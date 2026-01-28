@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://b7ya8xhkrdyfk"]
+
+[ext_resource type="Script" uid="uid://tuam2o2ygfh2" path="res://scripts/puzzles/pinashouse_cabinet.gd" id="1_v416s"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_io61x"]
+
+[node name="PinasHouse" type="Node2D"]
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+shape = SubResource("RectangleShape2D_io61x")
+script = ExtResource("1_v416s")
