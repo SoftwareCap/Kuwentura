@@ -13,3 +13,8 @@
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
 shape = SubResource("RectangleShape2D_io61x")
 script = ExtResource("1_v416s")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 20.0
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
