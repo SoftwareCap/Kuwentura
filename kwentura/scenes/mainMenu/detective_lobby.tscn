@@ -1,7 +1,7 @@
 [gd_scene load_steps=10 format=3 uid="uid://ecol225bxgli"]
 
 [ext_resource type="Script" uid="uid://dxdvx5uj13ngo" path="res://scripts/mainMenu/detective_lobby.gd" id="1_8ywx3"]
-[ext_resource type="Texture2D" uid="uid://w844nys0xd6n" path="res://assets/backgrounds/lobby.png" id="2_pge74"]
+[ext_resource type="Texture2D" uid="uid://w844nys0xd6n" path="res://assets/backgrounds/Lobby.png" id="2_pge74"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_4bddd"]
 [ext_resource type="FontFile" uid="uid://bpff8oqdskuog" path="res://assets/fonts/Pixeled.ttf" id="4_58gs4"]
 
