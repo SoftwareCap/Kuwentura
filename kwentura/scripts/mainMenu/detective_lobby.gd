@@ -12,6 +12,7 @@ func _process(_delta: float) -> void:
 
 
 func _on_start_pressed() -> void:
+	# to be updated when the cut scene is finished
 	print("Start game pressed")
 
 
