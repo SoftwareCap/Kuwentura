@@ -1,0 +1,535 @@
+# Project Directory Structure:
+.
+├── assets/
+│   ├── audio/
+│   ├── backgrounds/
+│   │   ├── zones/
+│   │   │   ├── PinasHouse.png
+│   │   │   └── PinasHouse.png.import
+│   │   ├── Lobby.png
+│   │   ├── Lobby.png.import
+│   │   ├── MainMenu.png
+│   │   ├── MainMenu.png.import
+│   │   ├── Popup.png
+│   │   └── Popup.png.import
+│   ├── fonts/
+│   │   ├── Minecraft.ttf
+│   │   ├── Minecraft.ttf.import
+│   │   ├── Pixeled.ttf
+│   │   └── Pixeled.ttf.import
+│   └── sprites/
+│       ├── consequenceCharacters/
+│       └── players/
+│           ├── Detective/
+│           │   ├── Detective_idle.png
+│           │   ├── Detective_idle.png.import
+│           │   ├── Detective_walk.png
+│           │   └── Detective_walk.png.import
+│           └── Sidekick/
+│               ├── Sidekick_idle.png
+│               ├── Sidekick_idle.png.import
+│               ├── Sidekick_walk.png
+│               └── Sidekick_walk.png.import
+├── data/
+│   ├── clues/
+│   ├── dialogue/
+│   └── puzzles/
+├── scenes/
+│   ├── cameras/
+│   ├── cutscenes/
+│   ├── mainMenu/
+│   │   ├── detective_lobby.tscn
+│   │   ├── main_menu.tscn
+│   │   ├── sidekickJoinCode_popup.tscn
+│   │   └── sidekick_waiting.tscn
+│   ├── players/
+│   │   ├── PlayerHost.tscn
+│   │   └── PlayerSidekick.tscn
+│   ├── puzzles/
+│   ├── ui/
+│   │   ├── HUD.tscn
+│   │   └── PuzzleUI.tscn
+│   ├── world/
+│   │   ├── climax/
+│   │   │   ├── AltarDeduction.tscn
+│   │   │   └── Bakunawa.tscn
+│   │   ├── hub/
+│   │   │   └── ForestHub.tscn
+│   │   ├── zones/
+│   │   │   ├── abandonedHouse/
+│   │   │   │   └── AbandonedHouse.tscn
+│   │   │   ├── backyardPath/
+│   │   │   │   └── BackyardPath.tscn
+│   │   │   ├── oldWell/
+│   │   │   │   └── OldWell.tscn
+│   │   │   ├── pinasHouse/
+│   │   │   │   └── PinasHouse.tscn
+│   │   │   └── storageHut/
+│   │   │       └── StorageHut.tscn
+│   │   └── Game.tscn
+│   ├── Main.tscn
+│   ├── MainMenu.tscn.depren
+│   ├── MainMenu.tscn3961847869.tmp
+│   └── MainMenu.tscn4057914042.tmp
+├── scripts/
+│   ├── characters/
+│   │   ├── nuno_sa_punso.gd
+│   │   └── nuno_sa_punso.gd.uid
+│   ├── cutscenes/
+│   │   ├── ending_cutscene.gd
+│   │   ├── ending_cutscene.gd.uid
+│   │   ├── opening_cutscene.gd
+│   │   └── opening_cutscene.gd.uid
+│   ├── mainMenu/
+│   │   ├── detective_lobby.gd
+│   │   ├── detective_lobby.gd.uid
+│   │   ├── main_menu.gd
+│   │   ├── main_menu.gd.uid
+│   │   ├── post_game_lobby.gd
+│   │   ├── post_game_lobby.gd.uid
+│   │   ├── sidekickJoinCode_popup.gd
+│   │   ├── sidekickJoinCode_popup.gd.uid
+│   │   ├── sidekick_waiting.gd
+│   │   └── sidekick_waiting.gd.uid
+│   ├── players/
+│   │   ├── player_host.gd
+│   │   ├── player_host.gd.uid
+│   │   ├── player_sidekick.gd
+│   │   └── player_sidekick.gd.uid
+│   ├── puzzles/
+│   │   ├── pinashouse_cabinet.gd
+│   │   ├── pinashouse_cabinet.gd.uid
+│   │   ├── pinashouse_puzzle.gd
+│   │   └── pinashouse_puzzle.gd.uid
+│   ├── systems/
+│   │   ├── firebase_auth.gd
+│   │   ├── firebase_auth.gd.uid
+│   │   ├── firebase_firestore.gd
+│   │   ├── firebase_firestore.gd.uid
+│   │   ├── firebase_manager.gd
+│   │   ├── firebase_manager.gd.uid
+│   │   ├── game_state.gd
+│   │   ├── game_state.gd.uid
+│   │   ├── network_manager.gd
+│   │   ├── network_manager.gd.uid
+│   │   ├── puzzle_manager.gd
+│   │   └── puzzle_manager.gd.uid
+│   ├── ui/
+│   ├── world/
+│   │   ├── climax/
+│   │   │   ├── altar_deduction.gd
+│   │   │   ├── altar_deduction.gd.uid
+│   │   │   ├── bakunawa_nightfall.gd
+│   │   │   ├── bakunawa_nightfall.gd.uid
+│   │   │   ├── sidekick_audioNav.gd
+│   │   │   └── sidekick_audioNav.gd.uid
+│   │   ├── hub/
+│   │   │   ├── forest_hub.gd
+│   │   │   └── forest_hub.gd.uid
+│   │   ├── zones/
+│   │   │   ├── abandonedHouse/
+│   │   │   │   ├── abandoned_house.gd
+│   │   │   │   └── abandoned_house.gd.uid
+│   │   │   ├── backyardPath/
+│   │   │   │   ├── backyard_path.gd
+│   │   │   │   └── backyard_path.gd.uid
+│   │   │   ├── oldWell/
+│   │   │   │   ├── old_well.gd
+│   │   │   │   └── old_well.gd.uid
+│   │   │   ├── pinasHouse/
+│   │   │   │   ├── pinas_house.gd
+│   │   │   │   └── pinas_house.gd.uid
+│   │   │   └── storageHut/
+│   │   │       ├── storage_hut.gd
+│   │   │       └── storage_hut.gd.uid
+│   │   ├── game.gd
+│   │   └── game.gd.uid
+│   ├── Main.gd
+│   └── Main.gd.uid
+├── .editorconfig
+├── .gitattributes
+├── export_presets.cfg
+├── gptree_output.txt
+├── icon.svg
+├── icon.svg.import
+├── node_2d.gd
+├── node_2d.gd.uid
+└── project.godot
+
+# BEGIN FILE CONTENTS
+
+# File: scenes\players\PlayerHost.tscn
+
+[gd_scene load_steps=21 format=3 uid="uid://bswqgsqsdyd8k"]
+
+[ext_resource type="Script" uid="uid://bwa5cliuua5sb" path="res://scripts/players/player_host.gd" id="1_f4ao3"]
+[ext_resource type="Texture2D" uid="uid://bv2f8hf4rymwo" path="res://assets/sprites/players/Detective/Detective_idle.png" id="2_1408y"]
+[ext_resource type="Texture2D" uid="uid://3tw61wpai70" path="res://assets/sprites/players/Detective/Detective_walk.png" id="3_hej0o"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_363fc"]
+atlas = ExtResource("2_1408y")
+region = Rect2(0, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kbjpn"]
+atlas = ExtResource("2_1408y")
+region = Rect2(1144, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hwg4q"]
+atlas = ExtResource("2_1408y")
+region = Rect2(2288, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jq00p"]
+atlas = ExtResource("2_1408y")
+region = Rect2(3432, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6c216"]
+atlas = ExtResource("2_1408y")
+region = Rect2(4576, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_phenm"]
+atlas = ExtResource("2_1408y")
+region = Rect2(5720, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xqbn5"]
+atlas = ExtResource("2_1408y")
+region = Rect2(6864, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_380fj"]
+atlas = ExtResource("3_hej0o")
+region = Rect2(0, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nfu0j"]
+atlas = ExtResource("3_hej0o")
+region = Rect2(1000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gliqv"]
+atlas = ExtResource("3_hej0o")
+region = Rect2(2000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gswuo"]
+atlas = ExtResource("3_hej0o")
+region = Rect2(3000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kacu1"]
+atlas = ExtResource("3_hej0o")
+region = Rect2(4000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_swwk3"]
+atlas = ExtResource("3_hej0o")
+region = Rect2(5000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iejne"]
+atlas = ExtResource("3_hej0o")
+region = Rect2(6000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lmyfu"]
+atlas = ExtResource("3_hej0o")
+region = Rect2(7000, 0, 1000, 1000)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_t2is1"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_363fc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kbjpn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hwg4q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jq00p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6c216")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_phenm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xqbn5")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_380fj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nfu0j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gliqv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gswuo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kacu1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_swwk3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iejne")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lmyfu")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kllei"]
+
+[node name="PlayerHost" type="CharacterBody2D"]
+texture_filter = 1
+script = ExtResource("1_f4ao3")
+speed = null
+jump_force = null
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_t2is1")
+animation = &"walk"
+frame = 1
+frame_progress = 0.38923684
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_kllei")
+
+
+# File: scenes\players\PlayerSidekick.tscn
+
+[gd_scene load_steps=22 format=3 uid="uid://udt37i3bt31c"]
+
+[ext_resource type="Texture2D" uid="uid://cpcwvvoj4wtab" path="res://assets/sprites/players/Sidekick/Sidekick_idle.png" id="1_ig6if"]
+[ext_resource type="Texture2D" uid="uid://cskqffd4p1vuw" path="res://assets/sprites/players/Sidekick/Sidekick_walk.png" id="2_djqfg"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7461x"]
+atlas = ExtResource("1_ig6if")
+region = Rect2(0, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oyvdf"]
+atlas = ExtResource("1_ig6if")
+region = Rect2(1000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cpmhp"]
+atlas = ExtResource("1_ig6if")
+region = Rect2(2000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_17vlx"]
+atlas = ExtResource("1_ig6if")
+region = Rect2(3000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_av3wc"]
+atlas = ExtResource("1_ig6if")
+region = Rect2(4000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t8p0b"]
+atlas = ExtResource("1_ig6if")
+region = Rect2(5000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8pblb"]
+atlas = ExtResource("1_ig6if")
+region = Rect2(6000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ui6kw"]
+atlas = ExtResource("1_ig6if")
+region = Rect2(7000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0dx7a"]
+atlas = ExtResource("1_ig6if")
+region = Rect2(8000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_52qsw"]
+atlas = ExtResource("2_djqfg")
+region = Rect2(0, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2eiaf"]
+atlas = ExtResource("2_djqfg")
+region = Rect2(1000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_slpj1"]
+atlas = ExtResource("2_djqfg")
+region = Rect2(2000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dwqpp"]
+atlas = ExtResource("2_djqfg")
+region = Rect2(3000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mp1xv"]
+atlas = ExtResource("2_djqfg")
+region = Rect2(4000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mttld"]
+atlas = ExtResource("2_djqfg")
+region = Rect2(5000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fch75"]
+atlas = ExtResource("2_djqfg")
+region = Rect2(6000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b465l"]
+atlas = ExtResource("2_djqfg")
+region = Rect2(7000, 0, 1000, 1000)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wm3to"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7461x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oyvdf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cpmhp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_17vlx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_av3wc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t8p0b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8pblb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ui6kw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0dx7a")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_52qsw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2eiaf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_slpj1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dwqpp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mp1xv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mttld")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fch75")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b465l")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_coail"]
+
+[node name="PlayerSidekick" type="CharacterBody2D"]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_wm3to")
+animation = &"walk"
+frame_progress = 0.34461376
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_coail")
+
+
+# File: scripts\players\player_host.gd
+
+extends CharacterBody2D
+
+@export var speed = 350
+@export var jump_force = -700
+var is_host = false
+
+func _process(_delta):
+	# Movement logic (handled by _input)
+	move_and_slide()
+
+func _input(event):
+	if event is InputEventScreenTouch:
+		var screen_size = DisplayServer.screen_get_size()
+		var screen_width = screen_size.x
+		var screen_height = screen_size.y
+		
+		# Left zone: bottom-left 20% of screen width
+		if event.position.x < screen_width * 0.2 and event.position.y > screen_height * 0.8:
+			if event.pressed:
+				velocity.x = -speed
+			else:
+				# velocity.x = 0
+				pass
+				
+		# Right zone: bottom-right 20% of screen width  
+		elif event.position.x > screen_width * 0.8 and event.position.y > screen_height * 0.8:
+			if event.pressed:
+				velocity.x = speed
+			else:
+				# velocity.x = 0
+				pass
+				
+		# Center zone: bottom-center for action
+		elif abs(event.position.x - screen_width/2) < 100 and event.position.y > screen_height * 0.8:
+			if event.pressed and is_on_floor():
+				velocity.y = jump_force
+
+func _physics_process(delta):
+	var direction := Input.get_axis("ui_left", "ui_right")
+	
+	# Move
+	velocity.x = direction * speed
+	move_and_slide()
+	
+	# Switch animation
+	if direction == 0:
+		if sprite.animation != "idle":
+			sprite.play("idle")
+	else:
+		if sprite.animation != "walk":
+			sprite.play("walk")
+		sprite.flip_h = direction < 0
+
+
+# File: scripts\players\player_host.gd.uid
+
+uid://bwa5cliuua5sb
+
+
+# File: scripts\players\player_sidekick.gd
+
+extends Node
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	pass
+
+
+# File: scripts\players\player_sidekick.gd.uid
+
+uid://d5emekkjkv5l

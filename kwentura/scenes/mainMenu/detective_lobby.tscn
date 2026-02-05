@@ -1,9 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://ecol225bxgli"]
+[gd_scene load_steps=12 format=3 uid="uid://ecol225bxgli"]
 
 [ext_resource type="Script" uid="uid://dxdvx5uj13ngo" path="res://scripts/mainMenu/detective_lobby.gd" id="1_8ywx3"]
 [ext_resource type="Texture2D" uid="uid://w844nys0xd6n" path="res://assets/backgrounds/Lobby.png" id="2_pge74"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_4bddd"]
 [ext_resource type="FontFile" uid="uid://bpff8oqdskuog" path="res://assets/fonts/Pixeled.ttf" id="4_58gs4"]
+[ext_resource type="PackedScene" uid="uid://bswqgsqsdyd8k" path="res://scenes/players/PlayerHost.tscn" id="5_pge74"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ab31o"]
 texture = ExtResource("2_pge74")
@@ -38,6 +39,8 @@ shadow_size = 5
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_758ce"]
 
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_4bddd"]
+
 [node name="DetectiveLobby" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -55,6 +58,54 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_ab31o")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -504.0
+offset_right = 504.0
+offset_bottom = 336.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0)
+theme_override_fonts/font = ExtResource("4_58gs4")
+theme_override_font_sizes/font_size = 120
+text = "KWENTURA"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RoomCode" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -298.0
+offset_top = -198.0
+offset_right = 298.0
+offset_bottom = -63.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 50
+text = "Code:"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -668.0
+offset_top = -241.0
+offset_right = -456.0
+offset_bottom = -147.0
+grow_horizontal = 2
+grow_vertical = 0
 
 [node name="Button" type="Button" parent="."]
 layout_mode = 1
@@ -99,22 +150,32 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_sngst")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_758ce")
 text = "Back"
 
-[node name="Label" type="Label" parent="."]
+[node name="PlayerHost" parent="." instance=ExtResource("5_pge74")]
+position = Vector2(468, 772.00006)
+scale = Vector2(1.6679997, 1.6679997)
+motion_mode = 1
+speed = 350
+jump_force = -700
+
+[node name="SidekickSprite2D2" type="Sprite2D" parent="."]
+position = Vector2(1500, 600.00006)
+scale = Vector2(1.6679997, 1.6679997)
+texture = SubResource("CompressedTexture2D_4bddd")
+flip_h = true
+
+[node name="SidekickLabel" type="Label" parent="."]
 layout_mode = 1
-anchors_preset = 5
+anchors_preset = 7
 anchor_left = 0.5
+anchor_top = 1.0
 anchor_right = 0.5
-offset_left = -468.5
-offset_right = 468.5
-offset_bottom = 280.0
+anchor_bottom = 1.0
+offset_left = 445.0
+offset_top = -241.0
+offset_right = 657.0
+offset_bottom = -147.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0)
-theme_override_fonts/font = ExtResource("4_58gs4")
-theme_override_font_sizes/font_size = 120
-text = "KWENTURA"
-horizontal_alignment = 1
-vertical_alignment = 1
+grow_vertical = 0
 
 [connection signal="pressed" from="Button" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="Button2" to="." method="_on_back_pressed"]
