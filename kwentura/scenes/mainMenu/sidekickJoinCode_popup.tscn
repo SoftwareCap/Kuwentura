@@ -1,0 +1,133 @@
+[gd_scene load_steps=9 format=3 uid="uid://dsyv8v4hpfmem"]
+
+[ext_resource type="Texture2D" uid="uid://dns0mjvxvyjw1" path="res://assets/backgrounds/Popup.png" id="1_ahpwq"]
+[ext_resource type="Script" uid="uid://c60gwk06swqg6" path="res://scripts/mainMenu/sidekickJoinCode_popup.gd" id="1_l5j12"]
+[ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="1_m1v1r"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_d1hbq"]
+texture = ExtResource("1_ahpwq")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l5j12"]
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ahpwq"]
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d1hbq"]
+bg_color = Color(0.8235294, 0.8235294, 0.8235294, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rnb66"]
+
+[node name="SidekickJoinCodePopup" type="PopupPanel"]
+transparent_bg = false
+oversampling_override = 1.0
+mode = 2
+size = Vector2i(800, 500)
+visible = true
+theme_override_styles/panel = SubResource("StyleBoxTexture_d1hbq")
+script = ExtResource("1_l5j12")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -250.0
+offset_right = 400.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+theme_override_constants/separation = 65
+
+[node name="Label" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = 7
+theme_override_fonts/font = ExtResource("1_m1v1r")
+theme_override_font_sizes/font_size = 70
+text = "
+Enter Code:"
+horizontal_alignment = 1
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer"]
+custom_minimum_size = Vector2(600, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/minimum_character_width = 4
+theme_override_font_sizes/font_size = 45
+placeholder_text = "enter code"
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 25
+
+[node name="Button" type="Button" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(200, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("1_m1v1r")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_l5j12")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ahpwq")
+theme_override_styles/hover = SubResource("StyleBoxFlat_d1hbq")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_rnb66")
+text = "Okay"
+
+[node name="Button2" type="Button" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(200, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("1_m1v1r")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_l5j12")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ahpwq")
+theme_override_styles/hover = SubResource("StyleBoxFlat_d1hbq")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_rnb66")
+text = "Cancel"

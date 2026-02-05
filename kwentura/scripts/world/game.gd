@@ -24,3 +24,8 @@ func _spawn_player(peer_id):
 
 	spawn_index += 1
 	add_child(player, true)
+
+func spawn_players():
+	var host = preload("res://scenes/players/PlayerHost.tscn").instantiate()
+	host.is_host = true
+	add_child(host)

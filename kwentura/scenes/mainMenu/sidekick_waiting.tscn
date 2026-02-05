@@ -1,0 +1,113 @@
+[gd_scene load_steps=11 format=3 uid="uid://bpwtvxm3sxvv7"]
+
+[ext_resource type="Script" uid="uid://wjhm4mlblikf" path="res://scripts/mainMenu/sidekick_waiting.gd" id="1_ipaaq"]
+[ext_resource type="Texture2D" uid="uid://w844nys0xd6n" path="res://assets/backgrounds/Lobby.png" id="2_5k5mc"]
+[ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_o5ctn"]
+[ext_resource type="FontFile" uid="uid://bpff8oqdskuog" path="res://assets/fonts/Pixeled.ttf" id="4_t4fp1"]
+[ext_resource type="Texture2D" uid="uid://r58y48o51rmm" path="res://assets/sprites/players/sidekick.png" id="5_5k5mc"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ab31o"]
+texture = ExtResource("2_5k5mc")
+modulate_color = Color(0.36659476, 0.36659455, 0.36659473, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3m1b5"]
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fbpcy"]
+bg_color = Color(0.63529414, 0.63529414, 0.63529414, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sngst"]
+bg_color = Color(0.8235294, 0.8235294, 0.8235294, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_758ce"]
+
+[node name="SidekickWaiting" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ipaaq")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_ab31o")
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 1
+offset_left = 92.0
+offset_top = 81.0
+offset_right = 292.0
+offset_bottom = 146.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_o5ctn")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_3m1b5")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_fbpcy")
+theme_override_styles/hover = SubResource("StyleBoxFlat_sngst")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_758ce")
+text = "Cancel"
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -468.5
+offset_right = 468.5
+offset_bottom = 280.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0)
+theme_override_fonts/font = ExtResource("4_t4fp1")
+theme_override_font_sizes/font_size = 120
+text = "KWENTURA"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label2" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -106.0
+offset_top = -241.0
+offset_right = 106.0
+offset_bottom = -147.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Sidekick" type="Sprite2D" parent="."]
+position = Vector2(1414, 630)
+scale = Vector2(2.218, 2.218)
+texture = ExtResource("5_5k5mc")
+flip_h = true
