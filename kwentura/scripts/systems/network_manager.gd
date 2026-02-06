@@ -5,26 +5,24 @@ const MAX_PLAYERS: int = 2
 const DEFAULT_IP: String = "127.0.0.1"
 
 # WebSocket relay server (localhost for testing)
-const RELAY_SERVER_URL: String = "ws://localhost:10001"  # ws:// for localhost (not wss://)
-const USE_RELAY: bool = true  # Toggle between direct and relay connection
+const RELAY_SERVER_URL: String = "ws://localhost:10001"
+const RELAY_HTTP_URL: String = "http://localhost:10000"  # HTTP on different port
+const USE_RELAY: bool = true
 
 var is_hosting: bool = false
 
 enum ConnectionState { DISCONNECTED, CONNECTING, CONNECTED, HOSTING }
 
-var multiplayer_peer: WebSocketMultiplayerPeer  # Changed to WebSocket for relay
+var multiplayer_peer: WebSocketMultiplayerPeer
 var connection_state: ConnectionState = ConnectionState.DISCONNECTED
 var players: Dictionary = {}
 var local_peer_id: int = 0
 
-# Room code system
 var current_room_code: String = ""
 var target_room_code: String = ""
 
-# HTTP for matchmaking
 var http_request: HTTPRequest
 
-# Signals
 signal connection_established(peer_id: int)
 signal player_joined(peer_id: int, role: GameState.Role)
 signal player_left(peer_id: int)
@@ -35,6 +33,7 @@ signal peer_disconnected
 signal restart_requested
 signal restart_confirmed
 signal room_code_generated(code: String)
+signal snapshot_received(data: Dictionary)
 
 func _ready():
 	multiplayer.peer_connected.connect(_on_peer_connected)
@@ -43,20 +42,16 @@ func _ready():
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
-	# Setup HTTP for matchmaking
 	http_request = HTTPRequest.new()
 	add_child(http_request)
 	http_request.request_completed.connect(_on_http_request_completed)
 	
-	# Poll WebSocket in process
 	set_process(true)
 
 func _process(_delta):
-	# Required for WebSocket multiplayer to work
 	if multiplayer_peer:
 		multiplayer_peer.poll()
 
-# Generate a random 6-character room code
 func _generate_room_code() -> String:
 	var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 	var code = ""
@@ -71,7 +66,6 @@ func host_game() -> bool:
 		return _host_direct()
 
 func _host_direct() -> bool:
-	# Direct connection (LAN only) - uses ENet
 	var enet_peer = ENetMultiplayerPeer.new()
 	var error = enet_peer.create_server(PORT, MAX_PLAYERS)
 	
@@ -90,10 +84,7 @@ func _host_direct() -> bool:
 	return true
 
 func _host_with_relay() -> bool:
-	# Use WebSocket relay for connections
 	multiplayer_peer = WebSocketMultiplayerPeer.new()
-	
-	# Create WebSocket server on local port
 	var error = multiplayer_peer.create_server(PORT)
 	
 	if error != OK:
@@ -103,7 +94,6 @@ func _host_with_relay() -> bool:
 	multiplayer.multiplayer_peer = multiplayer_peer
 	_setup_host_common()
 	
-	# Generate and register room code
 	current_room_code = _generate_room_code()
 	_register_room_with_matchmaker(current_room_code, true)
 	
@@ -120,8 +110,7 @@ func _setup_host_common():
 	players[local_peer_id] = {"role": GameState.Role.DETECTIVE, "ready": false}
 
 func _register_room_with_matchmaker(room_code: String, is_host: bool):
-	# Register with local relay server via HTTP
-	var url = RELAY_SERVER_URL.replace("ws://", "http://") + "/register"
+	var url = RELAY_HTTP_URL + "/register"  # Use HTTP URL
 	var headers = ["Content-Type: application/json"]
 	var body = JSON.stringify({
 		"room_code": room_code,
@@ -142,8 +131,7 @@ func join_game_with_code(room_code: String) -> bool:
 		return join_game(DEFAULT_IP)
 
 func _join_with_relay(room_code: String) -> bool:
-	# Query relay server for connection info
-	var url = RELAY_SERVER_URL.replace("ws://", "http://") + "/join?room=" + room_code
+	var url = RELAY_HTTP_URL + "/join?room=" + room_code  # Use HTTP URL
 	http_request.set_meta("action", "join_room")
 	http_request.set_meta("room_code", room_code)
 	http_request.request(url)
@@ -159,6 +147,13 @@ func _on_http_request_completed(_result: int, response_code: int, _headers: Pack
 	var action = http_request.get_meta("action", "")
 	var json = JSON.parse_string(body.get_string_from_utf8())
 	
+	# NULL CHECK - FIX FOR THE ERROR
+	if json == null:
+		print("Failed to parse JSON response: ", body.get_string_from_utf8())
+		if action == "join_room":
+			emit_signal("connection_failed", "Invalid server response")
+		return
+	
 	match action:
 		"register":
 			if response_code == 200:
@@ -170,19 +165,16 @@ func _on_http_request_completed(_result: int, response_code: int, _headers: Pack
 			_handle_join_response(json)
 
 func _handle_join_response(json: Dictionary):
-	if json == null or json.has("error"):
-		var error_msg = json.get("error", "Room not found") if json else "Invalid response"
+	if json.has("error"):
+		var error_msg = json.get("error", "Room not found")
 		emit_signal("connection_failed", error_msg)
 		return
 	
-	# Connect to the relay server
 	var host_url = json.get("relay_url", RELAY_SERVER_URL + "?room=" + target_room_code)
 	_connect_to_relay(host_url)
 
 func _connect_to_relay(relay_url: String):
 	multiplayer_peer = WebSocketMultiplayerPeer.new()
-	
-	# Connect as client to relay server
 	var error = multiplayer_peer.create_client(relay_url)
 	
 	if error != OK:
@@ -197,7 +189,6 @@ func _connect_to_relay(relay_url: String):
 	return true
 
 func join_game(ip_address: String = DEFAULT_IP) -> bool:
-	# Fallback direct connection
 	var enet_peer = ENetMultiplayerPeer.new()
 	var error = enet_peer.create_client(ip_address, PORT)
 	
@@ -256,6 +247,7 @@ func _rpc_assign_role(role: GameState.Role):
 @rpc("authority", "reliable")
 func _sync_game_state(state_data: Dictionary):
 	GameState.load_save_data(state_data)
+	emit_signal("snapshot_received", state_data)
 	print("State synced")
 
 func start_game():
