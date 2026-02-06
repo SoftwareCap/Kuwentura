@@ -167,7 +167,7 @@ text = "Detective"
 horizontal_alignment = 1
 
 [node name="PlayerSidekick" parent="." instance=ExtResource("6_4bddd")]
-position = Vector2(1586, 688)
+position = Vector2(1532, 685)
 scale = Vector2(0.7, 0.7)
 
 [node name="SidekickName" type="Label" parent="PlayerSidekick"]

@@ -40,6 +40,17 @@ func handle_touch(event):
 		velocity.x = 0
 
 func _physics_process(delta):
+	# Skip physics if we're in a Control-based scene (like lobby/menu)
+	# This prevents the character from falling when there's no floor
+	if get_parent() is Control:
+		# Still update animation based on any residual velocity
+		if velocity.x == 0:
+			sprite.play("idle")
+		else:
+			sprite.play("walk")
+			sprite.flip_h = velocity.x < 0
+		return
+	
 	var direction := Input.get_axis("ui_left", "ui_right")
 	
 	# Only apply keyboard if no touch is active (or use a flag system)
