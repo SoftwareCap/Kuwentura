@@ -152,8 +152,8 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_758ce")
 text = "Back"
 
 [node name="PlayerHost" parent="." instance=ExtResource("5_pge74")]
-position = Vector2(380.99997, 685)
-scale = Vector2(0.7, 0.7)
+position = Vector2(-667.99994, 704.00006)
+scale = Vector2(1.6679997, 1.6679997)
 motion_mode = 1
 
 [node name="DetectiveName" type="Label" parent="PlayerHost"]
@@ -167,8 +167,8 @@ text = "Detective"
 horizontal_alignment = 1
 
 [node name="PlayerSidekick" parent="." instance=ExtResource("6_4bddd")]
-position = Vector2(1586, 688)
-scale = Vector2(0.7, 0.7)
+position = Vector2(2691, 719)
+scale = Vector2(1.6679997, 1.6679997)
 
 [node name="SidekickName" type="Label" parent="PlayerSidekick"]
 offset_left = -143.28525

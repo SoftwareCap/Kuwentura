@@ -4,13 +4,19 @@ extends Control
 @onready var back_button = $Button2
 @onready var room_code_label = $RoomCode
 @onready var status_label = $StatusLabel
-@onready var detective_sprite = $Sprite2D
-@onready var sidekick_sprite = $Sidekick
-@onready var sicekick_label = $SidekickLabel
+@onready var sidekick_label = $SidekickLabel
+
+@onready var detective_sprite = $PlayerHost/AnimatedSprite2D
+@onready var sidekick_sprite = $PlayerSidekick/AnimatedSprite2D
 
 var sidekick_connected: bool = false
 
 func _ready():
+	if detective_sprite:
+		detective_sprite.play("idle")
+	if sidekick_sprite:
+		sidekick_sprite.play("idle")
+	
 	# Determine role and setup UI accordingly
 	if GameState.local_role == GameState.Role.DETECTIVE:
 		_setup_host_view()
@@ -36,8 +42,9 @@ func _setup_host_view():
 		status_label.text = "Creating room..."
 	
 	# Sidekick sprite hidden initially (will appear when connected)
-	sidekick_sprite.visible = false
-	sicekick_label.visible = false
+	if sidekick_sprite:
+		sidekick_sprite.visible = false
+	sidekick_label.visible = false
 	
 	status_label.text = "Waiting for Sidekick..."
 
@@ -46,16 +53,14 @@ func _setup_sidekick_view():
 	start_button.visible = false  # Sidekick can't start game
 	room_code_label.visible = false  # Sidekick doesn't see code
 	
-	# Show waiting panel
-	sicekick_label.visible = true
-	sicekick_label.get_node("Label").text = "Connected!\nWaiting for Detective to start..."
-	
 	# Position sidekick sprite on right
-	sidekick_sprite.visible = true
-	sidekick_sprite.position = Vector2(1400, 600)  # Right side
+	if sidekick_sprite:
+		sidekick_sprite.visible = true
+		# Don't change position here - it's set in the scene
 	
 	# Detective sprite on left (host is there)
-	detective_sprite.visible = true
+	if detective_sprite:
+		detective_sprite.visible = true
 	
 	status_label.text = "Connected to Detective!"
 
@@ -79,11 +84,12 @@ func _on_player_joined(_peer_id: int, _role: GameState.Role):
 		start_button.visible = true
 		start_button.disabled = false
 		
-		# Show sidekick sprite
-		sidekick_sprite.visible = true
-		sidekick_sprite.modulate = Color(1, 1, 1, 0)  # Fade in
-		var tween = create_tween()
-		tween.tween_property(sidekick_sprite, "modulate", Color(1, 1, 1, 1), 0.5)
+		# Show sidekick sprite with fade in
+		if sidekick_sprite:
+			sidekick_sprite.visible = true
+			sidekick_sprite.modulate = Color(1, 1, 1, 0)  # Start transparent
+			var tween = create_tween()
+			tween.tween_property(sidekick_sprite, "modulate", Color(1, 1, 1, 1), 0.5)
 	else:
 		# Sidekick sees they're connected
 		status_label.text = "Connected! Waiting for host..."
