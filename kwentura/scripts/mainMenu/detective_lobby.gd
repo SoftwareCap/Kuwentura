@@ -10,6 +10,7 @@ extends Control
 @onready var sidekick_sprite = $PlayerSidekick/AnimatedSprite2D
 
 var sidekick_connected: bool = false
+var _world_ready: bool = false
 
 func _ready():
 	if detective_sprite:
@@ -18,79 +19,91 @@ func _ready():
 		sidekick_sprite.play("idle")
 	
 	# Determine role and setup UI accordingly
-	if GameState.local_role == GameState.Role.DETECTIVE:
+	if NetworkManager.get_my_role() == "detective":
 		_setup_host_view()
 	else:
 		_setup_sidekick_view()
 	
-	# Connect signals (both roles need these)
+	# Connect signals
 	NetworkManager.room_code_generated.connect(_on_room_code_generated)
-	NetworkManager.player_joined.connect(_on_player_joined)
+	NetworkManager.partner_connected.connect(_on_partner_connected)
 	NetworkManager.game_started.connect(_on_game_started)
 	NetworkManager.connection_failed.connect(_on_connection_failed)
 	
-	# Check if sidekick already connected (handles race condition)
-	_check_existing_connections()
+	# Check if partner already connected (for sidekick joining)
+	if NetworkManager.get_my_role() == "sidekick":
+		var partner = NetworkManager.get_partner_status()
+		if partner.connected:
+			status_label.text = "Connected to " + partner.display_name + "! Waiting for start..."
 
 func _setup_host_view():
 	# Host (Detective) setup
 	start_button.visible = false
 	start_button.disabled = true
 	
-	# Show room code
-	if NetworkManager.is_hosting and not NetworkManager.current_room_code.is_empty():
-		_show_room_code(NetworkManager.current_room_code)
+	# Get invite code from NetworkManager (set when creating world)
+	var invite_code = NetworkManager.get_invite_code()
+	if not invite_code.is_empty():
+		_show_room_code(invite_code)
 	else:
-		room_code_label.text = "Generating Code..."
-		status_label.text = "Creating room..."
+		room_code_label.text = "Code: ???"
 	
-	# Sidekick sprite hidden initially (will appear when connected)
+	# Sidekick sprite hidden initially
 	if sidekick_sprite:
 		sidekick_sprite.visible = false
 	sidekick_label.visible = false
 	
+	# Poll for sidekick to join
 	status_label.text = "Waiting for Sidekick..."
+	_poll_for_sidekick()
 
 func _setup_sidekick_view():
-	# Sidekick setup - different UI
+	# Sidekick setup
 	start_button.visible = false  # Sidekick can't start game
 	room_code_label.visible = false  # Sidekick doesn't see code
 	
-	# Position sidekick sprite on right
 	if sidekick_sprite:
 		sidekick_sprite.visible = true
-		# Don't change position here - it's set in the scene
 	
-	# Detective sprite on left (host is there)
 	if detective_sprite:
 		detective_sprite.visible = true
 	
-	status_label.text = "Connected to Detective!"
+	status_label.text = "Connected! Waiting for detective to start..."
 
-func _check_existing_connections():
-	# Check if a sidekick is already connected when scene loads
-	# This handles the race condition where player_joined fires before _ready
-	for peer_id in NetworkManager.players.keys():
-		var player_data = NetworkManager.players[peer_id]
-		if player_data.has("role") and player_data.role == GameState.Role.SIDEKICK:
-			print("Sidekick already connected (peer_id: ", peer_id, "), showing avatar")
-			_on_player_joined(peer_id, GameState.Role.SIDEKICK)
-			break
+func _poll_for_sidekick():
+	"""Poll world status until sidekick joins"""
+	while not sidekick_connected:
+		await get_tree().create_timer(1.0).timeout
+		
+		var status = await NetworkManager.get_world_status()
+		print("Lobby - World status: ", status)
+		
+		if status.has("error"):
+			continue
+		
+		# Check if sidekick joined (partner_id will be non-null)
+		# According to API schema: partner_id is "string | null"
+		if status.get("partner_id") != null and not status.get("partner_id", "").is_empty():
+			print("Sidekick joined! partner_id: ", status.get("partner_id"))
+			sidekick_connected = true
+			_world_ready = true
+			_on_partner_connected({})
+			return
 
 func _show_room_code(code: String):
 	room_code_label.text = "Code: " + code
 	room_code_label.modulate = Color(1, 0.9, 0.2)  # Gold
 
 func _on_room_code_generated(code: String):
-	if GameState.local_role == GameState.Role.DETECTIVE:
+	if NetworkManager.get_my_role() == "detective":
 		_show_room_code(code)
 
-func _on_player_joined(_peer_id: int, _role: GameState.Role):
+func _on_partner_connected(_data: Dictionary):
 	sidekick_connected = true
 	
-	if GameState.local_role == GameState.Role.DETECTIVE:
+	if NetworkManager.get_my_role() == "detective":
 		# Host sees sidekick joined
-		status_label.text = "Sidekick Connected! Ready to start!"
+		status_label.text = "Sidekick Connected! Click START when ready!"
 		status_label.modulate = Color(0, 1, 0)
 		
 		# Show start button
@@ -100,24 +113,33 @@ func _on_player_joined(_peer_id: int, _role: GameState.Role):
 		# Show sidekick sprite with fade in
 		if sidekick_sprite:
 			sidekick_sprite.visible = true
-			sidekick_sprite.modulate = Color(1, 1, 1, 0)  # Start transparent
+			sidekick_sprite.modulate = Color(1, 1, 1, 0)
 			var tween = create_tween()
 			tween.tween_property(sidekick_sprite, "modulate", Color(1, 1, 1, 1), 0.5)
 	else:
 		# Sidekick sees they're connected
-		status_label.text = "Connected! Waiting for host..."
+		status_label.text = "Connected! Waiting for host to start..."
 		status_label.modulate = Color(0, 1, 0)
 
 func _on_start_pressed() -> void:
-	if GameState.local_role != GameState.Role.DETECTIVE:
+	if NetworkManager.get_my_role() != "detective":
 		return  # Only host can start
 	
 	if not sidekick_connected:
 		print("Waiting for sidekick to connect...")
 		return
 	
-	print("Starting game...")
-	NetworkManager.start_game()
+	print("Starting game session...")
+	start_button.disabled = true
+	status_label.text = "Starting game..."
+	
+	# Start the session
+	var result = await NetworkManager.start_game_session()
+	if result.has("error"):
+		status_label.text = "Failed to start: " + result.get("error", "Unknown error")
+		start_button.disabled = false
+	else:
+		status_label.text = "Game starting!"
 
 func _on_back_pressed() -> void:
 	NetworkManager.disconnect_network()

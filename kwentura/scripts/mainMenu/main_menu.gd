@@ -18,14 +18,37 @@ func _ready():
 	NetworkManager.connection_failed.connect(_on_connection_failed)
 	NetworkManager.player_joined.connect(_on_player_joined)
 	NetworkManager.role_assignment_received.connect(_on_role_assigned)
+	NetworkManager.room_code_generated.connect(_on_room_code_generated)
 
 func _on_host_pressed() -> void:
 	print("Hosting game...")
 	
-	if NetworkManager.host_game():
-		get_tree().change_scene_to_file("res://scenes/mainMenu/detective_lobby.tscn")
-	else:
-		_show_status("Failed to create server!")
+	# Check if authenticated
+	if NetworkManager._auth_token.is_empty():
+		_show_status("Waiting for authentication...")
+		# Wait up to 5 seconds for auth
+		var attempts = 0
+		while NetworkManager._auth_token.is_empty() and attempts < 50:
+			await get_tree().create_timer(0.1).timeout
+			attempts += 1
+		
+		if NetworkManager._auth_token.is_empty():
+			_show_status("Not authenticated! Please wait and try again.")
+			return
+	
+	_show_status("Creating world...")
+	
+	# Step 1: Create world (doesn't start session yet)
+	var result = await NetworkManager.create_world("Game")
+	if result.has("error"):
+		_show_status("Failed to create world: " + result.get("error", "Unknown error"))
+		return
+	
+	print("World created! Invite code: ", result.get("invite_code", ""))
+	
+	# Step 2: Go to lobby immediately
+	# The lobby will poll for sidekick and show the start button when ready
+	get_tree().change_scene_to_file("res://scenes/mainMenu/detective_lobby.tscn")
 
 func _on_join_pressed() -> void:
 	print("Opening join popup...")
@@ -48,13 +71,20 @@ func _on_code_entered(code: String):
 		join_popup.queue_free()
 		join_popup = null
 	
-	if NetworkManager.join_game_with_code(code):
-		# Wait a moment for connection, then go to SAME lobby as host
-		await get_tree().create_timer(0.5).timeout
-		get_tree().change_scene_to_file("res://scenes/mainMenu/detective_lobby.tscn")
-	else:
-		print("Failed to start connection!")
+	_show_status("Joining world...")
+	
+	# Step 1: Join the world (sidekick)
+	var result = await NetworkManager.join_world(code)
+	if result.has("error"):
+		_show_status("Failed to join: " + result.get("error", "Unknown error"))
 		_show_join_popup()
+		return
+	
+	print("Joined world! Partner: ", result.get("partner_name", "Unknown"))
+	print("World status: ", result.get("status", "unknown"))
+	
+	# Step 2: Go to lobby and wait for detective to start
+	get_tree().change_scene_to_file("res://scenes/mainMenu/detective_lobby.tscn")
 
 func _on_join_cancelled():
 	print("Join cancelled")
@@ -62,20 +92,24 @@ func _on_join_cancelled():
 		join_popup.queue_free()
 		join_popup = null
 
+func _on_room_code_generated(code: String):
+	print("Room code generated: ", code)
+
 func _on_connection_established(peer_id: int):
 	print("Connected! Peer ID: ", peer_id)
 
 func _on_connection_failed(error: String):
 	print("Connection failed: " + error)
+	_show_status("Connection failed: " + error)
 
-func _on_role_assigned(role: GameState.Role):
-	print("Role assigned: ", GameState.Role.keys()[role])
+func _on_role_assigned(role):
+	print("Role assigned: ", role)
 
 func _on_exit_pressed() -> void:
 	get_tree().quit()
 
-func _on_player_joined(_peer_id: int, role: GameState.Role):
-	print("Player joined as ", GameState.Role.keys()[role])
+func _on_player_joined(_peer_id: int, role):
+	print("Player joined as ", role)
 
 func _show_status(text: String):
 	if status_label:
