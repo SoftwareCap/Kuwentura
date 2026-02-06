@@ -28,6 +28,9 @@ func _ready():
 	NetworkManager.player_joined.connect(_on_player_joined)
 	NetworkManager.game_started.connect(_on_game_started)
 	NetworkManager.connection_failed.connect(_on_connection_failed)
+	
+	# Check if sidekick already connected (handles race condition)
+	_check_existing_connections()
 
 func _setup_host_view():
 	# Host (Detective) setup
@@ -63,6 +66,16 @@ func _setup_sidekick_view():
 		detective_sprite.visible = true
 	
 	status_label.text = "Connected to Detective!"
+
+func _check_existing_connections():
+	# Check if a sidekick is already connected when scene loads
+	# This handles the race condition where player_joined fires before _ready
+	for peer_id in NetworkManager.players.keys():
+		var player_data = NetworkManager.players[peer_id]
+		if player_data.has("role") and player_data.role == GameState.Role.SIDEKICK:
+			print("Sidekick already connected (peer_id: ", peer_id, "), showing avatar")
+			_on_player_joined(peer_id, GameState.Role.SIDEKICK)
+			break
 
 func _show_room_code(code: String):
 	room_code_label.text = "Code: " + code
