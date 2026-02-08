@@ -28,7 +28,7 @@ func _on_host_pressed() -> void:
 	_show_status("Creating game...")
 
 	# Host the game (LAN mode)
-	var result = await NetworkManager.host_game()
+	var result = NetworkManager.host_game()
 	
 	if not result.success:
 		var error_msg = result.get("error", "Unknown error")
@@ -70,10 +70,10 @@ func _on_code_entered(code: String):
 		print("[MainMenu] DEBUG MODE: Connecting to localhost")
 		_show_status("Debug: Connecting to localhost...")
 		
-		var result = await NetworkManager.join_game_with_ip("127.0.0.1", "LOCAL")
+		var local_result = await NetworkManager.join_game_with_ip("127.0.0.1", "LOCAL")
 		
-		if not result.success:
-			_show_status("Failed to join localhost: " + result.get("error", "Unknown"))
+		if not local_result.success:
+			_show_status("Failed to join localhost: " + local_result.get("error", "Unknown"))
 			await get_tree().create_timer(2.0).timeout
 			_show_join_popup()
 			return
