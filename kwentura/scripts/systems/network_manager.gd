@@ -534,14 +534,14 @@ func _rpc_sync_world_state(world_state: Dictionary):
 
 
 @rpc("any_peer", "reliable")
-func submit_puzzle_solution(puzzle_id: String, solution: Variant, attempt_time_ms: int):
+func submit_puzzle_solution(puzzle_id: String, solution: Variant, _attempt_time_ms: int):
 	if multiplayer.is_server():
 		var result = PuzzleManager.validate_puzzle(puzzle_id, solution)
 		_puzzle_result_rpc.rpc_id(multiplayer.get_remote_sender_id(), puzzle_id, result)
 
 
 @rpc("authority", "reliable")
-func _puzzle_result_rpc(puzzle_id: String, result: Dictionary):
+func _puzzle_result_rpc(_puzzle_id: String, _result: Dictionary):
 	pass
 
 
@@ -558,7 +558,7 @@ func sync_player_state(position: Vector2, velocity: Vector2, facing: String, ani
 
 
 @rpc("authority", "reliable")
-func trigger_clue_collection(zone_id: String, clue_data: Dictionary):
+func trigger_clue_collection(zone_id: String, _clue_data: Dictionary):
 	GameState.collect_clue(zone_id)
 
 #------------------------------------------------------------------------------

@@ -1,12 +1,17 @@
 extends Control
 
-@onready var status_label = $Label2
-@onready var cancel_button = $Button
+@onready var status_label: Label = $StatusLabel
+@onready var cancel_button: Button = $CancelButton
+
+@onready var detective_sprite: AnimatedSprite2D = $PlayerHost/AnimatedSprite2D
+@onready var detective_name_label: Label = $PlayerHost/DetectiveName
+@onready var sidekick_sprite: AnimatedSprite2D = $PlayerSidekick/AnimatedSprite2D
+@onready var sidekick_name_label: Label = $PlayerSidekick/SidekickName
 
 
 func _ready():
 	if status_label == null:
-		print("ERROR: Label2 not found!")
+		print("ERROR: StatusLabel not found!")
 		return
 
 	# Connect signals
@@ -14,12 +19,46 @@ func _ready():
 	NetworkManager.connection_failed.connect(_on_connection_failed)
 	NetworkManager.partner_disconnected.connect(_on_host_disconnected)
 	NetworkManager.partner_connected.connect(_on_partner_connected)
+	NetworkManager.connection_established.connect(_on_connection_established)
 
 	cancel_button.pressed.connect(_on_cancel_pressed)
 
+	# Show both avatars immediately
+	# Detective (host) on the left
+	if detective_sprite:
+		detective_sprite.visible = true
+		detective_sprite.play("idle")
+	if detective_name_label:
+		detective_name_label.visible = true
+	
+	# Sidekick (self) on the right - always visible in lobby
+	if sidekick_sprite:
+		sidekick_sprite.visible = true
+		sidekick_sprite.play("idle")
+	if sidekick_name_label:
+		sidekick_name_label.visible = true
+
 	# Update status
-	status_label.text = "Connected to Detective!\nWaiting for game to start..."
+	status_label.text = "Connecting to Detective..."
+	status_label.modulate = Color(1, 1, 0)  # Yellow while connecting
+
+
+func _on_connection_established(peer_id: int):
+	print("[SidekickLobby] Connected! Peer ID: ", peer_id)
+	
+	status_label.text = "Connected!\nWaiting for Detective to start..."
 	status_label.modulate = Color(0, 1, 0)  # Green
+	
+	# Show sidekick avatar with fade in
+	if sidekick_sprite:
+		sidekick_sprite.visible = true
+		sidekick_sprite.play("idle")
+		sidekick_sprite.modulate = Color(1, 1, 1, 0)
+		var tween = create_tween()
+		tween.tween_property(sidekick_sprite, "modulate", Color(1, 1, 1, 1), 0.5)
+	
+	if sidekick_name_label:
+		sidekick_name_label.visible = true
 
 
 func _on_partner_connected(_data: Dictionary):
