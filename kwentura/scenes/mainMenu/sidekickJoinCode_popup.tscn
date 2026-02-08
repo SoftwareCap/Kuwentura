@@ -113,7 +113,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_l5j12")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_ahpwq")
 theme_override_styles/hover = SubResource("StyleBoxFlat_d1hbq")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_rnb66")
-text = "Okay"
+text = "Join"
 
 [node name="Button2" type="Button" parent="VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(200, 40)

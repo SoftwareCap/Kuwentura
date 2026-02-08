@@ -26,31 +26,36 @@ var zones_status: Dictionary = {
 
 # Clue System - Stores both physical clues and story fragments
 var collected_clues: Dictionary = {
-	"pinas_house": {
+	"pinas_house":
+	{
 		"collected": false,
 		"item": "Ladle",
 		"text": "We use our eyes to find things, but Pina never used hers…",
 		"zone_name": "Pina's House"
 	},
-	"backyard_path": {
+	"backyard_path":
+	{
 		"collected": false,
 		"item": "Pineapple_Sapling",
 		"text": "Pina didn't run away; she became the garden.",
 		"zone_name": "Backyard Path"
 	},
-	"old_well": {
+	"old_well":
+	{
 		"collected": false,
 		"item": "Eye_Symbol",
 		"text": "She had eyes but chose not to see.",
 		"zone_name": "Old Well"
 	},
-	"storage_hut": {
+	"storage_hut":
+	{
 		"collected": false,
 		"item": "Wish_Scroll",
 		"text": "I wished you had many eyes, so you could find what you seek...",
 		"zone_name": "Storage Hut"
 	},
-	"abandoned_house": {
+	"abandoned_house":
+	{
 		"collected": false,
 		"item": "Tiara",
 		"text": "Treated like a princess, she never learned to look.",
@@ -73,9 +78,11 @@ var game_completed: bool = false
 var nightfall_attempts: int = 0
 var max_nightfall_attempts: int = 3
 
+
 func _ready():
 	randomize()
 	_initialize_puzzle_seeds()
+
 
 func _initialize_puzzle_seeds():
 	# Generate unique seeds for each zone's puzzles
@@ -83,47 +90,53 @@ func _initialize_puzzle_seeds():
 	for zone in zones_status.keys():
 		puzzle_seeds[zone] = randi()
 
+
 func assign_role(role: Role):
 	local_role = role
 	is_host = (role == Role.DETECTIVE)
 	emit_signal("player_role_assigned", role)
 	print("Role assigned: ", Role.keys()[role], " | Is Host: ", is_host)
 
+
 func collect_clue(zone_id: String) -> bool:
 	if not collected_clues.has(zone_id):
 		return false
-		
+
 	collected_clues[zone_id].collected = true
 	var clue_data = collected_clues[zone_id]
-	
+
 	# Add to ledger
-	ledger_entries.append({
-		"zone": zone_id,
-		"item": clue_data.item,
-		"text": clue_data.text,
-		"timestamp": Time.get_unix_time_from_system()
-	})
-	
+	ledger_entries.append(
+		{
+			"zone": zone_id,
+			"item": clue_data.item,
+			"text": clue_data.text,
+			"timestamp": Time.get_unix_time_from_system()
+		}
+	)
+
 	zones_status[zone_id] = ZoneStatus.COMPLETED
 	emit_signal("clue_collected", zone_id, clue_data)
 	emit_signal("zone_completed", zone_id)
-	
+
 	# Check for all clues
 	if _check_all_clues_collected():
 		climax_triggered = true
 		emit_signal("all_clues_collected")
-	
+
 	# Auto-save
 	if FirebaseManager:
 		FirebaseManager.save_progress()
-	
+
 	return true
+
 
 func _check_all_clues_collected() -> bool:
 	for zone_id in collected_clues.keys():
 		if not collected_clues[zone_id].collected:
 			return false
 	return true
+
 
 func get_collected_count() -> int:
 	var count = 0
@@ -132,30 +145,33 @@ func get_collected_count() -> int:
 			count += 1
 	return count
 
+
 func reset_game_after_nightfall():
 	# Called when Bakunawa catches players
 	attempt_count += 1
 	nightfall_attempts += 1
-	
+
 	# Reset clues but keep zones available
 	for zone_id in collected_clues.keys():
 		collected_clues[zone_id].collected = false
-	
+
 	# Regenerate puzzle seeds (numbers change, questions stay same)
 	_initialize_puzzle_seeds()
-	
+
 	# Reset position
 	current_zone = "forest_hub"
 	climax_triggered = false
-	
+
 	emit_signal("game_reset")
-	
+
 	# Save the reset state
 	if FirebaseManager:
 		FirebaseManager.save_progress()
 
+
 func get_puzzle_seed(zone_id: String) -> int:
 	return puzzle_seeds.get(zone_id, randi())
+
 
 func get_save_data() -> Dictionary:
 	return {
@@ -170,6 +186,7 @@ func get_save_data() -> Dictionary:
 		"puzzle_seeds": puzzle_seeds,
 		"timestamp": Time.get_unix_time_from_system()
 	}
+
 
 func load_save_data(data: Dictionary):
 	if data.has("collected_clues"):
@@ -190,5 +207,5 @@ func load_save_data(data: Dictionary):
 		ledger_entries = data.ledger_entries
 	if data.has("puzzle_seeds"):
 		puzzle_seeds = data.puzzle_seeds
-	
+
 	emit_signal("data_synced")
