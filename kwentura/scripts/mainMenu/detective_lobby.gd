@@ -4,153 +4,171 @@ extends Control
 @onready var back_button = $Button2
 @onready var room_code_label = $RoomCode
 @onready var status_label = $StatusLabel
-@onready var sidekick_label = $SidekickLabel
-
 @onready var detective_sprite = $PlayerHost/AnimatedSprite2D
 @onready var sidekick_sprite = $PlayerSidekick/AnimatedSprite2D
+@onready var sidekick_name_label = $PlayerSidekick/SidekickName
 
 var sidekick_connected: bool = false
-var _world_ready: bool = false
+
 
 func _ready():
 	if detective_sprite:
 		detective_sprite.play("idle")
 	if sidekick_sprite:
 		sidekick_sprite.play("idle")
-	
+
 	# Determine role and setup UI accordingly
 	if NetworkManager.get_my_role() == "detective":
 		_setup_host_view()
 	else:
 		_setup_sidekick_view()
-	
+
 	# Connect signals
 	NetworkManager.room_code_generated.connect(_on_room_code_generated)
 	NetworkManager.partner_connected.connect(_on_partner_connected)
+	NetworkManager.partner_disconnected.connect(_on_partner_disconnected)
 	NetworkManager.game_started.connect(_on_game_started)
 	NetworkManager.connection_failed.connect(_on_connection_failed)
-	
-	# Check if partner already connected (for sidekick joining)
-	if NetworkManager.get_my_role() == "sidekick":
-		var partner = NetworkManager.get_partner_status()
-		if partner.connected:
-			status_label.text = "Connected to " + partner.display_name + "! Waiting for start..."
+
 
 func _setup_host_view():
 	# Host (Detective) setup
 	start_button.visible = false
 	start_button.disabled = true
-	
-	# Get invite code from NetworkManager (set when creating world)
+
+	# Get invite code from NetworkManager
 	var invite_code = NetworkManager.get_invite_code()
 	if not invite_code.is_empty():
 		_show_room_code(invite_code)
 	else:
 		room_code_label.text = "Code: ???"
-	
-	# Sidekick sprite hidden initially
+
+	# Sidekick elements hidden initially
 	if sidekick_sprite:
 		sidekick_sprite.visible = false
-	sidekick_label.visible = false
-	
-	# Poll for sidekick to join
-	status_label.text = "Waiting for Sidekick..."
-	_poll_for_sidekick()
+	if sidekick_name_label:
+		sidekick_name_label.visible = false
+
+	# Waiting message with instructions
+	status_label.text = "Waiting for Sidekick...\n(Code is being broadcast on LAN)"
+	status_label.modulate = Color(1, 1, 1)
+
+	print("[Lobby] Host waiting. Code: ", invite_code)
+	print("[Lobby] Make sure both devices are on the same Wi-Fi network")
+
 
 func _setup_sidekick_view():
 	# Sidekick setup
 	start_button.visible = false  # Sidekick can't start game
 	room_code_label.visible = false  # Sidekick doesn't see code
-	
+
+	# Sidekick sees both characters
 	if sidekick_sprite:
 		sidekick_sprite.visible = true
-	
+	if sidekick_name_label:
+		sidekick_name_label.visible = true
 	if detective_sprite:
 		detective_sprite.visible = true
-	
-	status_label.text = "Connected! Waiting for detective to start..."
 
-func _poll_for_sidekick():
-	"""Poll world status until sidekick joins"""
-	while not sidekick_connected:
-		await get_tree().create_timer(1.0).timeout
-		
-		var status = await NetworkManager.get_world_status()
-		print("Lobby - World status: ", status)
-		
-		if status.has("error"):
-			continue
-		
-		# Check if sidekick joined (partner_id will be non-null)
-		# According to API schema: partner_id is "string | null"
-		if status.get("partner_id") != null and not status.get("partner_id", "").is_empty():
-			print("Sidekick joined! partner_id: ", status.get("partner_id"))
-			sidekick_connected = true
-			_world_ready = true
-			_on_partner_connected({})
-			return
+	status_label.text = "Connected! Waiting for Detective to start..."
+	status_label.modulate = Color(0, 1, 0)
+
 
 func _show_room_code(code: String):
 	room_code_label.text = "Code: " + code
 	room_code_label.modulate = Color(1, 0.9, 0.2)  # Gold
 
+
 func _on_room_code_generated(code: String):
 	if NetworkManager.get_my_role() == "detective":
 		_show_room_code(code)
 
-func _on_partner_connected(_data: Dictionary):
+
+func _on_partner_connected(data: Dictionary):
 	sidekick_connected = true
-	
+
 	if NetworkManager.get_my_role() == "detective":
-		# Host sees sidekick joined
-		status_label.text = "Sidekick Connected! Click START when ready!"
+		var partner_name = data.get("display_name", "Sidekick")
+		print("[Lobby] Sidekick joined: ", partner_name)
+
+		status_label.text = "Sidekick Connected!\nClick START when ready!"
 		status_label.modulate = Color(0, 1, 0)
-		
+
 		# Show start button
 		start_button.visible = true
 		start_button.disabled = false
-		
+
 		# Show sidekick sprite with fade in
 		if sidekick_sprite:
 			sidekick_sprite.visible = true
 			sidekick_sprite.modulate = Color(1, 1, 1, 0)
 			var tween = create_tween()
 			tween.tween_property(sidekick_sprite, "modulate", Color(1, 1, 1, 1), 0.5)
+
+		# Show sidekick name
+		if sidekick_name_label:
+			sidekick_name_label.visible = true
+			sidekick_name_label.text = partner_name
+
+
 	else:
 		# Sidekick sees they're connected
 		status_label.text = "Connected! Waiting for host to start..."
 		status_label.modulate = Color(0, 1, 0)
 
+
+func _on_partner_disconnected(_data: Dictionary):
+	sidekick_connected = false
+
+	if NetworkManager.get_my_role() == "detective":
+		status_label.text = "Sidekick disconnected! Waiting..."
+		status_label.modulate = Color(1, 0, 0)
+
+		start_button.visible = false
+		start_button.disabled = true
+
+		if sidekick_sprite:
+			sidekick_sprite.visible = false
+
+		if sidekick_name_label:
+			sidekick_name_label.visible = false
+
+
+
+
 func _on_start_pressed() -> void:
 	if NetworkManager.get_my_role() != "detective":
 		return  # Only host can start
-	
+
 	if not sidekick_connected:
 		print("Waiting for sidekick to connect...")
 		return
-	
+
 	print("Starting game session...")
 	start_button.disabled = true
 	status_label.text = "Starting game..."
-	
+
 	# Start the session
-	var result = await NetworkManager.start_game_session()
-	if result.has("error"):
-		status_label.text = "Failed to start: " + result.get("error", "Unknown error")
+	var success = NetworkManager.start_game()
+	if not success:
+		status_label.text = "Failed to start game"
 		start_button.disabled = false
 	else:
 		status_label.text = "Game starting!"
+
 
 func _on_back_pressed() -> void:
 	NetworkManager.disconnect_network()
 	get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
 
-func _on_game_started():
+
+func _on_game_started(_checkpoint: String = ""):
 	# Both players fade out and go to game
 	var tween = create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
 	await tween.finished
 	get_tree().change_scene_to_file("res://scenes/cutscenes/OpeningCutscene.tscn")
+
 
 func _on_connection_failed(error: String):
 	status_label.text = "Connection failed: " + error
