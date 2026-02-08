@@ -7,10 +7,12 @@ extends Node2D
 var placed_clues: Dictionary = {}
 var required_clues = ["Ladle", "Pineapple_Sapling", "Eye_Symbol", "Wish_Scroll", "Tiara"]
 
+
 func _ready():
 	_setup_deduction_board()
 	_populate_clues()
 	_check_if_all_clues_present()
+
 
 func _setup_deduction_board():
 	# Create 5 slots for the clues
@@ -21,6 +23,7 @@ func _setup_deduction_board():
 		slot.clue_placed.connect(_on_clue_placed)
 		clue_slots.add_child(slot)
 
+
 func _populate_clues():
 	# Show collected clues from GameState
 	for zone_id in GameState.collected_clues.keys():
@@ -30,12 +33,14 @@ func _populate_clues():
 			clue_icon.setup(clue_data.item, clue_data.text)
 			$AvailableClues.add_child(clue_icon)
 
+
 func _on_clue_placed(clue_id: String, slot_id: String):
 	placed_clues[slot_id] = clue_id
 	AudioManager.play_sfx("clue_place")
-	
+
 	if placed_clues.size() == 5:
 		_reveal_truth()
+
 
 func _reveal_truth():
 	# Animate the final deduction
@@ -51,18 +56,19 @@ func _reveal_truth():
 	"Gamitin ang sariling mata sa paghahanap,
 	huwag laging iasa sa bibig at sa iba."
 	"""
-	
+
 	final_text_display.text = story_text
 	final_text_display.show()
-	
+
 	# Typewriter effect
 	await _animate_text(story_text)
-	
+
 	# Mark game complete
 	GameState.game_completed = true
 	FirebaseManager.save_progress()
-	
+
 	_fade_to_ending()
+
 
 func _animate_text(text: String):
 	final_text_display.text = ""
@@ -70,12 +76,13 @@ func _animate_text(text: String):
 		final_text_display.text = text.substr(0, i)
 		await get_tree().create_timer(5.0).timeout
 
+
 func _fade_to_ending():
 	# Fade out altar scene
 	var fade = $FadeRect
 	var tween = create_tween()
 	tween.tween_property(fade, "color", Color(0, 0, 0, 1), 2.0)
 	await tween.finished
-	
+
 	# Change to ending cutscene
 	get_tree().change_scene_to_file("res://scenes/cutscenes/EndingCutscene.tscn")

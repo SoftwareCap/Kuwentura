@@ -1,335 +1,655 @@
 extends Node
 
-const PORT: int = 7777
+#==============================================================================
+# NETWORK MANAGER - LAN Listen Server with Code-Based Discovery
+#==============================================================================
+# FIXED: Proper UDP broadcast that doesn't conflict on port binding
+# Host broadcasts on port 17778, Client listens on port 17779
+#==============================================================================
+
+enum ConnectionState {
+	DISCONNECTED,
+	CONNECTING,
+	HOSTING,
+	CONNECTED,
+	PLAYING,
+	DISCONNECTING
+}
+
+enum Role { NONE, DETECTIVE, SIDEKICK }
+
+const DEFAULT_PORT: int = 17777
 const MAX_PLAYERS: int = 2
-const DEFAULT_IP: String = "127.0.0.1"
-
-# WebSocket relay server (localhost for testing)
-const RELAY_SERVER_URL: String = "ws://localhost:10001"  # ws:// for localhost (not wss://)
-const USE_RELAY: bool = true  # Toggle between direct and relay connection
-
-var is_hosting: bool = false
-
-enum ConnectionState { DISCONNECTED, CONNECTING, CONNECTED, HOSTING }
-
-var multiplayer_peer: WebSocketMultiplayerPeer  # Changed to WebSocket for relay
-var connection_state: ConnectionState = ConnectionState.DISCONNECTED
-var players: Dictionary = {}
-var local_peer_id: int = 0
-
-# Room code system
-var current_room_code: String = ""
-var target_room_code: String = ""
-
-# HTTP for matchmaking
-var http_request: HTTPRequest
+const BROADCAST_PORT: int = 17778  # Host broadcasts here
+const LISTEN_PORT: int = 17779     # Client listens here (different port!)
+const DISCOVERY_BROADCAST_INTERVAL: float = 0.5
+const DISCOVERY_TIMEOUT: float = 5.0
 
 # Signals
+signal connection_state_changed(new_state: int, old_state: int)
 signal connection_established(peer_id: int)
-signal player_joined(peer_id: int, role: GameState.Role)
-signal player_left(peer_id: int)
 signal connection_failed(error: String)
-signal role_assignment_received(role: GameState.Role)
-signal game_started
-signal peer_disconnected
-signal restart_requested
-signal restart_confirmed
+signal player_connected(peer_id: int)
+signal player_disconnected(peer_id: int)
+signal player_joined(peer_id: int, role: Role)
+signal player_left(peer_id: int)
+signal partner_connected(player_data: Dictionary)
+signal partner_disconnected(player_data: Dictionary)
+signal session_started(world_data: Dictionary)
+signal game_started(checkpoint: String)
+signal game_paused(reason: String)
+signal game_resumed
+signal host_discovered(host_info: Dictionary)
+signal discovery_started
+signal discovery_stopped
+signal role_assignment_received(role: int)
 signal room_code_generated(code: String)
 
+@export var enable_prediction: bool = true
+@export var enable_interpolation: bool = true
+
+# State
+var _state: ConnectionState = ConnectionState.DISCONNECTED
+var _multiplayer_peer: ENetMultiplayerPeer = null
+
+# Discovery - FIXED: Separate sockets for broadcast and listen
+var _broadcast_socket: PacketPeerUDP = null  # Host uses this to broadcast
+var _listen_socket: PacketPeerUDP = null     # Client uses this to listen
+var _discovery_broadcast_timer: float = 0.0
+var _is_discovering: bool = false
+var _discovery_targets: Dictionary = {}
+var _target_code: String = ""
+
+# Player
+var _local_role: Role = Role.NONE
+var _local_peer_id: int = 0
+var _partner_peer_id: int = 0
+
+# Session
+var _invite_code: String = ""
+var _session_seed: int = 0
+var _is_host: bool = false
+var _world_progress: Dictionary = {}
+var _partner_states: Dictionary = {}
+
+#------------------------------------------------------------------------------
+# Public API
+#------------------------------------------------------------------------------
+
+func is_host() -> bool:
+	return _is_host
+
+func is_playing() -> bool:
+	return _state == ConnectionState.PLAYING
+
+func get_state() -> ConnectionState:
+	return _state
+
+func get_my_role() -> String:
+	return "detective" if _local_role == Role.DETECTIVE else "sidekick" if _local_role == Role.SIDEKICK else "none"
+
+func get_invite_code() -> String:
+	return _invite_code
+
+func get_room_code() -> String:
+	return _invite_code
+
+func has_active_connection() -> bool:
+	return _state == ConnectionState.PLAYING or _state == ConnectionState.HOSTING or _state == ConnectionState.CONNECTED
+
+func is_network_connected() -> bool:
+	return has_active_connection()
+
+func is_partner_connected() -> bool:
+	return _partner_peer_id != 0 and (_state == ConnectionState.PLAYING or _state == ConnectionState.HOSTING)
+
+func resume_game() -> bool:
+	if _state != ConnectionState.PLAYING:
+		push_warning("Cannot resume: game is not in PLAYING state")
+		return false
+	
+	# Notify all peers that game has resumed
+	if _is_host:
+		_game_resumed_rpc.rpc()
+	else:
+		# Client requests resume, host will broadcast
+		_request_resume_rpc.rpc_id(1)
+	
+	emit_signal("game_resumed")
+	print("[Network] Game resumed")
+	return true
+
+#------------------------------------------------------------------------------
+# Godot Lifecycle
+#------------------------------------------------------------------------------
+
 func _ready():
-	multiplayer.peer_connected.connect(_on_peer_connected)
-	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+	multiplayer.peer_connected.connect(_on_multiplayer_peer_connected)
+	multiplayer.peer_disconnected.connect(_on_multiplayer_peer_disconnected)
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
+
+
+func _process(delta: float):
+	if _is_discovering and _listen_socket:
+		_poll_discovery()
 	
-	# Setup HTTP for matchmaking
-	http_request = HTTPRequest.new()
-	add_child(http_request)
-	http_request.request_completed.connect(_on_http_request_completed)
+	if _is_host:
+		_discovery_broadcast_timer += delta
+		if _discovery_broadcast_timer >= DISCOVERY_BROADCAST_INTERVAL:
+			_discovery_broadcast_timer = 0.0
+			_broadcast_host_presence()
+
+
+func _exit_tree():
+	disconnect_network()
+
+#------------------------------------------------------------------------------
+# Hosting
+#------------------------------------------------------------------------------
+
+func host_game() -> Dictionary:
+	if _state != ConnectionState.DISCONNECTED:
+		return {"error": "Already connected", "success": false}
 	
-	# Poll WebSocket in process
-	set_process(true)
-
-func _process(_delta):
-	# Required for WebSocket multiplayer to work
-	if multiplayer_peer:
-		multiplayer_peer.poll()
-
-# Generate a random 6-character room code
-func _generate_room_code() -> String:
-	var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-	var code = ""
-	for i in range(6):
-		code += chars[randi() % chars.length()]
-	return code
-
-func host_game() -> bool:
-	if USE_RELAY:
-		return _host_with_relay()
-	else:
-		return _host_direct()
-
-func _host_direct() -> bool:
-	# Direct connection (LAN only) - uses ENet
-	var enet_peer = ENetMultiplayerPeer.new()
-	var error = enet_peer.create_server(PORT, MAX_PLAYERS)
+	_change_state(ConnectionState.CONNECTING)
+	
+	_multiplayer_peer = ENetMultiplayerPeer.new()
+	var error = _multiplayer_peer.create_server(DEFAULT_PORT, MAX_PLAYERS)
 	
 	if error != OK:
-		emit_signal("connection_failed", "Failed to create server: " + str(error))
-		return false
+		_change_state(ConnectionState.DISCONNECTED)
+		return {"error": "Failed to create server: " + str(error), "success": false}
 	
-	multiplayer.multiplayer_peer = enet_peer
-	_setup_host_common()
+	multiplayer.multiplayer_peer = _multiplayer_peer
 	
-	current_room_code = _generate_room_code()
-	emit_signal("room_code_generated", current_room_code)
-	
-	print("Direct server started on port ", PORT)
-	emit_signal("connection_established", local_peer_id)
-	return true
-
-func _host_with_relay() -> bool:
-	# Use WebSocket relay for connections
-	multiplayer_peer = WebSocketMultiplayerPeer.new()
-	
-	# Create WebSocket server on local port
-	var error = multiplayer_peer.create_server(PORT)
-	
-	if error != OK:
-		emit_signal("connection_failed", "Failed to create WebSocket server: " + str(error))
-		return false
-	
-	multiplayer.multiplayer_peer = multiplayer_peer
-	_setup_host_common()
-	
-	# Generate and register room code
-	current_room_code = _generate_room_code()
-	_register_room_with_matchmaker(current_room_code, true)
-	
-	emit_signal("room_code_generated", current_room_code)
-	print("Relay host created, code: ", current_room_code)
-	emit_signal("connection_established", local_peer_id)
-	return true
-
-func _setup_host_common():
-	connection_state = ConnectionState.HOSTING
-	is_hosting = true
-	local_peer_id = multiplayer.get_unique_id()
+	_local_peer_id = 1
+	_is_host = true
+	_local_role = Role.DETECTIVE
 	GameState.assign_role(GameState.Role.DETECTIVE)
-	players[local_peer_id] = {"role": GameState.Role.DETECTIVE, "ready": false}
-
-func _register_room_with_matchmaker(room_code: String, is_host: bool):
-	# Register with local relay server via HTTP
-	var url = RELAY_SERVER_URL.replace("ws://", "http://") + "/register"
-	var headers = ["Content-Type: application/json"]
-	var body = JSON.stringify({
-		"room_code": room_code,
-		"is_host": is_host,
-		"local_port": PORT
-	})
 	
-	http_request.set_meta("action", "register")
-	http_request.request(url, headers, HTTPClient.METHOD_POST, body)
-
-func join_game_with_code(room_code: String) -> bool:
-	room_code = room_code.to_upper().strip_edges()
-	target_room_code = room_code
+	_invite_code = _generate_invite_code()
+	_session_seed = randi()
 	
-	if USE_RELAY:
-		return _join_with_relay(room_code)
-	else:
-		return join_game(DEFAULT_IP)
-
-func _join_with_relay(room_code: String) -> bool:
-	# Query relay server for connection info
-	var url = RELAY_SERVER_URL.replace("ws://", "http://") + "/join?room=" + room_code
-	http_request.set_meta("action", "join_room")
-	http_request.set_meta("room_code", room_code)
-	http_request.request(url)
+	_world_progress = {
+		"collected_clues": {},
+		"zones_status": GameState.zones_status.duplicate(),
+		"current_zone": "forest_hub",
+		"session_seed": _session_seed
+	}
 	
-	print("Looking up room: ", room_code)
-	return true
+	# Start broadcasting presence
+	_start_broadcasting()
+	
+	_change_state(ConnectionState.HOSTING)
+	
+	emit_signal("connection_established", _local_peer_id)
+	emit_signal("role_assignment_received", Role.DETECTIVE)
+	emit_signal("room_code_generated", _invite_code)
+	
+	print("[Network] Hosting game. Code: ", _invite_code)
+	
+	return {
+		"success": true,
+		"invite_code": _invite_code,
+		"host_ip": _get_host_ip(),
+		"port": DEFAULT_PORT
+	}
 
-func _on_http_request_completed(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray):
-	if _result != HTTPRequest.RESULT_SUCCESS:
-		print("HTTP request failed: ", _result)
+
+#------------------------------------------------------------------------------
+# FIXED: Broadcasting - don't bind, just send
+#------------------------------------------------------------------------------
+
+func _start_broadcasting():
+	_broadcast_socket = PacketPeerUDP.new()
+	_broadcast_socket.set_broadcast_enabled(true)
+	# Don't bind! Just use it to send broadcasts
+	print("[Network] Started broadcasting code: ", _invite_code)
+
+
+func _broadcast_host_presence():
+	if not _broadcast_socket or _invite_code.is_empty():
 		return
 	
-	var action = http_request.get_meta("action", "")
-	var json = JSON.parse_string(body.get_string_from_utf8())
+	var host_ip = _get_host_ip()
 	
-	match action:
-		"register":
-			if response_code == 200:
-				print("Room registered with relay server")
-			else:
-				print("Failed to register room: ", response_code)
+	var broadcast_data = {
+		"game": "kwentura",
+		"version": "1.0.0",
+		"code": _invite_code,
+		"host_ip": host_ip,  # The actual IP to connect to
+		"port": DEFAULT_PORT,
+		"host_name": _get_device_name(),
+		"timestamp": Time.get_unix_time_from_system()
+	}
+	
+	var packet = JSON.stringify(broadcast_data).to_utf8_buffer()
+	
+	# Send to broadcast address on BROADCAST_PORT
+	_broadcast_socket.set_dest_address("255.255.255.255", BROADCAST_PORT)
+	var err = _broadcast_socket.put_packet(packet)
+	
+	if err != OK:
+		print("[Network] Broadcast failed: ", err)
+
+
+#------------------------------------------------------------------------------
+# Joining with Code Discovery - FIXED: Listen on different port
+#------------------------------------------------------------------------------
+
+func start_discovery_for_code(target_code: String) -> bool:
+	if _is_discovering:
+		return true
+	
+	_target_code = target_code.to_upper()
+	_discovery_targets.clear()
+	
+	_listen_socket = PacketPeerUDP.new()
+	_listen_socket.set_broadcast_enabled(true)
+	
+	# Bind to LISTEN_PORT (different from broadcast port!)
+	var error = _listen_socket.bind(BROADCAST_PORT)
+	if error != OK:
+		push_warning("[Network] Failed to bind listen socket: " + str(error))
+		_listen_socket = null
+		return false
+	
+	_is_discovering = true
+	emit_signal("discovery_started")
+	
+	print("[Network] Listening for code: ", _target_code)
+	
+	return true
+
+
+func get_discovered_host(code: String) -> Dictionary:
+	return _discovery_targets.get(code.to_upper(), {})
+
+
+## Join using code (with discovery)
+func join_game_with_code(invite_code: String) -> Dictionary:
+	if _state != ConnectionState.DISCONNECTED:
+		return {"error": "Already connected", "success": false}
+	
+	var target_code = invite_code.to_upper()
+	
+	# Start discovery
+	print("[Network] Searching for game with code: ", target_code)
+	var discovery_active = start_discovery_for_code(target_code)
+	
+	if not discovery_active:
+		return {"error": "Failed to start discovery", "success": false}
+	
+	# Wait for discovery with timeout
+	var attempts = 0
+	var max_attempts = 10  # 5 seconds total
+	var host_info = {}
+	
+	while attempts < max_attempts:
+		await get_tree().create_timer(0.5).timeout
 		
-		"join_room":
-			_handle_join_response(json)
+		host_info = get_discovered_host(target_code)
+		if not host_info.is_empty():
+			print("[Network] Found host: ", host_info)
+			break
+		
+		attempts += 1
+		print("[Network] Discovery attempt ", attempts, "/", max_attempts)
+	
+	_stop_discovery()
+	
+	if host_info.is_empty():
+		return {
+			"error": "Could not find game with code: " + target_code + "\nMake sure:\n• Both on same Wi-Fi\n• Host is still hosting", 
+			"success": false
+		}
+	
+	# Connect to discovered host
+	var host_ip = host_info.get("host_ip", "")
+	print("[Network] Connecting to host at: ", host_ip)
+	
+	return await _connect_to_host(host_ip, target_code)
 
-func _handle_join_response(json: Dictionary):
-	if json == null or json.has("error"):
-		var error_msg = json.get("error", "Room not found") if json else "Invalid response"
-		emit_signal("connection_failed", error_msg)
+
+## Join directly with IP (for testing or when discovery fails)
+func join_game_with_ip(host_ip: String, code: String = "") -> Dictionary:
+	if _state != ConnectionState.DISCONNECTED:
+		return {"error": "Already connected", "success": false}
+	
+	print("[Network] Direct connect to IP: ", host_ip)
+	return await _connect_to_host(host_ip, code)
+
+
+func _poll_discovery():
+	if not _listen_socket:
 		return
 	
-	# Connect to the relay server
-	var host_url = json.get("relay_url", RELAY_SERVER_URL + "?room=" + target_room_code)
-	_connect_to_relay(host_url)
+	while _listen_socket.get_available_packet_count() > 0:
+		var packet = _listen_socket.get_packet()
+		var from_ip = _listen_socket.get_packet_ip()
+		
+		var data = JSON.parse_string(packet.get_string_from_utf8())
+		if data == null or not data is Dictionary:
+			continue
+		
+		if data.get("game") != "kwentura":
+			continue
+		
+		var code = data.get("code", "")
+		var host_ip = data.get("host_ip", from_ip)
+		
+		print("[Network] Discovered broadcast from ", from_ip, " code: ", code)
+		
+		# Store discovery info
+		_discovery_targets[code] = {
+			"ip": from_ip,
+			"host_ip": host_ip,
+			"port": data.get("port", DEFAULT_PORT),
+			"code": code,
+			"host_name": data.get("host_name", "Unknown"),
+			"last_seen": Time.get_unix_time_from_system()
+		}
+		
+		emit_signal("host_discovered", _discovery_targets[code])
 
-func _connect_to_relay(relay_url: String):
-	multiplayer_peer = WebSocketMultiplayerPeer.new()
+
+func stop_discovery():
+	_stop_discovery()
+
+
+func _stop_discovery():
+	_is_discovering = false
+	if _listen_socket:
+		_listen_socket.close()
+		_listen_socket = null
+	emit_signal("discovery_stopped")
+
+
+#------------------------------------------------------------------------------
+# Connection
+#------------------------------------------------------------------------------
+
+func _connect_to_host(host_ip: String, code: String) -> Dictionary:
+	_change_state(ConnectionState.CONNECTING)
 	
-	# Connect as client to relay server
-	var error = multiplayer_peer.create_client(relay_url)
+	_multiplayer_peer = ENetMultiplayerPeer.new()
+	var error = _multiplayer_peer.create_client(host_ip, DEFAULT_PORT)
 	
 	if error != OK:
-		emit_signal("connection_failed", "Failed to connect to relay: " + str(error))
+		_change_state(ConnectionState.DISCONNECTED)
+		return {"error": "Failed to create client: " + str(error), "success": false}
+	
+	multiplayer.multiplayer_peer = _multiplayer_peer
+	_local_role = Role.SIDEKICK
+	GameState.assign_role(GameState.Role.SIDEKICK)
+	_invite_code = code
+	
+	print("[Network] Connecting to ", host_ip, ":", DEFAULT_PORT)
+	
+	# Wait for connection with timeout
+	var attempts = 0
+	var max_attempts = 30  # 3 seconds
+	
+	while attempts < max_attempts:
+		await get_tree().create_timer(0.1).timeout
+		
+		if _state == ConnectionState.CONNECTED or _state == ConnectionState.PLAYING:
+			return {"success": true}
+		
+		attempts += 1
+	
+	# Timeout
+	_cleanup()
+	_change_state(ConnectionState.DISCONNECTED)
+	return {"error": "Connection timeout. Check:\n• Same Wi-Fi network\n• Firewall settings", "success": false}
+
+
+func start_game() -> bool:
+	if not _is_host:
+		push_warning("Only host can start the game")
 		return false
 	
-	multiplayer.multiplayer_peer = multiplayer_peer
-	connection_state = ConnectionState.CONNECTING
-	local_peer_id = multiplayer.get_unique_id()
-	
-	print("Connecting to relay: ", relay_url)
-	return true
-
-func join_game(ip_address: String = DEFAULT_IP) -> bool:
-	# Fallback direct connection
-	var enet_peer = ENetMultiplayerPeer.new()
-	var error = enet_peer.create_client(ip_address, PORT)
-	
-	if error != OK:
-		emit_signal("connection_failed", "Failed to create client: " + str(error))
+	if _state != ConnectionState.HOSTING or _partner_peer_id == 0:
+		push_warning("No partner connected")
 		return false
 	
-	multiplayer.multiplayer_peer = enet_peer
-	connection_state = ConnectionState.CONNECTING
-	local_peer_id = multiplayer.get_unique_id()
+	_rpc_sync_world_state.rpc(_world_progress)
 	
-	print("Connecting directly to ", ip_address, ":", PORT)
+	_change_state(ConnectionState.PLAYING)
+	
+	_game_started_rpc.rpc("forest_hub")
+	
+	emit_signal("game_started", "forest_hub")
+	
 	return true
 
-func _on_connected_to_server():
-	connection_state = ConnectionState.CONNECTED
-	local_peer_id = multiplayer.get_unique_id()
-	print("Connected! Peer ID: ", local_peer_id)
-	emit_signal("connection_established", local_peer_id)
-
-func _on_connection_failed():
-	connection_state = ConnectionState.DISCONNECTED
-	emit_signal("connection_failed", "Connection failed")
-	print("Connection failed")
-
-func _on_server_disconnected():
-	connection_state = ConnectionState.DISCONNECTED
-	emit_signal("connection_failed", "Server disconnected")
-	print("Server disconnected")
-
-func _on_peer_connected(peer_id: int):
-	print("Peer connected: ", peer_id)
-	
-	if multiplayer.is_server():
-		var role = GameState.Role.SIDEKICK
-		players[peer_id] = {"role": role, "ready": false}
-		_rpc_assign_role.rpc_id(peer_id, role)
-		emit_signal("player_joined", peer_id, role)
-		_sync_game_state.rpc_id(peer_id, GameState.get_save_data())
-
-func _on_peer_disconnected(peer_id: int):
-	print("Peer disconnected: ", peer_id)
-	players.erase(peer_id)
-	emit_signal("player_left", peer_id)
-	
-	if not multiplayer.is_server():
-		connection_state = ConnectionState.DISCONNECTED
-		emit_signal("peer_disconnected")
-
-@rpc("authority", "reliable")
-func _rpc_assign_role(role: GameState.Role):
-	GameState.assign_role(role)
-	emit_signal("role_assignment_received", role)
-	print("Role assigned: ", GameState.Role.keys()[role])
-
-@rpc("authority", "reliable")
-func _sync_game_state(state_data: Dictionary):
-	GameState.load_save_data(state_data)
-	print("State synced")
-
-func start_game():
-	if multiplayer.is_server():
-		_rpc_start_game.rpc()
-
-@rpc("authority", "reliable")
-func _rpc_start_game():
-	emit_signal("game_started")
-	print("Game started!")
 
 func disconnect_network():
-	if multiplayer_peer:
-		multiplayer_peer.close()
-	multiplayer.multiplayer_peer = null
-	connection_state = ConnectionState.DISCONNECTED
-	is_hosting = false
-	current_room_code = ""
-	target_room_code = ""
-	players.clear()
-	print("Disconnected")
+	if _state == ConnectionState.DISCONNECTED:
+		return
+	
+	_change_state(ConnectionState.DISCONNECTING)
+	
+	_stop_discovery()
+	
+	if _broadcast_socket:
+		_broadcast_socket.close()
+		_broadcast_socket = null
+	
+	if multiplayer.multiplayer_peer:
+		multiplayer.multiplayer_peer.close()
+		multiplayer.multiplayer_peer = null
+	
+	_cleanup()
+	_change_state(ConnectionState.DISCONNECTED)
+	
+	print("[Network] Disconnected")
 
-@rpc("any_peer", "reliable")
-func sync_clue_collection(zone_id: String):
-	if multiplayer.is_server():
-		GameState.collect_clue(zone_id)
-		_broadcast_clue_collection.rpc(zone_id)
 
-@rpc("authority", "reliable")
-func _broadcast_clue_collection(zone_id: String):
-	if not multiplayer.is_server():
-		GameState.collect_clue(zone_id)
-
-@rpc("any_peer", "reliable")
-func request_zone_change(zone_id: String):
-	if multiplayer.is_server():
-		_approve_zone_change.rpc(zone_id)
-
-@rpc("authority", "reliable")
-func _approve_zone_change(zone_id: String):
-	GameState.current_zone = zone_id
-	get_tree().change_scene_to_file("res://scenes/world/zones/%s/%s.tscn" % [zone_id, zone_id.to_pascal_case()])
-
-func request_restart():
-	if multiplayer.is_server():
-		_broadcast_restart_request.rpc()
-
-@rpc("authority", "reliable")
-func _broadcast_restart_request():
-	emit_signal("restart_requested")
-	_show_restart_dialog()
-
-func _show_restart_dialog():
-	var dialog = ConfirmationDialog.new()
-	dialog.title = "Play Again?"
-	dialog.dialog_text = "Detective wants to play again. Join?"
-	dialog.ok_button_text = "Yes!"
-	dialog.cancel_button_text = "No"
-	dialog.confirmed.connect(_accept_restart)
-	dialog.canceled.connect(_decline_restart)
-	get_tree().current_scene.add_child(dialog)
-	dialog.popup_centered()
-
-func _accept_restart():
-	_confirm_restart.rpc_id(1)
-
-func _decline_restart():
+func disconnect_from_session():
 	disconnect_network()
-	get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
+
+#------------------------------------------------------------------------------
+# Multiplayer Handlers
+#------------------------------------------------------------------------------
+
+func _on_multiplayer_peer_connected(peer_id: int):
+	print("[Network] Peer connected: ", peer_id)
+	emit_signal("player_connected", peer_id)
+	
+	if _is_host:
+		_partner_peer_id = peer_id
+		_assign_role_rpc.rpc_id(peer_id, Role.SIDEKICK, _invite_code, _session_seed)
+		
+		emit_signal("partner_connected", {
+			"player_id": str(peer_id),
+			"display_name": "Sidekick",
+			"role": "sidekick"
+		})
+		emit_signal("player_joined", peer_id, Role.SIDEKICK)
+	else:
+		emit_signal("player_joined", peer_id, Role.DETECTIVE)
+
+
+func _on_multiplayer_peer_disconnected(peer_id: int):
+	print("[Network] Peer disconnected: ", peer_id)
+	emit_signal("player_disconnected", peer_id)
+	
+	if peer_id == _partner_peer_id:
+		_partner_peer_id = 0
+		emit_signal("partner_disconnected", {
+			"player_id": str(peer_id),
+			"reason": "disconnected"
+		})
+		emit_signal("game_paused", "partner_disconnected")
+		emit_signal("player_left", peer_id)
+	
+	if _is_host and _state == ConnectionState.PLAYING:
+		_change_state(ConnectionState.HOSTING)
+
+
+func _on_connected_to_server():
+	print("[Network] Connected to server")
+	_local_peer_id = multiplayer.get_unique_id()
+	_change_state(ConnectionState.CONNECTED)
+
+
+func _on_connection_failed():
+	push_error("[Network] Connection failed")
+	_change_state(ConnectionState.DISCONNECTED)
+	emit_signal("connection_failed", "Failed to connect to host")
+	_cleanup()
+
+
+func _on_server_disconnected():
+	print("[Network] Server disconnected")
+	emit_signal("partner_disconnected", {"reason": "host_disconnected"})
+	emit_signal("game_paused", "host_disconnected")
+	_change_state(ConnectionState.DISCONNECTED)
+	_cleanup()
+
+#------------------------------------------------------------------------------
+# RPC Functions
+#------------------------------------------------------------------------------
+
+@rpc("authority", "reliable")
+func _assign_role_rpc(role: Role, invite_code: String, session_seed: int):
+	_local_role = role
+	_session_seed = session_seed
+	_invite_code = invite_code
+	
+	GameState.assign_role(GameState.Role.SIDEKICK)
+	
+	print("[Network] Assigned role: SIDEKICK")
+	
+	emit_signal("connection_established", _local_peer_id)
+	emit_signal("role_assignment_received", Role.SIDEKICK)
+
+
+@rpc("authority", "reliable")
+func _game_started_rpc(checkpoint: String):
+	_change_state(ConnectionState.PLAYING)
+	emit_signal("game_started", checkpoint)
+	emit_signal("session_started", {
+		"checkpoint": checkpoint,
+		"world_progress": _world_progress,
+		"your_role": "sidekick",
+		"partner": {
+			"player_id": str(_partner_peer_id),
+			"role": "detective"
+		}
+	})
+
 
 @rpc("any_peer", "reliable")
-func _confirm_restart():
-	emit_signal("restart_confirmed")
-	_start_restart_sequence()
+func _request_resume_rpc():
+	if multiplayer.is_server():
+		_game_resumed_rpc.rpc()
 
-func _start_restart_sequence():
-	_rpc_start_game.rpc()
+
+@rpc("authority", "reliable")
+func _game_resumed_rpc():
+	emit_signal("game_resumed")
+
+
+@rpc("any_peer", "reliable")
+func _rpc_sync_world_state(world_state: Dictionary):
+	_world_progress = world_state
+	GameState.puzzle_seeds = world_state.get("puzzle_seeds", {})
+
+
+@rpc("any_peer", "reliable")
+func submit_puzzle_solution(puzzle_id: String, solution: Variant, _attempt_time_ms: int):
+	if multiplayer.is_server():
+		var result = PuzzleManager.validate_puzzle(puzzle_id, solution)
+		_puzzle_result_rpc.rpc_id(multiplayer.get_remote_sender_id(), puzzle_id, result)
+
+
+@rpc("authority", "reliable")
+func _puzzle_result_rpc(_puzzle_id: String, _result: Dictionary):
+	pass
+
+
+@rpc("any_peer", "unreliable_ordered")
+func sync_player_state(position: Vector2, velocity: Vector2, facing: String, animation_state: String):
+	var sender_id = multiplayer.get_remote_sender_id()
+	_partner_states[str(sender_id)] = {
+		"position": position,
+		"velocity": velocity,
+		"facing": facing,
+		"animation": animation_state,
+		"timestamp": Time.get_unix_time_from_system()
+	}
+
+
+@rpc("authority", "reliable")
+func trigger_clue_collection(zone_id: String, _clue_data: Dictionary):
+	GameState.collect_clue(zone_id)
+
+#------------------------------------------------------------------------------
+# Helpers
+#------------------------------------------------------------------------------
+
+func _change_state(new_state: ConnectionState):
+	if _state == new_state:
+		return
+	var old_state := _state
+	_state = new_state
+	emit_signal("connection_state_changed", new_state, old_state)
+	print("[Network] State: ", _state_name(old_state), " -> ", _state_name(new_state))
+
+
+func _state_name(s: int) -> String:
+	match s:
+		ConnectionState.DISCONNECTED: return "DISCONNECTED"
+		ConnectionState.CONNECTING: return "CONNECTING"
+		ConnectionState.HOSTING: return "HOSTING"
+		ConnectionState.CONNECTED: return "CONNECTED"
+		ConnectionState.PLAYING: return "PLAYING"
+		ConnectionState.DISCONNECTING: return "DISCONNECTING"
+		_: return "UNKNOWN"
+
+
+func _generate_invite_code() -> String:
+	var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+	var code = ""
+	var random_seed = hash(str(randi()) + str(Time.get_unix_time_from_system()))
+	for i in range(6):
+		random_seed = (random_seed * 9301 + 49297) % 233280
+		code += chars[random_seed % chars.length()]
+	return code
+
+
+func _get_host_ip() -> String:
+	var ips = IP.get_local_addresses()
+	for ip in ips:
+		if ip.begins_with("127."):
+			continue
+		if "." in ip and not ip.begins_with("0."):
+			return ip
+	return "localhost"
+
+
+func _get_device_name() -> String:
+	var player_name = OS.get_name() + " Player"
+	var env = OS.get_environment("COMPUTERNAME")
+	if not env.is_empty():
+		player_name = env
+	return player_name
+
+
+func _cleanup():
+	_is_host = false
+	_local_peer_id = 0
+	_partner_peer_id = 0
+	_local_role = Role.NONE
+	_invite_code = ""
+	_world_progress.clear()
+	_partner_states.clear()
+	_discovery_targets.clear()
+	
+	if multiplayer.multiplayer_peer:
+		multiplayer.multiplayer_peer.close()
+		multiplayer.multiplayer_peer = null

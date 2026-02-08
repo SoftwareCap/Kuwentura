@@ -1,26 +1,27 @@
 extends Node
 
 const PROJECT_ID = "kwentura-89df4"
-const BASE_URL = "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents"
+const BASE_URL = (
+	"https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents"
+)
+
 
 func save_game_state(user_id: String, data: Dictionary):
 	if user_id.is_empty():
 		print("Cannot save: No user ID")
 		return
-	
+
 	var id_token = FirebaseAuth.id_token
 	if id_token.is_empty():
 		print("Cannot save: Not authenticated")
 		return
-	
+
 	var url = BASE_URL + "/users/" + user_id + "/game_state"
-	var headers = [
-		"Content-Type: application/json",
-		"Authorization: Bearer " + id_token  # ✅ Use ID token here
-	]
-	
+	var headers = ["Content-Type: application/json", "Authorization: Bearer " + id_token]  # ✅ Use ID token here
+
 	var doc = {
-		"fields": {
+		"fields":
+		{
 			"collected_clues": _convert_clues_to_firestore(data.get("collected_clues", {})),
 			"zones_status": _convert_dict_to_firestore(data.get("zones_status", {})),
 			"current_zone": {"stringValue": data.get("current_zone", "forest_hub")},
@@ -32,35 +33,41 @@ func save_game_state(user_id: String, data: Dictionary):
 			"timestamp": {"stringValue": str(Time.get_unix_time_from_system())}
 		}
 	}
-	
+
 	var body = JSON.stringify(doc)
 	print("Saving to: ", url)
 	print("Data: ", body)
-	
+
 	var http = HTTPRequest.new()
 	add_child(http)
 	http.request_completed.connect(_on_save_response.bind(http))
-	
+
 	var error = http.request(url, headers, HTTPClient.METHOD_PATCH, body)
 	if error != OK:
 		print("Save request failed: ", error)
+
 
 func _convert_clues_to_firestore(clues: Dictionary) -> Dictionary:
 	var values = []
 	for zone_id in clues.keys():
 		var clue_data = clues[zone_id]
 		if clue_data is Dictionary and clue_data.get("collected", false):
-			values.append({
-				"mapValue": {
-					"fields": {
-						"zone_id": {"stringValue": zone_id},
-						"item": {"stringValue": clue_data.get("item", "")},
-						"text": {"stringValue": clue_data.get("text", "")}
+			values.append(
+				{
+					"mapValue":
+					{
+						"fields":
+						{
+							"zone_id": {"stringValue": zone_id},
+							"item": {"stringValue": clue_data.get("item", "")},
+							"text": {"stringValue": clue_data.get("text", "")}
+						}
 					}
 				}
-			})
-	
+			)
+
 	return {"arrayValue": {"values": values}}
+
 
 func _convert_dict_to_firestore(dict: Dictionary) -> Dictionary:
 	var fields = {}
@@ -75,8 +82,9 @@ func _convert_dict_to_firestore(dict: Dictionary) -> Dictionary:
 				fields[key] = {"stringValue": value}
 			_:
 				fields[key] = {"stringValue": str(value)}
-	
+
 	return {"mapValue": {"fields": fields}}
+
 
 func _on_save_response(_result, response_code, _headers, body, http):
 	print("Save response code: ", response_code)
@@ -85,8 +93,9 @@ func _on_save_response(_result, response_code, _headers, body, http):
 	else:
 		var error_text = body.get_string_from_utf8()
 		print("Save failed: ", response_code, " - ", error_text)
-	
+
 	http.queue_free()
+
 
 func load_game_state():
 	var user_id = FirebaseAuth.current_user_id
@@ -94,25 +103,24 @@ func load_game_state():
 	if user_id.is_empty():
 		print("Cannot load: No user ID")
 		return
-	
+
 	if id_token.is_empty():
 		print("Cannot load: Not authenticated")
 		return
-	
+
 	var url = BASE_URL + "/users/" + user_id + "/game_state"
-	var headers = [
-		"Authorization: Bearer " + id_token
-	]
-	
+	var headers = ["Authorization: Bearer " + id_token]
+
 	print("Loading from: ", url)
-	
+
 	var http = HTTPRequest.new()
 	add_child(http)
 	http.request_completed.connect(_on_load_response.bind(http))
-	
+
 	var error = http.request(url, headers, HTTPClient.METHOD_GET)
 	if error != OK:
 		print("Load request failed: ", error)
+
 
 func _on_load_response(_result, response_code, _headers, body, http):
 	print("Load response code: ", response_code)
@@ -133,17 +141,19 @@ func _on_load_response(_result, response_code, _headers, body, http):
 		var error_text = body.get_string_from_utf8()
 		print("Load failed: ", response_code, " - ", error_text)
 		FirebaseManager.emit_signal("load_failed", error_text)
-	
+
 	http.queue_free()
+
 
 func _convert_from_firestore(fields: Dictionary) -> Dictionary:
 	var result = {}
-	
+
 	for key in fields.keys():
 		var field = fields[key]
 		result[key] = _firestore_value_to_godot(field)
-	
+
 	return result
+
 
 func _firestore_value_to_godot(field: Dictionary):
 	if field.has("stringValue"):
