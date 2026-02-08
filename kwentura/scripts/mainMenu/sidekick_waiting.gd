@@ -1,61 +1,105 @@
 extends Control
 
-@onready var status_label = $Label2
-@onready var cancel_button = $Button
+@onready var status_label: Label = $StatusLabel
+@onready var cancel_button: Button = $CancelButton
+
+@onready var detective_sprite: AnimatedSprite2D = $PlayerHost/AnimatedSprite2D
+@onready var detective_name_label: Label = $PlayerHost/DetectiveName
+@onready var sidekick_sprite: AnimatedSprite2D = $PlayerSidekick/AnimatedSprite2D
+@onready var sidekick_name_label: Label = $PlayerSidekick/SidekickName
+
 
 func _ready():
 	if status_label == null:
-		print("ERROR: Label2 not found!")
+		print("ERROR: StatusLabel not found!")
 		return
-	
+
 	# Connect signals
 	NetworkManager.game_started.connect(_on_game_started)
 	NetworkManager.connection_failed.connect(_on_connection_failed)
-	NetworkManager.peer_disconnected.connect(_on_host_disconnected)
-	
+	NetworkManager.partner_disconnected.connect(_on_host_disconnected)
+	NetworkManager.partner_connected.connect(_on_partner_connected)
+	NetworkManager.connection_established.connect(_on_connection_established)
+
 	cancel_button.pressed.connect(_on_cancel_pressed)
+
+	# Show both avatars immediately
+	# Detective (host) on the left
+	if detective_sprite:
+		detective_sprite.visible = true
+		detective_sprite.play("idle")
+	if detective_name_label:
+		detective_name_label.visible = true
 	
+	# Sidekick (self) on the right - always visible in lobby
+	if sidekick_sprite:
+		sidekick_sprite.visible = true
+		sidekick_sprite.play("idle")
+	if sidekick_name_label:
+		sidekick_name_label.visible = true
+
 	# Update status
 	status_label.text = "Connecting to Detective..."
-	
-	# Check if already connected
-	if NetworkManager.connection_state == NetworkManager.ConnectionState.CONNECTED:
-		_on_connected()
+	status_label.modulate = Color(1, 1, 0)  # Yellow while connecting
 
-func _on_connected():
-	status_label.text = "Connected! Waiting for Detective to start..."
+
+func _on_connection_established(peer_id: int):
+	print("[SidekickLobby] Connected! Peer ID: ", peer_id)
+	
+	status_label.text = "Connected!\nWaiting for Detective to start..."
 	status_label.modulate = Color(0, 1, 0)  # Green
 	
-	# Optional: Show "Connected" animation or icon
-	var tween = create_tween()
-	tween.tween_property(status_label, "scale", Vector2(1.1, 1.1), 0.3)
-	tween.tween_property(status_label, "scale", Vector2(1.0, 1.0), 0.3)
-
-func _on_game_started():
-	status_label.text = "Starting game..."
+	# Show sidekick avatar with fade in
+	if sidekick_sprite:
+		sidekick_sprite.visible = true
+		sidekick_sprite.play("idle")
+		sidekick_sprite.modulate = Color(1, 1, 1, 0)
+		var tween = create_tween()
+		tween.tween_property(sidekick_sprite, "modulate", Color(1, 1, 1, 1), 0.5)
 	
+	if sidekick_name_label:
+		sidekick_name_label.visible = true
+
+
+func _on_partner_connected(_data: Dictionary):
+	status_label.text = "Connected!\nWaiting for Detective to start..."
+	status_label.modulate = Color(0, 1, 0)
+
+
+func _on_game_started(_checkpoint: String = ""):
+	status_label.text = "Starting game..."
+
 	# Fade out
 	var tween = create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
 	await tween.finished
-	
+
 	# Go to opening cutscene
 	get_tree().change_scene_to_file("res://scenes/cutscenes/OpeningCutscene.tscn")
 
+
 func _on_connection_failed(error: String):
-	status_label.text = "Connection failed: " + error
-	status_label.modulate = Color(1, 0, 0)  # Red
+	var error_msg = "Cannot connect to game.\n\nPlease check:\n"
+	error_msg += "• Both devices on same Wi-Fi\n"
+	error_msg += "• Room code is correct\n"
+	error_msg += "• Detective is hosting\n"
+	error_msg += "\nError: " + error
 	
-	# Show retry button or auto-return
-	await get_tree().create_timer(2.0).timeout
+	status_label.text = error_msg
+	status_label.modulate = Color(1, 0, 0)
+
+	# Auto-return to menu
+	await get_tree().create_timer(5.0).timeout
 	get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
+
 
 func _on_host_disconnected():
 	status_label.text = "Detective disconnected!"
 	status_label.modulate = Color(1, 0, 0)
-	
+
 	await get_tree().create_timer(2.0).timeout
 	get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
+
 
 func _on_cancel_pressed():
 	NetworkManager.disconnect_network()
