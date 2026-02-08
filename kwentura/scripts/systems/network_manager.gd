@@ -103,6 +103,22 @@ func is_network_connected() -> bool:
 func is_partner_connected() -> bool:
 	return _partner_peer_id != 0 and (_state == ConnectionState.PLAYING or _state == ConnectionState.HOSTING)
 
+func resume_game() -> bool:
+	if _state != ConnectionState.PLAYING:
+		push_warning("Cannot resume: game is not in PLAYING state")
+		return false
+	
+	# Notify all peers that game has resumed
+	if _is_host:
+		_game_resumed_rpc.rpc()
+	else:
+		# Client requests resume, host will broadcast
+		_request_resume_rpc.rpc_id(1)
+	
+	emit_signal("game_resumed")
+	print("[Network] Game resumed")
+	return true
+
 #------------------------------------------------------------------------------
 # Godot Lifecycle
 #------------------------------------------------------------------------------
@@ -261,9 +277,9 @@ func join_game_with_code(invite_code: String) -> Dictionary:
 	
 	# Start discovery
 	print("[Network] Searching for game with code: ", target_code)
-	var discovery_started = start_discovery_for_code(target_code)
+	var discovery_active = start_discovery_for_code(target_code)
 	
-	if not discovery_started:
+	if not discovery_active:
 		return {"error": "Failed to start discovery", "success": false}
 	
 	# Wait for discovery with timeout
@@ -528,6 +544,17 @@ func _game_started_rpc(checkpoint: String):
 
 
 @rpc("any_peer", "reliable")
+func _request_resume_rpc():
+	if multiplayer.is_server():
+		_game_resumed_rpc.rpc()
+
+
+@rpc("authority", "reliable")
+func _game_resumed_rpc():
+	emit_signal("game_resumed")
+
+
+@rpc("any_peer", "reliable")
 func _rpc_sync_world_state(world_state: Dictionary):
 	_world_progress = world_state
 	GameState.puzzle_seeds = world_state.get("puzzle_seeds", {})
@@ -588,10 +615,10 @@ func _state_name(s: int) -> String:
 func _generate_invite_code() -> String:
 	var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 	var code = ""
-	var seed = hash(str(randi()) + str(Time.get_unix_time_from_system()))
+	var random_seed = hash(str(randi()) + str(Time.get_unix_time_from_system()))
 	for i in range(6):
-		seed = (seed * 9301 + 49297) % 233280
-		code += chars[seed % chars.length()]
+		random_seed = (random_seed * 9301 + 49297) % 233280
+		code += chars[random_seed % chars.length()]
 	return code
 
 
@@ -606,11 +633,11 @@ func _get_host_ip() -> String:
 
 
 func _get_device_name() -> String:
-	var name = OS.get_name() + " Player"
+	var player_name = OS.get_name() + " Player"
 	var env = OS.get_environment("COMPUTERNAME")
 	if not env.is_empty():
-		name = env
-	return name
+		player_name = env
+	return player_name
 
 
 func _cleanup():

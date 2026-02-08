@@ -59,8 +59,8 @@ func _setup_host_view():
 
 func _setup_sidekick_view():
 	# Sidekick setup
-	start_button.visible = false  # Sidekick can't start game
-	room_code_label.visible = false  # Sidekick doesn't see code
+	start_button.visible = false
+	room_code_label.visible = false
 
 	# Sidekick sees both characters
 	if sidekick_sprite:
@@ -110,7 +110,6 @@ func _on_partner_connected(data: Dictionary):
 			sidekick_name_label.visible = true
 			sidekick_name_label.text = partner_name
 
-
 	else:
 		# Sidekick sees they're connected
 		status_label.text = "Connected! Waiting for host to start..."
@@ -132,8 +131,6 @@ func _on_partner_disconnected(_data: Dictionary):
 
 		if sidekick_name_label:
 			sidekick_name_label.visible = false
-
-
 
 
 func _on_start_pressed() -> void:
@@ -162,6 +159,7 @@ func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
 
 
+# for testing of zones, change the file path
 func _on_game_started(_checkpoint: String = ""):
 	# Both players fade out and go to game
 	var tween = create_tween()
