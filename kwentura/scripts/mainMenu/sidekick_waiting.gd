@@ -20,6 +20,7 @@ func _ready():
 	NetworkManager.partner_disconnected.connect(_on_host_disconnected)
 	NetworkManager.partner_connected.connect(_on_partner_connected)
 	NetworkManager.connection_established.connect(_on_connection_established)
+	NetworkManager.connection_state_changed.connect(_on_connection_state_changed)
 
 	cancel_button.pressed.connect(_on_cancel_pressed)
 
@@ -94,11 +95,22 @@ func _on_connection_failed(error: String):
 
 
 func _on_host_disconnected():
-	status_label.text = "Detective disconnected!"
+	status_label.text = "Detective disconnected!\nReturning to menu..."
 	status_label.modulate = Color(1, 0, 0)
 
 	await get_tree().create_timer(2.0).timeout
 	get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
+
+
+func _on_connection_state_changed(new_state: int, _old_state: int):
+	# If we get disconnected while in lobby, return to main menu
+	# ConnectionState.DISCONNECTED = 0
+	if new_state == 0:
+		status_label.text = "Connection lost!\nReturning to menu..."
+		status_label.modulate = Color(1, 0, 0)
+		
+		await get_tree().create_timer(2.0).timeout
+		get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
 
 
 func _on_cancel_pressed():
