@@ -1,3 +1,5 @@
 [gd_scene format=3 uid="uid://c65bu18udl64v"]
 
-[node name="ForestHub" type="Node2D"]
+[node name="ForestHub" type="Control"]
+layout_mode = 3
+anchors_preset = 0
