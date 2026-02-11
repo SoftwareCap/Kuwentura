@@ -66,6 +66,7 @@ var collected_clues: Dictionary = {
 # Dynamic Puzzle Data - Resets on game over
 var puzzle_seeds: Dictionary = {}  # Stores random seeds for puzzle generation
 var attempt_count: int = 0  # Tracks failed attempts for difficulty scaling
+var _session_seed: int = 0  # Master seed from NetworkManager
 
 # Story Ledger (Sidekick's Book)
 var ledger_entries: Array = []
@@ -81,14 +82,28 @@ var max_nightfall_attempts: int = 3
 
 func _ready():
 	randomize()
-	_initialize_puzzle_seeds()
+	# Note: puzzle seeds are now initialized via set_session_seed()
+	# when NetworkManager establishes connection
 
 
 func _initialize_puzzle_seeds():
 	# Generate unique seeds for each zone's puzzles
 	# These regenerate if game resets (Bakunawa catches player)
+	# If no session seed set yet, use random (for offline/testing)
+	if _session_seed == 0:
+		_session_seed = randi()
+	
+	# Derive zone seeds deterministically from session seed
 	for zone in zones_status.keys():
-		puzzle_seeds[zone] = randi()
+		puzzle_seeds[zone] = hash(_session_seed + zone.hash())
+
+
+func set_session_seed(session_seed: int):
+	# Called by NetworkManager when joining/hosting
+	_session_seed = session_seed
+	_initialize_puzzle_seeds()
+	print("[GameState] Session seed set: ", _session_seed)
+	print("[GameState] Zone seeds derived: ", puzzle_seeds)
 
 
 func assign_role(role: Role):
@@ -155,8 +170,10 @@ func reset_game_after_nightfall():
 	for zone_id in collected_clues.keys():
 		collected_clues[zone_id].collected = false
 
-	# Regenerate puzzle seeds (numbers change, questions stay same)
+	# Generate NEW session seed for new puzzle variations
+	_session_seed = randi()
 	_initialize_puzzle_seeds()
+	print("[GameState] Nightfall reset - new session seed: ", _session_seed)
 
 	# Reset position
 	current_zone = "forest_hub"
@@ -170,7 +187,13 @@ func reset_game_after_nightfall():
 
 
 func get_puzzle_seed(zone_id: String) -> int:
-	return puzzle_seeds.get(zone_id, randi())
+	# Return cached seed or derive if not initialized
+	if puzzle_seeds.has(zone_id):
+		return puzzle_seeds[zone_id]
+	# Fallback: derive from session seed or generate random
+	if _session_seed != 0:
+		return hash(_session_seed + zone_id.hash())
+	return randi()
 
 
 func get_save_data() -> Dictionary:
@@ -184,6 +207,7 @@ func get_save_data() -> Dictionary:
 		"nightfall_attempts": nightfall_attempts,
 		"ledger_entries": ledger_entries,
 		"puzzle_seeds": puzzle_seeds,
+		"session_seed": _session_seed,
 		"timestamp": Time.get_unix_time_from_system()
 	}
 
@@ -207,5 +231,9 @@ func load_save_data(data: Dictionary):
 		ledger_entries = data.ledger_entries
 	if data.has("puzzle_seeds"):
 		puzzle_seeds = data.puzzle_seeds
+	if data.has("session_seed"):
+		_session_seed = data.session_seed
+		# Re-derive zone seeds from loaded session seed
+		_initialize_puzzle_seeds()
 
 	emit_signal("data_synced")

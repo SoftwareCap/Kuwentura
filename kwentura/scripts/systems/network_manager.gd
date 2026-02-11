@@ -179,6 +179,9 @@ func host_game() -> Dictionary:
 		"session_seed": _session_seed
 	}
 	
+	# Initialize GameState with session seed (derives zone seeds)
+	GameState.set_session_seed(_session_seed)
+	
 	# Start broadcasting presence
 	_start_broadcasting()
 	
@@ -522,7 +525,10 @@ func _assign_role_rpc(role: Role, invite_code: String, session_seed: int):
 	
 	GameState.assign_role(GameState.Role.SIDEKICK)
 	
-	print("[Network] Assigned role: SIDEKICK")
+	# Initialize GameState with synced session seed (derives zone seeds)
+	GameState.set_session_seed(_session_seed)
+	
+	print("[Network] Assigned role: SIDEKICK, session seed: ", _session_seed)
 	
 	emit_signal("connection_established", _local_peer_id)
 	emit_signal("role_assignment_received", Role.SIDEKICK)
@@ -557,7 +563,12 @@ func _game_resumed_rpc():
 @rpc("any_peer", "reliable")
 func _rpc_sync_world_state(world_state: Dictionary):
 	_world_progress = world_state
-	GameState.puzzle_seeds = world_state.get("puzzle_seeds", {})
+	# Sync session seed if provided (for nightfall resets)
+	var synced_seed = world_state.get("session_seed", 0)
+	if synced_seed != 0 and synced_seed != _session_seed:
+		_session_seed = synced_seed
+		GameState.set_session_seed(_session_seed)
+		print("[Network] Synced new session seed: ", _session_seed)
 
 
 @rpc("any_peer", "reliable")
