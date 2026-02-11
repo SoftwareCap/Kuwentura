@@ -20,27 +20,27 @@
 Session States:
 
 [NO SESSION] 
-     |
-     | Host creates world
-     | Client joins world
-     v
+	 |
+	 | Host creates world
+	 | Client joins world
+	 v
 [LOBBY] -------- Both players in menu, not playing
-     |
-     | Host clicks "Start Game"
-     v
+	 |
+	 | Host clicks "Start Game"
+	 v
 [ACTIVE] ------- Both playing, world loaded
-     |          Server validates all actions
-     |          Auto-save progress every 30s
-     |
-     +- Player disconnects --> [PAUSED] --> Auto-save --> [SESSION END]
-     |
-     +- Host clicks "End Game" --> Auto-save --> [SESSION END]
-                                              
+	 |          Server validates all actions
+	 |          Auto-save progress every 30s
+	 |
+	 +- Player disconnects --> [PAUSED] --> Auto-save --> [SESSION END]
+	 |
+	 +- Host clicks "End Game" --> Auto-save --> [SESSION END]
+											  
 [SESSION END]
-     |
-     | Both return to main menu
-     | Can rejoin later to continue world
-     v
+	 |
+	 | Both return to main menu
+	 | Can rejoin later to continue world
+	 v
 [NO SESSION]
 ```
 
@@ -101,24 +101,24 @@ Session States:
   
   // WORLD PROGRESS (accumulates over multiple sessions)
   "progress": {
-    "story_chapter": 3,
-    "zones_unlocked": ["forest", "cave", "village"],
-    "puzzles_solved": ["p1", "p2", "p5"],
-    "clues_found": ["c1", "c3", "c7"],
-    "story_flags": {
-      "met_villager": true,
-      "found_key": false
-    },
-    "inventory_shared": ["lantern", "map"],
-    "playtime_total_minutes": 450
+	"story_chapter": 3,
+	"zones_unlocked": ["forest", "cave", "village"],
+	"puzzles_solved": ["p1", "p2", "p5"],
+	"clues_found": ["c1", "c3", "c7"],
+	"story_flags": {
+	  "met_villager": true,
+	  "found_key": false
+	},
+	"inventory_shared": ["lantern", "map"],
+	"playtime_total_minutes": 450
   },
   
   // SESSION HISTORY
   "last_session": {
-    "ended_at": 1706659200,
-    "duration_minutes": 45,
-    "ended_by": "disconnect",
-    "checkpoint": "cave_entrance"
+	"ended_at": 1706659200,
+	"duration_minutes": 45,
+	"ended_by": "disconnect",
+	"checkpoint": "cave_entrance"
   },
   
   // STATUS
@@ -138,8 +138,8 @@ Session States:
   
   // CURRENT POSITIONS - Reset to checkpoint on rejoin
   "player_positions": {
-    "user_A": { "x": 100, "y": 200, "zone": "cave" },
-    "user_B": { "x": 105, "y": 200, "zone": "cave" }
+	"user_A": { "x": 100, "y": 200, "zone": "cave" },
+	"user_B": { "x": 105, "y": 200, "zone": "cave" }
   },
   
   // TEMPORARY STATES
@@ -240,15 +240,15 @@ Response: {
 // List my worlds for Continue menu
 Response: {
   "worlds": [
-    {
-      "world_id": "w_abc123",
-      "name": "The Missing Idol",
-      "role": "detective",
-      "partner_name": "PlayerB",
-      "partner_online": false,
-      "progress": { ... },
-      "can_continue": true
-    }
+	{
+	  "world_id": "w_abc123",
+	  "name": "The Missing Idol",
+	  "role": "detective",
+	  "partner_name": "PlayerB",
+	  "partner_online": false,
+	  "progress": { ... },
+	  "can_continue": true
+	}
   ]
 }
 
@@ -284,10 +284,10 @@ Response: {
 {
   "type": "session_joined",
   "data": {
-    "role": "detective",
-    "checkpoint": "cave_entrance",
-    "progress": { ... },
-    "partner_connected": true
+	"role": "detective",
+	"checkpoint": "cave_entrance",
+	"progress": { ... },
+	"partner_connected": true
   }
 }
 
@@ -299,9 +299,9 @@ Response: {
 {
   "type": "action_result",
   "data": {
-    "action": "collect_clue",
-    "result": { "success": true, "clue_id": "c8" },
-    "performed_by": "user_A"
+	"action": "collect_clue",
+	"result": { "success": true, "clue_id": "c8" },
+	"performed_by": "user_A"
   }
 }
 
@@ -316,80 +316,80 @@ Response: {
 ```javascript
 class GameSession {
   constructor(worldId, detectiveId, sidekickId) {
-    this.worldId = worldId;
-    this.detectiveId = detectiveId;
-    this.sidekickId = sidekickId;
-    this.connections = new Map(); // userId -> WebSocket
-    this.status = 'starting'; // starting, playing, paused, ended
-    this.progress = loadProgress(worldId);
+	this.worldId = worldId;
+	this.detectiveId = detectiveId;
+	this.sidekickId = sidekickId;
+	this.connections = new Map(); // userId -> WebSocket
+	this.status = 'starting'; // starting, playing, paused, ended
+	this.progress = loadProgress(worldId);
   }
   
   connect(userId, ws) {
-    // Verify user is part of this world
-    if (userId !== this.detectiveId && userId !== this.sidekickId) {
-      return false;
-    }
-    
-    this.connections.set(userId, ws);
-    
-    // If both connected, start playing
-    if (this.connections.size === 2) {
-      this.status = 'playing';
-      this.broadcast('game_resumed', { ... });
-    }
-    
-    return true;
+	// Verify user is part of this world
+	if (userId !== this.detectiveId && userId !== this.sidekickId) {
+	  return false;
+	}
+	
+	this.connections.set(userId, ws);
+	
+	// If both connected, start playing
+	if (this.connections.size === 2) {
+	  this.status = 'playing';
+	  this.broadcast('game_resumed', { ... });
+	}
+	
+	return true;
   }
   
   handleDisconnect(userId) {
-    this.connections.delete(userId);
-    this.status = 'paused';
-    this.saveProgress();
-    
-    // Notify partner
-    const partner = this.getPartner(userId);
-    if (partner) {
-      partner.send('partner_disconnected', { ... });
-    }
-    
-    // If no one left, end session
-    if (this.connections.size === 0) {
-      this.end();
-    }
+	this.connections.delete(userId);
+	this.status = 'paused';
+	this.saveProgress();
+	
+	// Notify partner
+	const partner = this.getPartner(userId);
+	if (partner) {
+	  partner.send('partner_disconnected', { ... });
+	}
+	
+	// If no one left, end session
+	if (this.connections.size === 0) {
+	  this.end();
+	}
   }
   
   handleAction(userId, action) {
-    if (this.status !== 'playing') return;
-    
-    // Validate action
-    if (!this.isValidAction(userId, action)) {
-      return;
-    }
-    
-    // Apply action
-    const result = this.applyAction(action);
-    
-    // Update progress
-    if (result.progressUpdate) {
-      Object.assign(this.progress, result.progressUpdate);
-      this.saveProgress();
-    }
-    
-    // Broadcast to both
-    this.broadcast('action_result', {
-      action: action.type,
-      result: result,
-      performed_by: userId
-    });
+	if (this.status !== 'playing') return;
+	
+	// Validate action
+	if (!this.isValidAction(userId, action)) {
+	  return;
+	}
+	
+	// Apply action
+	const result = this.applyAction(action);
+	
+	// Update progress
+	if (result.progressUpdate) {
+	  Object.assign(this.progress, result.progressUpdate);
+	  this.saveProgress();
+	}
+	
+	// Broadcast to both
+	this.broadcast('action_result', {
+	  action: action.type,
+	  result: result,
+	  performed_by: userId
+	});
   }
   
   saveProgress() {
-    saveToDatabase(this.worldId, this.progress);
+	saveToDatabase(this.worldId, this.progress);
   }
   
   end() {
-    this.saveProgress();
-    this.status = 'ended';
+	this.saveProgress();
+	this.status = 'ended';
   }
 }
 ```
@@ -403,13 +403,13 @@ class GameSession {
 extends Node
 
 enum ConnectionState { 
-    DISCONNECTED, 
-    CONNECTING,
-    IN_LOBBY,      # Both in menu, waiting to start
-    STARTING,      # Loading game
-    PLAYING,       # Game active
-    PAUSED,        # Partner disconnected
-    ENDED          # Session ended
+	DISCONNECTED, 
+	CONNECTING,
+	IN_LOBBY,      # Both in menu, waiting to start
+	STARTING,      # Loading game
+	PLAYING,       # Game active
+	PAUSED,        # Partner disconnected
+	ENDED          # Session ended
 }
 
 var state: ConnectionState = ConnectionState.DISCONNECTED
@@ -430,203 +430,203 @@ const API_BASE: String = "https://your-api.com"
 # ==================== WORLD CREATION (Host Only) ====================
 
 func create_world(world_name: String, my_role_pref: String) -> Dictionary:
-    var http = HTTPRequest.new()
-    add_child(http)
-    
-    var result = await http.request(
-        API_BASE + "/worlds",
-        ["Authorization: Bearer " + auth_token, "Content-Type: application/json"],
-        HTTPClient.METHOD_POST,
-        JSON.stringify({
-            "name": world_name,
-            "role": my_role_pref
-        })
-    )
-    
-    var response = JSON.parse_string(result[3].get_string_from_utf8())
-    
-    if response.has("error"):
-        return response
-    
-    current_world = response
-    my_role = response.role
-    state = ConnectionState.IN_LOBBY
-    
-    emit_signal("world_created", response)
-    return response
+	var http = HTTPRequest.new()
+	add_child(http)
+	
+	var result = await http.request(
+		API_BASE + "/worlds",
+		["Authorization: Bearer " + auth_token, "Content-Type: application/json"],
+		HTTPClient.METHOD_POST,
+		JSON.stringify({
+			"name": world_name,
+			"role": my_role_pref
+		})
+	)
+	
+	var response = JSON.parse_string(result[3].get_string_from_utf8())
+	
+	if response.has("error"):
+		return response
+	
+	current_world = response
+	my_role = response.role
+	state = ConnectionState.IN_LOBBY
+	
+	emit_signal("world_created", response)
+	return response
 
 # ==================== JOINING WORLD (Both) ====================
 
 func join_world(invite_code: String) -> Dictionary:
-    var http = HTTPRequest.new()
-    add_child(http)
-    
-    var result = await http.request(
-        API_BASE + "/worlds/" + invite_code + "/join",
-        ["Authorization: Bearer " + auth_token],
-        HTTPClient.METHOD_POST
-    )
-    
-    var response = JSON.parse_string(result[3].get_string_from_utf8())
-    
-    if response.has("error"):
-        return response
-    
-    current_world = response
-    my_role = response.role
-    state = ConnectionState.IN_LOBBY
-    
-    emit_signal("partner_joined", {
-        "user_id": response.partner_id,
-        "name": response.partner_name
-    })
-    
-    return response
+	var http = HTTPRequest.new()
+	add_child(http)
+	
+	var result = await http.request(
+		API_BASE + "/worlds/" + invite_code + "/join",
+		["Authorization: Bearer " + auth_token],
+		HTTPClient.METHOD_POST
+	)
+	
+	var response = JSON.parse_string(result[3].get_string_from_utf8())
+	
+	if response.has("error"):
+		return response
+	
+	current_world = response
+	my_role = response.role
+	state = ConnectionState.IN_LOBBY
+	
+	emit_signal("partner_joined", {
+		"user_id": response.partner_id,
+		"name": response.partner_name
+	})
+	
+	return response
 
 # ==================== STARTING GAME (Host Only) ====================
 
 func start_game() -> bool:
-    if my_role != "detective":
-        push_error("Only detective can start the game")
-        return false
-    
-    var http = HTTPRequest.new()
-    add_child(http)
-    
-    var result = await http.request(
-        API_BASE + "/worlds/" + current_world.world_id + "/start",
-        ["Authorization: Bearer " + auth_token],
-        HTTPClient.METHOD_POST
-    )
-    
-    var response = JSON.parse_string(result[3].get_string_from_utf8())
-    
-    if not response.has("ws_url"):
-        return false
-    
-    # Connect to game session
-    return await _connect_session(response.ws_url, response.checkpoint)
+	if my_role != "detective":
+		push_error("Only detective can start the game")
+		return false
+	
+	var http = HTTPRequest.new()
+	add_child(http)
+	
+	var result = await http.request(
+		API_BASE + "/worlds/" + current_world.world_id + "/start",
+		["Authorization: Bearer " + auth_token],
+		HTTPClient.METHOD_POST
+	)
+	
+	var response = JSON.parse_string(result[3].get_string_from_utf8())
+	
+	if not response.has("ws_url"):
+		return false
+	
+	# Connect to game session
+	return await _connect_session(response.ws_url, response.checkpoint)
 
 # ==================== GAME SESSION ====================
 
 func _connect_session(ws_url: String, checkpoint: String) -> bool:
-    ws = WebSocketPeer.new()
-    var err = ws.connect_to_url(ws_url + "?token=" + auth_token)
-    
-    if err != OK:
-        return false
-    
-    state = ConnectionState.STARTING
-    set_process(true)
-    
-    # Wait for connection
-    var timeout = 0.0
-    while ws.get_ready_state() == WebSocketPeer.STATE_CONNECTING:
-        ws.poll()
-        await get_tree().process_frame
-        timeout += get_process_delta_time()
-        if timeout > 10.0:
-            return false
-    
-    if ws.get_ready_state() != WebSocketPeer.STATE_OPEN:
-        return false
-    
-    return true
+	ws = WebSocketPeer.new()
+	var err = ws.connect_to_url(ws_url + "?token=" + auth_token)
+	
+	if err != OK:
+		return false
+	
+	state = ConnectionState.STARTING
+	set_process(true)
+	
+	# Wait for connection
+	var timeout = 0.0
+	while ws.get_ready_state() == WebSocketPeer.STATE_CONNECTING:
+		ws.poll()
+		await get_tree().process_frame
+		timeout += get_process_delta_time()
+		if timeout > 10.0:
+			return false
+	
+	if ws.get_ready_state() != WebSocketPeer.STATE_OPEN:
+		return false
+	
+	return true
 
 func _process(delta):
-    if not ws:
-        return
-    
-    ws.poll()
-    
-    while ws.get_available_packet_count() > 0:
-        var packet = ws.get_packet()
-        var message = JSON.parse_string(packet.get_string_from_utf8())
-        _handle_message(message)
+	if not ws:
+		return
+	
+	ws.poll()
+	
+	while ws.get_available_packet_count() > 0:
+		var packet = ws.get_packet()
+		var message = JSON.parse_string(packet.get_string_from_utf8())
+		_handle_message(message)
 
 func _handle_message(msg: Dictionary):
-    match msg.type:
-        "session_joined":
-            _on_session_joined(msg.data)
-            
-        "partner_connected":
-            if state == ConnectionState.IN_LOBBY:
-                emit_signal("partner_joined", msg.data)
-            elif state == ConnectionState.PAUSED:
-                emit_signal("game_resumed")
-                state = ConnectionState.PLAYING
-                
-        "partner_disconnected":
-            state = ConnectionState.PAUSED
-            emit_signal("game_paused", "partner_disconnected")
-            emit_signal("partner_disconnected")
-            
-        "game_resumed":
-            state = ConnectionState.PLAYING
-            GameState.load_progress(msg.data.progress)
-            emit_signal("game_resumed")
-            
-        "game_started":
-            state = ConnectionState.PLAYING
-            GameState.load_checkpoint(msg.data.checkpoint)
-            GameState.load_progress(msg.data.progress)
-            emit_signal("game_started", msg.data.checkpoint)
-            
-        "action_result":
-            _apply_action_result(msg.data)
-            
-        "progress_saved":
-            emit_signal("progress_saved")
-            
-        "session_ended":
-            state = ConnectionState.ENDED
-            emit_signal("session_ended", msg.data.final_progress)
-            _cleanup()
+	match msg.type:
+		"session_joined":
+			_on_session_joined(msg.data)
+			
+		"partner_connected":
+			if state == ConnectionState.IN_LOBBY:
+				emit_signal("partner_joined", msg.data)
+			elif state == ConnectionState.PAUSED:
+				emit_signal("game_resumed")
+				state = ConnectionState.PLAYING
+				
+		"partner_disconnected":
+			state = ConnectionState.PAUSED
+			emit_signal("game_paused", "partner_disconnected")
+			emit_signal("partner_disconnected")
+			
+		"game_resumed":
+			state = ConnectionState.PLAYING
+			GameState.load_progress(msg.data.progress)
+			emit_signal("game_resumed")
+			
+		"game_started":
+			state = ConnectionState.PLAYING
+			GameState.load_checkpoint(msg.data.checkpoint)
+			GameState.load_progress(msg.data.progress)
+			emit_signal("game_started", msg.data.checkpoint)
+			
+		"action_result":
+			_apply_action_result(msg.data)
+			
+		"progress_saved":
+			emit_signal("progress_saved")
+			
+		"session_ended":
+			state = ConnectionState.ENDED
+			emit_signal("session_ended", msg.data.final_progress)
+			_cleanup()
 
 func _on_session_joined(data: Dictionary):
-    my_role = data.role
-    
-    if data.partner_connected:
-        state = ConnectionState.PLAYING
-        GameState.load_checkpoint(data.checkpoint)
-        GameState.load_progress(data.progress)
-        emit_signal("game_started", data.checkpoint)
-    else:
-        state = ConnectionState.IN_LOBBY
-        show_waiting_for_partner()
+	my_role = data.role
+	
+	if data.partner_connected:
+		state = ConnectionState.PLAYING
+		GameState.load_checkpoint(data.checkpoint)
+		GameState.load_progress(data.progress)
+		emit_signal("game_started", data.checkpoint)
+	else:
+		state = ConnectionState.IN_LOBBY
+		show_waiting_for_partner()
 
 # ==================== GAME ACTIONS ====================
 
 func send_input(direction: Vector2):
-    if state != ConnectionState.PLAYING:
-        return
-    _send("player_input", { "direction": { "x": direction.x, "y": direction.y }})
+	if state != ConnectionState.PLAYING:
+		return
+	_send("player_input", { "direction": { "x": direction.x, "y": direction.y }})
 
 func perform_action(action_type: String, data: Dictionary = {}):
-    if state != ConnectionState.PLAYING:
-        return
-    _send("action", { "type": action_type, "data": data })
+	if state != ConnectionState.PLAYING:
+		return
+	_send("action", { "type": action_type, "data": data })
 
 func submit_puzzle(puzzle_id: String, solution: Dictionary):
-    if state != ConnectionState.PLAYING:
-        return
-    _send("puzzle_attempt", { "puzzle_id": puzzle_id, "solution": solution })
+	if state != ConnectionState.PLAYING:
+		return
+	_send("puzzle_attempt", { "puzzle_id": puzzle_id, "solution": solution })
 
 func _send(type: String, data: Dictionary):
-    if ws and ws.get_ready_state() == WebSocketPeer.STATE_OPEN:
-        ws.send_text(JSON.stringify({"type": type, "data": data}))
+	if ws and ws.get_ready_state() == WebSocketPeer.STATE_OPEN:
+		ws.send_text(JSON.stringify({"type": type, "data": data}))
 
 # ==================== SESSION MANAGEMENT ====================
 
 func leave_session():
-    if ws:
-        ws.close()
-    _cleanup()
+	if ws:
+		ws.close()
+	_cleanup()
 
 func _cleanup():
-    ws = null
-    state = ConnectionState.DISCONNECTED
-    set_process(false)
+	ws = null
+	state = ConnectionState.DISCONNECTED
+	set_process(false)
 ```
 
 ---

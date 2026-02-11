@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Kwentura"
+config/name="test - Kwentura"
 run/main_scene="uid://bv7e50npbvo5b"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
