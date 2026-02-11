@@ -131,6 +131,8 @@ func _on_partner_disconnected(_data: Dictionary):
 
 		if sidekick_name_label:
 			sidekick_name_label.visible = false
+		
+		print("[Lobby] Sidekick left the lobby")
 
 
 func _on_start_pressed() -> void:
@@ -155,8 +157,18 @@ func _on_start_pressed() -> void:
 
 
 func _on_back_pressed() -> void:
+	# Notify sidekick that host is leaving before disconnecting
+	if sidekick_connected:
+		_notify_sidekick_host_leaving.rpc()
+	
 	NetworkManager.disconnect_network()
 	get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
+
+
+@rpc("authority", "reliable")
+func _notify_sidekick_host_leaving():
+	# This RPC is received by the sidekick
+	pass
 
 
 # for testing of zones, change the file path
