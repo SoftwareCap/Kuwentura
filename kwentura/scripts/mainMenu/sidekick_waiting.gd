@@ -39,7 +39,7 @@ func _ready():
 		sidekick_name_label.visible = true
 
 	# Update status
-	status_label.text = "Connecting to Detective..."
+	status_label.text = "Connected to Host!"
 	status_label.modulate = Color(1, 1, 0)  # Yellow while connecting
 
 
