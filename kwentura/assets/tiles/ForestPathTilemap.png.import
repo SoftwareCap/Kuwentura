@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d06a48u2atl4o"
-path="res://.godot/imported/PinasHouse.png-82cacc646626792274fd76e177b5bc9f.ctex"
+uid="uid://fyaaxc6p5k04"
+path="res://.godot/imported/ForestPathTilemap.png-2b7d3a78b648bc9a9a65e711c5dbbf7a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/backgrounds/zones/PinasHouse.png"
-dest_files=["res://.godot/imported/PinasHouse.png-82cacc646626792274fd76e177b5bc9f.ctex"]
+source_file="res://assets/tiles/ForestPathTilemap.png"
+dest_files=["res://.godot/imported/ForestPathTilemap.png-2b7d3a78b648bc9a9a65e711c5dbbf7a.ctex"]
 
 [params]
 
