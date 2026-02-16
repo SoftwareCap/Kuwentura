@@ -9,18 +9,30 @@ var join_popup: PopupPanel = null
 
 
 func _ready():
-	# Connect button signals
-	host_button.pressed.connect(_on_host_pressed)
-	join_button.pressed.connect(_on_join_pressed)
-	exit_button.pressed.connect(_on_exit_pressed)
+	# Ensure main menu music is playing
+	MusicController.play_track(MusicController.MusicTrack.MAIN_MENU)
+	
+	# Connect button signals (check if not already connected)
+	if not host_button.pressed.is_connected(_on_host_pressed):
+		host_button.pressed.connect(_on_host_pressed)
+	if not join_button.pressed.is_connected(_on_join_pressed):
+		join_button.pressed.connect(_on_join_pressed)
+	if not exit_button.pressed.is_connected(_on_exit_pressed):
+		exit_button.pressed.connect(_on_exit_pressed)
 
-	# Connect to network signals
-	NetworkManager.connection_established.connect(_on_connection_established)
-	NetworkManager.connection_failed.connect(_on_connection_failed)
-	NetworkManager.player_joined.connect(_on_player_joined)
-	NetworkManager.role_assignment_received.connect(_on_role_assigned)
-	NetworkManager.room_code_generated.connect(_on_room_code_generated)
-	NetworkManager.game_started.connect(_on_game_started)
+	# Connect to network signals (check if not already connected)
+	if not NetworkManager.connection_established.is_connected(_on_connection_established):
+		NetworkManager.connection_established.connect(_on_connection_established)
+	if not NetworkManager.connection_failed.is_connected(_on_connection_failed):
+		NetworkManager.connection_failed.connect(_on_connection_failed)
+	if not NetworkManager.player_joined.is_connected(_on_player_joined):
+		NetworkManager.player_joined.connect(_on_player_joined)
+	if not NetworkManager.role_assignment_received.is_connected(_on_role_assigned):
+		NetworkManager.role_assignment_received.connect(_on_role_assigned)
+	if not NetworkManager.room_code_generated.is_connected(_on_room_code_generated):
+		NetworkManager.room_code_generated.connect(_on_room_code_generated)
+	if not NetworkManager.game_started.is_connected(_on_game_started):
+		NetworkManager.game_started.connect(_on_game_started)
 
 
 func _on_host_pressed() -> void:
@@ -130,7 +142,7 @@ func _on_role_assigned(role):
 func _on_game_started(checkpoint: String):
 	print("Game started at: ", checkpoint)
 	# Transition to game scene
-	get_tree().change_scene_to_file("res://scenes/cutscenes/OpeningCutscene.tscn")
+	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 
 
 func _on_exit_pressed() -> void:

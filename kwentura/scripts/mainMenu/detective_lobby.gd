@@ -4,6 +4,8 @@ extends Control
 @onready var back_button = $Button2
 @onready var room_code_label = $RoomCode
 @onready var status_label = $StatusLabel
+@onready var player_host = $PlayerHost
+@onready var player_sidekick = $PlayerSidekick
 @onready var detective_sprite = $PlayerHost/AnimatedSprite2D
 @onready var sidekick_sprite = $PlayerSidekick/AnimatedSprite2D
 @onready var sidekick_name_label = $PlayerSidekick/SidekickName
@@ -12,6 +14,16 @@ var sidekick_connected: bool = false
 
 
 func _ready():
+	# Ensure main menu music continues playing in lobby
+	MusicController.play_track(MusicController.MusicTrack.MAIN_MENU)
+	
+	# Disable physics for lobby avatars - they're just for display
+	# We keep animations but stop gravity/physics
+	if player_host:
+		player_host.set_physics_process(false)
+	if player_sidekick:
+		player_sidekick.set_physics_process(false)
+	
 	if detective_sprite:
 		detective_sprite.play("idle")
 	if sidekick_sprite:
@@ -23,12 +35,17 @@ func _ready():
 	else:
 		_setup_sidekick_view()
 
-	# Connect signals
-	NetworkManager.room_code_generated.connect(_on_room_code_generated)
-	NetworkManager.partner_connected.connect(_on_partner_connected)
-	NetworkManager.partner_disconnected.connect(_on_partner_disconnected)
-	NetworkManager.game_started.connect(_on_game_started)
-	NetworkManager.connection_failed.connect(_on_connection_failed)
+	# Connect signals (check if not already connected)
+	if not NetworkManager.room_code_generated.is_connected(_on_room_code_generated):
+		NetworkManager.room_code_generated.connect(_on_room_code_generated)
+	if not NetworkManager.partner_connected.is_connected(_on_partner_connected):
+		NetworkManager.partner_connected.connect(_on_partner_connected)
+	if not NetworkManager.partner_disconnected.is_connected(_on_partner_disconnected):
+		NetworkManager.partner_disconnected.connect(_on_partner_disconnected)
+	if not NetworkManager.game_started.is_connected(_on_game_started):
+		NetworkManager.game_started.connect(_on_game_started)
+	if not NetworkManager.connection_failed.is_connected(_on_connection_failed):
+		NetworkManager.connection_failed.connect(_on_connection_failed)
 
 
 func _setup_host_view():
@@ -177,7 +194,8 @@ func _on_game_started(_checkpoint: String = ""):
 	var tween = create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
 	await tween.finished
-	get_tree().change_scene_to_file("res://scenes/cutscenes/OpeningCutscene.tscn")
+	# change this file into res://scenes/cutscenes/OpeningCutscene.tscn
+	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 
 
 func _on_connection_failed(error: String):
