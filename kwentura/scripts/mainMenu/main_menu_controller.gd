@@ -259,7 +259,7 @@ func _on_game_started(checkpoint: String):
 	
 	# Transition to game scene
 	# Replace with your actual game scene path
-	var game_scene_path = "res://scenes/world/zones/forest_hub.tscn"
+	var game_scene_path = "res://scenes/world/hub/ForestHub.tscn"
 	get_tree().change_scene_to_file(game_scene_path)
 
 #------------------------------------------------------------------------------
