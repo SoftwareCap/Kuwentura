@@ -3,6 +3,8 @@ extends Control
 @onready var status_label: Label = $StatusLabel
 @onready var cancel_button: Button = $CancelButton
 
+@onready var player_host = $PlayerHost
+@onready var player_sidekick = $PlayerSidekick
 @onready var detective_sprite: AnimatedSprite2D = $PlayerHost/AnimatedSprite2D
 @onready var detective_name_label: Label = $PlayerHost/DetectiveName
 @onready var sidekick_sprite: AnimatedSprite2D = $PlayerSidekick/AnimatedSprite2D
@@ -10,19 +12,35 @@ extends Control
 
 
 func _ready():
+	# Ensure main menu music continues playing in lobby
+	MusicController.play_track(MusicController.MusicTrack.MAIN_MENU)
+	
 	if status_label == null:
 		print("ERROR: StatusLabel not found!")
 		return
+	
+	# Disable physics for lobby avatars - they're just for display
+	if player_host:
+		player_host.set_physics_process(false)
+	if player_sidekick:
+		player_sidekick.set_physics_process(false)
 
-	# Connect signals
-	NetworkManager.game_started.connect(_on_game_started)
-	NetworkManager.connection_failed.connect(_on_connection_failed)
-	NetworkManager.partner_disconnected.connect(_on_host_disconnected)
-	NetworkManager.partner_connected.connect(_on_partner_connected)
-	NetworkManager.connection_established.connect(_on_connection_established)
-	NetworkManager.connection_state_changed.connect(_on_connection_state_changed)
+	# Connect signals (check if not already connected)
+	if not NetworkManager.game_started.is_connected(_on_game_started):
+		NetworkManager.game_started.connect(_on_game_started)
+	if not NetworkManager.connection_failed.is_connected(_on_connection_failed):
+		NetworkManager.connection_failed.connect(_on_connection_failed)
+	if not NetworkManager.partner_disconnected.is_connected(_on_host_disconnected):
+		NetworkManager.partner_disconnected.connect(_on_host_disconnected)
+	if not NetworkManager.partner_connected.is_connected(_on_partner_connected):
+		NetworkManager.partner_connected.connect(_on_partner_connected)
+	if not NetworkManager.connection_established.is_connected(_on_connection_established):
+		NetworkManager.connection_established.connect(_on_connection_established)
+	if not NetworkManager.connection_state_changed.is_connected(_on_connection_state_changed):
+		NetworkManager.connection_state_changed.connect(_on_connection_state_changed)
 
-	cancel_button.pressed.connect(_on_cancel_pressed)
+	if not cancel_button.pressed.is_connected(_on_cancel_pressed):
+		cancel_button.pressed.connect(_on_cancel_pressed)
 
 	# Show both avatars immediately
 	# Detective (host) on the left
@@ -76,7 +94,8 @@ func _on_game_started(_checkpoint: String = ""):
 	await tween.finished
 
 	# Go to opening cutscene
-	get_tree().change_scene_to_file("res://scenes/cutscenes/OpeningCutscene.tscn")
+	# change this file into res://scenes/cutscenes/OpeningCutscene.tscn
+	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 
 
 func _on_connection_failed(error: String):
