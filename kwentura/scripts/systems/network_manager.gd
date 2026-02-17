@@ -103,6 +103,10 @@ func is_network_connected() -> bool:
 func is_partner_connected() -> bool:
 	return _partner_peer_id != 0 and (_state == ConnectionState.PLAYING or _state == ConnectionState.HOSTING)
 
+
+func get_partner_state(peer_id: int) -> Dictionary:
+	return _partner_states.get(str(peer_id), {})
+
 func resume_game() -> bool:
 	if _state != ConnectionState.PLAYING:
 		push_warning("Cannot resume: game is not in PLAYING state")
