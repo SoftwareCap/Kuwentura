@@ -6,19 +6,22 @@ extends CharacterBody2D
 @export var jump_force = -700
 @export var role: String = "Detective"
 @export var avatar_scale: Vector2 = Vector2(1.0, 1.0)
+@export var sync_interval: float = 0.05  # Sync 20 times per second
+
 var is_host = false
 
 var _is_in_lobby = false
+var _sync_timer: float = 0.0
+var _last_sent_position: Vector2 = Vector2.ZERO
+var _last_sent_animation: String = ""
+var _remote_animation: String = ""
 
 
 func _ready():
-	# Check if we're in a lobby (Control parent) or gameplay (Node2D parent)
 	_is_in_lobby = get_parent() is Control
 	
-	# Only apply avatar_scale if we're in a gameplay scene
 	if not _is_in_lobby:
 		scale = avatar_scale
-		# Configure floor detection for better stability
 		floor_snap_length = 32.0
 		floor_max_angle = deg_to_rad(60.0)
 		floor_block_on_wall = true
@@ -27,13 +30,17 @@ func _ready():
 
 
 func _process(_delta):
-	# In lobby, just update animation, no physics
 	if _is_in_lobby:
 		if velocity.x == 0:
 			sprite.play("idle")
 		else:
 			sprite.play("walk")
 			sprite.flip_h = velocity.x < 0
+		return
+	
+	# If not authority, update from network
+	if not is_multiplayer_authority():
+		_update_from_network_state()
 
 
 func _try_jump():
@@ -41,33 +48,76 @@ func _try_jump():
 		velocity.y = jump_force
 
 
+func _update_from_network_state():
+	var peer_id = int(str(name))
+	if peer_id == 0:
+		return
+	
+	var state = NetworkManager.get_partner_state(peer_id)
+	if state.is_empty():
+		return
+	
+	# Update position
+	var target_pos = state.get("position", global_position)
+	global_position = global_position.lerp(target_pos, 0.3)
+	
+	# Update facing
+	var facing = state.get("facing", "right")
+	sprite.flip_h = (facing == "left")
+	
+	# Update animation (only if changed to avoid resetting animation frame)
+	var anim = state.get("animation", "idle")
+	if anim != _remote_animation:
+		_remote_animation = anim
+		if anim == "walk":
+			sprite.play("walk")
+		else:
+			sprite.play("idle")
+
+
 func _physics_process(delta):
-	# Skip physics in lobby
 	if _is_in_lobby:
 		return
 
-	# Get movement input from TouchScreenButtons or keyboard
+	# Local movement input
 	var direction := Input.get_axis("game_left", "game_right")
 	velocity.x = direction * speed
 
-	# Apply gravity
+	# Gravity
 	if not is_on_floor():
 		velocity += get_gravity() * delta
-	else:
-		# On floor - keep Y velocity at 0 to prevent sliding
-		if velocity.y > 0:
-			velocity.y = 0
+	elif velocity.y > 0:
+		velocity.y = 0
 
-	# Handle jump input
+	# Jump
 	if Input.is_action_just_pressed("game_jump"):
 		_try_jump()
 
-	# Move and slide
 	move_and_slide()
-
-	# Animation
-	if velocity.x == 0:
-		sprite.play("idle")
-	else:
-		sprite.play("walk")
-		sprite.flip_h = velocity.x < 0
+	
+	# Only do local animation and sync if we have authority
+	if is_multiplayer_authority():
+		# Local animation
+		var current_anim = "idle"
+		if velocity.x == 0:
+			sprite.play("idle")
+		else:
+			sprite.play("walk")
+			sprite.flip_h = velocity.x < 0
+			current_anim = "walk"
+		
+		# Sync to network
+		_sync_timer += delta
+		var pos_changed = global_position.distance_to(_last_sent_position) > 0.5
+		var anim_changed = current_anim != _last_sent_animation
+		
+		if _sync_timer >= sync_interval and (pos_changed or anim_changed):
+			_sync_timer = 0.0
+			_last_sent_position = global_position
+			_last_sent_animation = current_anim
+			NetworkManager.sync_player_state.rpc(
+				global_position,
+				velocity,
+				"left" if sprite.flip_h else "right",
+				current_anim
+			)
