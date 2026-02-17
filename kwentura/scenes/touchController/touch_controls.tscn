@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://i2gpufiq0ql0"]
 
-[ext_resource type="Script" uid="uid://ci46mv31xj0do" path="res://scripts/touchController/touch_control.gd" id="1_sv83y"]
+[ext_resource type="Script" uid="uid://ci46mv31xj0do" path="res://scripts/touchController/touch_controller.gd" id="1_sv83y"]
 [ext_resource type="Texture2D" uid="uid://dp27skv21m3fj" path="res://assets/buttons/left.png" id="2_hcjou"]
 [ext_resource type="Texture2D" uid="uid://q26ui1ynvv34" path="res://assets/buttons/right.png" id="3_xwlpt"]
 [ext_resource type="Texture2D" uid="uid://bc40nmjniu431" path="res://assets/buttons/jump.png" id="4_dlgvd"]
@@ -27,7 +27,7 @@ passby_press = true
 action = "game_left"
 
 [node name="Right" type="TouchScreenButton" parent="."]
-position = Vector2(253, 893)
+position = Vector2(291, 893)
 scale = Vector2(0.5, 0.5)
 texture_normal = ExtResource("3_xwlpt")
 shape = SubResource("RectangleShape2D_right")
@@ -45,4 +45,4 @@ action = "game_jump"
 [node name="Settings" type="TouchScreenButton" parent="."]
 position = Vector2(1799, 28)
 scale = Vector2(0.3, 0.3)
-action = "ui_menu"
+action = "game_settings"

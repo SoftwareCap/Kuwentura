@@ -8,9 +8,6 @@ extends CharacterBody2D
 @export var avatar_scale: Vector2 = Vector2(1.0, 1.0)
 var is_host = false
 
-# Movement state
-var touch_left = false
-var touch_right = false
 var _is_in_lobby = false
 
 
@@ -39,55 +36,9 @@ func _process(_delta):
 			sprite.flip_h = velocity.x < 0
 
 
-func _input(event):
-	if event is InputEventScreenTouch:
-		handle_touch(event)
-	elif event is InputEventScreenDrag:
-		handle_drag(event)
-
-
-func handle_touch(event):
-	var screen_size = DisplayServer.screen_get_size()
-	var zone_height_threshold = screen_size.y * 0.8
-
-	if event.position.y <= zone_height_threshold:
-		return
-
-	if event.position.x < screen_size.x * 0.2:
-		touch_left = event.pressed
-	elif event.position.x > screen_size.x * 0.8:
-		touch_right = event.pressed
-
-	_update_velocity()
-
-
-func handle_drag(event):
-	var screen_size = DisplayServer.screen_get_size()
-	var zone_height_threshold = screen_size.y * 0.8
-
-	if event.position.y <= zone_height_threshold:
-		return
-
-	if event.position.x < screen_size.x * 0.2:
-		touch_left = true
-		touch_right = false
-	elif event.position.x > screen_size.x * 0.8:
-		touch_left = false
-		touch_right = true
-	else:
-		touch_left = false
-		touch_right = false
-
-	_update_velocity()
-
-
-func _update_velocity():
-	if touch_left and not touch_right:
-		velocity.x = -speed
-	elif touch_right and not touch_left:
-		velocity.x = speed
-	else:
-		velocity.x = 0
+func _try_jump():
+	if is_on_floor():
+		velocity.y = jump_force
 
 
 func _physics_process(delta):
@@ -95,20 +46,21 @@ func _physics_process(delta):
 	if _is_in_lobby:
 		return
 
-	var direction := Input.get_axis("ui_left", "ui_right")
-
-	# Apply keyboard input only if no touch is active
-	if direction != 0 and not touch_left and not touch_right:
-		velocity.x = direction * speed
-	elif not touch_left and not touch_right:
-		velocity.x = 0
+	# Get movement input from TouchScreenButtons or keyboard
+	var direction := Input.get_axis("game_left", "game_right")
+	velocity.x = direction * speed
 
 	# Apply gravity
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 	else:
 		# On floor - keep Y velocity at 0 to prevent sliding
-		velocity.y = 0
+		if velocity.y > 0:
+			velocity.y = 0
+
+	# Handle jump input
+	if Input.is_action_just_pressed("game_jump"):
+		_try_jump()
 
 	# Move and slide
 	move_and_slide()
