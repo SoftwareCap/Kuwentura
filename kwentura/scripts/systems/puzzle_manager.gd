@@ -78,7 +78,7 @@ func _generate_conversion_puzzle(zone_id: String, _seed: int) -> Dictionary:
 
 	# Pina's spirit height in cm
 	var spirit_height = rng.randi_range(100, 150)
-	var dali_value = spirit_height / 2  # 1 Dali = 2 cm
+	var dali_value = spirit_height / 2.0  # 1 Dali = 2 cm
 
 	return {
 		"zone_id": zone_id,
