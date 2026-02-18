@@ -131,29 +131,55 @@ func _process(delta: float) -> void:
     _velocity.x = lerp(_velocity.x, 0.0, FRICTION * delta)
 ```
 
+## Documentation Guidelines
+
+### Using Mermaid Diagrams
+
+When creating documentation (plans, architecture docs, flow charts), use **Mermaid diagrams** instead of ASCII art for better readability and maintainability:
+
+```markdown
+```mermaid
+flowchart TD
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Action 1]
+    B -->|No| D[Action 2]
+```
+```
+
+**Common diagram types:**
+- `flowchart TD/LR` - Flowcharts for processes and architectures
+- `sequenceDiagram` - For interaction/connection flows
+- `classDiagram` - For class hierarchies
+- `stateDiagram` - For state machines
+
 ## Key Architecture Concepts
 
 ### Two-System Architecture
 
 Kwentura uses **two independent systems** that work together:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      KWENTURA CLIENT                        │
-│  ┌─────────────────────┐    ┌──────────────────────────┐   │
-│  │   LAN MULTIPLAYER   │    │      CLOUD SAVE          │   │
-│  │   (NetworkManager)  │    │   (FirebaseManager)      │   │
-│  ├─────────────────────┤    ├──────────────────────────┤   │
-│  │ • ENet UDP (LAN)    │    │ • HTTP REST API          │   │
-│  │ • Port 17777/17778  │    │ • Firebase Auth          │   │
-│  │ • No internet req.  │    │ • Firestore Database     │   │
-│  │ • Real-time sync    │    │ • Optional, async        │   │
-│  └─────────────────────┘    └──────────────────────────┘   │
-│            │                           │                    │
-│            ▼                           ▼                    │
-│      Partner (2P)                Firebase Cloud             │
-│   Same Wi-Fi only               Internet required           │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Client["KWENTURA CLIENT"]
+        subgraph MP["LAN MULTIPLAYER"]
+            NM[NetworkManager]
+            ENet["ENet UDP (LAN)"]
+            Ports["Port 17777/17778"]
+            Offline["No internet req."]
+            Realtime["Real-time sync"]
+        end
+        
+        subgraph CS["CLOUD SAVE"]
+            FM[FirebaseManager]
+            HTTP["HTTP REST API"]
+            FBAuth["Firebase Auth"]
+            Firestore["Firestore Database"]
+            Async["Optional, async"]
+        end
+    end
+    
+    Partner["Partner (2P)<br/>Same Wi-Fi only"] <-->|UDP/ENet| MP
+    CS <-->|Internet required| Firebase["Firebase Cloud"]
 ```
 
 **Key Point**: Multiplayer works entirely offline. Firebase only activates when:
@@ -165,16 +191,21 @@ Kwentura uses **two independent systems** that work together:
 
 The game uses a **listen server** model ideal for 2-player co-op:
 
-```
-┌─────────────────┐                      ┌─────────────────┐
-│   DETECTIVE     │ ←──── Host/Server ─→ │    SIDEKICK     │
-│   (Player 1)    │    UDP/ENet (LAN)    │   (Player 2)    │
-│                 │                      │                 │
-│ • Authority     │                      │ • Pure Client   │
-│ • Validates     │                      │ • Sends inputs  │
-│   puzzles       │                      │ • Receives sync │
-│ • Syncs state   │                      │                 │
-└─────────────────┘                      └─────────────────┘
+```mermaid
+flowchart LR
+    subgraph Detective["DETECTIVE (Player 1)"]
+        DAuth["• Authority"]
+        DVal["• Validates puzzles"]
+        DSync["• Syncs state"]
+    end
+    
+    subgraph Sidekick["SIDEKICK (Player 2)"]
+        SClient["• Pure Client"]
+        SInput["• Sends inputs"]
+        SRecv["• Receives sync"]
+    end
+    
+    Detective <-->|"Host/Server<br/>UDP/ENet (LAN)"| Sidekick
 ```
 
 **Why this architecture?**
@@ -197,19 +228,21 @@ Automatic host discovery using UDP broadcast:
 
 ### Connection Flow
 
-```
-HOST (Detective)                    CLIENT (Sidekick)
-     │                                     │
-     │  1. Host Game                       │
-     │  2. Generate invite code            │
-     │  3. Start broadcast discovery  ───→ │
-     │                                     │  4. Discover hosts
-     │ ←─────────────────────────────────  │  5. Connect via ENet
-     │  6. Accept connection               │
-     │  7. Assign role (SIDEKICK)   ───→   │
-     │                                     │  8. Ready to play
-     │  9. Start Game (when ready)  ───→   │
-     │                                     │  10. Begin gameplay!
+```mermaid
+sequenceDiagram
+    participant H as HOST (Detective)
+    participant C as CLIENT (Sidekick)
+    
+    H->>H: 1. Host Game
+    H->>H: 2. Generate invite code
+    H->>C: 3. Start broadcast discovery
+    C->>C: 4. Discover hosts
+    C->>H: 5. Connect via ENet
+    H->>H: 6. Accept connection
+    H->>C: 7. Assign role (SIDEKICK)
+    C->>C: 8. Ready to play
+    H->>C: 9. Start Game (when ready)
+    C->>C: 10. Begin gameplay!
 ```
 
 ### Game State Structure
@@ -332,6 +365,7 @@ print("[Network] Debug: ", variable)
 - Scene files: `PascalCase.tscn`
 - Assets: descriptive with suffix (e.g., `button_start.png`)
 - Documentation: `UPPERCASE.md` for important docs
+- Plans: Create in `docs/plans/` with descriptive names
 
 ## Dependencies
 

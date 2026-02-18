@@ -108,8 +108,8 @@ func _on_partner_connected(data: Dictionary):
 		var partner_name = data.get("display_name", "Sidekick")
 		print("[Lobby] Sidekick joined: ", partner_name)
 
-		status_label.text = "Sidekick Connected!\nClick START when ready!"
-		status_label.modulate = Color(0, 1, 0)
+		status_label.text = "Sidekick connected!\nClick START when ready!"
+		status_label.modulate = Color(1, 1, 0)  # Yellow while connecting
 
 		# Show start button
 		start_button.visible = true
@@ -137,7 +137,7 @@ func _on_partner_disconnected(_data: Dictionary):
 	sidekick_connected = false
 
 	if NetworkManager.get_my_role() == "detective":
-		status_label.text = "Sidekick disconnected! Waiting..."
+		status_label.text = "Sidekick disconnected!\nWaiting..."
 		status_label.modulate = Color(1, 0, 0)
 
 		start_button.visible = false
