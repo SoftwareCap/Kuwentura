@@ -20,6 +20,8 @@ var _remote_animation: String = ""
 func _ready():
 	_is_in_lobby = get_parent() is Control
 	
+	z_index = 10 if is_multiplayer_authority() else 0
+	
 	if not _is_in_lobby:
 		scale = avatar_scale
 		floor_snap_length = 32.0

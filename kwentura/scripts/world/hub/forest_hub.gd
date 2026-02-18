@@ -15,7 +15,6 @@ extends Node2D
 
 # Track spawned players
 var _spawned_players: Dictionary = {}
-var _pending_spawns: Array[int] = []
 
 
 func _ready():
@@ -25,6 +24,12 @@ func _ready():
 	# Connect to network signals
 	NetworkManager.player_connected.connect(_on_player_connected)
 	NetworkManager.player_disconnected.connect(_on_player_disconnected)
+	
+	# Connect to spawn signals from NetworkManager (RPCs now handled there)
+	if not NetworkManager.spawn_player_requested.is_connected(_on_spawn_player_requested):
+		NetworkManager.spawn_player_requested.connect(_on_spawn_player_requested)
+	if not NetworkManager.despawn_player_requested.is_connected(_on_despawn_player_requested):
+		NetworkManager.despawn_player_requested.connect(_on_despawn_player_requested)
 	
 	# Spawn local player
 	_spawn_local_player()
@@ -43,12 +48,22 @@ func _ready():
 			if peer_id != multiplayer.get_unique_id():
 				# Tell this peer to spawn the host (ID 1)
 				print("[ForestHub] Telling peer ", peer_id, " to spawn host")
-				_rpc_spawn_player.rpc_id(peer_id, 1, true)
+				NetworkManager.request_spawn_player(peer_id, 1, true)
 				# Tell all other peers to spawn this peer
 				for other_peer in multiplayer.get_peers():
 					if other_peer != peer_id and other_peer != multiplayer.get_unique_id():
 						print("[ForestHub] Telling peer ", other_peer, " to spawn peer ", peer_id)
-						_rpc_spawn_player.rpc_id(other_peer, peer_id, false)
+						NetworkManager.request_spawn_player(other_peer, peer_id, false)
+
+
+func _on_spawn_player_requested(peer_id: int, is_detective: bool):
+	print("[ForestHub] Spawn requested via NetworkManager: peer_id=", peer_id, " is_detective=", is_detective)
+	_rpc_spawn_player(peer_id, is_detective)
+
+
+func _on_despawn_player_requested(peer_id: int):
+	print("[ForestHub] Despawn requested via NetworkManager: peer_id=", peer_id)
+	_rpc_despawn_player(peer_id)
 
 
 func _spawn_local_player():
@@ -117,13 +132,13 @@ func _on_player_connected(peer_id: int) -> void:
 		
 		# Tell the new peer to spawn the host (ID 1)
 		print("[ForestHub] Telling peer ", peer_id, " to spawn host (ID 1)")
-		_rpc_spawn_player.rpc_id(peer_id, 1, true)
+		NetworkManager.request_spawn_player(peer_id, 1, true)
 		
 		# Tell all existing peers (including server) about the new player
 		for other_peer in multiplayer.get_peers():
 			if other_peer != peer_id:
 				print("[ForestHub] Telling peer ", other_peer, " to spawn new player ", peer_id)
-				_rpc_spawn_player.rpc_id(other_peer, peer_id, false)
+				NetworkManager.request_spawn_player(other_peer, peer_id, false)
 
 
 func _on_player_disconnected(peer_id: int) -> void:
@@ -137,10 +152,10 @@ func _on_player_disconnected(peer_id: int) -> void:
 	
 	# Tell all clients to remove this player
 	if multiplayer.is_server():
-		_rpc_despawn_player.rpc(peer_id)
+		NetworkManager.request_despawn_player(peer_id)
 
 
-@rpc("authority", "reliable")
+## Spawn player via NetworkManager signal (not direct RPC)
 func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 	print("[ForestHub] === RPC SPAWN peer_id=", peer_id, " is_detective=", is_detective_role, " my_id=", multiplayer.get_unique_id())
 	
@@ -183,7 +198,6 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 	print("[ForestHub] === RPC SPAWNED ", player.role, " (ID: ", peer_id, ") at ", player.global_position, " visible=", player.visible)
 
 
-@rpc("authority", "reliable")
 func _rpc_despawn_player(peer_id: int) -> void:
 	if peer_id == multiplayer.get_unique_id():
 		return
@@ -198,6 +212,10 @@ func _exit_tree():
 		NetworkManager.player_connected.disconnect(_on_player_connected)
 	if NetworkManager.player_disconnected.is_connected(_on_player_disconnected):
 		NetworkManager.player_disconnected.disconnect(_on_player_disconnected)
+	if NetworkManager.spawn_player_requested.is_connected(_on_spawn_player_requested):
+		NetworkManager.spawn_player_requested.disconnect(_on_spawn_player_requested)
+	if NetworkManager.despawn_player_requested.is_connected(_on_despawn_player_requested):
+		NetworkManager.despawn_player_requested.disconnect(_on_despawn_player_requested)
 
 
 func _input(event):

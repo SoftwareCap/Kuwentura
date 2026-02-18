@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=4 uid="uid://c65bu18udl64v"]
+[gd_scene load_steps=12 format=4 uid="uid://c65bu18udl64v"]
 
 [ext_resource type="Texture2D" uid="uid://k60h4yhhde0x" path="res://assets/backgrounds/forest2.png" id="2_87r7r"]
 [ext_resource type="Texture2D" uid="uid://d06a48u2atl4o" path="res://assets/sprites/places/PinasHouse.png" id="2_anhpr"]
@@ -7,6 +7,9 @@
 [ext_resource type="Texture2D" uid="uid://cvgl2uufuo2gg" path="res://assets/sprites/places/StorageHut.png" id="6_dyw7g"]
 [ext_resource type="Script" uid="uid://dhq7o8y147g37" path="res://scripts/world/hub/forest_hub.gd" id="6_forest_hub"]
 [ext_resource type="PackedScene" uid="uid://i2gpufiq0ql0" path="res://scenes/touchController/touch_controls.tscn" id="7_6nmbo"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6nmbo"]
+size = Vector2(0.9499998, 20)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_87r7r"]
 size = Vector2(107.5, 241)
@@ -815,6 +818,15 @@ sources/0 = SubResource("TileSetAtlasSource_ggw0p")
 [node name="ForestHub" type="Node2D"]
 script = ExtResource("6_forest_hub")
 ground_y = 650.0
+
+[node name="Boundaries" type="Node2D" parent="."]
+
+[node name="LeftWall" type="StaticBody2D" parent="Boundaries"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Boundaries/LeftWall"]
+position = Vector2(4.9999986, 542)
+scale = Vector2(100, 100)
+shape = SubResource("RectangleShape2D_6nmbo")
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
 
