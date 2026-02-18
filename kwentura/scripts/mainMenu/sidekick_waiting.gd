@@ -113,7 +113,7 @@ func _on_connection_failed(error: String):
 	get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
 
 
-func _on_host_disconnected():
+func _on_host_disconnected(_data: Dictionary = {}):
 	status_label.text = "Detective disconnected!\nReturning to menu..."
 	status_label.modulate = Color(1, 0, 0)
 

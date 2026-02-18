@@ -42,6 +42,8 @@ signal game_resumed
 signal host_discovered(host_info: Dictionary)
 signal discovery_started
 signal discovery_stopped
+signal spawn_player_requested(peer_id: int, is_detective: bool)
+signal despawn_player_requested(peer_id: int)
 signal role_assignment_received(role: int)
 signal room_code_generated(code: String)
 
@@ -102,6 +104,10 @@ func is_network_connected() -> bool:
 
 func is_partner_connected() -> bool:
 	return _partner_peer_id != 0 and (_state == ConnectionState.PLAYING or _state == ConnectionState.HOSTING)
+
+
+func get_partner_state(peer_id: int) -> Dictionary:
+	return _partner_states.get(str(peer_id), {})
 
 func resume_game() -> bool:
 	if _state != ConnectionState.PLAYING:
@@ -598,6 +604,31 @@ func sync_player_state(position: Vector2, velocity: Vector2, facing: String, ani
 @rpc("authority", "reliable")
 func trigger_clue_collection(zone_id: String, _clue_data: Dictionary):
 	GameState.collect_clue(zone_id)
+
+
+#------------------------------------------------------------------------------
+# Player Spawn/Despawn RPCs (moved here from ForestHub to ensure node exists)
+#------------------------------------------------------------------------------
+
+@rpc("authority", "reliable")
+func _rpc_request_spawn_player(peer_id: int, is_detective_role: bool):
+	# Emit signal that ForestHub (or any scene) can connect to
+	emit_signal("spawn_player_requested", peer_id, is_detective_role)
+
+
+@rpc("authority", "reliable")
+func _rpc_request_despawn_player(peer_id: int):
+	emit_signal("despawn_player_requested", peer_id)
+
+
+## Call this to request a player spawn on a specific peer
+func request_spawn_player(target_peer: int, peer_id: int, is_detective: bool):
+	_rpc_request_spawn_player.rpc_id(target_peer, peer_id, is_detective)
+
+
+## Call this to request player despawn on all peers
+func request_despawn_player(peer_id: int):
+	_rpc_request_despawn_player.rpc(peer_id)
 
 #------------------------------------------------------------------------------
 # Helpers

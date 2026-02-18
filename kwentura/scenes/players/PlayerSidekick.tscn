@@ -1,6 +1,7 @@
-[gd_scene load_steps=22 format=3 uid="uid://udt37i3bt31c"]
+[gd_scene load_steps=23 format=3 uid="uid://udt37i3bt31c"]
 
 [ext_resource type="Texture2D" uid="uid://cpcwvvoj4wtab" path="res://assets/sprites/players/Sidekick/Sidekick_idle.png" id="1_ig6if"]
+[ext_resource type="Script" uid="uid://d5emekkjkv5l" path="res://scripts/players/player_sidekick.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://cskqffd4p1vuw" path="res://assets/sprites/players/Sidekick/Sidekick_walk.png" id="2_djqfg"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_7461x"]
@@ -136,8 +137,12 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_coail"]
+size = Vector2(32, 32)
 
 [node name="PlayerSidekick" type="CharacterBody2D"]
+collision_layer = 2
+floor_constant_speed = true
+script = ExtResource("1_script")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_wm3to")
@@ -145,3 +150,10 @@ animation = &"walk"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_coail")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+limit_left = 0
+limit_top = 0
+limit_right = 8000
+limit_bottom = 1080
+position_smoothing_enabled = true

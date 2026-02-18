@@ -4,74 +4,122 @@ extends CharacterBody2D
 
 @export var speed = 350
 @export var jump_force = -700
+@export var role: String = "Detective"
+@export var avatar_scale: Vector2 = Vector2(1.0, 1.0)
+@export var sync_interval: float = 0.05  # Sync 20 times per second
+
 var is_host = false
+
+var _is_in_lobby = false
+var _sync_timer: float = 0.0
+var _last_sent_position: Vector2 = Vector2.ZERO
+var _last_sent_animation: String = ""
+var _remote_animation: String = ""
+
+
+func _ready():
+	_is_in_lobby = get_parent() is Control
+	
+	z_index = 10 if is_multiplayer_authority() else 0
+	
+	if not _is_in_lobby:
+		scale = avatar_scale
+		floor_snap_length = 32.0
+		floor_max_angle = deg_to_rad(60.0)
+		floor_block_on_wall = true
+		floor_stop_on_slope = true
+		motion_mode = MOTION_MODE_GROUNDED
 
 
 func _process(_delta):
-	# Movement logic (handled by _input)
-	move_and_slide()
-
-
-var touch_left = false
-var touch_right = false
-
-
-func _input(event):
-	if event is InputEventScreenTouch:
-		handle_touch(event)
-	elif event is InputEventScreenDrag:
-		handle_touch(event)  # Dragging should also control movement
-
-
-func handle_touch(event):
-	var screen_size = DisplayServer.screen_get_size()
-	var zone_height_threshold = screen_size.y * 0.8
-
-	if event.position.y <= zone_height_threshold:
-		return  # Not in control zone
-
-	if event.position.x < screen_size.x * 0.2:
-		touch_left = event.pressed
-	elif event.position.x > screen_size.x * 0.8:
-		touch_right = event.pressed
-
-	# Update velocity based on touch state
-	if touch_left and not touch_right:
-		velocity.x = -speed
-	elif touch_right and not touch_left:
-		velocity.x = speed
-	else:
-		velocity.x = 0
-
-
-func _physics_process(delta):
-	# Skip physics if we're in a Control-based scene (like lobby/menu)
-	# This prevents the character from falling when there's no floor
-	if get_parent() is Control:
-		# Still update animation based on any residual velocity
+	if _is_in_lobby:
 		if velocity.x == 0:
 			sprite.play("idle")
 		else:
 			sprite.play("walk")
 			sprite.flip_h = velocity.x < 0
 		return
+	
+	# If not authority, update from network
+	if not is_multiplayer_authority():
+		_update_from_network_state()
 
-	var direction := Input.get_axis("ui_left", "ui_right")
 
-	# Only apply keyboard if no touch is active (or use a flag system)
-	if direction != 0:
-		velocity.x = direction * speed
-	# else: touch controls handle velocity.x
+func _try_jump():
+	if is_on_floor():
+		velocity.y = jump_force
+
+
+func _update_from_network_state():
+	var peer_id = int(str(name))
+	if peer_id == 0:
+		return
+	
+	var state = NetworkManager.get_partner_state(peer_id)
+	if state.is_empty():
+		return
+	
+	# Update position
+	var target_pos = state.get("position", global_position)
+	global_position = global_position.lerp(target_pos, 0.3)
+	
+	# Update facing
+	var facing = state.get("facing", "right")
+	sprite.flip_h = (facing == "left")
+	
+	# Update animation (only if changed to avoid resetting animation frame)
+	var anim = state.get("animation", "idle")
+	if anim != _remote_animation:
+		_remote_animation = anim
+		if anim == "walk":
+			sprite.play("walk")
+		else:
+			sprite.play("idle")
+
+
+func _physics_process(delta):
+	if _is_in_lobby:
+		return
+
+	# Local movement input
+	var direction := Input.get_axis("game_left", "game_right")
+	velocity.x = direction * speed
 
 	# Gravity
 	if not is_on_floor():
 		velocity += get_gravity() * delta
+	elif velocity.y > 0:
+		velocity.y = 0
+
+	# Jump
+	if Input.is_action_just_pressed("game_jump"):
+		_try_jump()
 
 	move_and_slide()
-
-	# Animation
-	if velocity.x == 0:
-		sprite.play("idle")
-	else:
-		sprite.play("walk")
-		sprite.flip_h = velocity.x < 0
+	
+	# Only do local animation and sync if we have authority
+	if is_multiplayer_authority():
+		# Local animation
+		var current_anim = "idle"
+		if velocity.x == 0:
+			sprite.play("idle")
+		else:
+			sprite.play("walk")
+			sprite.flip_h = velocity.x < 0
+			current_anim = "walk"
+		
+		# Sync to network
+		_sync_timer += delta
+		var pos_changed = global_position.distance_to(_last_sent_position) > 0.5
+		var anim_changed = current_anim != _last_sent_animation
+		
+		if _sync_timer >= sync_interval and (pos_changed or anim_changed):
+			_sync_timer = 0.0
+			_last_sent_position = global_position
+			_last_sent_animation = current_anim
+			NetworkManager.sync_player_state.rpc(
+				global_position,
+				velocity,
+				"left" if sprite.flip_h else "right",
+				current_anim
+			)

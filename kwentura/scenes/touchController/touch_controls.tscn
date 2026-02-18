@@ -1,0 +1,48 @@
+[gd_scene load_steps=8 format=3 uid="uid://i2gpufiq0ql0"]
+
+[ext_resource type="Script" uid="uid://ci46mv31xj0do" path="res://scripts/touchController/touch_controller.gd" id="1_sv83y"]
+[ext_resource type="Texture2D" uid="uid://dp27skv21m3fj" path="res://assets/buttons/left.png" id="2_hcjou"]
+[ext_resource type="Texture2D" uid="uid://q26ui1ynvv34" path="res://assets/buttons/right.png" id="3_xwlpt"]
+[ext_resource type="Texture2D" uid="uid://bc40nmjniu431" path="res://assets/buttons/jump.png" id="4_dlgvd"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_left"]
+size = Vector2(128, 128)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_right"]
+size = Vector2(128, 128)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jump"]
+size = Vector2(128, 128)
+
+[node name="TouchControls" type="CanvasLayer"]
+layer = 100
+script = ExtResource("1_sv83y")
+
+[node name="Left" type="TouchScreenButton" parent="."]
+position = Vector2(53, 893)
+scale = Vector2(0.5, 0.5)
+texture_normal = ExtResource("2_hcjou")
+shape = SubResource("RectangleShape2D_left")
+passby_press = true
+action = "game_left"
+
+[node name="Right" type="TouchScreenButton" parent="."]
+position = Vector2(291, 893)
+scale = Vector2(0.5, 0.5)
+texture_normal = ExtResource("3_xwlpt")
+shape = SubResource("RectangleShape2D_right")
+passby_press = true
+action = "game_right"
+
+[node name="Jump" type="TouchScreenButton" parent="."]
+position = Vector2(1695.0001, 893)
+scale = Vector2(0.5, 0.5)
+texture_normal = ExtResource("4_dlgvd")
+shape = SubResource("RectangleShape2D_jump")
+passby_press = true
+action = "game_jump"
+
+[node name="Settings" type="TouchScreenButton" parent="."]
+position = Vector2(1799, 28)
+scale = Vector2(0.3, 0.3)
+action = "game_settings"
