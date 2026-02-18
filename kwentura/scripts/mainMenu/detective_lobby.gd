@@ -153,19 +153,25 @@ func _on_partner_disconnected(_data: Dictionary):
 
 
 func _on_start_pressed() -> void:
+	print("[Lobby] Start button pressed!")
+	print("[Lobby] My role: ", NetworkManager.get_my_role())
+	print("[Lobby] Sidekick connected: ", sidekick_connected)
+	
 	if NetworkManager.get_my_role() != "detective":
+		print("[Lobby] ERROR: Not detective, cannot start")
 		return  # Only host can start
 
 	if not sidekick_connected:
-		print("Waiting for sidekick to connect...")
+		print("[Lobby] ERROR: Waiting for sidekick to connect...")
 		return
 
-	print("Starting game session...")
+	print("[Lobby] Calling NetworkManager.start_game()...")
 	start_button.disabled = true
 	status_label.text = "Starting game..."
 
 	# Start the session
 	var success = NetworkManager.start_game()
+	print("[Lobby] start_game() returned: ", success)
 	if not success:
 		status_label.text = "Failed to start game"
 		start_button.disabled = false
@@ -190,12 +196,18 @@ func _notify_sidekick_host_leaving():
 
 # for testing of zones, change the file path
 func _on_game_started(_checkpoint: String = ""):
+	print("[Lobby] _on_game_started called! Changing to ForestHub...")
 	# Both players fade out and go to game
 	var tween = create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
 	await tween.finished
+	print("[Lobby] Fade complete, changing scene now!")
 	# change this file into res://scenes/cutscenes/OpeningCutscene.tscn
-	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
+	var err = get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
+	if err != OK:
+		print("[Lobby] ERROR: Failed to change scene! Error code: ", err)
+	else:
+		print("[Lobby] Scene change initiated successfully")
 
 
 func _on_connection_failed(error: String):
