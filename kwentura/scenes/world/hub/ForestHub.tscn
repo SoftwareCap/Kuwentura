@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://i2gpufiq0ql0" path="res://scenes/touchController/touch_controls.tscn" id="7_6nmbo"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6nmbo"]
-size = Vector2(0.9499998, 20)
+size = Vector2(1.0549998, 20)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_87r7r"]
 size = Vector2(206, 361)
@@ -824,7 +824,7 @@ ground_y = 650.0
 [node name="LeftWall" type="StaticBody2D" parent="Boundaries"]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Boundaries/LeftWall"]
-position = Vector2(4.9999986, 542)
+position = Vector2(10.250002, 542)
 scale = Vector2(100, 100)
 shape = SubResource("RectangleShape2D_6nmbo")
 

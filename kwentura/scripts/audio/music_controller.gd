@@ -2,6 +2,7 @@ extends Node
 
 enum MusicTrack {
 	MAIN_MENU,      # Menu + Lobby music
+	FOREST_HUB,     # Forest hub exploration
 	GAMEPLAY,       # In-game exploration
 	CLUE_FOUND,     # Short jingle (non-looping)
 	PUZZLE,         # Puzzle solving tension
@@ -53,6 +54,15 @@ func _load_tracks() -> void:
 		_tracks[MusicTrack.MAIN_MENU] = main_menu_stream
 	else:
 		push_warning("[MusicController] Failed to load MainMenuBG.mp3")
+	
+	# Forest Hub BGM
+	var forest_stream := load("res://audios/ForestBG.mp3")
+	if forest_stream:
+		if forest_stream is AudioStreamMP3 or forest_stream is AudioStreamOggVorbis:
+			forest_stream.loop = true
+		_tracks[MusicTrack.FOREST_HUB] = forest_stream
+	else:
+		push_warning("[MusicController] Failed to load ForestBG.mp3")
 
 func play_track(track: MusicTrack, fade_duration: float = 0.5) -> void:
 	"""Play a music track with optional fade transition."""

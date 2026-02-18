@@ -18,6 +18,9 @@ var _spawned_players: Dictionary = {}
 
 
 func _ready():
+	# Play forest hub music
+	MusicController.play_track(MusicController.MusicTrack.FOREST_HUB)
+	
 	print("[ForestHub] Initializing... Multiplayer ID: ", multiplayer.get_unique_id())
 	print("[ForestHub] Peers: ", multiplayer.get_peers())
 	
