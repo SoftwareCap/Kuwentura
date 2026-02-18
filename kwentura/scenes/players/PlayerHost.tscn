@@ -127,7 +127,6 @@ size = Vector2(32, 32)
 
 [node name="PlayerHost" type="CharacterBody2D"]
 collision_layer = 2
-floor_stop_on_slope = true
 floor_constant_speed = true
 script = ExtResource("1_f4ao3")
 
@@ -139,3 +138,10 @@ frame_progress = 0.28283346
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_46ybd")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+limit_left = 0
+limit_top = 0
+limit_right = 8000
+limit_bottom = 1080
+position_smoothing_enabled = true
