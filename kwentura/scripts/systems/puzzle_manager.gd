@@ -332,33 +332,40 @@ func get_puzzle_for_zone(zone_id: String) -> Dictionary:
 	var variations = zone_data.variations
 	
 	# Get seed from GameState (derived from session seed)
-	var seed = GameState.get_puzzle_seed(zone_id)
+	var puzzle_seed = GameState.get_puzzle_seed(zone_id)
 	
 	# Select variation based on seed
 	var rng = RandomNumberGenerator.new()
-	rng.seed = seed
+	rng.seed = puzzle_seed
 	var variation_index = rng.randi_range(0, variations.size() - 1)
 	var selected = variations[variation_index]
 	
+	# Extract solution values from selected variation
+	var solution = selected.solution
+	var x = solution.x
+	var y = solution.y
+	var base = solution.z
+	
+	# Calculate sum and diff from the equations (for reference)
+	var _sum = x + y
+	var _diff = y - base
+	
 	return {
 		"zone_id": zone_id,
-		"type": "algebra",
+		"type": zone_data.type,
 		"variables": {"x": x, "y": y, "z": base},
-		"equations": ["x + y = %d" % sum, "y - z = %d" % diff, "z = %d" % base],
-		"solution": {"x": x, "y": y, "z": base},
-		"answer_format": "Ladle is x = %d" % x,
-		"host_view": {"symbols": "x=Ladle, y=Pan, z=Pot", "values_visible": false},
-		"sidekick_view":
-		{
-			"equations": ["□ + □ = %d" % sum, "□ - □ = %d" % diff, "□ = %d" % base],
-			"messy_kitchen": true
-		}
+		"equations": selected.equations,
+		"solution": solution,
+		"answer_format": selected.answer_format,
+		"symbol_map": selected.symbol_map,
+		"host_view": zone_data.host_view,
+		"sidekick_view": zone_data.sidekick_view
 	}
 
 
 func _generate_conversion_puzzle(zone_id: String, _seed: int) -> Dictionary:
 	var rng = RandomNumberGenerator.new()
-	rng.seed = seed
+	rng.seed = _seed
 
 	# Pina's spirit height in cm
 	var spirit_height = rng.randi_range(100, 150)
