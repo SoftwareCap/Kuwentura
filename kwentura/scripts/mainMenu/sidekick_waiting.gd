@@ -110,7 +110,7 @@ func _on_connection_failed(error: String):
 
 	# Auto-return to menu
 	await get_tree().create_timer(5.0).timeout
-	get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
+	get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
 
 
 func _on_host_disconnected(_data: Dictionary = {}):
@@ -118,7 +118,7 @@ func _on_host_disconnected(_data: Dictionary = {}):
 	status_label.modulate = Color(1, 0, 0)
 
 	await get_tree().create_timer(2.0).timeout
-	get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
+	get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
 
 
 func _on_connection_state_changed(new_state: int, _old_state: int):
@@ -129,9 +129,9 @@ func _on_connection_state_changed(new_state: int, _old_state: int):
 		status_label.modulate = Color(1, 0, 0)
 		
 		await get_tree().create_timer(2.0).timeout
-		get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
+		get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
 
 
 func _on_cancel_pressed():
 	NetworkManager.disconnect_network()
-	get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
+	get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")

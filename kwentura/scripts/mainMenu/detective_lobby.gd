@@ -185,7 +185,7 @@ func _on_back_pressed() -> void:
 		_notify_sidekick_host_leaving.rpc()
 	
 	NetworkManager.disconnect_network()
-	get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
+	get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
 
 
 @rpc("authority", "reliable")

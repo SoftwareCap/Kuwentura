@@ -20,8 +20,7 @@ enum Role { NONE, DETECTIVE, SIDEKICK }
 
 const DEFAULT_PORT: int = 17777
 const MAX_PLAYERS: int = 2
-const BROADCAST_PORT: int = 17778  # Host broadcasts here
-const LISTEN_PORT: int = 17779     # Client listens here (different port!)
+const BROADCAST_PORT: int = 17778  # Host broadcasts here, Client listens here
 const DISCOVERY_BROADCAST_INTERVAL: float = 0.5
 const DISCOVERY_TIMEOUT: float = 5.0
 
@@ -364,6 +363,17 @@ func _poll_discovery():
 		emit_signal("host_discovered", _discovery_targets[code])
 
 
+func _cleanup_old_discovery_targets() -> void:
+	var current_time = Time.get_unix_time_from_system()
+	var to_remove = []
+	for code in _discovery_targets:
+		var target = _discovery_targets[code]
+		if current_time - target.get("last_seen", 0) > 30.0:
+			to_remove.append(code)
+	for code in to_remove:
+		_discovery_targets.erase(code)
+
+
 func stop_discovery():
 	_stop_discovery()
 
@@ -406,6 +416,10 @@ func _connect_to_host(host_ip: String, code: String) -> Dictionary:
 		
 		if _state == ConnectionState.CONNECTED or _state == ConnectionState.PLAYING:
 			return {"success": true}
+		
+		# Check if connection failed during wait
+		if _state == ConnectionState.DISCONNECTED:
+			return {"error": "Connection failed. Check:\n• Same Wi-Fi network\n• Firewall settings", "success": false}
 		
 		attempts += 1
 	

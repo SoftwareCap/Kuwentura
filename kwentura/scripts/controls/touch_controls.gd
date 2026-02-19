@@ -3,6 +3,8 @@ extends CanvasLayer
 ## TouchControls handles visibility of on-screen touch controls
 ## The TouchScreenButton nodes automatically trigger input actions when pressed
 
+signal settings_pressed
+
 enum VisibilityMode {
 	AUTO,       ## Show on mobile/tablet, hide on desktop
 	ALWAYS_SHOW,## Always visible
@@ -18,6 +20,24 @@ enum VisibilityMode {
 @onready var jump_button: TouchScreenButton = $Jump
 @onready var settings_button: TouchScreenButton = $Settings
 
+
+func _notification(what: int):
+	# Handle node being removed from tree (scene change)
+	if what == NOTIFICATION_PREDELETE:
+		# Disconnect signals to prevent errors during cleanup
+		if left_button and left_button.pressed.is_connected(_on_left_pressed):
+			left_button.pressed.disconnect(_on_left_pressed)
+			left_button.released.disconnect(_on_left_released)
+		if right_button and right_button.pressed.is_connected(_on_right_pressed):
+			right_button.pressed.disconnect(_on_right_pressed)
+			right_button.released.disconnect(_on_right_released)
+		if jump_button and jump_button.pressed.is_connected(_on_jump_pressed):
+			jump_button.pressed.disconnect(_on_jump_pressed)
+			jump_button.released.disconnect(_on_jump_released)
+		if settings_button and settings_button.pressed.is_connected(_on_settings_pressed):
+			settings_button.pressed.disconnect(_on_settings_pressed)
+			settings_button.released.disconnect(_on_settings_released)
+
 var _is_visible: bool = true
 
 # Button original scales for press animation
@@ -25,26 +45,34 @@ var _original_scales: Dictionary = {}
 
 
 func _ready():
-	# Store original scales for press animations
-	_original_scales[left_button] = left_button.scale
-	_original_scales[right_button] = right_button.scale
-	_original_scales[jump_button] = jump_button.scale
-	_original_scales[settings_button] = settings_button.scale
+	# Store original scales for press animations (with null checks)
+	if left_button:
+		_original_scales[left_button] = left_button.scale
+	if right_button:
+		_original_scales[right_button] = right_button.scale
+	if jump_button:
+		_original_scales[jump_button] = jump_button.scale
+	if settings_button:
+		_original_scales[settings_button] = settings_button.scale
 	
 	_connect_button_signals()
 	_apply_visibility_mode()
 
 
 func _connect_button_signals():
-	# Connect signals programmatically to avoid editor setup
-	left_button.pressed.connect(_on_left_pressed)
-	left_button.released.connect(_on_left_released)
-	right_button.pressed.connect(_on_right_pressed)
-	right_button.released.connect(_on_right_released)
-	jump_button.pressed.connect(_on_jump_pressed)
-	jump_button.released.connect(_on_jump_released)
-	settings_button.pressed.connect(_on_settings_pressed)
-	settings_button.released.connect(_on_settings_released)
+	# Connect signals programmatically to avoid editor setup (with null checks)
+	if left_button:
+		left_button.pressed.connect(_on_left_pressed)
+		left_button.released.connect(_on_left_released)
+	if right_button:
+		right_button.pressed.connect(_on_right_pressed)
+		right_button.released.connect(_on_right_released)
+	if jump_button:
+		jump_button.pressed.connect(_on_jump_pressed)
+		jump_button.released.connect(_on_jump_released)
+	if settings_button:
+		settings_button.pressed.connect(_on_settings_pressed)
+		settings_button.released.connect(_on_settings_released)
 
 
 func _apply_visibility_mode():
@@ -115,7 +143,8 @@ func set_jump_enabled(enabled: bool):
 
 
 func set_settings_enabled(enabled: bool):
-	settings_button.visible = enabled
+	if settings_button:
+		settings_button.visible = enabled
 
 
 ## Check if controls are currently visible
@@ -151,6 +180,8 @@ func _on_jump_released() -> void:
 
 func _on_settings_pressed() -> void:
 	_animate_button_press(settings_button, true)
+	print("[TouchControls] Settings button pressed, emitting signal")
+	settings_pressed.emit()
 
 
 func _on_settings_released() -> void:

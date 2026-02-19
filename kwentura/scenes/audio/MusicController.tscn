@@ -1,8 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bluayuduex4re"]
-
-[ext_resource type="AudioStream" uid="uid://sw1l4rvklm28" path="res://audios/MainMenuBG.mp3" id="1_rpr2k"]
-
-[node name="MusicController" type="Node"]
-
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("1_rpr2k")
