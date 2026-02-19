@@ -21,7 +21,7 @@ FirebaseAuth="*res://scripts/systems/firebase_auth.gd"
 FirebaseManager="*res://scripts/systems/firebase_manager.gd"
 FirebaseFirestore="*res://scripts/systems/firebase_firestore.gd"
 GameState="*res://scripts/systems/game_state.gd"
-MusicController="*res://scripts/audio/music_controller.gd"
+MusicController="*res://scenes/controls/AudioControl.tscn"
 NetworkManager="*res://scripts/systems/network_manager.gd"
 PuzzleManager="*res://scripts/systems/puzzle_manager.gd"
 

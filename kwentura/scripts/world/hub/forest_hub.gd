@@ -12,12 +12,34 @@ extends Node2D
 @export var ground_y: float = 750.0
 
 @onready var spawn_points: Node2D = $SpawnPoints
+@onready var touch_controls: CanvasLayer = $TouchControls
+@onready var in_game_settings_panel: Panel = $InGameSettingsPanel
+@onready var volume_slider: HSlider = $InGameSettingsPanel/HBoxContainer/VolumeSlider
+@onready var volume_value_label: Label = $InGameSettingsPanel/HBoxContainer/VolumeValue
 
 # Track spawned players
 var _spawned_players: Dictionary = {}
 
 
 func _ready():
+	# Verify required nodes exist
+	if spawn_points == null:
+		push_error("[ForestHub] SpawnPoints node not found! Creating fallback spawn points.")
+		spawn_points = Node2D.new()
+		spawn_points.name = "SpawnPoints"
+		add_child(spawn_points)
+		
+		# Create default spawn markers
+		var detective_spawn = Marker2D.new()
+		detective_spawn.name = "DetectiveSpawn"
+		detective_spawn.position = Vector2(400, ground_y)
+		spawn_points.add_child(detective_spawn)
+		
+		var sidekick_spawn = Marker2D.new()
+		sidekick_spawn.name = "SidekickSpawn"
+		sidekick_spawn.position = Vector2(600, ground_y)
+		spawn_points.add_child(sidekick_spawn)
+	
 	# Play forest hub music
 	MusicController.play_track(MusicController.MusicTrack.FOREST_HUB)
 	
@@ -33,6 +55,27 @@ func _ready():
 		NetworkManager.spawn_player_requested.connect(_on_spawn_player_requested)
 	if not NetworkManager.despawn_player_requested.is_connected(_on_despawn_player_requested):
 		NetworkManager.despawn_player_requested.connect(_on_despawn_player_requested)
+	
+	# Connect touch controls settings button
+	if touch_controls:
+		# Check if touch_controls has the signal (it should emit settings_pressed)
+		if touch_controls.has_signal("settings_pressed"):
+			if not touch_controls.settings_pressed.is_connected(_on_settings_button_pressed):
+				touch_controls.settings_pressed.connect(_on_settings_button_pressed)
+		# Also check for the settings button directly
+		var settings_btn = touch_controls.get_node_or_null("Settings")
+		if settings_btn and settings_btn is TouchScreenButton:
+			if not settings_btn.is_connected("pressed", _on_settings_button_pressed):
+				settings_btn.pressed.connect(_on_settings_button_pressed)
+	
+	# Initialize settings panel
+	if in_game_settings_panel:
+		in_game_settings_panel.visible = false
+		# Set initial volume slider value
+		if volume_slider:
+			volume_slider.value = MusicController.get_volume() * 100
+		if volume_value_label:
+			volume_value_label.text = str(int(MusicController.get_volume() * 100)) + "%"
 	
 	# Spawn local player
 	_spawn_local_player()
@@ -57,6 +100,46 @@ func _ready():
 					if other_peer != peer_id and other_peer != multiplayer.get_unique_id():
 						print("[ForestHub] Telling peer ", other_peer, " to spawn peer ", peer_id)
 						NetworkManager.request_spawn_player(other_peer, peer_id, false)
+
+
+func _on_settings_button_pressed() -> void:
+	print("[ForestHub] Settings button pressed")
+	if in_game_settings_panel:
+		in_game_settings_panel.visible = true
+		# Update slider to current volume
+		if volume_slider:
+			volume_slider.value = MusicController.get_volume() * 100
+		if volume_value_label:
+			volume_value_label.text = str(int(MusicController.get_volume() * 100)) + "%"
+		print("[ForestHub] In-game settings panel opened")
+
+
+func _on_in_game_settings_back_pressed() -> void:
+	print("[ForestHub] Closing in-game settings panel")
+	if in_game_settings_panel:
+		in_game_settings_panel.visible = false
+		_save_settings()
+
+
+func _on_in_game_volume_changed(value: float) -> void:
+	var volume = value / 100.0
+	MusicController.set_volume(volume)
+	if volume_value_label:
+		volume_value_label.text = str(int(value)) + "%"
+	print("[ForestHub] Volume changed to: ", volume)
+
+
+func _save_settings() -> void:
+	const SETTINGS_FILE = "user://settings.json"
+	var data = {
+		"volume": MusicController.get_volume()
+	}
+	
+	var file = FileAccess.open(SETTINGS_FILE, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data))
+		file.close()
+		print("[ForestHub] Settings saved successfully")
 
 
 func _on_spawn_player_requested(peer_id: int, is_detective: bool):
@@ -91,13 +174,13 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 	
 	if is_detective:
 		player = player_host_scene.instantiate()
-		spawn_marker = spawn_points.get_node("DetectiveSpawn")
+		spawn_marker = spawn_points.get_node_or_null("DetectiveSpawn")
 		player.role = "Detective"
 		player.avatar_scale = detective_scale
 		print("[ForestHub] Instantiated Detective scene")
 	else:
 		player = player_sidekick_scene.instantiate()
-		spawn_marker = spawn_points.get_node("SidekickSpawn")
+		spawn_marker = spawn_points.get_node_or_null("SidekickSpawn")
 		player.role = "Sidekick"
 		player.avatar_scale = sidekick_scale
 		print("[ForestHub] Instantiated Sidekick scene")
@@ -109,6 +192,7 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 		spawn_pos = spawn_marker.global_position
 	else:
 		spawn_pos = Vector2(400 if is_detective else 200, ground_y)
+		push_warning("[ForestHub] Spawn marker not found for " + ("Detective" if is_detective else "Sidekick") + ", using default position")
 	
 	player.global_position = spawn_pos
 	
@@ -175,13 +259,13 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 	
 	if is_detective_role:
 		player = player_host_scene.instantiate()
-		spawn_marker = spawn_points.get_node("DetectiveSpawn")
+		spawn_marker = spawn_points.get_node_or_null("DetectiveSpawn")
 		player.role = "Detective"
 		player.avatar_scale = detective_scale
 		print("[ForestHub] RPC: Instantiated Detective")
 	else:
 		player = player_sidekick_scene.instantiate()
-		spawn_marker = spawn_points.get_node("SidekickSpawn")
+		spawn_marker = spawn_points.get_node_or_null("SidekickSpawn")
 		player.role = "Sidekick"
 		player.avatar_scale = sidekick_scale
 		print("[ForestHub] RPC: Instantiated Sidekick")
@@ -192,6 +276,7 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 		player.global_position = spawn_marker.global_position
 	else:
 		player.global_position = Vector2(400 if is_detective_role else 200, ground_y)
+		push_warning("[ForestHub] RPC: Spawn marker not found, using default position")
 	
 	player.set_multiplayer_authority(peer_id)
 	player.visible = true

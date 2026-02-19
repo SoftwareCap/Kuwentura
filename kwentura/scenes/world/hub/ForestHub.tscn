@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=4 uid="uid://c65bu18udl64v"]
+[gd_scene load_steps=17 format=4 uid="uid://c65bu18udl64v"]
 
 [ext_resource type="Texture2D" uid="uid://k60h4yhhde0x" path="res://assets/backgrounds/forest2.png" id="2_87r7r"]
 [ext_resource type="Texture2D" uid="uid://d06a48u2atl4o" path="res://assets/sprites/places/PinasHouse.png" id="2_anhpr"]
@@ -6,7 +6,9 @@
 [ext_resource type="Texture2D" uid="uid://p18vin8nbajb" path="res://assets/sprites/places/OldWell.png" id="5_ggw0p"]
 [ext_resource type="Texture2D" uid="uid://cvgl2uufuo2gg" path="res://assets/sprites/places/StorageHut.png" id="6_dyw7g"]
 [ext_resource type="Script" uid="uid://dhq7o8y147g37" path="res://scripts/world/hub/forest_hub.gd" id="6_forest_hub"]
-[ext_resource type="PackedScene" uid="uid://i2gpufiq0ql0" path="res://scenes/touchController/touch_controls.tscn" id="7_6nmbo"]
+[ext_resource type="PackedScene" uid="uid://i2gpufiq0ql0" path="res://scenes/controls/TouchControls.tscn" id="7_6nmbo"]
+[ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="8_ggw0p"]
+[ext_resource type="Texture2D" uid="uid://bhxj8dd714vd8" path="res://assets/buttons/closebtn.png" id="9_dyw7g"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6nmbo"]
 size = Vector2(1.0549998, 20)
@@ -815,6 +817,26 @@ physics_layer_0/collision_layer = 1
 physics_layer_0/collision_mask = 0
 sources/0 = SubResource("TileSetAtlasSource_ggw0p")
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4f0r4"]
+bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.49354547, 0.4935456, 0.4935453, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_hlomu"]
+color = Color(1, 1, 1, 1)
+thickness = 6
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_qvhdv"]
+color = Color(0.48324937, 0.54248023, 1, 1)
+thickness = 8
+
 [node name="ForestHub" type="Node2D"]
 script = ExtResource("6_forest_hub")
 ground_y = 650.0
@@ -941,3 +963,71 @@ position = Vector2(201, 720)
 position = Vector2(0, 720)
 
 [node name="TouchControls" parent="." instance=ExtResource("7_6nmbo")]
+
+[node name="InGameSettingsPanel" type="Panel" parent="."]
+visible = false
+offset_left = 1055.0
+offset_top = 103.0
+offset_right = 1795.5
+offset_bottom = 689.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_4f0r4")
+
+[node name="Label" type="Label" parent="InGameSettingsPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 35.0
+offset_bottom = 144.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("8_ggw0p")
+theme_override_font_sizes/font_size = 55
+text = "Settings"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Back" type="TouchScreenButton" parent="InGameSettingsPanel"]
+position = Vector2(9, 9.000002)
+scale = Vector2(0.21166667, 0.21166667)
+texture_normal = ExtResource("9_dyw7g")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="InGameSettingsPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.25
+offset_top = -94.0
+offset_right = 300.25
+offset_bottom = -62.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 30
+
+[node name="VolumeLabel" type="Label" parent="InGameSettingsPanel/HBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("8_ggw0p")
+theme_override_font_sizes/font_size = 30
+text = "Music Volume:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VolumeSlider" type="HSlider" parent="InGameSettingsPanel/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/slider = SubResource("StyleBoxLine_hlomu")
+theme_override_styles/grabber_area = SubResource("StyleBoxLine_qvhdv")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_qvhdv")
+value = 80.0
+
+[node name="VolumeValue" type="Label" parent="InGameSettingsPanel/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "80%"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[connection signal="pressed" from="InGameSettingsPanel/Back" to="." method="_on_in_game_settings_back_pressed"]
+[connection signal="value_changed" from="InGameSettingsPanel/HBoxContainer/VolumeSlider" to="." method="_on_in_game_volume_changed"]

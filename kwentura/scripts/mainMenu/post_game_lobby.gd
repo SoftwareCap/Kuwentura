@@ -72,7 +72,7 @@ func _on_disconnect_pressed():
 
 	# Return to main menu (single player effectively)
 	await get_tree().create_timer(0.5).timeout
-	get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
+	get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
 
 
 func _on_exit_pressed():
@@ -92,7 +92,7 @@ func _on_peer_disconnected(_peer_id: int = 0):
 	dialog.dialog_text = "The other player has disconnected."
 	dialog.ok_button_text = "Return to Menu"
 	dialog.canceled.connect(
-		func(): get_tree().change_scene_to_file("res://scenes/mainMenu/main_menu.tscn")
+		func(): get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
 	)
 	add_child(dialog)
 	dialog.popup_centered()
