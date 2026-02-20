@@ -48,6 +48,20 @@ func _ready():
 		NetworkManager.connection_failed.connect(_on_connection_failed)
 
 
+func _exit_tree():
+	# Disconnect all signals to prevent callbacks after scene change
+	if NetworkManager.room_code_generated.is_connected(_on_room_code_generated):
+		NetworkManager.room_code_generated.disconnect(_on_room_code_generated)
+	if NetworkManager.partner_connected.is_connected(_on_partner_connected):
+		NetworkManager.partner_connected.disconnect(_on_partner_connected)
+	if NetworkManager.partner_disconnected.is_connected(_on_partner_disconnected):
+		NetworkManager.partner_disconnected.disconnect(_on_partner_disconnected)
+	if NetworkManager.game_started.is_connected(_on_game_started):
+		NetworkManager.game_started.disconnect(_on_game_started)
+	if NetworkManager.connection_failed.is_connected(_on_connection_failed):
+		NetworkManager.connection_failed.disconnect(_on_connection_failed)
+
+
 func _setup_host_view():
 	# Host (Detective) setup
 	start_button.visible = false
@@ -185,7 +199,16 @@ func _on_back_pressed() -> void:
 		_notify_sidekick_host_leaving.rpc()
 	
 	NetworkManager.disconnect_network()
-	get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
+	
+	# Safety check: ensure node is still in tree before changing scene
+	if not is_inside_tree():
+		return
+	
+	var tree = get_tree()
+	if tree == null:
+		return
+	
+	tree.change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
 
 
 @rpc("authority", "reliable")
@@ -201,9 +224,20 @@ func _on_game_started(_checkpoint: String = ""):
 	var tween = create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
 	await tween.finished
+	
+	# Safety check: ensure node is still valid and in tree before changing scene
+	if not is_instance_valid(self) or not is_inside_tree():
+		print("[Lobby] Node no longer valid, skipping scene change")
+		return
+	
+	var tree = get_tree()
+	if tree == null:
+		print("[Lobby] SceneTree is null, cannot change scene")
+		return
+	
 	print("[Lobby] Fade complete, changing scene now!")
 	# change this file into res://scenes/cutscenes/OpeningCutscene.tscn
-	var err = get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
+	var err = tree.change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 	if err != OK:
 		print("[Lobby] ERROR: Failed to change scene! Error code: ", err)
 	else:

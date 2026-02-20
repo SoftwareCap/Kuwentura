@@ -62,6 +62,22 @@ func _ready():
 	status_label.modulate = Color(1, 1, 0)  # Yellow while connecting
 
 
+func _exit_tree():
+	# Disconnect all signals to prevent callbacks after scene change
+	if NetworkManager.game_started.is_connected(_on_game_started):
+		NetworkManager.game_started.disconnect(_on_game_started)
+	if NetworkManager.connection_failed.is_connected(_on_connection_failed):
+		NetworkManager.connection_failed.disconnect(_on_connection_failed)
+	if NetworkManager.partner_disconnected.is_connected(_on_host_disconnected):
+		NetworkManager.partner_disconnected.disconnect(_on_host_disconnected)
+	if NetworkManager.partner_connected.is_connected(_on_partner_connected):
+		NetworkManager.partner_connected.disconnect(_on_partner_connected)
+	if NetworkManager.connection_established.is_connected(_on_connection_established):
+		NetworkManager.connection_established.disconnect(_on_connection_established)
+	if NetworkManager.connection_state_changed.is_connected(_on_connection_state_changed):
+		NetworkManager.connection_state_changed.disconnect(_on_connection_state_changed)
+
+
 func _on_connection_established(peer_id: int):
 	print("[SidekickLobby] Connected! Peer ID: ", peer_id)
 	
@@ -92,10 +108,20 @@ func _on_game_started(_checkpoint: String = ""):
 	var tween = create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
 	await tween.finished
+	
+	# Safety check: ensure node is still valid and in tree before changing scene
+	if not is_instance_valid(self) or not is_inside_tree():
+		print("[SidekickWaiting] Node no longer valid, skipping scene change")
+		return
+	
+	var tree = get_tree()
+	if tree == null:
+		print("[SidekickWaiting] SceneTree is null, cannot change scene")
+		return
 
 	# Go to opening cutscene
 	# change this file into res://scenes/cutscenes/OpeningCutscene.tscn
-	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
+	tree.change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 
 
 func _on_connection_failed(error: String):
@@ -110,7 +136,18 @@ func _on_connection_failed(error: String):
 
 	# Auto-return to menu
 	await get_tree().create_timer(5.0).timeout
-	get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
+	
+	# Safety check: ensure node is still valid and in tree before changing scene
+	if not is_instance_valid(self) or not is_inside_tree():
+		print("[SidekickWaiting] Node no longer valid, skipping scene change")
+		return
+	
+	var tree = get_tree()
+	if tree == null:
+		print("[SidekickWaiting] SceneTree is null, cannot change scene")
+		return
+	
+	tree.change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
 
 
 func _on_host_disconnected(_data: Dictionary = {}):
@@ -118,7 +155,18 @@ func _on_host_disconnected(_data: Dictionary = {}):
 	status_label.modulate = Color(1, 0, 0)
 
 	await get_tree().create_timer(2.0).timeout
-	get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
+	
+	# Safety check: ensure node is still valid and in tree before changing scene
+	if not is_instance_valid(self) or not is_inside_tree():
+		print("[SidekickWaiting] Node no longer valid, skipping scene change")
+		return
+	
+	var tree = get_tree()
+	if tree == null:
+		print("[SidekickWaiting] SceneTree is null, cannot change scene")
+		return
+	
+	tree.change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
 
 
 func _on_connection_state_changed(new_state: int, _old_state: int):
@@ -129,9 +177,29 @@ func _on_connection_state_changed(new_state: int, _old_state: int):
 		status_label.modulate = Color(1, 0, 0)
 		
 		await get_tree().create_timer(2.0).timeout
-		get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
+		
+		# Safety check: ensure node is still valid and in tree before changing scene
+		if not is_instance_valid(self) or not is_inside_tree():
+			print("[SidekickWaiting] Node no longer valid, skipping scene change")
+			return
+		
+		var tree = get_tree()
+		if tree == null:
+			print("[SidekickWaiting] SceneTree is null, cannot change scene")
+			return
+		
+		tree.change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
 
 
 func _on_cancel_pressed():
 	NetworkManager.disconnect_network()
-	get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
+	
+	# Safety check: ensure node is still in tree before changing scene
+	if not is_inside_tree():
+		return
+	
+	var tree = get_tree()
+	if tree == null:
+		return
+	
+	tree.change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")

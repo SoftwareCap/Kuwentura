@@ -1,10 +1,12 @@
-[gd_scene load_steps=10 format=3 uid="uid://i2gpufiq0ql0"]
+[gd_scene load_steps=12 format=3 uid="uid://i2gpufiq0ql0"]
 
 [ext_resource type="Script" uid="uid://ci46mv31xj0do" path="res://scripts/controls/touch_controls.gd" id="1_sv83y"]
 [ext_resource type="Texture2D" uid="uid://dp27skv21m3fj" path="res://assets/buttons/left.png" id="2_hcjou"]
 [ext_resource type="Texture2D" uid="uid://q26ui1ynvv34" path="res://assets/buttons/right.png" id="3_xwlpt"]
 [ext_resource type="Texture2D" uid="uid://bc40nmjniu431" path="res://assets/buttons/jump.png" id="4_dlgvd"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settings.png" id="5_xxxxx"]
+[ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/play.png" id="6_256s7"]
+[ext_resource type="Texture2D" uid="uid://chff8f3cdvqaf" path="res://assets/buttons/pause.png" id="7_vwhch"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_left"]
 size = Vector2(200, 200)
@@ -39,7 +41,7 @@ passby_press = true
 action = "game_right"
 
 [node name="Jump" type="TouchScreenButton" parent="."]
-position = Vector2(1695.0001, 893)
+position = Vector2(1695, 893)
 scale = Vector2(0.5, 0.5)
 texture_normal = ExtResource("4_dlgvd")
 shape = SubResource("RectangleShape2D_jump")
@@ -47,9 +49,25 @@ passby_press = true
 action = "game_jump"
 
 [node name="Settings" type="TouchScreenButton" parent="."]
-position = Vector2(1724, 40)
+position = Vector2(1479, 32)
 scale = Vector2(0.5, 0.5)
 texture_normal = ExtResource("5_xxxxx")
 shape = SubResource("RectangleShape2D_gputu")
 passby_press = true
-action = "game_settings"
+action = "game_option"
+
+[node name="Play" type="TouchScreenButton" parent="."]
+position = Vector2(1696, 24)
+scale = Vector2(0.5, 0.5)
+texture_normal = ExtResource("6_256s7")
+shape = SubResource("RectangleShape2D_gputu")
+passby_press = true
+action = "game_play"
+
+[node name="Pause" type="TouchScreenButton" parent="."]
+position = Vector2(1695, 27)
+scale = Vector2(0.5, 0.5)
+texture_normal = ExtResource("7_vwhch")
+shape = SubResource("RectangleShape2D_gputu")
+passby_press = true
+action = "game_pause"

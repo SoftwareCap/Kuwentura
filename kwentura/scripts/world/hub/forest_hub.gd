@@ -13,9 +13,9 @@ extends Node2D
 
 @onready var spawn_points: Node2D = $SpawnPoints
 @onready var touch_controls: CanvasLayer = $TouchControls
-@onready var in_game_settings_panel: Panel = $InGameSettingsPanel
-@onready var volume_slider: HSlider = $InGameSettingsPanel/HBoxContainer/VolumeSlider
-@onready var volume_value_label: Label = $InGameSettingsPanel/HBoxContainer/VolumeValue
+@onready var in_game_settings_panel: Panel = $InGameOptionPanel
+@onready var volume_slider: HSlider = $InGameOptionPanel/HBoxContainer/VolumeSlider
+@onready var volume_value_label: Label = $InGameOptionPanel/HBoxContainer/VolumeValue
 
 # Track spawned players
 var _spawned_players: Dictionary = {}
@@ -317,3 +317,7 @@ func _input(event):
 		for child in get_children():
 			if child is CharacterBody2D:
 				print("  Node: ", child.name, " role=", child.role, " pos=", child.global_position)
+
+
+func _on_exit_mainMenu_button_pressed() -> void:
+	pass # Replace with function body.
