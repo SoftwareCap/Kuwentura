@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+class_name Player
+
 @onready var sprite = $AnimatedSprite2D
 
 @export var speed = 350
@@ -20,7 +22,11 @@ var _remote_animation: String = ""
 func _ready():
 	_is_in_lobby = get_parent() is Control
 	
-	z_index = 10 if is_multiplayer_authority() else 0
+	# Only check multiplayer authority if we have a valid multiplayer peer
+	if multiplayer.has_multiplayer_peer():
+		z_index = 10 if is_multiplayer_authority() else 0
+	else:
+		z_index = 10  # Default to local player visuals if no multiplayer
 	
 	if not _is_in_lobby:
 		scale = avatar_scale
@@ -38,6 +44,10 @@ func _process(_delta):
 		else:
 			sprite.play("walk")
 			sprite.flip_h = velocity.x < 0
+		return
+	
+	# Skip if no multiplayer peer available
+	if not multiplayer.has_multiplayer_peer():
 		return
 	
 	# If not authority, update from network
@@ -98,6 +108,10 @@ func _physics_process(delta):
 	move_and_slide()
 	
 	# Only do local animation and sync if we have authority
+	# Skip if no multiplayer peer available
+	if not multiplayer.has_multiplayer_peer():
+		return
+	
 	if is_multiplayer_authority():
 		# Local animation
 		var current_anim = "idle"
