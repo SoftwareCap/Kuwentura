@@ -13,4 +13,4 @@ scale = Vector2(0.5, 0.5)
 texture_normal = ExtResource("1_chhvf")
 shape = SubResource("RectangleShape2D_etj13")
 passby_press = true
-action = "game_settings"
+action = "game_option"

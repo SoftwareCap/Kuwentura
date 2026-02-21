@@ -79,6 +79,10 @@ var game_completed: bool = false
 var nightfall_attempts: int = 0
 var max_nightfall_attempts: int = 3
 
+# Saved spawn positions for returning from zones
+# Key: peer_id, Value: {position: Vector2, zone: String}
+var saved_spawn_positions: Dictionary = {}
+
 
 func _ready():
 	randomize()
@@ -237,3 +241,56 @@ func load_save_data(data: Dictionary):
 		_initialize_puzzle_seeds()
 
 	emit_signal("data_synced")
+
+
+# === SPAWN POSITION SAVE/RESTORE ===
+
+func save_spawn_position(peer_id: int, position: Vector2, zone: String = "forest_hub"):
+	"""Save a player's position before entering a zone."""
+	saved_spawn_positions[peer_id] = {
+		"position": position,
+		"zone": zone,
+		"timestamp": Time.get_unix_time_from_system()
+	}
+	print("[GameState] Saved spawn position for peer ", peer_id, ": ", position)
+
+
+func get_spawn_position(peer_id: int) -> Vector2:
+	"""Get saved spawn position for a player, or Vector2.ZERO if none saved."""
+	if saved_spawn_positions.has(peer_id):
+		return saved_spawn_positions[peer_id].position
+	return Vector2.ZERO
+
+
+func clear_spawn_position(peer_id: int):
+	"""Clear saved spawn position after using it."""
+	if saved_spawn_positions.has(peer_id):
+		saved_spawn_positions.erase(peer_id)
+		print("[GameState] Cleared spawn position for peer ", peer_id)
+
+
+func has_spawn_position(peer_id: int) -> bool:
+	"""Check if a player has a saved spawn position."""
+	return saved_spawn_positions.has(peer_id)
+
+
+# === RPC FUNCTIONS FOR POSITION SYNC ===
+# These are here because GameState is a singleton that exists in all scenes
+
+@rpc("authority", "reliable", "call_local")
+func _broadcast_position_rpc(peer_id: int, pos: Vector2):
+	"""Host broadcasts a player's position to all clients."""
+	save_spawn_position(peer_id, pos, "forest_hub")
+	print("[GameState] Received position for peer ", peer_id, ": ", pos)
+
+
+@rpc("any_peer", "reliable")
+func _report_position_to_host_rpc(peer_id: int, pos: Vector2):
+	"""Client reports their position to host."""
+	if not multiplayer.is_server():
+		return
+	
+	# Host saves and broadcasts to all
+	save_spawn_position(peer_id, pos, "forest_hub")
+	_broadcast_position_rpc.rpc(peer_id, pos)
+	print("[GameState] Host received and broadcast position for peer ", peer_id, ": ", pos)

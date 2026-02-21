@@ -1,3 +1,45 @@
-[gd_scene format=3 uid="uid://c4cg1d5srj22n"]
+[gd_scene load_steps=4 format=3 uid="uid://abandonedhouse"]
+
+[ext_resource type="Script" path="res://scripts/world/zones/abandonedHouse/abandoned_house.gd" id="1_abandonedhouse"]
+[ext_resource type="Texture2D" uid="uid://w844nys0xd6n" path="res://assets/backgrounds/Lobby.png" id="2_bg"]
+[ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 
 [node name="AbandonedHouse" type="Node2D"]
+script = ExtResource("1_abandonedhouse")
+
+[node name="Background" type="Sprite2D" parent="."]
+position = Vector2(960, 540)
+scale = Vector2(1.25, 1.06)
+texture = ExtResource("2_bg")
+
+[node name="TestLabel" type="Label" parent="."]
+offset_left = 560.0
+offset_top = 200.0
+offset_right = 1360.0
+offset_bottom = 300.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 64
+text = "ABANDONED HOUSE TEST ZONE"
+horizontal_alignment = 1
+
+[node name="RoleLabel" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 560.0
+offset_top = 320.0
+offset_right = 1360.0
+offset_bottom = 380.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 48
+text = "Waiting for role..."
+horizontal_alignment = 1
+
+[node name="BackButton" type="Button" parent="."]
+offset_left = 50.0
+offset_top = 50.0
+offset_right = 300.0
+offset_bottom = 120.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 32
+text = "← Back to Forest"
+
+[connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
