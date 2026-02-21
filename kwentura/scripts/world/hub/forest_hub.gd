@@ -13,9 +13,11 @@ extends Node2D
 
 @onready var spawn_points: Node2D = $SpawnPoints
 @onready var touch_controls: CanvasLayer = $TouchControls
-@onready var in_game_settings_panel: Panel = $InGameOptionPanel
-@onready var volume_slider: HSlider = $InGameOptionPanel/HBoxContainer/VolumeSlider
-@onready var volume_value_label: Label = $InGameOptionPanel/HBoxContainer/VolumeValue
+@onready var pause_canvas_layer: CanvasLayer = $PauseCanvasLayer
+@onready var in_game_pause_panel: Panel = $PauseCanvasLayer/InGamePausePanel
+@onready var option_sub_panel: Panel = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel
+@onready var volume_slider: HSlider = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer/VolumeSlider
+@onready var volume_value_label: Label = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer/VolumeValue
 
 # Track spawned players
 var _spawned_players: Dictionary = {}
@@ -49,6 +51,7 @@ func _ready():
 	# Connect to network signals
 	NetworkManager.player_connected.connect(_on_player_connected)
 	NetworkManager.player_disconnected.connect(_on_player_disconnected)
+	NetworkManager.partner_disconnected.connect(_on_partner_disconnected)
 	
 	# Connect to spawn signals from NetworkManager (RPCs now handled there)
 	if not NetworkManager.spawn_player_requested.is_connected(_on_spawn_player_requested):
@@ -56,26 +59,34 @@ func _ready():
 	if not NetworkManager.despawn_player_requested.is_connected(_on_despawn_player_requested):
 		NetworkManager.despawn_player_requested.connect(_on_despawn_player_requested)
 	
-	# Connect touch controls settings button
+	# Connect touch controls pause button
+	print("[ForestHub] Setting up touch controls...")
 	if touch_controls:
-		# Check if touch_controls has the signal (it should emit settings_pressed)
-		if touch_controls.has_signal("settings_pressed"):
-			if not touch_controls.settings_pressed.is_connected(_on_settings_button_pressed):
-				touch_controls.settings_pressed.connect(_on_settings_button_pressed)
-		# Also check for the settings button directly
-		var settings_btn = touch_controls.get_node_or_null("Settings")
-		if settings_btn and settings_btn is TouchScreenButton:
-			if not settings_btn.is_connected("pressed", _on_settings_button_pressed):
-				settings_btn.pressed.connect(_on_settings_button_pressed)
+		print("[ForestHub] TouchControls found")
+		# Connect to the pause_pressed signal from TouchControls
+		if touch_controls.has_signal("pause_pressed"):
+			print("[ForestHub] TouchControls has pause_pressed signal")
+			if not touch_controls.pause_pressed.is_connected(_on_pause_button_pressed):
+				touch_controls.pause_pressed.connect(_on_pause_button_pressed)
+				print("[ForestHub] Connected pause_pressed signal")
+		else:
+			print("[ForestHub] TouchControls does NOT have pause_pressed signal")
+	else:
+		push_error("[ForestHub] TouchControls not found!")
 	
-	# Initialize settings panel
-	if in_game_settings_panel:
-		in_game_settings_panel.visible = false
+	# Initialize pause panel
+	print("[ForestHub] Initializing pause panel...")
+	if in_game_pause_panel:
+		print("[ForestHub] Pause panel found, setting invisible")
+		in_game_pause_panel.visible = false
 		# Set initial volume slider value
 		if volume_slider:
 			volume_slider.value = MusicController.get_volume() * 100
+			print("[ForestHub] Volume slider set to: ", volume_slider.value)
 		if volume_value_label:
 			volume_value_label.text = str(int(MusicController.get_volume() * 100)) + "%"
+	else:
+		push_error("[ForestHub] InGamePausePanel not found!")
 	
 	# Spawn local player
 	_spawn_local_player()
@@ -102,23 +113,75 @@ func _ready():
 						NetworkManager.request_spawn_player(other_peer, peer_id, false)
 
 
-func _on_settings_button_pressed() -> void:
-	print("[ForestHub] Settings button pressed")
-	if in_game_settings_panel:
-		in_game_settings_panel.visible = true
+## Open the pause panel (called when touch controls option button is pressed)
+func _on_pause_button_pressed() -> void:
+	print("[ForestHub] ========== PAUSE BUTTON PRESSED ==========")
+	if in_game_pause_panel:
+		in_game_pause_panel.visible = true
+		# Hide option sub-panel when opening pause
+		if option_sub_panel:
+			option_sub_panel.visible = false
+		print("[ForestHub] Pause panel visible: ", in_game_pause_panel.visible)
+		print("[ForestHub] In-game pause panel OPENED")
+		# Pause the game
+		get_tree().paused = true
+	else:
+		push_error("[ForestHub] Cannot open pause - in_game_pause_panel is null!")
+
+
+## Resume button pressed - closes pause panel and resumes game
+func _on_resume_play_button_pressed() -> void:
+	print("[ForestHub] Resume button pressed - resuming game")
+	if in_game_pause_panel:
+		in_game_pause_panel.visible = false
+	if option_sub_panel:
+		option_sub_panel.visible = false
+	get_tree().paused = false
+	print("[ForestHub] Game RESUMED")
+
+
+## Option button pressed - opens the option sub-panel
+func _on_option_button_pressed() -> void:
+	print("[ForestHub] Option button pressed - opening options")
+	if option_sub_panel:
+		option_sub_panel.visible = true
 		# Update slider to current volume
 		if volume_slider:
 			volume_slider.value = MusicController.get_volume() * 100
 		if volume_value_label:
 			volume_value_label.text = str(int(MusicController.get_volume() * 100)) + "%"
-		print("[ForestHub] In-game settings panel opened")
+		print("[ForestHub] Option sub-panel OPENED")
+	else:
+		push_error("[ForestHub] Cannot open options - option_sub_panel is null!")
 
 
-func _on_in_game_settings_back_pressed() -> void:
-	print("[ForestHub] Closing in-game settings panel")
-	if in_game_settings_panel:
-		in_game_settings_panel.visible = false
-		_save_settings()
+## Back button pressed (BackToPrevious on option sub-panel) - returns to pause panel
+func _on_in_game_option_back_pressed() -> void:
+	print("[ForestHub] Back button pressed")
+	if option_sub_panel and option_sub_panel.visible:
+		# If option panel is open, close it and return to pause panel
+		option_sub_panel.visible = false
+		print("[ForestHub] Option sub-panel closed, back to pause panel")
+
+
+## Exit to Main Menu button pressed
+func _on_exit_to_main_menu_button_pressed() -> void:
+	print("[ForestHub] Exit to Main Menu button pressed")
+	# Unpause before leaving
+	get_tree().paused = false
+	
+	# Disconnect from network if connected
+	if NetworkManager.has_active_connection():
+		NetworkManager.disconnect_network()
+		# Small delay to ensure disconnect is processed
+		await get_tree().create_timer(0.2).timeout
+	
+	# Save settings
+	_save_pause()
+	
+	# Return to main menu (check if still in tree after delay)
+	if is_inside_tree():
+		get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
 
 
 func _on_in_game_volume_changed(value: float) -> void:
@@ -129,17 +192,17 @@ func _on_in_game_volume_changed(value: float) -> void:
 	print("[ForestHub] Volume changed to: ", volume)
 
 
-func _save_settings() -> void:
-	const SETTINGS_FILE = "user://settings.json"
+func _save_pause() -> void:
+	const OPTION_FILE = "user://settings.json"
 	var data = {
 		"volume": MusicController.get_volume()
 	}
 	
-	var file = FileAccess.open(SETTINGS_FILE, FileAccess.WRITE)
+	var file = FileAccess.open(OPTION_FILE, FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(data))
 		file.close()
-		print("[ForestHub] Settings saved successfully")
+		print("[ForestHub] Pause saved successfully")
 
 
 func _on_spawn_player_requested(peer_id: int, is_detective: bool):
@@ -187,8 +250,14 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 	
 	player.name = str(peer_id)
 	
-	# Get spawn position
-	if spawn_marker:
+	# Get spawn position - use saved position if returning from a zone
+	var saved_pos = GameState.get_spawn_position(peer_id)
+	if saved_pos != Vector2.ZERO:
+		# Use saved position from before entering zone
+		spawn_pos = saved_pos
+		GameState.clear_spawn_position(peer_id)  # Clear after using
+		print("[ForestHub] Using saved spawn position for ", "Detective" if is_detective else "Sidekick", ": ", spawn_pos)
+	elif spawn_marker:
 		spawn_pos = spawn_marker.global_position
 	else:
 		spawn_pos = Vector2(400 if is_detective else 200, ground_y)
@@ -213,6 +282,23 @@ func _on_player_connected(peer_id: int) -> void:
 	print("[ForestHub] Player connected signal: ", peer_id)
 	
 	if multiplayer.is_server():
+		# Clean up any existing player node for this peer (in case of reconnection)
+		var existing_node = get_node_or_null(str(peer_id))
+		if existing_node:
+			print("[ForestHub] Removing existing player node for peer ", peer_id)
+			existing_node.queue_free()
+			_spawned_players.erase(peer_id)
+		
+		# Also clean up any other sidekick nodes (in case peer_id changed on reconnect)
+		# This prevents duplicate sidekick avatars
+		for child in get_children():
+			if child is CharacterBody2D:
+				var child_peer_id = int(child.name)
+				if child_peer_id > 1 and child_peer_id != peer_id:  # Not host and not the new peer
+					if not multiplayer.get_peers().has(child_peer_id):
+						print("[ForestHub] Cleaning up old sidekick node: ", child.name)
+						child.queue_free()
+		
 		# Server spawns the new player locally
 		if not _spawned_players.has(peer_id):
 			_spawn_player_for_peer(peer_id)
@@ -231,8 +317,10 @@ func _on_player_connected(peer_id: int) -> void:
 func _on_player_disconnected(peer_id: int) -> void:
 	print("[ForestHub] Player disconnected: ", peer_id)
 	
+	# Remove the player node if it exists
 	var player_node: Node = get_node_or_null(str(peer_id))
 	if player_node:
+		print("[ForestHub] Removing player node for peer ", peer_id)
 		player_node.queue_free()
 	
 	_spawned_players.erase(peer_id)
@@ -240,6 +328,49 @@ func _on_player_disconnected(peer_id: int) -> void:
 	# Tell all clients to remove this player
 	if multiplayer.is_server():
 		NetworkManager.request_despawn_player(peer_id)
+		
+		# Also clean up any orphaned sidekick nodes (in case of quick reconnect with new peer_id)
+		_cleanup_orphaned_players()
+
+
+## Called when partner disconnects (host disconnected for sidekick, or sidekick disconnected for host)
+func _on_partner_disconnected(player_data: Dictionary) -> void:
+	print("[ForestHub] Partner disconnected: ", player_data)
+	
+	# Get the reason for disconnection
+	var reason = player_data.get("reason", "")
+	
+	# If host disconnected (detected via reason or by checking if we were the sidekick)
+	# Host disconnection can be detected by reason or by having no active connection
+	if reason == "host_disconnected" or not NetworkManager.has_active_connection():
+		print("[ForestHub] Host disconnected! Returning to main menu...")
+		
+		# Unpause before leaving
+		get_tree().paused = false
+		
+		# Show a message to the player (optional - could add a popup here)
+		
+		# Return to main menu after a short delay to allow cleanup
+		await get_tree().create_timer(0.5).timeout
+		if is_inside_tree():
+			get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
+
+
+## Clean up orphaned player nodes (for reconnection scenarios)
+func _cleanup_orphaned_players() -> void:
+	# Get list of currently connected peers
+	var connected_peers = multiplayer.get_peers()
+	
+	# Check all children for player nodes that shouldn't exist
+	for child in get_children():
+		# Check if this is a player node (CharacterBody2D with name as number)
+		if child is CharacterBody2D:
+			var peer_id = int(child.name)
+			if peer_id > 0:  # Valid peer ID
+				# If this peer is not in our spawned list and not in connected peers, remove it
+				if not _spawned_players.has(peer_id) and not connected_peers.has(peer_id):
+					print("[ForestHub] Cleaning up orphaned player node: ", child.name)
+					child.queue_free()
 
 
 ## Spawn player via NetworkManager signal (not direct RPC)
@@ -253,6 +384,12 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 	if peer_id == multiplayer.get_unique_id():
 		print("[ForestHub] Not spawning self")
 		return
+	
+	# Remove any existing node with this name (in case of cleanup issues)
+	var existing_node = get_node_or_null(str(peer_id))
+	if existing_node:
+		print("[ForestHub] Removing existing node with name ", peer_id)
+		existing_node.queue_free()
 	
 	var player: CharacterBody2D
 	var spawn_marker: Marker2D
@@ -272,7 +409,12 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 	
 	player.name = str(peer_id)
 	
-	if spawn_marker:
+	# Check for saved position (returning from zone)
+	var saved_pos = GameState.get_spawn_position(peer_id)
+	if saved_pos != Vector2.ZERO:
+		player.global_position = saved_pos
+		print("[ForestHub] RPC: Using saved position for ", "Detective" if is_detective_role else "Sidekick", ": ", saved_pos)
+	elif spawn_marker:
 		player.global_position = spawn_marker.global_position
 	else:
 		player.global_position = Vector2(400 if is_detective_role else 200, ground_y)
@@ -300,6 +442,8 @@ func _exit_tree():
 		NetworkManager.player_connected.disconnect(_on_player_connected)
 	if NetworkManager.player_disconnected.is_connected(_on_player_disconnected):
 		NetworkManager.player_disconnected.disconnect(_on_player_disconnected)
+	if NetworkManager.partner_disconnected.is_connected(_on_partner_disconnected):
+		NetworkManager.partner_disconnected.disconnect(_on_partner_disconnected)
 	if NetworkManager.spawn_player_requested.is_connected(_on_spawn_player_requested):
 		NetworkManager.spawn_player_requested.disconnect(_on_spawn_player_requested)
 	if NetworkManager.despawn_player_requested.is_connected(_on_despawn_player_requested):
@@ -317,7 +461,3 @@ func _input(event):
 		for child in get_children():
 			if child is CharacterBody2D:
 				print("  Node: ", child.name, " role=", child.role, " pos=", child.global_position)
-
-
-func _on_exit_mainMenu_button_pressed() -> void:
-	pass # Replace with function body.

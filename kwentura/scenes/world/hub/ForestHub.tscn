@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=4 uid="uid://c65bu18udl64v"]
+[gd_scene load_steps=21 format=4 uid="uid://c65bu18udl64v"]
 
 [ext_resource type="Texture2D" uid="uid://k60h4yhhde0x" path="res://assets/backgrounds/forest2.png" id="2_87r7r"]
 [ext_resource type="Texture2D" uid="uid://d06a48u2atl4o" path="res://assets/sprites/places/PinasHouse.png" id="2_anhpr"]
@@ -9,8 +9,10 @@
 [ext_resource type="Script" uid="uid://dhq7o8y147g37" path="res://scripts/world/hub/forest_hub.gd" id="6_forest_hub"]
 [ext_resource type="PackedScene" uid="uid://i2gpufiq0ql0" path="res://scenes/controls/TouchControls.tscn" id="7_6nmbo"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="8_ggw0p"]
-[ext_resource type="Texture2D" uid="uid://bhxj8dd714vd8" path="res://assets/buttons/closebtn.png" id="9_dyw7g"]
-[ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exit.png" id="11_4f0r4"]
+[ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/play.png" id="11_i1yoq"]
+[ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settings.png" id="12_aispg"]
+[ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exit.png" id="13_cpdo7"]
+[ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/back2.png" id="14_wp30c"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6nmbo"]
 size = Vector2(1.0549998, 20)
@@ -18,7 +20,7 @@ size = Vector2(1.0549998, 20)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_87r7r"]
 size = Vector2(206, 361)
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ggw0p"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4f0r4"]
 texture = ExtResource("2_k5ulr")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
@@ -817,7 +819,7 @@ texture = ExtResource("2_k5ulr")
 [sub_resource type="TileSet" id="TileSet_dyw7g"]
 physics_layer_0/collision_layer = 1
 physics_layer_0/collision_mask = 0
-sources/0 = SubResource("TileSetAtlasSource_ggw0p")
+sources/0 = SubResource("TileSetAtlasSource_4f0r4")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4f0r4"]
 bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
@@ -894,6 +896,10 @@ position = Vector2(28, -1)
 
 [node name="OldWell" type="Area2D" parent="Zone Portals"]
 position = Vector2(3405, 750)
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("3_dyw7g")
+scene_path = "res://scenes/world/zones/oldWell/OldWell.tscn"
 
 [node name="Sprite2D" type="Sprite2D" parent="Zone Portals/OldWell"]
 position = Vector2(-5.0000877, -16.749973)
@@ -909,6 +915,10 @@ position = Vector2(28, -1)
 
 [node name="StorageHut" type="Area2D" parent="Zone Portals"]
 position = Vector2(4563, 750)
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("3_dyw7g")
+scene_path = "res://scenes/world/zones/storageHut/StorageHut.tscn"
 
 [node name="Sprite2D" type="Sprite2D" parent="Zone Portals/StorageHut"]
 position = Vector2(-158, -303)
@@ -924,6 +934,10 @@ position = Vector2(28, -1)
 
 [node name="Backyard" type="Area2D" parent="Zone Portals"]
 position = Vector2(6036, 750)
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("3_dyw7g")
+scene_path = "res://scenes/world/zones/backyardPath/BackyardPath.tscn"
 
 [node name="Sprite2D" type="Sprite2D" parent="Zone Portals/Backyard"]
 position = Vector2(-158, -303)
@@ -939,6 +953,10 @@ position = Vector2(28, -1)
 
 [node name="AbandonedHouse" type="Area2D" parent="Zone Portals"]
 position = Vector2(7501, 750)
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("3_dyw7g")
+scene_path = "res://scenes/world/zones/abandonedHouse/AbandonedHouse.tscn"
 
 [node name="Sprite2D" type="Sprite2D" parent="Zone Portals/AbandonedHouse"]
 position = Vector2(-158, -303)
@@ -969,15 +987,26 @@ position = Vector2(0, 720)
 
 [node name="TouchControls" parent="." instance=ExtResource("7_6nmbo")]
 
-[node name="InGameOptionPanel" type="Panel" parent="."]
+[node name="PauseCanvasLayer" type="CanvasLayer" parent="."]
+process_mode = 3
+layer = 100
+
+[node name="InGamePausePanel" type="Panel" parent="PauseCanvasLayer"]
 visible = false
-offset_left = 841.0
-offset_top = 99.0
-offset_right = 1581.5
-offset_bottom = 685.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -434.25
+offset_top = -380.0
+offset_right = 434.25
+offset_bottom = 380.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_4f0r4")
 
-[node name="Label" type="Label" parent="InGameOptionPanel"]
+[node name="TitleLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
@@ -986,75 +1015,144 @@ offset_bottom = 144.0
 grow_horizontal = 2
 theme_override_fonts/font = ExtResource("8_ggw0p")
 theme_override_font_sizes/font_size = 55
-text = "Options"
+text = "Game Paused!"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Back" type="TouchScreenButton" parent="InGameOptionPanel"]
-position = Vector2(9, 9.000002)
-scale = Vector2(0.21166667, 0.21166667)
-texture_normal = ExtResource("9_dyw7g")
-
-[node name="ExitToMainMenuButton" type="TextureButton" parent="InGameOptionPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseCanvasLayer/InGamePausePanel"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -270.25
-offset_top = 188.0
-offset_right = 1774.7495
-offset_bottom = 488.0
+offset_left = -259.5
+offset_top = -206.0
+offset_right = 311.5
+offset_bottom = 340.0
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(0.2, 0.2)
-texture_normal = ExtResource("11_4f0r4")
-stretch_mode = 5
+scale = Vector2(0.9, 0.9)
+theme_override_constants/separation = 10
 
-[node name="Label2" type="Label" parent="InGameOptionPanel/ExitToMainMenuButton"]
+[node name="Resume_PlayButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("11_i1yoq")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/VBoxContainer/Resume_PlayButton"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
+anchors_preset = 4
 anchor_top = 0.5
-anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 190.00009
-offset_top = -45.5
-offset_right = 944.0001
-offset_bottom = 45.5
-grow_horizontal = 2
+offset_left = 220.0
+offset_top = -20.0
+offset_right = 506.0
+offset_bottom = 20.0
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("8_ggw0p")
-theme_override_font_sizes/font_size = 90
+theme_override_font_sizes/font_size = 40
+text = "Resume Game"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OptionButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("12_aispg")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/VBoxContainer/OptionButton"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 220.0
+offset_top = -20.0
+offset_right = 348.0
+offset_bottom = 20.0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("8_ggw0p")
+theme_override_font_sizes/font_size = 40
+text = "Option"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ExitButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("13_cpdo7")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/VBoxContainer/ExitButton"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 220.0
+offset_top = -20.0
+offset_right = 556.0
+offset_bottom = 20.0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("8_ggw0p")
+theme_override_font_sizes/font_size = 40
 text = "Exit to Main Menu"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="InGameOptionPanel"]
+[node name="OptionSubPanel" type="Panel" parent="PauseCanvasLayer/InGamePausePanel"]
+visible = false
+layout_mode = 0
+offset_right = 868.0
+offset_bottom = 759.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_4f0r4")
+
+[node name="OptionLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 35.0
+offset_bottom = 144.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("8_ggw0p")
+theme_override_font_sizes/font_size = 55
+text = "Option:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackToPrevious" type="TouchScreenButton" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+position = Vector2(20, 10)
+scale = Vector2(0.3, 0.3)
+texture_normal = ExtResource("14_wp30c")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -300.25
-offset_top = -94.0
-offset_right = 300.25
-offset_bottom = -62.5
+offset_left = -345.6875
+offset_top = -124.5
+offset_right = 345.6875
+offset_bottom = -82.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 30
+theme_override_constants/separation = 35
 
-[node name="VolumeLabel" type="Label" parent="InGameOptionPanel/HBoxContainer"]
+[node name="VolumeLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("8_ggw0p")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 40
 text = "Music Volume:"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="VolumeSlider" type="HSlider" parent="InGameOptionPanel/HBoxContainer"]
+[node name="VolumeSlider" type="HSlider" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
@@ -1063,13 +1161,15 @@ theme_override_styles/grabber_area = SubResource("StyleBoxLine_qvhdv")
 theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_qvhdv")
 value = 80.0
 
-[node name="VolumeValue" type="Label" parent="InGameOptionPanel/HBoxContainer"]
+[node name="VolumeValue" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 30
 text = "80%"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[connection signal="pressed" from="InGameOptionPanel/Back" to="." method="_on_in_game_settings_back_pressed"]
-[connection signal="pressed" from="InGameOptionPanel/ExitToMainMenuButton" to="." method="_on_exit_mainMenu_button_pressed"]
-[connection signal="value_changed" from="InGameOptionPanel/HBoxContainer/VolumeSlider" to="." method="_on_in_game_volume_changed"]
+[connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/VBoxContainer/Resume_PlayButton" to="." method="_on_resume_play_button_pressed"]
+[connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/VBoxContainer/OptionButton" to="." method="_on_option_button_pressed"]
+[connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/VBoxContainer/ExitButton" to="." method="_on_exit_to_main_menu_button_pressed"]
+[connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/BackToPrevious" to="." method="_on_in_game_option_back_pressed"]
+[connection signal="value_changed" from="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer/VolumeSlider" to="." method="_on_in_game_volume_changed"]

@@ -52,7 +52,7 @@ func _ensure_music_bus() -> void:
 func _load_tracks() -> void:
 	"""Preload all music tracks."""
 	# Main Menu / Lobby BGM
-	var main_menu_stream := load("res://audios/MainMenuBG.mp3")
+	var main_menu_stream := load("res://assets/audios/MainMenuBG.mp3")
 	if main_menu_stream:
 		# Configure for looping
 		if main_menu_stream is AudioStreamMP3 or main_menu_stream is AudioStreamOggVorbis:
@@ -62,7 +62,7 @@ func _load_tracks() -> void:
 		push_warning("[AudioControl] Failed to load MainMenuBG.mp3")
 	
 	# Forest Hub BGM
-	var forest_stream := load("res://audios/ForestBG.mp3")
+	var forest_stream := load("res://assets/audios/ForestBG.mp3")
 	if forest_stream:
 		if forest_stream is AudioStreamMP3 or forest_stream is AudioStreamOggVorbis:
 			forest_stream.loop = true

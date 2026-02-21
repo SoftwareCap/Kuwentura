@@ -3,7 +3,7 @@ extends CanvasLayer
 ## TouchControls handles visibility of on-screen touch controls
 ## The TouchScreenButton nodes automatically trigger input actions when pressed
 
-signal settings_pressed
+signal pause_pressed
 
 enum VisibilityMode {
 	AUTO,       ## Show on mobile/tablet, hide on desktop
@@ -18,7 +18,7 @@ enum VisibilityMode {
 @onready var left_button: TouchScreenButton = $Left
 @onready var right_button: TouchScreenButton = $Right
 @onready var jump_button: TouchScreenButton = $Jump
-@onready var settings_button: TouchScreenButton = $Settings
+@onready var pause_button: TouchScreenButton = $Pause
 
 
 func _notification(what: int):
@@ -34,9 +34,9 @@ func _notification(what: int):
 		if jump_button and jump_button.pressed.is_connected(_on_jump_pressed):
 			jump_button.pressed.disconnect(_on_jump_pressed)
 			jump_button.released.disconnect(_on_jump_released)
-		if settings_button and settings_button.pressed.is_connected(_on_settings_pressed):
-			settings_button.pressed.disconnect(_on_settings_pressed)
-			settings_button.released.disconnect(_on_settings_released)
+		if pause_button and pause_button.pressed.is_connected(_on_pause_pressed):
+			pause_button.pressed.disconnect(_on_pause_pressed)
+			pause_button.released.disconnect(_on_pause_released)
 
 var _is_visible: bool = true
 
@@ -52,8 +52,8 @@ func _ready():
 		_original_scales[right_button] = right_button.scale
 	if jump_button:
 		_original_scales[jump_button] = jump_button.scale
-	if settings_button:
-		_original_scales[settings_button] = settings_button.scale
+	if pause_button:
+		_original_scales[pause_button] = pause_button.scale
 	
 	_connect_button_signals()
 	_apply_visibility_mode()
@@ -70,9 +70,9 @@ func _connect_button_signals():
 	if jump_button:
 		jump_button.pressed.connect(_on_jump_pressed)
 		jump_button.released.connect(_on_jump_released)
-	if settings_button:
-		settings_button.pressed.connect(_on_settings_pressed)
-		settings_button.released.connect(_on_settings_released)
+	if pause_button:
+		pause_button.pressed.connect(_on_pause_pressed)
+		pause_button.released.connect(_on_pause_released)
 
 
 func _apply_visibility_mode():
@@ -142,9 +142,9 @@ func set_jump_enabled(enabled: bool):
 	jump_button.visible = enabled
 
 
-func set_settings_enabled(enabled: bool):
-	if settings_button:
-		settings_button.visible = enabled
+func set_pause_enabled(enabled: bool):
+	if pause_button:
+		pause_button.visible = enabled
 
 
 ## Check if controls are currently visible
@@ -178,11 +178,11 @@ func _on_jump_released() -> void:
 	_animate_button_press(jump_button, false)
 
 
-func _on_settings_pressed() -> void:
-	_animate_button_press(settings_button, true)
-	print("[TouchControls] Settings button pressed, emitting signal")
-	settings_pressed.emit()
+func _on_pause_pressed() -> void:
+	_animate_button_press(pause_button, true)
+	print("[TouchControls] Pause button pressed, emitting signal")
+	pause_pressed.emit()
 
 
-func _on_settings_released() -> void:
-	_animate_button_press(settings_button, false)
+func _on_pause_released() -> void:
+	_animate_button_press(pause_button, false)
