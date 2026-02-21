@@ -42,6 +42,34 @@ func _ready():
 	if not cancel_button.pressed.is_connected(_on_cancel_pressed):
 		cancel_button.pressed.connect(_on_cancel_pressed)
 
+	# Check if game is already in progress (rejoining scenario)
+	# Use a deferred check to ensure NetworkManager has processed any pending RPCs
+	_call_join_if_playing()
+
+
+## Deferred check to see if we should join immediately
+func _call_join_if_playing():
+	await get_tree().process_frame
+	
+	if not is_inside_tree():
+		return
+	
+	if NetworkManager.is_playing():
+		print("[SidekickWaiting] Game already in progress, joining immediately...")
+		get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
+		return
+	
+	# If we're connected but not playing yet, the host will send game_started soon
+	# Also check after a short delay in case the RPC is delayed
+	await get_tree().create_timer(0.5).timeout
+	
+	if not is_inside_tree():
+		return
+		
+	if NetworkManager.is_playing():
+		print("[SidekickWaiting] Game started during wait, joining now...")
+		get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
+
 	# Show both avatars immediately
 	# Detective (host) on the left
 	if detective_sprite:
@@ -102,6 +130,13 @@ func _on_partner_connected(_data: Dictionary):
 
 
 func _on_game_started(_checkpoint: String = ""):
+	print("[SidekickWaiting] Game started signal received!")
+	
+	# Prevent duplicate scene changes
+	if not is_inside_tree():
+		print("[SidekickWaiting] Not in tree, ignoring game_started")
+		return
+	
 	status_label.text = "Starting game..."
 
 	# Fade out
@@ -119,8 +154,7 @@ func _on_game_started(_checkpoint: String = ""):
 		print("[SidekickWaiting] SceneTree is null, cannot change scene")
 		return
 
-	# Go to opening cutscene
-	# change this file into res://scenes/cutscenes/OpeningCutscene.tscn
+	# Go to game
 	tree.change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 
 

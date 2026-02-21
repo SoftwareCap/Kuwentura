@@ -1,11 +1,49 @@
-extends Node
+extends Node2D
+
+## Storage Hut - Test zone with position save/restore
+
+@onready var role_label: Label = %RoleLabel
+@onready var back_button: Button = $BackButton
+
+var clue_collected: bool = false
 
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass  # Replace with function body.
+func _ready():
+	print("[StorageHut] Scene loaded!")
+	
+	var role_text = "Unknown"
+	match GameState.local_role:
+		GameState.Role.DETECTIVE:
+			role_text = "DETECTIVE (Host)"
+		GameState.Role.SIDEKICK:
+			role_text = "SIDEKICK (Client)"
+		_:
+			role_text = "NO ROLE ASSIGNED"
+	
+	role_label.text = "Role: " + role_text
+	print("[StorageHut] Local role: ", role_text, " | Peer ID: ", multiplayer.get_unique_id())
+	
+	var saved_pos = GameState.get_spawn_position(multiplayer.get_unique_id())
+	if saved_pos != Vector2.ZERO:
+		print("[StorageHut] Will return to Forest Hub at position: ", saved_pos)
+	
+	GameState.clue_collected.connect(_on_clue_collected)
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
-	pass
+func _on_back_pressed():
+	print("[StorageHut] Returning to Forest Hub...")
+	_return_to_forest()
+
+
+func _on_clue_collected(zone_id: String, _clue_data: Dictionary):
+	if zone_id == "storage_hut" and not clue_collected:
+		clue_collected = true
+		print("[StorageHut] Clue collected! Auto-returning in 3 seconds...")
+		role_label.text = "Clue collected! Returning..."
+		await get_tree().create_timer(3.0).timeout
+		_return_to_forest()
+
+
+func _return_to_forest():
+	print("[StorageHut] Teleporting back to Forest Hub")
+	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")

@@ -492,6 +492,11 @@ func _on_multiplayer_peer_connected(peer_id: int):
 			"role": "sidekick"
 		})
 		emit_signal("player_joined", peer_id, Role.SIDEKICK)
+		
+		# If host is already playing, immediately tell the new sidekick to start the game
+		if _state == ConnectionState.PLAYING:
+			print("[Network] Host is already playing, sending game_started to new sidekick")
+			_game_started_rpc.rpc_id(peer_id, "forest_hub")
 	else:
 		emit_signal("player_joined", peer_id, Role.DETECTIVE)
 
