@@ -6,6 +6,7 @@ extends Node
 enum MusicTrack {
 	MAIN_MENU,      # Menu + Lobby music
 	FOREST_HUB,     # Forest hub exploration
+	PINAS_HOUSE,    # Pina's House zone
 	GAMEPLAY,       # In-game exploration
 	CLUE_FOUND,     # Short jingle (non-looping)
 	PUZZLE,         # Puzzle solving tension
@@ -69,6 +70,15 @@ func _load_tracks() -> void:
 		_tracks[MusicTrack.FOREST_HUB] = forest_stream
 	else:
 		push_warning("[AudioControl] Failed to load ForestBG.mp3")
+	
+	# Pina's House BGM
+	var pinas_house_stream := load("res://assets/audios/PinasHouseBG.mp3")
+	if pinas_house_stream:
+		if pinas_house_stream is AudioStreamMP3 or pinas_house_stream is AudioStreamOggVorbis:
+			pinas_house_stream.loop = true
+		_tracks[MusicTrack.PINAS_HOUSE] = pinas_house_stream
+	else:
+		push_warning("[AudioControl] Failed to load PinasHouseBG.mp3")
 
 
 func play_track(track: MusicTrack, fade_duration: float = 0.5) -> void:
