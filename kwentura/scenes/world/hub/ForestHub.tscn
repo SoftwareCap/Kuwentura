@@ -12,7 +12,7 @@
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/play.png" id="11_i1yoq"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settings.png" id="12_aispg"]
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exit.png" id="13_cpdo7"]
-[ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/back2.png" id="14_wp30c"]
+[ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftBack2.png" id="14_wp30c"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6nmbo"]
 size = Vector2(1.0549998, 20)
@@ -992,7 +992,6 @@ process_mode = 3
 layer = 100
 
 [node name="InGamePausePanel" type="Panel" parent="PauseCanvasLayer"]
-visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
