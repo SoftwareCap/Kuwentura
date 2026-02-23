@@ -650,6 +650,71 @@ func request_despawn_player(peer_id: int):
 	_rpc_request_despawn_player.rpc(peer_id)
 
 #------------------------------------------------------------------------------
+# COSTUME SYNC RPCs (moved here to work across different scenes)
+#------------------------------------------------------------------------------
+
+## Sync costume preview to all peers (called from lobby scenes)
+func sync_costume_preview(role: String, costume_id: String) -> void:
+	if multiplayer.has_multiplayer_peer() and multiplayer.get_peers().size() > 0:
+		_rpc_sync_costume_preview.rpc(role, costume_id)
+
+
+## Sync costume confirmation to all peers (called from lobby scenes)
+func sync_costume_confirmed(role: String, costume_id: String) -> void:
+	if multiplayer.has_multiplayer_peer() and multiplayer.get_peers().size() > 0:
+		_rpc_sync_costume_confirmed.rpc(role, costume_id)
+
+
+## Send full costume state to a specific peer (called when new player joins)
+func send_costume_state_to_client(target_peer: int) -> void:
+	_rpc_send_full_costume_state.rpc_id(target_peer,
+		GameState.selected_costumes["detective"],
+		GameState.selected_costumes["sidekick"],
+		GameState._costume_confirmed_status["detective"],
+		GameState._costume_confirmed_status["sidekick"]
+	)
+
+
+@rpc("any_peer", "reliable")
+func _rpc_sync_costume_preview(role: String, costume_id: String) -> void:
+	if multiplayer.get_remote_sender_id() == 0:
+		return  # Invalid sender
+	GameState.selected_costumes[role] = costume_id
+	GameState.emit_signal("costume_changed", role, costume_id)
+
+
+@rpc("any_peer", "reliable")
+func _rpc_sync_costume_confirmed(role: String, costume_id: String) -> void:
+	if multiplayer.get_remote_sender_id() == 0:
+		return  # Invalid sender
+	GameState.selected_costumes[role] = costume_id
+	GameState._costume_confirmed_status[role] = true
+	GameState.emit_signal("costume_confirmed", role, true)
+
+
+@rpc("authority", "reliable")
+func _rpc_send_full_costume_state(detective_costume: String, sidekick_costume: String,
+									  detective_confirmed: bool, sidekick_confirmed: bool) -> void:
+	GameState.selected_costumes["detective"] = detective_costume
+	GameState.selected_costumes["sidekick"] = sidekick_costume
+	GameState._costume_confirmed_status["detective"] = detective_confirmed
+	GameState._costume_confirmed_status["sidekick"] = sidekick_confirmed
+	GameState.emit_signal("costume_changed", "detective", detective_costume)
+	GameState.emit_signal("costume_changed", "sidekick", sidekick_costume)
+
+
+## Notify sidekick that host is leaving (called before disconnect)
+func notify_host_leaving() -> void:
+	if multiplayer.has_multiplayer_peer() and multiplayer.get_peers().size() > 0:
+		_rpc_notify_host_leaving.rpc()
+
+
+@rpc("authority", "reliable")
+func _rpc_notify_host_leaving() -> void:
+	# Sidekick receives this - could emit a signal if needed
+	emit_signal("game_paused", "host_leaving")
+
+#------------------------------------------------------------------------------
 # Helpers
 #------------------------------------------------------------------------------
 
