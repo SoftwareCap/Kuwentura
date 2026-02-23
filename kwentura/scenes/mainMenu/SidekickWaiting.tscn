@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://bpwtvxm3sxvv7"]
+[gd_scene load_steps=17 format=3 uid="uid://bpwtvxm3sxvv7"]
 
 [ext_resource type="Script" uid="uid://wjhm4mlblikf" path="res://scripts/mainMenu/sidekick_waiting.gd" id="1_ipaaq"]
 [ext_resource type="Texture2D" uid="uid://w844nys0xd6n" path="res://assets/backgrounds/Lobby.png" id="2_5k5mc"]
@@ -6,10 +6,20 @@
 [ext_resource type="FontFile" uid="uid://bpff8oqdskuog" path="res://assets/fonts/Pixeled.ttf" id="4_t4fp1"]
 [ext_resource type="PackedScene" uid="uid://2ktjes4bfwlo" path="res://scenes/players/PlayerHost.tscn" id="5_pge74"]
 [ext_resource type="PackedScene" uid="uid://udt37i3bt31c" path="res://scenes/players/PlayerSidekick.tscn" id="6_4bddd"]
+[ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftBack2.png" id="7_arrow_left"]
+[ext_resource type="Texture2D" uid="uid://5hqcc5yhq64a" path="res://assets/buttons/rightBack2.png" id="8_arrow_right"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ab31o"]
 texture = ExtResource("2_5k5mc")
 modulate_color = Color(0.36659476, 0.36659455, 0.36659473, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_title"]
+font = ExtResource("4_t4fp1")
+font_size = 120
+outline_size = 8
+outline_color = Color(0, 0, 0, 0.5)
+shadow_size = 12
+shadow_color = Color(0, 0, 0, 0.4)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3m1b5"]
 bg_color = Color(1, 1, 1, 1)
@@ -17,28 +27,47 @@ corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.20392157)
-shadow_size = 5
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fbpcy"]
-bg_color = Color(0.63529414, 0.63529414, 0.63529414, 1)
+bg_color = Color(0.7, 0.7, 0.7, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.20392157)
-shadow_size = 5
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sngst"]
-bg_color = Color(0.8235294, 0.8235294, 0.8235294, 1)
+bg_color = Color(0.9, 0.9, 0.9, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.20392157)
-shadow_size = 5
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_758ce"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_role"]
+font_size = 50
+outline_size = 4
+outline_color = Color(0, 0, 0, 0.8)
+shadow_size = 6
+shadow_color = Color(0, 0, 0, 0.5)
+
+[sub_resource type="LabelSettings" id="LabelSettings_costume"]
+font = ExtResource("3_o5ctn")
+font_size = 32
+font_color = Color(1, 0.95, 0.8, 1)
+outline_size = 3
+outline_color = Color(0.2, 0.1, 0, 0.8)
+shadow_size = 4
+shadow_color = Color(0, 0, 0, 0.6)
 
 [node name="SidekickLobby" type="Control"]
 layout_mode = 3
@@ -64,14 +93,12 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -504.0
+offset_top = 40.0
 offset_right = 504.0
-offset_bottom = 336.0
+offset_bottom = 376.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0)
-theme_override_fonts/font = ExtResource("4_t4fp1")
-theme_override_font_sizes/font_size = 120
 text = "KWENTURA"
+label_settings = SubResource("LabelSettings_title")
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -88,55 +115,189 @@ offset_right = 400.0
 offset_bottom = 50.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("3_o5ctn")
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 36
 text = "Connecting to Detective..."
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CancelButton" type="Button" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
-offset_left = 92.0
-offset_top = 81.0
-offset_right = 292.0
-offset_bottom = 146.0
+offset_left = 60.0
+offset_top = 60.0
+offset_right = 220.0
+offset_bottom = 125.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
 theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
 theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_o5ctn")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 28
 theme_override_styles/normal = SubResource("StyleBoxFlat_3m1b5")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_fbpcy")
 theme_override_styles/hover = SubResource("StyleBoxFlat_sngst")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_758ce")
 text = "Cancel"
 
-[node name="PlayerHost" parent="." instance=ExtResource("5_pge74")]
-position = Vector2(380.99997, 685)
-scale = Vector2(0.7, 0.7)
+[node name="DetectiveArea" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 150.0
+offset_top = 50.0
+offset_right = 750.0
+offset_bottom = 950.0
+
+[node name="DetectiveLeftBtn" type="TextureButton" parent="DetectiveArea"]
+layout_mode = 0
+offset_left = -21.0
+offset_top = 540.0
+offset_right = 279.0
+offset_bottom = 840.0
+scale = Vector2(0.28, 0.28)
+pivot_offset = Vector2(150, 150)
+texture_normal = ExtResource("7_arrow_left")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="PlayerHost" parent="DetectiveArea" instance=ExtResource("5_pge74")]
+position = Vector2(300, 580)
+scale = Vector2(0.42, 0.42)
 motion_mode = 1
 
-[node name="DetectiveName" type="Label" parent="PlayerHost"]
-offset_left = -143.28525
-offset_top = -479.0169
-offset_right = 84.71475
-offset_bottom = -410.0169
-theme_override_font_sizes/font_size = 50
+[node name="DetectiveName" type="Label" parent="DetectiveArea/PlayerHost"]
+offset_left = -200.0
+offset_top = -520.0
+offset_right = 200.0
+offset_bottom = -450.0
 text = "Detective"
+label_settings = SubResource("LabelSettings_role")
 horizontal_alignment = 1
 
-[node name="PlayerSidekick" parent="." instance=ExtResource("6_4bddd")]
-position = Vector2(1532, 685)
-scale = Vector2(0.7, 0.7)
+[node name="DetectiveCostumeName" type="Label" parent="DetectiveArea"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 150.0
+offset_top = 755.0
+offset_right = 450.0
+offset_bottom = 805.0
+text = "Classic Outfit"
+label_settings = SubResource("LabelSettings_costume")
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="SidekickName" type="Label" parent="PlayerSidekick"]
-offset_left = -143.28525
-offset_top = -479.0169
-offset_right = 84.71475
-offset_bottom = -410.0169
-theme_override_font_sizes/font_size = 50
+[node name="DetectiveRightBtn" type="TextureButton" parent="DetectiveArea"]
+layout_mode = 0
+offset_left = 319.0
+offset_top = 540.0
+offset_right = 619.0
+offset_bottom = 840.0
+scale = Vector2(0.28, 0.28)
+pivot_offset = Vector2(150, 150)
+texture_normal = ExtResource("8_arrow_right")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="DetectiveSelectBtn" type="Button" parent="DetectiveArea"]
+layout_mode = 0
+offset_left = 175.0
+offset_top = 830.0
+offset_right = 425.0
+offset_bottom = 900.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_3m1b5")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_fbpcy")
+theme_override_styles/hover = SubResource("StyleBoxFlat_sngst")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_fbpcy")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_758ce")
+text = "Select Costume"
+
+[node name="SidekickArea" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 1170.0
+offset_top = 50.0
+offset_right = 1770.0
+offset_bottom = 950.0
+
+[node name="SidekickLeftBtn" type="TextureButton" parent="SidekickArea"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -23.0
+offset_top = 540.0
+offset_right = 277.0
+offset_bottom = 840.0
+scale = Vector2(0.28, 0.28)
+pivot_offset = Vector2(150, 150)
+texture_normal = ExtResource("7_arrow_left")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="PlayerSidekick" parent="SidekickArea" instance=ExtResource("6_4bddd")]
+position = Vector2(300, 580)
+scale = Vector2(0.42, 0.42)
+
+[node name="SidekickName" type="Label" parent="SidekickArea/PlayerSidekick"]
+offset_left = -200.0
+offset_top = -520.0
+offset_right = 200.0
+offset_bottom = -450.0
 text = "Sidekick"
+label_settings = SubResource("LabelSettings_role")
 horizontal_alignment = 1
+
+[node name="SidekickRightBtn" type="TextureButton" parent="SidekickArea"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 317.0
+offset_top = 540.0
+offset_right = 617.0
+offset_bottom = 840.0
+scale = Vector2(0.28, 0.28)
+pivot_offset = Vector2(150, 150)
+texture_normal = ExtResource("8_arrow_right")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="SidekickCostumeName" type="Label" parent="SidekickArea"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 150.0
+offset_top = 755.0
+offset_right = 450.0
+offset_bottom = 805.0
+text = "Classic Outfit"
+label_settings = SubResource("LabelSettings_costume")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SidekickSelectBtn" type="Button" parent="SidekickArea"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 175.0
+offset_top = 830.0
+offset_right = 425.0
+offset_bottom = 900.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_3m1b5")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_fbpcy")
+theme_override_styles/hover = SubResource("StyleBoxFlat_sngst")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_fbpcy")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_758ce")
+text = "Select Costume"
 
 [connection signal="pressed" from="CancelButton" to="." method="_on_cancel_pressed"]
+[connection signal="pressed" from="SidekickArea/SidekickLeftBtn" to="." method="_on_sidekick_left_pressed"]
+[connection signal="pressed" from="SidekickArea/SidekickRightBtn" to="." method="_on_sidekick_right_pressed"]
+[connection signal="pressed" from="SidekickArea/SidekickSelectBtn" to="." method="_on_sidekick_select_pressed"]
