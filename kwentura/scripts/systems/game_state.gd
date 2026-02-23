@@ -6,6 +6,8 @@ signal all_clues_collected
 signal game_reset
 signal player_role_assigned(role: Role)
 signal data_synced
+signal costume_changed(role: String, costume_id: String)
+signal costume_confirmed(role: String, confirmed: bool)
 
 enum Role { NONE, DETECTIVE, SIDEKICK }
 enum ZoneStatus { LOCKED, AVAILABLE, COMPLETED }
@@ -82,6 +84,43 @@ var max_nightfall_attempts: int = 3
 # Saved spawn positions for returning from zones
 # Key: peer_id, Value: {position: Vector2, zone: String}
 var saved_spawn_positions: Dictionary = {}
+
+# Costume System
+# NOTE: Only classic outfit is available for now.
+const COSTUMES_IMPLEMENTED: bool = false
+
+const COSTUMES: Dictionary = {
+	"detective": [
+		{
+			"id": "default",
+			"name": "Classic Outfit",
+			"description": "The traditional detective look",
+			"sprite_folder": "Detective",
+			"unlocked": true
+		}
+	],
+	"sidekick": [
+		{
+			"id": "default",
+			"name": "Classic Outfit",
+			"description": "The traditional sidekick look",
+			"sprite_folder": "Sidekick",
+			"unlocked": true
+		}
+	]
+}
+
+# Current selections (persisted through game session)
+var selected_costumes: Dictionary = {
+	"detective": "default",
+	"sidekick": "default"
+}
+
+# Selection status for lobby UI
+var _costume_confirmed_status: Dictionary = {
+	"detective": false,
+	"sidekick": false
+}
 
 
 func _ready():
@@ -294,3 +333,47 @@ func _report_position_to_host_rpc(peer_id: int, pos: Vector2):
 	save_spawn_position(peer_id, pos, "forest_hub")
 	_broadcast_position_rpc.rpc(peer_id, pos)
 	print("[GameState] Host received and broadcast position for peer ", peer_id, ": ", pos)
+
+
+# === COSTUME SYSTEM FUNCTIONS ===
+
+func get_costumes_for_role(role: String) -> Array:
+	"""Get available costumes for a role (detective or sidekick)."""
+	return COSTUMES.get(role, [])
+
+
+func get_costume_by_id(role: String, costume_id: String) -> Dictionary:
+	"""Get costume data by role and ID. Returns first costume if not found."""
+	var costumes = get_costumes_for_role(role)
+	for costume in costumes:
+		if costume.id == costume_id:
+			return costume
+	return costumes[0] if costumes.size() > 0 else {}
+
+
+func set_selected_costume(role: String, costume_id: String):
+	"""Set the selected costume for a role."""
+	selected_costumes[role] = costume_id
+	emit_signal("costume_changed", role, costume_id)
+
+
+func get_selected_costume(role: String) -> String:
+	"""Get the selected costume ID for a role."""
+	return selected_costumes.get(role, "default")
+
+
+func confirm_costume_selection(role: String, confirmed: bool = true):
+	"""Confirm or unconfirm costume selection for a role."""
+	_costume_confirmed_status[role] = confirmed
+	emit_signal("costume_confirmed", role, confirmed)
+
+
+func is_costume_confirmed(role: String) -> bool:
+	"""Check if costume selection is confirmed for a role."""
+	return _costume_confirmed_status.get(role, false)
+
+
+func reset_costume_selections():
+	"""Reset all costume selections (called on game reset)."""
+	selected_costumes = {"detective": "default", "sidekick": "default"}
+	_costume_confirmed_status = {"detective": false, "sidekick": false}
