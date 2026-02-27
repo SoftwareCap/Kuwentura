@@ -82,7 +82,12 @@ func _ready() -> void:
 			sidekick_board.solved.connect(_on_sidekick_solved)
 
 	# Prepare detective text on load (equations view)
-	_apply_unsolved_text()
+	if GameState.is_puzzle_solved("pinas_house"):
+		_apply_solved_text()
+		if is_instance_valid(sidekick_board) and sidekick_board.has_method("apply_solved_view"):
+			sidekick_board.apply_solved_view()
+	else:
+		_apply_unsolved_text()
 
 
 func _setup_pause_controls():
@@ -196,7 +201,10 @@ func _on_note_interacted() -> void:
 
 	if GameState.local_role == GameState.Role.DETECTIVE:
 		detective_board.visible = true
-		_apply_unsolved_text()
+		if GameState.is_puzzle_solved("pinas_house"):
+			_apply_solved_text()
+		else:
+			_apply_unsolved_text()
 	elif GameState.local_role == GameState.Role.SIDEKICK:
 		sidekick_board.visible = true
 		if sidekick_board.has_method("open_board"):
@@ -249,7 +257,12 @@ func _on_sidekick_solved() -> void:
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_pinas_house_solved() -> void:
+	GameState.set_puzzle_solved("pinas_house", true)
 	_apply_solved_text()
+
+	# Sidekick board needs to show the solved values on reopen too
+	if is_instance_valid(sidekick_board) and sidekick_board.has_method("apply_solved_view"):
+		sidekick_board.apply_solved_view()
 
 
 func update_role_visibility() -> void:
