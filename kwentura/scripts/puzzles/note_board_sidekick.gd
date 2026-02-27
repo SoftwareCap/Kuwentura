@@ -33,9 +33,17 @@ func _ready() -> void:
 
 	# Manual submit (no lambda)
 	submit.pressed.connect(_on_submit_pressed)
-
+	if GameState.is_puzzle_solved("pinas_house"):
+			apply_solved_view()
+			
 func open_board() -> void:
 	feedback.text = ""
+
+	# If already solved, keep showing the solved values
+	if GameState.is_puzzle_solved("pinas_house"):
+		apply_solved_view()
+		return
+
 	x_input.text = ""
 	y_input.text = ""
 	if GameState.local_role == GameState.Role.SIDEKICK:
@@ -80,3 +88,21 @@ func _check_answer(realtime: bool) -> void:
 	else:
 		if not realtime:
 			feedback.text = "Incorrect. Try again."
+
+func apply_solved_view() -> void:
+	var z_val := int(solution.get("z", 0))
+	var x_val := int(solution.get("x", 0))
+	var y_val := int(solution.get("y", 0))
+
+	# Hide inputs after solved
+	x_input.visible = false
+	y_input.visible = false
+	submit.visible = false
+
+	# Show solved text same as detective
+	equation.text = (
+		"Cooking Tools Inventory \n\n"
+		+ "Pot (z) = %d\nPan (y) = %d\nLadle (x) = %d" % [z_val, y_val, x_val]
+	)
+
+	feedback.text = "Solved."
