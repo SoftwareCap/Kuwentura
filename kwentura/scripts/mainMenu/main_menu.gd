@@ -1,14 +1,19 @@
 extends Control
 
-@onready var host_button = $VBoxContainer/Button
-@onready var join_button = $VBoxContainer/Button2
-@onready var exit_button = $VBoxContainer/Button3
+@onready var host_button: TextureButton = $HostButton
+@onready var join_button: TextureButton = $JoinButton
+@onready var exit_button = $ExitButton
 @onready var status_label = $StatusLabel
 @onready var settings_control: CanvasLayer = $SettingsControl
 @onready var settings_panel: Panel = $SettingsPanel
-@onready var volume_slider: HSlider = $SettingsPanel/HBoxContainer/VolumeSlider
-@onready var volume_value_label: Label = $SettingsPanel/HBoxContainer/VolumeValue
+@onready var volume_slider: HSlider = $SettingsPanel/VolumeSliderControl/VolumeSlider
+@onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
 @onready var back_button: TouchScreenButton = $SettingsPanel/Back
+
+# User Auth
+@onready var sign_in_button: Button = $SettingsPanel/UserSection/AuthButtons/SignInButton
+@onready var guest_button: Button = $SettingsPanel/UserSection/AuthButtons/GuestButton
+@onready var link_google_button: Button = $SettingsPanel/UserSection/AuthButtons/LinkGoogleButton
 
 # Sidekick Join Popup nodes
 @onready var sidekick_popup: Panel = $SidekickPopup
