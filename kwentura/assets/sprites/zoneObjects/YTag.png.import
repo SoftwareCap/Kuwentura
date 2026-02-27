@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://w844nys0xd6n"
-path="res://.godot/imported/lobby.png-47a2159023bf7d5f6ba604b9f9aa4222.ctex"
+uid="uid://dn6x00uyfvwyr"
+path="res://.godot/imported/YTag.png-0c22c25cb68051a553eadd8deb7234a8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/backgrounds/lobby.png"
-dest_files=["res://.godot/imported/lobby.png-47a2159023bf7d5f6ba604b9f9aa4222.ctex"]
+source_file="res://assets/sprites/zoneObjects/YTag.png"
+dest_files=["res://.godot/imported/YTag.png-0c22c25cb68051a553eadd8deb7234a8.ctex"]
 
 [params]
 

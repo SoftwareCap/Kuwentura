@@ -1,0 +1,360 @@
+[gd_scene load_steps=21 format=3 uid="uid://bqxqfi3lx1c22"]
+
+[ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
+[ext_resource type="Texture2D" uid="uid://biubiql2qvqqp" path="res://assets/sprites/places/Background.png" id="2_j72wi"]
+[ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
+[ext_resource type="Texture2D" uid="uid://3boff2bjwjx5" path="res://assets/sprites/zoneObjects/Pan.png" id="3_ly128"]
+[ext_resource type="Texture2D" uid="uid://c7ovr6oox2jvd" path="res://assets/sprites/zoneObjects/Ladle.png" id="4_cge7x"]
+[ext_resource type="Texture2D" uid="uid://dbkyjwytwiu6v" path="res://assets/sprites/zoneObjects/Notes.png" id="4_nmqvk"]
+[ext_resource type="Texture2D" uid="uid://eq2djd03g5l" path="res://assets/sprites/zoneObjects/Pot.png" id="5_bp02q"]
+[ext_resource type="Texture2D" uid="uid://bbgo7clxxrjik" path="res://assets/sprites/zoneObjects/XTag.png" id="6_nmqvk"]
+[ext_resource type="Texture2D" uid="uid://dn6x00uyfvwyr" path="res://assets/sprites/zoneObjects/YTag.png" id="7_ly128"]
+[ext_resource type="Texture2D" uid="uid://bophcwvkbb44f" path="res://assets/sprites/zoneObjects/ZTag.png" id="8_cge7x"]
+[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/Close.png" id="11_qtbop"]
+[ext_resource type="Script" uid="uid://hufijointu80" path="res://scripts/puzzles/note_board_sidekick.gd" id="12_fqh8x"]
+[ext_resource type="FontFile" uid="uid://bpff8oqdskuog" path="res://assets/fonts/Pixeled.ttf" id="13_j72wi"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_knfr5"]
+size = Vector2(447.125, 327)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qtbop"]
+size = Vector2(486.00003, 342.5)
+
+[sub_resource type="GDScript" id="GDScript_p1gn7"]
+script/source = "extends Area2D
+
+signal note_interacted
+
+var _player_in_range := false
+
+func _ready() -> void:
+	body_entered.connect(_on_body_entered)
+	body_exited.connect(_on_body_exited)
+	input_event.connect(_on_input_event)
+
+func _on_body_entered(body: Node) -> void:
+	if body.is_in_group(\"players\") or body.name == \"Player\":
+		_player_in_range = true
+
+func _on_body_exited(body: Node) -> void:
+	if body.is_in_group(\"players\") or body.name == \"Player\":
+		_player_in_range = false
+
+func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+	if not _player_in_range:
+		return
+
+	# Mobile tap
+	if event is InputEventScreenTouch and event.pressed:
+		emit_signal(\"note_interacted\")
+		return
+
+	# Optional: still works on PC for testing
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		emit_signal(\"note_interacted\")
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qj22k"]
+size = Vector2(168.99997, 162.5002)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mq12q"]
+size = Vector2(170, 114)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pnx6a"]
+size = Vector2(234.52274, 272.73984)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qajdg"]
+size = Vector2(217, 175.5)
+
+[node name="PinasHouse" type="Node2D"]
+script = ExtResource("1_pinashouse")
+
+[node name="BackgroundLayer" type="Node2D" parent="."]
+position = Vector2(6.1035156e-05, 6.1035156e-05)
+scale = Vector2(0.99999994, 0.99999994)
+
+[node name="KitchenSprite" type="Sprite2D" parent="BackgroundLayer"]
+position = Vector2(961.50006, 545)
+scale = Vector2(0.754297, 0.7583335)
+texture = ExtResource("2_j72wi")
+
+[node name="InteractiveLayer" type="Node2D" parent="."]
+position = Vector2(6.1035156e-05, 6.1035156e-05)
+scale = Vector2(0.99999994, 0.99999994)
+
+[node name="Aswang Window" type="Area2D" parent="InteractiveLayer"]
+
+[node name="Aswang" type="CollisionShape2D" parent="InteractiveLayer/Aswang Window"]
+position = Vector2(1559, 169.99995)
+scale = Vector2(0.99999994, 0.99999994)
+shape = SubResource("RectangleShape2D_knfr5")
+
+[node name="Cabinet" type="Area2D" parent="InteractiveLayer"]
+position = Vector2(888.5, 514)
+
+[node name="Cabinet" type="CollisionShape2D" parent="InteractiveLayer/Cabinet"]
+position = Vector2(-647.49994, -339.24997)
+scale = Vector2(0.9999998, 0.9999998)
+shape = SubResource("RectangleShape2D_qtbop")
+
+[node name="Notes" type="Area2D" parent="InteractiveLayer"]
+script = SubResource("GDScript_p1gn7")
+
+[node name="NotesSprite" type="Sprite2D" parent="InteractiveLayer/Notes"]
+position = Vector2(1356, 502)
+scale = Vector2(0.81374973, 0.8862496)
+texture = ExtResource("4_nmqvk")
+
+[node name="NotesCollision" type="CollisionShape2D" parent="InteractiveLayer/Notes"]
+position = Vector2(1350.5, 503.74988)
+scale = Vector2(0.9999995, 0.9999995)
+shape = SubResource("RectangleShape2D_qj22k")
+
+[node name="PanProp" type="Area2D" parent="InteractiveLayer"]
+
+[node name="Pan" type="Sprite2D" parent="InteractiveLayer/PanProp"]
+position = Vector2(1539, 784)
+scale = Vector2(0.1476875, 0.13712502)
+texture = ExtResource("3_ly128")
+
+[node name="PanCollision" type="CollisionShape2D" parent="InteractiveLayer/PanProp"]
+position = Vector2(1501, 812.9999)
+scale = Vector2(0.99999994, 0.99999994)
+shape = SubResource("RectangleShape2D_mq12q")
+
+[node name="LadleProp" type="Area2D" parent="InteractiveLayer"]
+position = Vector2(963.00006, 543.00006)
+scale = Vector2(0.66944444, 0.66913587)
+
+[node name="Sprite2D" type="Sprite2D" parent="InteractiveLayer/LadleProp"]
+position = Vector2(-1262.2407, 316.82648)
+scale = Vector2(0.25137872, 0.18106727)
+texture = ExtResource("4_cge7x")
+
+[node name="LadleCollision" type="CollisionShape2D" parent="InteractiveLayer/LadleProp"]
+position = Vector2(-1260.0002, 311.2223)
+scale = Vector2(1, 0.9999999)
+shape = SubResource("RectangleShape2D_pnx6a")
+
+[node name="PotProp" type="Area2D" parent="InteractiveLayer"]
+
+[node name="Pot" type="Sprite2D" parent="InteractiveLayer/PotProp"]
+position = Vector2(1706.0001, 811.99994)
+scale = Vector2(0.35337502, 0.359125)
+texture = ExtResource("5_bp02q")
+
+[node name="PotCollision" type="CollisionShape2D" parent="InteractiveLayer/PotProp"]
+position = Vector2(1703, 823)
+scale = Vector2(0.99999994, 0.99999994)
+shape = SubResource("RectangleShape2D_qajdg")
+
+[node name="RoleLayer" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="RoleLayer"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 6.0
+offset_top = -7.0
+offset_right = 1938.0
+offset_bottom = 1091.0
+mouse_filter = 2
+
+[node name="DetectiveOverlays" type="Control" parent="RoleLayer/Control"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+
+[node name="XTag" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
+layout_mode = 0
+offset_left = 737.0
+offset_top = 167.0
+offset_right = 833.0
+offset_bottom = 246.0
+texture = ExtResource("6_nmqvk")
+expand_mode = 1
+
+[node name="YTag" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
+layout_mode = 0
+offset_left = 950.0
+offset_top = 172.0
+offset_right = 1033.0
+offset_bottom = 254.0
+texture = ExtResource("7_ly128")
+expand_mode = 1
+
+[node name="ZTag" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
+layout_mode = 0
+offset_left = 1145.0
+offset_top = 183.0
+offset_right = 1228.0
+offset_bottom = 255.0
+texture = ExtResource("8_cge7x")
+expand_mode = 1
+
+[node name="NoteBoardDetective" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
+layout_mode = 0
+offset_left = 352.0
+offset_top = -18.0
+offset_right = 1666.0
+offset_bottom = 1105.0
+mouse_filter = 0
+texture = ExtResource("4_nmqvk")
+expand_mode = 1
+
+[node name="Close" type="Button" parent="RoleLayer/Control/DetectiveOverlays/NoteBoardDetective"]
+layout_mode = 0
+offset_left = 104.0
+offset_top = 110.0
+offset_right = 298.0
+offset_bottom = 280.0
+theme_override_font_sizes/font_size = 28
+icon = ExtResource("11_qtbop")
+flat = true
+expand_icon = true
+
+[node name="DetectiveText" type="Label" parent="RoleLayer/Control/DetectiveOverlays/NoteBoardDetective"]
+layout_mode = 0
+offset_left = 195.0
+offset_top = 220.0
+offset_right = 1113.0
+offset_bottom = 900.0
+theme_override_colors/font_color = Color(0.021434637, 0.021434635, 0.021434633, 1)
+theme_override_colors/font_outline_color = Color(0.9955804, 0.99558026, 0.99558026, 1)
+theme_override_fonts/font = ExtResource("13_j72wi")
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+
+[node name="SidekickOverlays" type="Control" parent="RoleLayer/Control"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+
+[node name="NoteBoardSidekick" type="Control" parent="RoleLayer/Control/SidekickOverlays"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("12_fqh8x")
+
+[node name="SidekickNote" type="TextureRect" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick"]
+layout_mode = 0
+offset_left = 358.0
+offset_top = -13.0
+offset_right = 1684.0
+offset_bottom = 1113.0
+texture = ExtResource("4_nmqvk")
+
+[node name="Close" type="Button" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 88.0
+offset_right = 278.0
+offset_bottom = 277.0
+theme_override_font_sizes/font_size = 28
+icon = ExtResource("11_qtbop")
+flat = true
+expand_icon = true
+
+[node name="Equation" type="Label" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
+layout_mode = 0
+offset_left = 185.0
+offset_top = 233.0
+offset_right = 1119.0
+offset_bottom = 928.0
+theme_override_colors/font_color = Color(0.06770238, 0.0775628, 0.04980346, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("13_j72wi")
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+
+[node name="XInput" type="LineEdit" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
+layout_mode = 0
+offset_left = 789.0
+offset_top = 443.0
+offset_right = 1078.0
+offset_bottom = 563.0
+theme_override_colors/font_color = Color(0.02601382, 0.025520181, 0.022503398, 1)
+theme_override_colors/font_selected_color = Color(0.04755766, 0.047557645, 0.047557645, 1)
+theme_override_colors/caret_color = Color(0.014275194, 0.014275219, 0.014275289, 1)
+theme_override_colors/clear_button_color = Color(0.021434566, 0.021434668, 0.021434598, 1)
+theme_override_colors/clear_button_color_pressed = Color(0.017732391, 0.017732391, 0.01773239, 1)
+theme_override_fonts/font = ExtResource("13_j72wi")
+theme_override_font_sizes/font_size = 40
+placeholder_text = "Enter X"
+alignment = 1
+
+[node name="YInput" type="LineEdit" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
+layout_mode = 0
+offset_left = 778.0
+offset_top = 580.0
+offset_right = 1078.0
+offset_bottom = 700.0
+theme_override_colors/font_color = Color(0.011087546, 0.0110876, 0.011087561, 1)
+theme_override_colors/font_selected_color = Color(0.056291588, 0.056291603, 0.056291595, 1)
+theme_override_colors/caret_color = Color(0.0430391, 0.043039143, 0.04303936, 1)
+theme_override_colors/clear_button_color = Color(0.064696394, 0.0646966, 0.06469644, 1)
+theme_override_colors/clear_button_color_pressed = Color(0.043039158, 0.04303915, 0.04303915, 1)
+theme_override_fonts/font = ExtResource("13_j72wi")
+theme_override_font_sizes/font_size = 40
+placeholder_text = "Enter Y"
+alignment = 1
+
+[node name="Submit" type="Button" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
+layout_mode = 0
+offset_left = 1054.0
+offset_top = 938.0
+offset_right = 1179.0
+offset_bottom = 1017.0
+theme_override_font_sizes/font_size = 34
+text = "Submit"
+flat = true
+expand_icon = true
+
+[node name="Feedback" type="Label" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
+layout_mode = 0
+offset_left = -625.0
+offset_top = -157.0
+offset_right = -585.0
+offset_bottom = -134.0
+
+[node name="NoteTapButton" type="TextureButton" parent="RoleLayer/Control"]
+layout_mode = 0
+offset_left = 1265.0
+offset_top = 430.0
+offset_right = 1437.0
+offset_bottom = 599.0
+
+[node name="TestLabel" type="Label" parent="."]
+visible = false
+offset_left = 560.0
+offset_top = 200.0
+offset_right = 1360.0
+offset_bottom = 300.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 64
+text = "PINA'S HOUSE TEST ZONE"
+horizontal_alignment = 1
+
+[node name="RoleLabel" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+offset_left = 560.0
+offset_top = 320.0
+offset_right = 1360.0
+offset_bottom = 380.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 48
+text = "Waiting for role..."
+horizontal_alignment = 1
+
+[node name="BackButton" type="Button" parent="."]
+offset_left = 50.0
+offset_top = 50.0
+offset_right = 300.0
+offset_bottom = 120.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 32
+text = "← Back to Forest"
+
+[connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
