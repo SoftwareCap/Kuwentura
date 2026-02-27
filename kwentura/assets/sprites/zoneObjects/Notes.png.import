@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://w844nys0xd6n"
-path="res://.godot/imported/lobby.png-47a2159023bf7d5f6ba604b9f9aa4222.ctex"
+uid="uid://dbkyjwytwiu6v"
+path="res://.godot/imported/Notes.png-009ab600c667ff288e68fe6e279d0fc9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/backgrounds/lobby.png"
-dest_files=["res://.godot/imported/lobby.png-47a2159023bf7d5f6ba604b9f9aa4222.ctex"]
+source_file="res://assets/sprites/zoneObjects/Notes.png"
+dest_files=["res://.godot/imported/Notes.png-009ab600c667ff288e68fe6e279d0fc9.ctex"]
 
 [params]
 

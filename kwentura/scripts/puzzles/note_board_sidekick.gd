@@ -1,0 +1,82 @@
+extends Control
+
+@onready var equation: Label = $SidekickNote/Equation
+@onready var x_input: LineEdit = $SidekickNote/XInput
+@onready var y_input: LineEdit = $SidekickNote/YInput
+@onready var submit: Button = $SidekickNote/Submit
+@onready var feedback: Label = $SidekickNote/Feedback
+
+signal solved  # tells PinasHouse "correct answer was entered"
+
+var puzzle_data: Dictionary = {}
+var solution: Dictionary = {}
+
+func _ready() -> void:
+	# Deterministic randomized puzzle
+	puzzle_data = PuzzleManager.get_puzzle_for_zone("pinas_house")
+	solution = puzzle_data.get("solution", {})
+
+	# Sidekick sees blanks (no equations)
+	var z_val := int(solution.get("z", 0))
+	equation.text = "Cooking Tools Inventory\n\nX = \nY = \nZ = %d" % z_val
+	feedback.text = ""
+
+	# Sidekick-only gate (hard lock even if UI visibility fails)
+	var is_sidekick := GameState.local_role == GameState.Role.SIDEKICK
+	x_input.editable = is_sidekick
+	y_input.editable = is_sidekick
+	submit.disabled = not is_sidekick
+
+	# Realtime checking
+	x_input.text_changed.connect(_on_realtime_changed)
+	y_input.text_changed.connect(_on_realtime_changed)
+
+	# Manual submit (no lambda)
+	submit.pressed.connect(_on_submit_pressed)
+
+func open_board() -> void:
+	feedback.text = ""
+	x_input.text = ""
+	y_input.text = ""
+	if GameState.local_role == GameState.Role.SIDEKICK:
+		x_input.grab_focus()
+
+func _on_realtime_changed(_new_text: String) -> void:
+	_check_answer(true)  # realtime = true
+
+func _on_submit_pressed() -> void:
+	_check_answer(false)  # realtime = false
+
+func _check_answer(realtime: bool) -> void:
+	if GameState.local_role != GameState.Role.SIDEKICK:
+		return
+
+	var x_txt := x_input.text.strip_edges()
+	var y_txt := y_input.text.strip_edges()
+
+	# In realtime mode, stay quiet until they type enough
+	if x_txt.is_empty() or y_txt.is_empty():
+		if not realtime:
+			feedback.text = "Fill in X and Y."
+		return
+
+	if not x_txt.is_valid_int() or not y_txt.is_valid_int():
+		if not realtime:
+			feedback.text = "Numbers only."
+		return
+
+	var x := int(x_txt)
+	var y := int(y_txt)
+
+	var correct_x := int(solution.get("x", -999999))
+	var correct_y := int(solution.get("y", -999999))
+
+	if x == correct_x and y == correct_y:
+		feedback.text = "Correct!"
+		x_input.editable = false
+		y_input.editable = false
+		submit.disabled = true
+		emit_signal("solved")
+	else:
+		if not realtime:
+			feedback.text = "Incorrect. Try again."
