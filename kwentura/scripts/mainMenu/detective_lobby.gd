@@ -475,7 +475,7 @@ func _on_partner_connected(data: Dictionary) -> void:
 		var partner_name: String = data.get("display_name", "Sidekick")
 		
 		if is_instance_valid(status_label):
-			status_label.text = "Sidekick connected!\nClick START when ready!"
+			status_label.text = "Sidekick connected!"
 			status_label.modulate = Color(1, 1, 0)
 		
 		if is_instance_valid(start_button):
