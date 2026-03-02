@@ -27,6 +27,25 @@ extends Node2D
 
 @onready var note_btn: TextureButton = $RoleLayer/Control/NoteTapButton
 
+# Puzzle 2: cooking tool hunt (unlocked after Puzzle 1 solve)
+@onready var pan_prop: Area2D = $InteractiveLayer/PanProp
+@onready var ladle_prop: Area2D = $InteractiveLayer/LadleProp
+@onready var pot_prop: Area2D = $InteractiveLayer/PotProp
+
+@onready var pan_collision: CollisionShape2D = $InteractiveLayer/PanProp/PanCollision
+@onready var ladle_collision: CollisionShape2D = $InteractiveLayer/LadleProp/LadleCollision
+@onready var pot_collision: CollisionShape2D = $InteractiveLayer/PotProp/PotCollision
+
+const _SERVER_PEER_ID := 1
+const _TOOL_IDS := ["pan", "ladle", "pot"]
+
+var _tools_unlocked := false
+var _tools_collected := {
+	"pan": false,
+	"ladle": false,
+	"pot": false,
+}
+
 # Flag to track if clue was collected (for auto-return)
 var clue_collected: bool = false
 
@@ -75,6 +94,9 @@ func _ready() -> void:
 	# Note tap opens board (guarded)
 	if is_instance_valid(note_btn) and not note_btn.pressed.is_connected(_on_note_pressed):
 		note_btn.pressed.connect(_on_note_pressed)
+		
+	# Puzzle 2: tool hunt interactions + initial lock state
+	_setup_tool_hunt()
 
 	# Listen for sidekick solving
 	if is_instance_valid(sidekick_board) and sidekick_board.has_signal("solved"):
@@ -86,8 +108,15 @@ func _ready() -> void:
 		_apply_solved_text()
 		if is_instance_valid(sidekick_board) and sidekick_board.has_method("apply_solved_view"):
 			sidekick_board.apply_solved_view()
+			
+		# Unlock Puzzle 2 tools
+		_set_tools_unlocked_local(true)
+		
 	else:
 		_apply_unsolved_text()
+		
+		# Keep Puzzle 2 locked
+		_set_tools_unlocked_local(false)
 
 
 func _setup_pause_controls():
@@ -143,8 +172,9 @@ func _on_option_button_pressed() -> void:
 ## Back button from options
 func _on_in_game_option_back_pressed() -> void:
 	print("[PinasHouse] Back from options")
-	if option_sub_panel:
+	if option_sub_panel and option_sub_panel.visible:
 		option_sub_panel.visible = false
+		print("[PinasHouse] Option sub-panel closed, back to pause panel")
 
 
 ## Exit to Main Menu
@@ -263,7 +293,147 @@ func rpc_pinas_house_solved() -> void:
 	# Sidekick board needs to show the solved values on reopen too
 	if is_instance_valid(sidekick_board) and sidekick_board.has_method("apply_solved_view"):
 		sidekick_board.apply_solved_view()
+	
+	# Puzzle 2 unlocks now (applies on all peers because this RPC is call_local)
+	_set_tools_unlocked_local(true)
 
+# =========================
+# Puzzle 2: Tool Hunt Logic
+# =========================
+
+func _setup_tool_hunt() -> void:
+	# Lock tools first (prevents clicking before puzzle 1)
+	_set_area_pickable(pan_prop, false)
+	_set_area_pickable(ladle_prop, false)
+	_set_area_pickable(pot_prop, false)
+
+	# Connect input signals (guarded)
+	if is_instance_valid(pan_prop) and not pan_prop.input_event.is_connected(_on_tool_input_event.bind("pan")):
+		pan_prop.input_event.connect(_on_tool_input_event.bind("pan"))
+	if is_instance_valid(ladle_prop) and not ladle_prop.input_event.is_connected(_on_tool_input_event.bind("ladle")):
+		ladle_prop.input_event.connect(_on_tool_input_event.bind("ladle"))
+	if is_instance_valid(pot_prop) and not pot_prop.input_event.is_connected(_on_tool_input_event.bind("pot")):
+		pot_prop.input_event.connect(_on_tool_input_event.bind("pot"))
+
+	# Apply initial gate
+	_set_tools_unlocked_local(GameState.is_puzzle_solved("pinas_house"))
+
+
+func _on_tool_input_event(_viewport: Node, event: InputEvent, _shape_idx: int, tool_id: String) -> void:
+	# Mouse
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			_try_collect_tool(tool_id)
+			return
+
+	# Touch
+	if event is InputEventScreenTouch:
+		var st := event as InputEventScreenTouch
+		if st.pressed:
+			_try_collect_tool(tool_id)
+			return
+
+
+func _try_collect_tool(tool_id: String) -> void:
+	if not _tools_unlocked:
+		return
+	if _tools_collected.get(tool_id, false):
+		return
+
+	# Offline / singleplayer test
+	if not multiplayer.has_multiplayer_peer():
+		_server_collect_tool(tool_id, 0)
+		return
+
+	# Authoritative server validates and broadcasts
+	if multiplayer.is_server():
+		_server_collect_tool(tool_id, multiplayer.get_unique_id())
+	else:
+		rpc_request_collect_tool.rpc_id(_SERVER_PEER_ID, tool_id)
+
+
+@rpc("any_peer", "reliable")
+func rpc_request_collect_tool(tool_id: String) -> void:
+	# Runs on server only. Clients calling this will be ignored locally.
+	if not multiplayer.is_server():
+		return
+	_server_collect_tool(tool_id, multiplayer.get_remote_sender_id())
+
+
+func _server_collect_tool(tool_id: String, _sender_peer_id: int) -> void:
+	# Gate: Puzzle 1 must be solved first
+	if not GameState.is_puzzle_solved("pinas_house"):
+		return
+	if not _TOOL_IDS.has(tool_id):
+		return
+	if _tools_collected.get(tool_id, false):
+		return
+
+	# Broadcast tool removal to all peers (and apply locally)
+	rpc_set_tool_collected.rpc(tool_id)
+
+	# If all tools collected, reveal clue on BOTH screens
+	if _all_tools_collected():
+		rpc_reveal_pinas_house_clue.rpc()
+
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_set_tool_collected(tool_id: String) -> void:
+	_tools_collected[tool_id] = true
+	_apply_tool_nodes()
+
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_set_tools_unlocked(unlocked: bool) -> void:
+	_set_tools_unlocked_local(unlocked)
+
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_reveal_pinas_house_clue() -> void:
+	# Reveal in both clients by collecting locally
+	GameState.collect_clue("pinas_house")
+
+
+func _set_tools_unlocked_local(unlocked: bool) -> void:
+	_tools_unlocked = unlocked
+	_apply_tool_nodes()
+
+
+func _apply_tool_nodes() -> void:
+	_apply_single_tool("pan", pan_prop, pan_collision)
+	_apply_single_tool("ladle", ladle_prop, ladle_collision)
+	_apply_single_tool("pot", pot_prop, pot_collision)
+
+
+func _apply_single_tool(tool_id: String, area: Area2D, col: CollisionShape2D) -> void:
+	# Item exists in the world always, but can only be collected after unlock
+	var collected: bool = bool(_tools_collected.get(tool_id, false))
+	var unlocked: bool = _tools_unlocked
+
+	var can_interact: bool = unlocked and not collected
+	var should_show: bool = not collected  # visible until collected, regardless of unlock
+
+	if is_instance_valid(area):
+		area.visible = should_show
+		_set_area_pickable(area, can_interact)
+	if is_instance_valid(col):
+		col.disabled = not can_interact
+
+
+func _set_area_pickable(area: Area2D, pickable: bool) -> void:
+	if not is_instance_valid(area):
+		return
+	area.input_pickable = pickable
+	area.monitoring = pickable
+	area.monitorable = pickable
+
+
+func _all_tools_collected() -> bool:
+	for id in _TOOL_IDS:
+		if not _tools_collected.get(id, false):
+			return false
+	return true
 
 func update_role_visibility() -> void:
 	match GameState.local_role:
