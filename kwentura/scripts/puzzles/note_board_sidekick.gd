@@ -106,3 +106,16 @@ func apply_solved_view() -> void:
 	)
 
 	feedback.text = "Solved."
+	
+func set_inputs_enabled(enabled: bool) -> void:
+	# Only affects sidekick; detective should never be able to type anyway
+	if GameState.local_role != GameState.Role.SIDEKICK:
+		return
+
+	# If already solved, keep locked/hidden
+	if GameState.is_puzzle_solved("pinas_house"):
+		return
+
+	x_input.editable = enabled
+	y_input.editable = enabled
+	submit.disabled = not enabled
