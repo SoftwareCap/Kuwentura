@@ -521,12 +521,13 @@ func _apply_single_tool(tool_id: String, area: Area2D, col: CollisionShape2D) ->
 	var collected: bool = bool(_tools_collected.get(tool_id, false))
 	var unlocked: bool = _tools_unlocked
 
-	var can_interact: bool = unlocked and not collected and _search_mode
-	var should_show: bool = _search_mode and not collected  # ONLY show during search screen
+	var can_interact: bool = unlocked and not collected
+	var should_show: bool = not collected
 
 	if is_instance_valid(area):
 		area.visible = should_show
 		_set_area_pickable(area, can_interact)
+
 	if is_instance_valid(col):
 		col.disabled = not can_interact
 
