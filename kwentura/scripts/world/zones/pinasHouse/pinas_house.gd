@@ -36,6 +36,30 @@ extends Node2D
 @onready var ladle_collision: CollisionShape2D = $InteractiveLayer/LadleProp/LadleCollision
 @onready var pot_collision: CollisionShape2D = $InteractiveLayer/PotProp/PotCollision
 
+# SEARCH ROOM button (shows only after Puzzle 1 solved)
+@onready var search_btn_detective: Button = $RoleLayer/Control/DetectiveOverlays/SearchRoomButton
+@onready var search_btn_sidekick: Button = $RoleLayer/Control/SidekickOverlays/SearchRoomButton
+
+# Search Room UI overlay
+@onready var search_room_ui: CanvasLayer = $SearchRoomUI
+@onready var frame_ladle: TextureRect = $SearchRoomUI/Root/Banner/FramesRow/Frame_Ladle
+@onready var frame_pan: TextureRect = $SearchRoomUI/Root/Banner/FramesRow/Frame_Pan
+@onready var frame_pot: TextureRect = $SearchRoomUI/Root/Banner/FramesRow/Frame_Pot
+
+var _search_mode := false
+
+var _shadow_tex := {
+	"ladle": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Ladle.png"),
+	"pan": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pan.png"),
+	"pot": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pot.png"),
+}
+
+var _reveal_tex := {
+	"ladle": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Reveal - Ladle.png"),
+	"pan": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Reveal - Pan.png"),
+	"pot": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Reveal - Pot.png"),
+}
+
 const _SERVER_PEER_ID := 1
 const _TOOL_IDS := ["pan", "ladle", "pot"]
 
@@ -48,6 +72,8 @@ var _tools_collected := {
 
 # Flag to track if clue was collected (for auto-return)
 var clue_collected: bool = false
+
+var _detective_note_seen := false  # local cache (synced via RPC)
 
 
 func _ready() -> void:
@@ -81,7 +107,7 @@ func _ready() -> void:
 	if is_instance_valid(sidekick_board):
 		sidekick_board.visible = false
 
-	# You: connect close buttons (guarded)
+# You: connect close buttons (guarded)
 	if is_instance_valid(detective_close) and not detective_close.pressed.is_connected(_close_boards):
 		detective_close.pressed.connect(_close_boards)
 	if is_instance_valid(sidekick_close) and not sidekick_close.pressed.is_connected(_close_boards):
@@ -118,6 +144,24 @@ func _ready() -> void:
 		# Keep Puzzle 2 locked
 		_set_tools_unlocked_local(false)
 
+	# Search Room UI starts hidden
+	if is_instance_valid(search_room_ui):
+		search_room_ui.visible = false
+
+	# Setup SEARCH ROOM buttons (guarded)
+	_setup_search_room_buttons()
+
+	# Initialize frames based on current collected state
+	_apply_banner_frames()
+
+	# Ensure tools are not shown until search mode is active
+	_search_mode = false
+	_apply_tool_nodes()
+	
+	# Close button is not visible
+	# _apply_close_button_visibility()
+	
+	_apply_note_interaction_gate()
 
 func _setup_pause_controls():
 	# Connect inside zone control pause button
@@ -226,27 +270,90 @@ func _on_note_pressed() -> void:
 
 
 func _on_note_interacted() -> void:
+	if _search_mode:
+		return
 	# Close both first
 	_close_boards()
 
 	if GameState.local_role == GameState.Role.DETECTIVE:
 		detective_board.visible = true
+
+		# NEW: mark as seen whenever detective opens it (first time only)
+		_mark_detective_note_seen()
+
 		if GameState.is_puzzle_solved("pinas_house"):
 			_apply_solved_text()
 		else:
 			_apply_unsolved_text()
+
 	elif GameState.local_role == GameState.Role.SIDEKICK:
 		sidekick_board.visible = true
+		
 		if sidekick_board.has_method("open_board"):
 			sidekick_board.open_board()
 
+		if sidekick_board.has_method("set_inputs_enabled"):
+			sidekick_board.set_inputs_enabled(_detective_note_seen)
+			
+	_apply_close_button_visibility()
 
-func _close_boards() -> void:
+func _mark_detective_note_seen() -> void:
+	# already marked
+	if _detective_note_seen:
+		return
+
+	# offline
+	if not multiplayer.has_multiplayer_peer():
+		_set_detective_note_seen_local(true)
+		return
+
+	# server-authoritative
+	if multiplayer.is_server():
+		_set_detective_note_seen_local(true)
+		rpc_set_detective_note_seen.rpc(true)
+	else:
+		rpc_request_detective_note_seen.rpc_id(_SERVER_PEER_ID)
+
+
+@rpc("any_peer", "reliable")
+func rpc_request_detective_note_seen() -> void:
+	if not multiplayer.is_server():
+		return
+	_set_detective_note_seen_local(true)
+	rpc_set_detective_note_seen.rpc(true)
+
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_set_detective_note_seen(seen: bool) -> void:
+	_set_detective_note_seen_local(seen)
+
+
+func _set_detective_note_seen_local(seen: bool) -> void:
+	_detective_note_seen = seen
+
+	# Tell sidekick UI to enable/disable inputs
+	if is_instance_valid(sidekick_board) and sidekick_board.has_method("set_inputs_enabled"):
+		sidekick_board.set_inputs_enabled(_detective_note_seen)
+
+func _close_boards(force: bool = false) -> void:
+	# Notes cannot be closed during Puzzle 1.
+	# They can be closed only in Search Mode (Puzzle 2), unless forced.
+	if not force and not _search_mode:
+		return
+
 	if is_instance_valid(detective_board):
 		detective_board.visible = false
 	if is_instance_valid(sidekick_board):
 		sidekick_board.visible = false
 
+func _apply_close_button_visibility() -> void:
+	# Only show close buttons during Search Room UI (Puzzle 2)
+
+	if is_instance_valid(detective_close):
+		detective_close.visible = _search_mode
+
+	if is_instance_valid(sidekick_close):
+		sidekick_close.visible = _search_mode
 
 func _apply_unsolved_text() -> void:
 	var p := PuzzleManager.get_puzzle_for_zone("pinas_house")
@@ -296,6 +403,9 @@ func rpc_pinas_house_solved() -> void:
 	
 	# Puzzle 2 unlocks now (applies on all peers because this RPC is call_local)
 	_set_tools_unlocked_local(true)
+	
+	# NEW:
+	_setup_search_room_buttons()
 
 # =========================
 # Puzzle 2: Tool Hunt Logic
@@ -382,6 +492,7 @@ func _server_collect_tool(tool_id: String, _sender_peer_id: int) -> void:
 func rpc_set_tool_collected(tool_id: String) -> void:
 	_tools_collected[tool_id] = true
 	_apply_tool_nodes()
+	_apply_banner_frames()
 
 
 @rpc("any_peer", "reliable", "call_local")
@@ -407,18 +518,73 @@ func _apply_tool_nodes() -> void:
 
 
 func _apply_single_tool(tool_id: String, area: Area2D, col: CollisionShape2D) -> void:
-	# Item exists in the world always, but can only be collected after unlock
 	var collected: bool = bool(_tools_collected.get(tool_id, false))
 	var unlocked: bool = _tools_unlocked
 
-	var can_interact: bool = unlocked and not collected
-	var should_show: bool = not collected  # visible until collected, regardless of unlock
+	var can_interact: bool = unlocked and not collected and _search_mode
+	var should_show: bool = _search_mode and not collected  # ONLY show during search screen
 
 	if is_instance_valid(area):
 		area.visible = should_show
 		_set_area_pickable(area, can_interact)
 	if is_instance_valid(col):
 		col.disabled = not can_interact
+
+func _setup_search_room_buttons() -> void:
+	var solved := GameState.is_puzzle_solved("pinas_house")
+
+	if is_instance_valid(search_btn_detective):
+		search_btn_detective.visible = solved
+		if not search_btn_detective.pressed.is_connected(_on_search_room_pressed):
+			search_btn_detective.pressed.connect(_on_search_room_pressed)
+
+	if is_instance_valid(search_btn_sidekick):
+		search_btn_sidekick.visible = solved
+		if not search_btn_sidekick.pressed.is_connected(_on_search_room_pressed):
+			search_btn_sidekick.pressed.connect(_on_search_room_pressed)
+
+func _on_search_room_pressed() -> void:
+	# Gate: must be solved first
+	if not GameState.is_puzzle_solved("pinas_house"):
+		return
+
+	# Hide SEARCH ROOM button locally
+	if is_instance_valid(search_btn_detective):
+		search_btn_detective.visible = false
+	if is_instance_valid(search_btn_sidekick):
+		search_btn_sidekick.visible = false
+
+	# Close notes locally
+	_close_boards(true)
+
+	# Open search UI locally
+	_set_search_mode_local(true)
+
+func _set_search_mode_local(enable: bool) -> void:
+	_search_mode = enable
+
+	if is_instance_valid(search_room_ui):
+		search_room_ui.visible = enable
+
+	_apply_note_interaction_gate() # NEW
+
+	_apply_tool_nodes()
+	_apply_banner_frames()
+
+func _apply_note_interaction_gate() -> void:
+	# When Search Room UI is active, block note interaction
+	var allow_note := not _search_mode
+
+	if is_instance_valid(note_btn):
+		note_btn.disabled = not allow_note
+
+func _apply_banner_frames() -> void:
+	if is_instance_valid(frame_ladle):
+		frame_ladle.texture = _reveal_tex["ladle"] if _tools_collected["ladle"] else _shadow_tex["ladle"]
+	if is_instance_valid(frame_pan):
+		frame_pan.texture = _reveal_tex["pan"] if _tools_collected["pan"] else _shadow_tex["pan"]
+	if is_instance_valid(frame_pot):
+		frame_pot.texture = _reveal_tex["pot"] if _tools_collected["pot"] else _shadow_tex["pot"]
 
 
 func _set_area_pickable(area: Area2D, pickable: bool) -> void:
