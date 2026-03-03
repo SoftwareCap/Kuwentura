@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://w844nys0xd6n"
-path="res://.godot/imported/Lobby.png-2c992b05318a5b9cacc60f35dbf258f5.ctex"
+uid="uid://c3sfa1s0d5uam"
+path="res://.godot/imported/Pina.png-2759e22258f15777d8a8e398f699e0d8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/backgrounds/Lobby.png"
-dest_files=["res://.godot/imported/Lobby.png-2c992b05318a5b9cacc60f35dbf258f5.ctex"]
+source_file="res://assets/sprites/zoneObjects/Pina.png"
+dest_files=["res://.godot/imported/Pina.png-2759e22258f15777d8a8e398f699e0d8.ctex"]
 
 [params]
 

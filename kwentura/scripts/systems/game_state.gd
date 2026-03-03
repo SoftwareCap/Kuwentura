@@ -242,6 +242,7 @@ func get_puzzle_seed(zone_id: String) -> int:
 func get_save_data() -> Dictionary:
 	return {
 		"collected_clues": collected_clues,
+		"solved_puzzles": solved_puzzles,
 		"zones_status": zones_status,
 		"current_zone": current_zone,
 		"climax_triggered": climax_triggered,
@@ -258,6 +259,8 @@ func get_save_data() -> Dictionary:
 func load_save_data(data: Dictionary):
 	if data.has("collected_clues"):
 		collected_clues = data.collected_clues
+	if data.has("solved_puzzles"):
+		solved_puzzles = data.solved_puzzles
 	if data.has("zones_status"):
 		zones_status = data.zones_status
 	if data.has("current_zone"):
@@ -377,3 +380,12 @@ func reset_costume_selections():
 	"""Reset all costume selections (called on game reset)."""
 	selected_costumes = {"detective": "default", "sidekick": "default"}
 	_costume_confirmed_status = {"detective": false, "sidekick": false}
+
+# Puzzle Completion State (per zone)
+var solved_puzzles: Dictionary = {}  # zone_id -> bool
+
+func is_puzzle_solved(zone_id: String) -> bool:
+	return bool(solved_puzzles.get(zone_id, false))
+
+func set_puzzle_solved(zone_id: String, solved: bool = true) -> void:
+	solved_puzzles[zone_id] = solved

@@ -1,13 +1,70 @@
-[gd_scene load_steps=11 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=44 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
-[ext_resource type="Texture2D" uid="uid://w844nys0xd6n" path="res://assets/backgrounds/Lobby.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://w844nys0xd6n" path="res://assets/backgrounds/lobby.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://bpeh268v43cji" path="res://assets/sprites/places/KitchenBackground.png" id="2_qj22k"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
+[ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/inventoryboard.png" id="3_k0xpg"]
+[ext_resource type="Texture2D" uid="uid://3boff2bjwjx5" path="res://assets/sprites/zoneObjects/Pan.png" id="4_d1egf"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="4_zonecontrols"]
+[ext_resource type="Texture2D" uid="uid://dorp3w7u7d4r6" path="res://assets/sprites/zoneObjects/Zone 1 Objects/14.png" id="5_j1qle"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/play.png" id="5_play"]
+[ext_resource type="Texture2D" uid="uid://eq2djd03g5l" path="res://assets/sprites/zoneObjects/Pot.png" id="6_qiked"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settings.png" id="6_settings"]
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exit.png" id="7_exit"]
+[ext_resource type="Texture2D" uid="uid://bcx3kj7n3d7p6" path="res://assets/sprites/zoneObjects/Zone 1 Objects/1.png" id="7_p8qr5"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftBack2.png" id="8_back"]
+[ext_resource type="Texture2D" uid="uid://0t43ufexjsf7" path="res://assets/sprites/zoneObjects/Zone 1 Objects/2.png" id="8_btbyq"]
+[ext_resource type="Texture2D" uid="uid://bngjcln4myt6q" path="res://assets/sprites/zoneObjects/Zone 1 Objects/4.png" id="9_g5sbh"]
+[ext_resource type="Texture2D" uid="uid://bhcics8hlpqq3" path="res://assets/sprites/zoneObjects/Zone 1 Objects/5.png" id="10_vt60f"]
+[ext_resource type="Texture2D" uid="uid://cgpsap0moh4cv" path="res://assets/sprites/zoneObjects/Zone 1 Objects/7.png" id="11_eedqa"]
+[ext_resource type="Texture2D" uid="uid://c4bq56iqqg3vk" path="res://assets/sprites/zoneObjects/Zone 1 Objects/8.png" id="12_cd1wg"]
+[ext_resource type="Texture2D" uid="uid://ulco6gp1v5ih" path="res://assets/sprites/zoneObjects/Zone 1 Objects/9.png" id="13_egl2a"]
+[ext_resource type="Texture2D" uid="uid://mu4tgb7cpi32" path="res://assets/sprites/zoneObjects/Zone 1 Objects/10.png" id="14_c70e8"]
+[ext_resource type="Script" uid="uid://hufijointu80" path="res://scripts/puzzles/note_board_sidekick.gd" id="14_p8qr5"]
+[ext_resource type="Texture2D" uid="uid://bp1p1fynalexm" path="res://assets/sprites/zoneObjects/Zone 1 Objects/11.png" id="15_dcipd"]
+[ext_resource type="Texture2D" uid="uid://bvjqibxpnaw5" path="res://assets/sprites/zoneObjects/Zone 1 Objects/13.png" id="16_u6sy3"]
+[ext_resource type="Texture2D" uid="uid://deqmdh6dbokyd" path="res://assets/sprites/zoneObjects/x.png" id="19_vt60f"]
+[ext_resource type="Texture2D" uid="uid://ci6sa4iwt7x0l" path="res://assets/sprites/zoneObjects/y.png" id="20_eedqa"]
+[ext_resource type="Texture2D" uid="uid://bcwl2rqppjo6k" path="res://assets/sprites/zoneObjects/z.png" id="21_cd1wg"]
+[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/Close.png" id="22_vt60f"]
+[ext_resource type="Texture2D" uid="uid://d2b4d66dls22f" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Banner.png" id="24_vt60f"]
+[ext_resource type="Texture2D" uid="uid://b216jsk5hyag5" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Ladle.png" id="25_eedqa"]
+[ext_resource type="Texture2D" uid="uid://llr505ongc63" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pan.png" id="26_cd1wg"]
+[ext_resource type="Texture2D" uid="uid://cnu6aahk6prn6" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pot.png" id="27_egl2a"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_btbyq"]
+size = Vector2(447.125, 536.50006)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_g5sbh"]
+size = Vector2(486.00003, 342.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vt60f"]
+size = Vector2(200.50006, 162.5002)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_eedqa"]
+size = Vector2(140, 114)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cd1wg"]
+size = Vector2(155.35278, 457.67987)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_egl2a"]
+size = Vector2(149, 105.00018)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j1qle"]
+bg_color = Color(0.5372549, 0.34901962, 0.2509804, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+border_blend = true
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pause"]
 bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
@@ -21,20 +78,180 @@ corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
-[sub_resource type="StyleBoxLine" id="StyleBoxLine_slider"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qj22k"]
+bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.65178686, 0.44065732, 0.2680916, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_k0xpg"]
 color = Color(1, 1, 1, 1)
 thickness = 6
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_d1egf"]
+color = Color(0.48324937, 0.54248023, 1, 1)
+thickness = 8
 
 [node name="PinasHouse" type="Node2D"]
 process_mode = 1
 script = ExtResource("1_pinashouse")
 
+[node name="BackgroundLayer" type="Node2D" parent="."]
+position = Vector2(6.1035156e-05, 6.1035156e-05)
+scale = Vector2(0.99999994, 0.99999994)
+
+[node name="KitchenSprite" type="Sprite2D" parent="BackgroundLayer"]
+position = Vector2(961.50006, 545)
+scale = Vector2(0.754297, 0.7583335)
+texture = ExtResource("2_qj22k")
+
+[node name="InteractiveLayer" type="Node2D" parent="."]
+position = Vector2(6.1035156e-05, 6.1035156e-05)
+scale = Vector2(0.99999994, 0.99999994)
+
+[node name="Aswang Window" type="Area2D" parent="InteractiveLayer"]
+
+[node name="Aswang" type="CollisionShape2D" parent="InteractiveLayer/Aswang Window"]
+position = Vector2(1559, 274.7499)
+scale = Vector2(0.9999999, 0.9999999)
+shape = SubResource("RectangleShape2D_btbyq")
+
+[node name="Cabinet" type="Area2D" parent="InteractiveLayer"]
+position = Vector2(888.5, 514)
+
+[node name="Cabinet" type="CollisionShape2D" parent="InteractiveLayer/Cabinet"]
+position = Vector2(-647.49994, -339.24997)
+scale = Vector2(0.9999998, 0.9999998)
+shape = SubResource("RectangleShape2D_g5sbh")
+
+[node name="Notes" type="Area2D" parent="InteractiveLayer"]
+
+[node name="NotesSprite" type="Sprite2D" parent="InteractiveLayer/Notes"]
+z_index = 6
+position = Vector2(1145.0002, 423)
+scale = Vector2(0.11359367, 0.14001945)
+texture = ExtResource("3_k0xpg")
+
+[node name="NotesCollision" type="CollisionShape2D" parent="InteractiveLayer/Notes"]
+z_index = 7
+position = Vector2(1140, 422.99997)
+scale = Vector2(0.9999994, 0.9999994)
+shape = SubResource("RectangleShape2D_vt60f")
+
+[node name="PanProp" type="Area2D" parent="InteractiveLayer"]
+
+[node name="Pan" type="Sprite2D" parent="InteractiveLayer/PanProp"]
+z_index = 1
+position = Vector2(63.999947, 773.00006)
+scale = Vector2(0.1476875, 0.13712502)
+texture = ExtResource("4_d1egf")
+
+[node name="PanCollision" type="CollisionShape2D" parent="InteractiveLayer/PanProp"]
+z_index = 1
+position = Vector2(70.999916, 797.99963)
+scale = Vector2(0.99999976, 0.99999976)
+shape = SubResource("RectangleShape2D_eedqa")
+
+[node name="LadleProp" type="Area2D" parent="InteractiveLayer"]
+position = Vector2(963.00006, 543.00006)
+scale = Vector2(0.66944444, 0.66913587)
+
+[node name="Sprite2D" type="Sprite2D" parent="InteractiveLayer/LadleProp"]
+position = Vector2(-528.051, 18.680725)
+scale = Vector2(0.49232364, 0.5435424)
+texture = ExtResource("5_j1qle")
+
+[node name="LadleCollision" type="CollisionShape2D" parent="InteractiveLayer/LadleProp"]
+position = Vector2(-560.166, 15.131348)
+scale = Vector2(1, 0.9999999)
+shape = SubResource("RectangleShape2D_cd1wg")
+
+[node name="PotProp" type="Area2D" parent="InteractiveLayer"]
+
+[node name="Pot" type="Sprite2D" parent="InteractiveLayer/PotProp"]
+z_index = 2
+position = Vector2(1703.3282, 789.10944)
+scale = Vector2(0.2613435, 0.29178125)
+texture = ExtResource("6_qiked")
+
+[node name="PotCollision" type="CollisionShape2D" parent="InteractiveLayer/PotProp"]
+z_index = 2
+position = Vector2(1706.5, 772.4998)
+scale = Vector2(0.99999964, 0.99999964)
+shape = SubResource("RectangleShape2D_egl2a")
+
+[node name="Objects" type="Node2D" parent="InteractiveLayer"]
+
+[node name="Object1" type="Sprite2D" parent="InteractiveLayer/Objects"]
+z_index = 1
+position = Vector2(51.499935, 666.49994)
+scale = Vector2(0.22453019, 0.22528514)
+texture = ExtResource("7_p8qr5")
+
+[node name="Object2" type="Sprite2D" parent="InteractiveLayer/Objects"]
+position = Vector2(142.99994, 736.99994)
+scale = Vector2(0.13176592, 0.13022472)
+texture = ExtResource("8_btbyq")
+
+[node name="Object4" type="Sprite2D" parent="InteractiveLayer/Objects"]
+z_index = 1
+position = Vector2(53.999943, 867.00006)
+scale = Vector2(0.15076688, 0.14002784)
+texture = ExtResource("9_g5sbh")
+
+[node name="Object5" type="Sprite2D" parent="InteractiveLayer/Objects"]
+position = Vector2(228.94997, 463.3)
+scale = Vector2(0.12033248, 0.10121532)
+texture = ExtResource("10_vt60f")
+
+[node name="Object7" type="Sprite2D" parent="InteractiveLayer/Objects"]
+z_index = 5
+position = Vector2(846.00006, 733.75006)
+scale = Vector2(0.32583338, 0.33592606)
+texture = ExtResource("11_eedqa")
+
+[node name="Object8" type="Sprite2D" parent="InteractiveLayer/Objects"]
+position = Vector2(858.00006, 836)
+scale = Vector2(0.15708335, 0.16296296)
+texture = ExtResource("12_cd1wg")
+
+[node name="Object9" type="Sprite2D" parent="InteractiveLayer/Objects"]
+z_index = 4
+position = Vector2(1167.0001, 713.125)
+scale = Vector2(0.17166673, 0.17907411)
+texture = ExtResource("13_egl2a")
+
+[node name="Object10" type="Sprite2D" parent="InteractiveLayer/Objects"]
+z_index = 3
+position = Vector2(1366, 789)
+scale = Vector2(0.30916667, 0.26731488)
+texture = ExtResource("14_c70e8")
+
+[node name="Object11" type="Sprite2D" parent="InteractiveLayer/Objects"]
+position = Vector2(1689.0001, 723)
+scale = Vector2(0.15583329, 0.1496297)
+texture = ExtResource("15_dcipd")
+
+[node name="Object13" type="Sprite2D" parent="InteractiveLayer/Objects"]
+z_index = 2
+position = Vector2(1670.3126, 822.625)
+scale = Vector2(0.31057286, 0.285)
+texture = ExtResource("16_u6sy3")
+
 [node name="Background" type="Sprite2D" parent="."]
+visible = false
 position = Vector2(960, 540)
 scale = Vector2(1.25, 1.06)
 texture = ExtResource("2_bg")
 
 [node name="TestLabel" type="Label" parent="."]
+visible = false
 offset_left = 560.0
 offset_top = 200.0
 offset_right = 1360.0
@@ -46,6 +263,7 @@ horizontal_alignment = 1
 
 [node name="RoleLabel" type="Label" parent="."]
 unique_name_in_owner = true
+visible = false
 offset_left = 560.0
 offset_top = 320.0
 offset_right = 1360.0
@@ -63,6 +281,292 @@ offset_bottom = 220.0
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 32
 text = "← Back to Forest"
+
+[node name="RoleLayer" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="RoleLayer"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 6.0
+offset_top = -7.0
+offset_right = 1938.0
+offset_bottom = 1091.0
+mouse_filter = 2
+
+[node name="DetectiveOverlays" type="Control" parent="RoleLayer/Control"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+
+[node name="XTag" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
+layout_mode = 0
+offset_left = 739.0
+offset_top = 90.0
+offset_right = 856.0
+offset_bottom = 185.0
+texture = ExtResource("19_vt60f")
+expand_mode = 1
+
+[node name="YTag" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
+layout_mode = 0
+offset_left = 933.0
+offset_top = 91.0
+offset_right = 1049.0
+offset_bottom = 184.0
+texture = ExtResource("20_eedqa")
+expand_mode = 1
+
+[node name="ZTag" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
+layout_mode = 0
+offset_left = 1133.0
+offset_top = 94.0
+offset_right = 1217.0
+offset_bottom = 185.0
+texture = ExtResource("21_cd1wg")
+expand_mode = 1
+
+[node name="NoteBoardDetective" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
+visible = false
+layout_mode = 0
+offset_left = 217.0
+offset_top = -282.0
+offset_right = 1811.0
+offset_bottom = 1319.0
+mouse_filter = 0
+texture = ExtResource("3_k0xpg")
+expand_mode = 1
+
+[node name="Close" type="Button" parent="RoleLayer/Control/DetectiveOverlays/NoteBoardDetective"]
+visible = false
+z_index = 8
+layout_mode = 0
+offset_left = 132.0
+offset_top = 382.0
+offset_right = 299.0
+offset_bottom = 558.0
+icon = ExtResource("22_vt60f")
+flat = true
+expand_icon = true
+
+[node name="DetectiveText" type="Label" parent="RoleLayer/Control/DetectiveOverlays/NoteBoardDetective"]
+layout_mode = 0
+offset_left = 229.0
+offset_top = 484.0
+offset_right = 1254.0
+offset_bottom = 1118.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.9955804, 0.99558026, 0.99558026, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 80
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SearchRoomButton" type="Button" parent="RoleLayer/Control/DetectiveOverlays"]
+visible = false
+layout_mode = 0
+offset_left = 721.0
+offset_top = 776.0
+offset_right = 1226.0
+offset_bottom = 873.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxFlat_j1qle")
+text = "Search Room"
+
+[node name="SidekickOverlays" type="Control" parent="RoleLayer/Control"]
+visible = false
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+
+[node name="NoteBoardSidekick" type="Control" parent="RoleLayer/Control/SidekickOverlays"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("14_p8qr5")
+
+[node name="SidekickNote" type="TextureRect" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick"]
+layout_mode = 0
+offset_left = 211.0
+offset_top = -290.0
+offset_right = 1816.0
+offset_bottom = 1323.0
+texture = ExtResource("3_k0xpg")
+expand_mode = 1
+
+[node name="Close" type="Button" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
+visible = false
+z_index = 8
+layout_mode = 0
+offset_left = 137.0
+offset_top = 394.0
+offset_right = 383.0
+offset_bottom = 560.0
+icon = ExtResource("22_vt60f")
+flat = true
+expand_icon = true
+
+[node name="Equation" type="Label" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -567.5
+offset_top = -314.5
+offset_right = 456.5
+offset_bottom = 319.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 80
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="XInput" type="LineEdit" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
+layout_mode = 0
+offset_left = 803.0
+offset_top = 743.0
+offset_right = 1051.0
+offset_bottom = 823.0
+theme_override_colors/font_color = Color(0.60784787, 0.6079192, 0.57901883, 1)
+theme_override_colors/font_selected_color = Color(0.04755766, 0.047557645, 0.047557645, 1)
+theme_override_colors/caret_color = Color(0.014275194, 0.014275219, 0.014275289, 1)
+theme_override_colors/clear_button_color = Color(0.021434566, 0.021434668, 0.021434598, 1)
+theme_override_colors/clear_button_color_pressed = Color(0.017732391, 0.017732391, 0.01773239, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 55
+placeholder_text = "Enter X"
+alignment = 1
+
+[node name="YInput" type="LineEdit" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
+layout_mode = 0
+offset_left = 804.0
+offset_top = 832.0
+offset_right = 1051.0
+offset_bottom = 911.0
+theme_override_colors/font_color = Color(0.5019608, 0.5019608, 0.5019608, 1)
+theme_override_colors/font_selected_color = Color(0.056291588, 0.056291603, 0.056291595, 1)
+theme_override_colors/caret_color = Color(0.0430391, 0.043039143, 0.04303936, 1)
+theme_override_colors/clear_button_color = Color(0.064696394, 0.0646966, 0.06469644, 1)
+theme_override_colors/clear_button_color_pressed = Color(0.043039158, 0.04303915, 0.04303915, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 55
+placeholder_text = "Enter Y"
+alignment = 1
+
+[node name="Submit" type="Button" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
+layout_mode = 0
+offset_left = 1202.0
+offset_top = 1148.0
+offset_right = 1327.0
+offset_bottom = 1227.0
+theme_override_font_sizes/font_size = 34
+text = "Submit"
+flat = true
+expand_icon = true
+
+[node name="Feedback" type="Label" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
+layout_mode = 0
+offset_left = -625.0
+offset_top = -157.0
+offset_right = -585.0
+offset_bottom = -134.0
+
+[node name="SearchRoomButton" type="Button" parent="RoleLayer/Control/SidekickOverlays"]
+visible = false
+layout_mode = 0
+offset_left = 718.0
+offset_top = 772.0
+offset_right = 1223.0
+offset_bottom = 869.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxFlat_j1qle")
+text = "Search Room"
+
+[node name="NoteTapButton" type="TextureButton" parent="RoleLayer/Control"]
+z_index = 8
+layout_mode = 0
+offset_left = 1026.0
+offset_top = 348.0
+offset_right = 1233.0
+offset_bottom = 517.0
+
+[node name="SearchRoomUI" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="Root" type="Control" parent="SearchRoomUI"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Banner" type="TextureRect" parent="SearchRoomUI/Root"]
+layout_mode = 0
+offset_left = -14.0
+offset_top = 849.0
+offset_right = 1927.0
+offset_bottom = 1119.0
+texture = ExtResource("24_vt60f")
+expand_mode = 2
+
+[node name="FramesRow" type="Control" parent="SearchRoomUI/Root/Banner"]
+anchors_preset = 0
+offset_left = 14.0
+offset_top = -849.0
+offset_right = 677.0
+offset_bottom = -297.0
+
+[node name="Frame_Ladle" type="TextureRect" parent="SearchRoomUI/Root/Banner/FramesRow"]
+custom_minimum_size = Vector2(120, 120)
+layout_mode = 0
+offset_left = 1142.0
+offset_top = 881.0
+offset_right = 1416.0
+offset_bottom = 1080.0
+size_flags_horizontal = 3
+texture = ExtResource("25_eedqa")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Frame_Pan" type="TextureRect" parent="SearchRoomUI/Root/Banner/FramesRow"]
+layout_mode = 0
+offset_left = 1473.0
+offset_top = 874.0
+offset_right = 1701.0
+offset_bottom = 1081.0
+texture = ExtResource("26_cd1wg")
+expand_mode = 1
+
+[node name="Frame_Pot" type="TextureRect" parent="SearchRoomUI/Root/Banner/FramesRow"]
+layout_mode = 0
+offset_left = 821.0
+offset_top = 870.0
+offset_right = 1070.0
+offset_bottom = 1078.0
+texture = ExtResource("27_egl2a")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="SearchRoomUI/Root"]
+layout_mode = 0
+offset_left = 274.0
+offset_top = 976.0
+offset_right = 835.0
+offset_bottom = 1032.0
+theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+theme_override_constants/line_spacing = 3
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 45
+text = "Find missing objects:"
+vertical_alignment = 2
 
 [node name="InsideZoneControl" parent="." instance=ExtResource("4_zonecontrols")]
 
@@ -185,29 +689,28 @@ vertical_alignment = 1
 
 [node name="OptionSubPanel" type="Panel" parent="PauseCanvasLayer/InGamePausePanel"]
 visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = -20.0
-offset_bottom = -20.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_pause")
+layout_mode = 0
+offset_right = 868.0
+offset_bottom = 759.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_qj22k")
 
-[node name="TitleLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+[node name="OptionLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 30.0
-offset_bottom = 90.0
+offset_top = 35.0
+offset_bottom = 144.0
 grow_horizontal = 2
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 48
-text = "Options"
+theme_override_font_sizes/font_size = 55
+text = "Option:"
 horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackToPrevious" type="TouchScreenButton" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+position = Vector2(20, 10)
+scale = Vector2(0.3, 0.3)
+texture_normal = ExtResource("8_back")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
 layout_mode = 1
@@ -216,66 +719,35 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -350.0
-offset_top = -50.0
-offset_right = 350.0
-offset_bottom = 50.0
+offset_left = -345.6875
+offset_top = -124.5
+offset_right = 345.6875
+offset_bottom = -82.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 35
 
 [node name="VolumeLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 36
-text = "Volume:"
+theme_override_font_sizes/font_size = 40
+text = "Music Volume:"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="VolumeSlider" type="HSlider" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer"]
-custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 4
-theme_override_styles/slider = SubResource("StyleBoxLine_slider")
-value = 100.0
+theme_override_styles/slider = SubResource("StyleBoxLine_k0xpg")
+theme_override_styles/grabber_area = SubResource("StyleBoxLine_d1egf")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_d1egf")
+value = 80.0
 
 [node name="VolumeValue" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 36
-text = "100%"
-
-[node name="BackToPauseButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -125.0
-offset_top = -120.0
-offset_right = 125.0
-offset_bottom = -20.0
-grow_horizontal = 2
-grow_vertical = 0
-texture_normal = ExtResource("8_back")
-ignore_texture_size = true
-stretch_mode = 4
-
-[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/BackToPauseButton"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -100.0
-offset_top = -20.0
-offset_right = 100.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 36
-text = "Back"
+theme_override_font_sizes/font_size = 30
+text = "80%"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -283,5 +755,4 @@ vertical_alignment = 1
 [connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/VBoxContainer/Resume_PlayButton" to="." method="_on_resume_play_button_pressed"]
 [connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/VBoxContainer/OptionButton" to="." method="_on_option_button_pressed"]
 [connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/VBoxContainer/ExitButton" to="." method="_on_exit_to_main_menu_button_pressed"]
-[connection signal="value_changed" from="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer/VolumeSlider" to="." method="_on_in_game_volume_changed"]
-[connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/BackToPauseButton" to="." method="_on_in_game_option_back_pressed"]
+[connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/BackToPrevious" to="." method="_on_in_game_option_back_pressed"]
