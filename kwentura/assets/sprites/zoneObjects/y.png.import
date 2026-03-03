@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://deemtl33cho1y"
-path="res://.godot/imported/Detective Dialogue.png-2e181be36b6b2a31b5e42305bb825dda.ctex"
+uid="uid://ci6sa4iwt7x0l"
+path="res://.godot/imported/y.png-6e6801dc9c46966ace65ddf098de9893.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/Detective Dialogue.png"
-dest_files=["res://.godot/imported/Detective Dialogue.png-2e181be36b6b2a31b5e42305bb825dda.ctex"]
+source_file="res://assets/sprites/zoneObjects/y.png"
+dest_files=["res://.godot/imported/y.png-6e6801dc9c46966ace65ddf098de9893.ctex"]
 
 [params]
 

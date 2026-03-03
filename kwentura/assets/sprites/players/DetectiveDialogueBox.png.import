@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://5duvlotnm43p"
-path="res://.godot/imported/Sidekick Dialogue.png-0bb6f33b6628f8d7e80200bc946ca44d.ctex"
+uid="uid://deemtl33cho1y"
+path="res://.godot/imported/DetectiveDialogueBox.png-a3d4061b2ef9c357c3fea27b47707dd0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/Sidekick Dialogue.png"
-dest_files=["res://.godot/imported/Sidekick Dialogue.png-0bb6f33b6628f8d7e80200bc946ca44d.ctex"]
+source_file="res://assets/sprites/players/DetectiveDialogueBox.png"
+dest_files=["res://.godot/imported/DetectiveDialogueBox.png-a3d4061b2ef9c357c3fea27b47707dd0.ctex"]
 
 [params]
 

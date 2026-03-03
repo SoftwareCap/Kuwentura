@@ -16,17 +16,17 @@
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftBack2.png" id="8_back"]
 [ext_resource type="Texture2D" uid="uid://0t43ufexjsf7" path="res://assets/sprites/zoneObjects/Zone 1 Objects/2.png" id="8_btbyq"]
 [ext_resource type="Texture2D" uid="uid://bngjcln4myt6q" path="res://assets/sprites/zoneObjects/Zone 1 Objects/4.png" id="9_g5sbh"]
-[ext_resource type="Texture2D" uid="uid://bbgo7clxxrjik" path="res://assets/sprites/zoneObjects/XTag.png" id="9_gvc4a"]
-[ext_resource type="Texture2D" uid="uid://dn6x00uyfvwyr" path="res://assets/sprites/zoneObjects/YTag.png" id="10_gmdug"]
 [ext_resource type="Texture2D" uid="uid://bhcics8hlpqq3" path="res://assets/sprites/zoneObjects/Zone 1 Objects/5.png" id="10_vt60f"]
 [ext_resource type="Texture2D" uid="uid://cgpsap0moh4cv" path="res://assets/sprites/zoneObjects/Zone 1 Objects/7.png" id="11_eedqa"]
-[ext_resource type="Texture2D" uid="uid://bophcwvkbb44f" path="res://assets/sprites/zoneObjects/ZTag.png" id="11_t1bjn"]
 [ext_resource type="Texture2D" uid="uid://c4bq56iqqg3vk" path="res://assets/sprites/zoneObjects/Zone 1 Objects/8.png" id="12_cd1wg"]
 [ext_resource type="Texture2D" uid="uid://ulco6gp1v5ih" path="res://assets/sprites/zoneObjects/Zone 1 Objects/9.png" id="13_egl2a"]
 [ext_resource type="Texture2D" uid="uid://mu4tgb7cpi32" path="res://assets/sprites/zoneObjects/Zone 1 Objects/10.png" id="14_c70e8"]
 [ext_resource type="Script" uid="uid://hufijointu80" path="res://scripts/puzzles/note_board_sidekick.gd" id="14_p8qr5"]
 [ext_resource type="Texture2D" uid="uid://bp1p1fynalexm" path="res://assets/sprites/zoneObjects/Zone 1 Objects/11.png" id="15_dcipd"]
 [ext_resource type="Texture2D" uid="uid://bvjqibxpnaw5" path="res://assets/sprites/zoneObjects/Zone 1 Objects/13.png" id="16_u6sy3"]
+[ext_resource type="Texture2D" uid="uid://deqmdh6dbokyd" path="res://assets/sprites/zoneObjects/x.png" id="19_vt60f"]
+[ext_resource type="Texture2D" uid="uid://ci6sa4iwt7x0l" path="res://assets/sprites/zoneObjects/y.png" id="20_eedqa"]
+[ext_resource type="Texture2D" uid="uid://bcwl2rqppjo6k" path="res://assets/sprites/zoneObjects/z.png" id="21_cd1wg"]
 [ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/Close.png" id="22_vt60f"]
 [ext_resource type="Texture2D" uid="uid://d2b4d66dls22f" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Banner.png" id="24_vt60f"]
 [ext_resource type="Texture2D" uid="uid://b216jsk5hyag5" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Ladle.png" id="25_eedqa"]
@@ -301,32 +301,33 @@ mouse_filter = 2
 
 [node name="XTag" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
 layout_mode = 0
-offset_left = 737.0
-offset_top = 167.0
-offset_right = 833.0
-offset_bottom = 246.0
-texture = ExtResource("9_gvc4a")
+offset_left = 739.0
+offset_top = 90.0
+offset_right = 856.0
+offset_bottom = 185.0
+texture = ExtResource("19_vt60f")
 expand_mode = 1
 
 [node name="YTag" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
 layout_mode = 0
-offset_left = 950.0
-offset_top = 172.0
-offset_right = 1033.0
-offset_bottom = 254.0
-texture = ExtResource("10_gmdug")
+offset_left = 933.0
+offset_top = 91.0
+offset_right = 1049.0
+offset_bottom = 184.0
+texture = ExtResource("20_eedqa")
 expand_mode = 1
 
 [node name="ZTag" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
 layout_mode = 0
-offset_left = 1145.0
-offset_top = 183.0
-offset_right = 1228.0
-offset_bottom = 255.0
-texture = ExtResource("11_t1bjn")
+offset_left = 1133.0
+offset_top = 94.0
+offset_right = 1217.0
+offset_bottom = 185.0
+texture = ExtResource("21_cd1wg")
 expand_mode = 1
 
 [node name="NoteBoardDetective" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
+visible = false
 layout_mode = 0
 offset_left = 217.0
 offset_top = -282.0
@@ -375,6 +376,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_j1qle")
 text = "Search Room"
 
 [node name="SidekickOverlays" type="Control" parent="RoleLayer/Control"]
+visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0

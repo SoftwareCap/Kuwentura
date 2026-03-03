@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bbgo7clxxrjik"
-path="res://.godot/imported/XTag.png-177365936c3bb7feb5b8aca7ba8d777f.ctex"
+uid="uid://5duvlotnm43p"
+path="res://.godot/imported/SidekickDialogueBox.png-f196f9aa64136ffeeb1165178f14e7d4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/XTag.png"
-dest_files=["res://.godot/imported/XTag.png-177365936c3bb7feb5b8aca7ba8d777f.ctex"]
+source_file="res://assets/sprites/players/SidekickDialogueBox.png"
+dest_files=["res://.godot/imported/SidekickDialogueBox.png-f196f9aa64136ffeeb1165178f14e7d4.ctex"]
 
 [params]
 
