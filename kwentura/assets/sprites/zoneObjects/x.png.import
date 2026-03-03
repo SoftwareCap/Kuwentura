@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bophcwvkbb44f"
-path="res://.godot/imported/ZTag.png-5ccc86e34fa544d607f01446bd000804.ctex"
+uid="uid://deqmdh6dbokyd"
+path="res://.godot/imported/x.png-041de107f4173e36290fa9935f2821bf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/ZTag.png"
-dest_files=["res://.godot/imported/ZTag.png-5ccc86e34fa544d607f01446bd000804.ctex"]
+source_file="res://assets/sprites/zoneObjects/x.png"
+dest_files=["res://.godot/imported/x.png-041de107f4173e36290fa9935f2821bf.ctex"]
 
 [params]
 
