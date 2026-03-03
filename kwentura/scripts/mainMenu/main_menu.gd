@@ -2,7 +2,7 @@ extends Control
 
 @onready var host_button: TextureButton = $HostButton
 @onready var join_button: TextureButton = $JoinButton
-@onready var exit_button = $ExitButton
+@onready var exit_button: TextureButton = $ExitButton
 @onready var status_label = $StatusLabel
 @onready var settings_control: CanvasLayer = $SettingsControl
 @onready var settings_panel: Panel = $SettingsPanel
@@ -34,21 +34,25 @@ func _ready():
 	# Load saved settings
 	_load_settings()
 	
-	# Connect button signals
-	if not host_button.pressed.is_connected(_on_host_pressed):
-		host_button.pressed.connect(_on_host_pressed)
-	if not join_button.pressed.is_connected(_on_join_pressed):
-		join_button.pressed.connect(_on_join_pressed)
-	if not exit_button.pressed.is_connected(_on_exit_pressed):
-		exit_button.pressed.connect(_on_exit_pressed)
+	# Setup visual feedback for main menu buttons
+	_setup_button_visuals(host_button)
+	_setup_button_visuals(join_button)
+	_setup_button_visuals(exit_button)
+	
+	# Connect button signals (use button_down/button_up for visuals, pressed for action)
+	_connect_texture_button(host_button, _on_host_pressed)
+	_connect_texture_button(join_button, _on_join_pressed)
+	_connect_texture_button(exit_button, _on_exit_pressed)
 
 	# Connect settings signals
 	if settings_control and not settings_control.settings_pressed.is_connected(_on_settings_pressed):
 		settings_control.settings_pressed.connect(_on_settings_pressed)
 	
 	# Connect settings panel signals
+	# TouchScreenButton uses "pressed" signal but it's different from TextureButton
 	if back_button and not back_button.pressed.is_connected(_on_back_settings_pressed):
 		back_button.pressed.connect(_on_back_settings_pressed)
+	
 	if volume_slider and not volume_slider.value_changed.is_connected(_on_volume_changed):
 		volume_slider.value_changed.connect(_on_volume_changed)
 	
@@ -73,6 +77,47 @@ func _ready():
 		NetworkManager.room_code_generated.connect(_on_room_code_generated)
 	if not NetworkManager.game_started.is_connected(_on_game_started):
 		NetworkManager.game_started.connect(_on_game_started)
+
+
+# NEW: Setup visual pressed feedback for buttons
+func _setup_button_visuals(button: TextureButton):
+	if not button:
+		push_warning("Button is null, cannot setup visuals")
+		return
+	
+	# Make sure pivot is centered for scaling
+	button.pivot_offset = button.size / 2
+	
+	# Connect visual feedback signals
+	button.button_down.connect(_on_button_down.bind(button))
+	button.button_up.connect(_on_button_up.bind(button))
+
+
+func _on_button_down(button: TextureButton):
+	# Scale down when pressed (like touch feedback)
+	var tween = create_tween()
+	tween.set_ease(Tween.EASE_OUT)
+	tween.set_trans(Tween.TRANS_QUAD)
+	tween.tween_property(button, "scale", Vector2(0.9, 0.9), 0.1)
+
+
+func _on_button_up(button: TextureButton):
+	# Scale back up when released
+	var tween = create_tween()
+	tween.set_ease(Tween.EASE_OUT)
+	tween.set_trans(Tween.TRANS_QUAD)
+	tween.tween_property(button, "scale", Vector2(1.0, 1.0), 0.1)
+
+
+# NEW: Helper to connect texture button signals safely
+func _connect_texture_button(button: TextureButton, callback: Callable):
+	if not button:
+		push_warning("Cannot connect null button")
+		return
+	
+	# TextureButton uses pressed signal (not property)
+	if not button.pressed.is_connected(callback):
+		button.pressed.connect(callback)
 
 
 func _on_settings_pressed() -> void:
