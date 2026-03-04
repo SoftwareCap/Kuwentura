@@ -1,7 +1,7 @@
 [gd_scene load_steps=25 format=3 uid="uid://bv7e50npbvo5b"]
 
 [ext_resource type="Script" uid="uid://ba7x4f4qnudae" path="res://scripts/mainMenu/main_menu.gd" id="1_bkukm"]
-[ext_resource type="Texture2D" uid="uid://bty51ac7ti8u8" path="res://assets/backgrounds/MainMenu.png" id="2_40cj7"]
+[ext_resource type="Texture2D" uid="uid://c1y03w2wn6cx5" path="res://assets/backgrounds/mainMenu.png" id="2_40cj7"]
 [ext_resource type="Texture2D" uid="uid://cu1ojlw72jgih" path="res://assets/buttons/hostGame.png" id="3_8bsd5"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_w35ku"]
 [ext_resource type="FontFile" uid="uid://bpff8oqdskuog" path="res://assets/fonts/Pixeled.ttf" id="4_8bsd5"]
@@ -272,7 +272,6 @@ theme_override_constants/minimum_character_width = 4
 theme_override_font_sizes/font_size = 45
 placeholder_text = "enter code"
 alignment = 1
-clear_button_enabled = true
 caret_blink = true
 caret_force_displayed = true
 

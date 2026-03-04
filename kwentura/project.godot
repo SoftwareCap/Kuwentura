@@ -25,6 +25,8 @@ MusicController="*res://scenes/controls/AudioControl.tscn"
 NetworkManager="*res://scripts/systems/network_manager.gd"
 PuzzleManager="*res://scripts/systems/puzzle_manager.gd"
 LoadingScreen="*res://scenes/ui/LoadingScreen.tscn"
+DialogueSystems="*res://scripts/systems/dialogue_system.gd"
+DialogueLibraries="*res://scripts/systems/dialogue_library.gd"
 
 [display]
 

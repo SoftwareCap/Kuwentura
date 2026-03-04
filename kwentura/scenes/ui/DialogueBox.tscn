@@ -1,0 +1,62 @@
+[gd_scene load_steps=5 format=3 uid="uid://c3tjujm7q6nas"]
+
+[ext_resource type="Texture2D" uid="uid://deemtl33cho1y" path="res://assets/sprites/players/DetectiveDialogueBox.png" id="1_ggoq5"]
+[ext_resource type="Script" uid="uid://cgrhmpox3p676" path="res://scenes/ui/dialogue_box.gd" id="1_nfm5p"]
+[ext_resource type="Texture2D" uid="uid://5duvlotnm43p" path="res://assets/sprites/players/SidekickDialogueBox.png" id="2_nfm5p"]
+[ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="4_bjuha"]
+
+[node name="DialogueBox" type="CanvasLayer"]
+process_mode = 3
+script = ExtResource("1_nfm5p")
+
+[node name="Panel" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -400.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="DetectiveDialogue" type="TextureRect" parent="Panel"]
+layout_mode = 0
+offset_left = -1.0
+offset_top = -684.0
+offset_right = 1918.0
+offset_bottom = 399.0
+texture = ExtResource("1_ggoq5")
+expand_mode = 1
+
+[node name="SidekickDialogue" type="TextureRect" parent="Panel"]
+visible = false
+layout_mode = 0
+offset_left = 1.0
+offset_top = -681.0
+offset_right = 1923.0
+offset_bottom = 399.0
+texture = ExtResource("2_nfm5p")
+expand_mode = 1
+
+[node name="Text" type="Label" parent="Panel"]
+layout_mode = 0
+offset_left = 357.0
+offset_top = 191.0
+offset_right = 1709.0
+offset_bottom = 296.0
+theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+theme_override_fonts/font = ExtResource("4_bjuha")
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Advance" type="Button" parent="Panel"]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
