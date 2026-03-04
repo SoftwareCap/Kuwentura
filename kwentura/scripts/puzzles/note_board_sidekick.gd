@@ -18,7 +18,7 @@ func _ready() -> void:
 
 	# Sidekick sees blanks (no equations)
 	var z_val := int(solution.get("z", 0))
-	equation.text = "Cooking Tools Inventory\n\nX = \nY = \nZ = %d" % z_val
+	equation.text = "COOKING TOOLS INVENTORY \n\nX = \nY = \nZ = %d" % z_val
 	feedback.text = ""
 
 	# Sidekick-only gate (hard lock even if UI visibility fails)
@@ -35,7 +35,7 @@ func _ready() -> void:
 	submit.pressed.connect(_on_submit_pressed)
 	if GameState.is_puzzle_solved("pinas_house"):
 			apply_solved_view()
-			
+
 func open_board() -> void:
 	feedback.text = ""
 
@@ -68,9 +68,12 @@ func _check_answer(realtime: bool) -> void:
 			feedback.text = "Fill in X and Y."
 		return
 
+	# Numbers-only validation
 	if not x_txt.is_valid_int() or not y_txt.is_valid_int():
 		if not realtime:
 			feedback.text = "Numbers only."
+			# Dialogue only on submit (no spam)
+		get_tree().current_scene.rpc_request_validation_dialogue.rpc_id(1, "numbers_only")
 		return
 
 	var x := int(x_txt)
@@ -86,8 +89,13 @@ func _check_answer(realtime: bool) -> void:
 		submit.disabled = true
 		emit_signal("solved")
 	else:
-		if not realtime:
+		if realtime:
+			# Real-time feedback only (no dialogue spam)
+			feedback.text = "Incorrect..."
+		else:
+			# Submit pressed → show dialogue
 			feedback.text = "Incorrect. Try again."
+			get_tree().current_scene.rpc_request_validation_dialogue.rpc_id(1, "wrong_answer")
 
 func apply_solved_view() -> void:
 	var z_val := int(solution.get("z", 0))
@@ -101,12 +109,12 @@ func apply_solved_view() -> void:
 
 	# Show solved text same as detective
 	equation.text = (
-		"Cooking Tools Inventory \n\n"
+		"COOKING TOOLS INVENTORY \n\n"
 		+ "Pot (z) = %d\nPan (y) = %d\nLadle (x) = %d" % [z_val, y_val, x_val]
 	)
 
 	feedback.text = "Solved."
-	
+
 func set_inputs_enabled(enabled: bool) -> void:
 	# Only affects sidekick; detective should never be able to type anyway
 	if GameState.local_role != GameState.Role.SIDEKICK:
@@ -119,3 +127,19 @@ func set_inputs_enabled(enabled: bool) -> void:
 	x_input.editable = enabled
 	y_input.editable = enabled
 	submit.disabled = not enabled
+
+func set_puzzle_inputs_visible(show_inputs: bool) -> void:
+	# If already solved, keep them hidden regardless
+	if GameState.is_puzzle_solved("pinas_house"):
+		x_input.visible = false
+		y_input.visible = false
+		submit.visible = false
+		return
+
+	x_input.visible = show_inputs
+	y_input.visible = show_inputs
+	submit.visible = show_inputs
+
+	# Optional: focus when showing
+	if show_inputs and GameState.local_role == GameState.Role.SIDEKICK:
+		x_input.grab_focus()

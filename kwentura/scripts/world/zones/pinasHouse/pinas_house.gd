@@ -1,7 +1,5 @@
 extends Node2D
 
-## Pina's House - Indoor zone with pause functionality + role-based note boards
-
 @onready var role_label: Label = %RoleLabel
 @onready var back_button: Button = $BackButton
 
@@ -10,7 +8,7 @@ extends Node2D
 @onready var pause_canvas_layer: CanvasLayer = $PauseCanvasLayer
 @onready var in_game_pause_panel: Panel = $PauseCanvasLayer/InGamePausePanel
 @onready var option_sub_panel: Panel = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel
-@onready var volume_slider: HSlider = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer/VolumeSlider
+@onready var volume_slider: HSlider = $PauseCanvas_layer/InGamePausePanel/OptionSubPanel/HBoxContainer/VolumeSlider
 @onready var volume_value_label: Label = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer/VolumeValue
 
 # Role overlays + boards (you)
@@ -75,53 +73,57 @@ var clue_collected: bool = false
 
 var _detective_note_seen := false  # local cache (synced via RPC)
 
+# Dialogue guards (local only; prevents replay spam)
+var _note_dialogue_played := false
+var _intro_dialogue_played := false
+
 
 func _ready() -> void:
 	print("[PinasHouse] Scene loaded!")
 
-	# Teammate: Play Pina's House background music
+	# Play Pina's House background music
 	if Engine.has_singleton("MusicController") or MusicController:
 		MusicController.play_track(MusicController.MusicTrack.PINAS_HOUSE)
 
-	# Show saved position info (teammate)
+	# Show saved position info
 	var saved_pos = GameState.get_spawn_position(multiplayer.get_unique_id())
 	if saved_pos != Vector2.ZERO:
 		print("[PinasHouse] Will return to Forest Hub at position: ", saved_pos)
 
-	# Signals: clue + role assigned (merge-safe guarded connections)
+	# Signals: clue and role assigned 
 	if not GameState.clue_collected.is_connected(_on_clue_collected):
 		GameState.clue_collected.connect(_on_clue_collected)
 	if not GameState.player_role_assigned.is_connected(_on_role_assigned):
 		GameState.player_role_assigned.connect(_on_role_assigned)
 
-	# Teammate: Setup pause functionality
+	# Setup pause functionality
 	_setup_pause_controls()
 
-	# You: role label + overlays
+	# Role label + overlays
 	_update_role_label()
 	update_role_visibility()
 
-	# You: hide boards by default
+	# Hide boards by default
 	if is_instance_valid(detective_board):
 		detective_board.visible = false
 	if is_instance_valid(sidekick_board):
 		sidekick_board.visible = false
 
-# You: connect close buttons (guarded)
+	# Connect close buttons
 	if is_instance_valid(detective_close) and not detective_close.pressed.is_connected(_close_boards):
 		detective_close.pressed.connect(_close_boards)
 	if is_instance_valid(sidekick_close) and not sidekick_close.pressed.is_connected(_close_boards):
 		sidekick_close.pressed.connect(_close_boards)
 
-	# Back button (guarded)
+	# Back button
 	if is_instance_valid(back_button) and not back_button.pressed.is_connected(_on_back_pressed):
 		back_button.pressed.connect(_on_back_pressed)
 
-	# Note tap opens board (guarded)
+	# Note tap opens board 
 	if is_instance_valid(note_btn) and not note_btn.pressed.is_connected(_on_note_pressed):
 		note_btn.pressed.connect(_on_note_pressed)
-		
-	# Puzzle 2: tool hunt interactions + initial lock state
+
+	# Puzzle 2 Tool hunt interactions and initial lock state
 	_setup_tool_hunt()
 
 	# Listen for sidekick solving
@@ -134,13 +136,13 @@ func _ready() -> void:
 		_apply_solved_text()
 		if is_instance_valid(sidekick_board) and sidekick_board.has_method("apply_solved_view"):
 			sidekick_board.apply_solved_view()
-			
+
 		# Unlock Puzzle 2 tools
 		_set_tools_unlocked_local(true)
-		
+
 	else:
 		_apply_unsolved_text()
-		
+
 		# Keep Puzzle 2 locked
 		_set_tools_unlocked_local(false)
 
@@ -157,11 +159,23 @@ func _ready() -> void:
 	# Ensure tools are not shown until search mode is active
 	_search_mode = false
 	_apply_tool_nodes()
-	
+
 	# Close button is not visible
 	# _apply_close_button_visibility()
-	
+
 	_apply_note_interaction_gate()
+
+	# Start delayed intro dialogue
+	_start_intro_dialogue_delayed()
+
+
+func _start_intro_dialogue_delayed() -> void:
+	if _intro_dialogue_played:
+		return
+	_intro_dialogue_played = true
+
+	DialogueSystems.play("pinas_house_enter", DialogueLibraries.PINAS_HOUSE_ENTER)
+
 
 func _setup_pause_controls():
 	# Connect inside zone control pause button
@@ -275,10 +289,17 @@ func _on_note_interacted() -> void:
 	# Close both first
 	_close_boards()
 
+	# Dialogue when note clicked (guarded)
+	var will_play_note_dialogue := false
+	if not _note_dialogue_played:
+		_note_dialogue_played = true
+		will_play_note_dialogue = true
+		DialogueSystems.play("pinas_house_note_clicked", DialogueLibraries.PINAS_HOUSE_NOTE_CLICKED)
+
 	if GameState.local_role == GameState.Role.DETECTIVE:
 		detective_board.visible = true
 
-		# NEW: mark as seen whenever detective opens it (first time only)
+		# Mark as seen whenever detective opens it
 		_mark_detective_note_seen()
 
 		if GameState.is_puzzle_solved("pinas_house"):
@@ -288,14 +309,25 @@ func _on_note_interacted() -> void:
 
 	elif GameState.local_role == GameState.Role.SIDEKICK:
 		sidekick_board.visible = true
-		
+
 		if sidekick_board.has_method("open_board"):
 			sidekick_board.open_board()
 
 		if sidekick_board.has_method("set_inputs_enabled"):
 			sidekick_board.set_inputs_enabled(_detective_note_seen)
-			
+
+		# Hide inputs while the "note clicked" dialogue is playing (only if it will play)
+		if will_play_note_dialogue and sidekick_board.has_method("set_puzzle_inputs_visible"):
+			sidekick_board.set_puzzle_inputs_visible(false)
+
+		# Wait until THIS dialogue finishes, then show inputs
+		if will_play_note_dialogue:
+			await DialogueSystems.wait_finished("pinas_house_note_clicked")
+			if sidekick_board.has_method("set_puzzle_inputs_visible"):
+				sidekick_board.set_puzzle_inputs_visible(true)
+
 	_apply_close_button_visibility()
+
 
 func _mark_detective_note_seen() -> void:
 	# already marked
@@ -335,6 +367,7 @@ func _set_detective_note_seen_local(seen: bool) -> void:
 	if is_instance_valid(sidekick_board) and sidekick_board.has_method("set_inputs_enabled"):
 		sidekick_board.set_inputs_enabled(_detective_note_seen)
 
+
 func _close_boards(force: bool = false) -> void:
 	# Notes cannot be closed during Puzzle 1.
 	# They can be closed only in Search Mode (Puzzle 2), unless forced.
@@ -346,6 +379,7 @@ func _close_boards(force: bool = false) -> void:
 	if is_instance_valid(sidekick_board):
 		sidekick_board.visible = false
 
+
 func _apply_close_button_visibility() -> void:
 	# Only show close buttons during Search Room UI (Puzzle 2)
 
@@ -355,10 +389,11 @@ func _apply_close_button_visibility() -> void:
 	if is_instance_valid(sidekick_close):
 		sidekick_close.visible = _search_mode
 
+
 func _apply_unsolved_text() -> void:
 	var p := PuzzleManager.get_puzzle_for_zone("pinas_house")
 	var eqs: Array = p.get("equations", [])
-	var txt := "Cooking Tools Inventory\n\n"
+	var txt := "COOKING TOOLS INVENTORY \n\n"
 	for e in eqs:
 		txt += str(e) + "\n"
 
@@ -376,7 +411,7 @@ func _apply_solved_text() -> void:
 
 	if is_instance_valid(detective_text):
 		detective_text.text = (
-			"Cooking Tools Inventory \n\n"
+			"COOKING TOOLS INVENTORY \n\n"
 			+ "Pot (z) = %d\nPan (y) = %d\nLadle (x) = %d" % [z, y, x]
 		)
 
@@ -397,15 +432,29 @@ func rpc_pinas_house_solved() -> void:
 	GameState.set_puzzle_solved("pinas_house", true)
 	_apply_solved_text()
 
-	# Sidekick board needs to show the solved values on reopen too
 	if is_instance_valid(sidekick_board) and sidekick_board.has_method("apply_solved_view"):
 		sidekick_board.apply_solved_view()
-	
-	# Puzzle 2 unlocks now (applies on all peers because this RPC is call_local)
+
 	_set_tools_unlocked_local(true)
-	
-	# NEW:
+
+	# Hide search buttons first
+	if is_instance_valid(search_btn_detective):
+		search_btn_detective.visible = false
+	if is_instance_valid(search_btn_sidekick):
+		search_btn_sidekick.visible = false
+
+	# Play dialogue
+	DialogueSystems.play(
+		"pinas_house_after_puzzle1",
+		DialogueLibraries.PINAS_HOUSE_AFTER_PUZZLE1
+	)
+
+	# Wait until dialogue finishes
+	await DialogueSystems.wait_finished("pinas_house_after_puzzle1")
+
+	# Only now show the search button
 	_setup_search_room_buttons()
+
 
 # =========================
 # Puzzle 2: Tool Hunt Logic
@@ -505,6 +554,32 @@ func rpc_reveal_pinas_house_clue() -> void:
 	# Reveal in both clients by collecting locally
 	GameState.collect_clue("pinas_house")
 
+@rpc("any_peer", "reliable")
+func rpc_request_validation_dialogue(dialogue_id: String) -> void:
+	if not multiplayer.is_server():
+		return
+
+	rpc_play_validation_dialogue.rpc(dialogue_id)
+
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_play_validation_dialogue(dialogue_id: String) -> void:
+
+	match dialogue_id:
+
+		"numbers_only":
+			DialogueSystems.play(
+				"pinas_house_numbers_only",
+				DialogueLibraries.PINAS_HOUSE_NUMBERS_ONLY,
+				true
+			)
+
+		"wrong_answer":
+			DialogueSystems.play(
+				"pinas_house_wrong_answer",
+				DialogueLibraries.PINAS_HOUSE_WRONG_ANSWER,
+				true
+			)
 
 func _set_tools_unlocked_local(unlocked: bool) -> void:
 	_tools_unlocked = unlocked
@@ -521,14 +596,16 @@ func _apply_single_tool(tool_id: String, area: Area2D, col: CollisionShape2D) ->
 	var collected: bool = bool(_tools_collected.get(tool_id, false))
 	var unlocked: bool = _tools_unlocked
 
-	var can_interact: bool = unlocked and not collected and _search_mode
-	var should_show: bool = _search_mode and not collected  # ONLY show during search screen
+	var can_interact: bool = unlocked and not collected
+	var should_show: bool = not collected
 
 	if is_instance_valid(area):
 		area.visible = should_show
 		_set_area_pickable(area, can_interact)
+
 	if is_instance_valid(col):
 		col.disabled = not can_interact
+
 
 func _setup_search_room_buttons() -> void:
 	var solved := GameState.is_puzzle_solved("pinas_house")
@@ -542,6 +619,7 @@ func _setup_search_room_buttons() -> void:
 		search_btn_sidekick.visible = solved
 		if not search_btn_sidekick.pressed.is_connected(_on_search_room_pressed):
 			search_btn_sidekick.pressed.connect(_on_search_room_pressed)
+
 
 func _on_search_room_pressed() -> void:
 	# Gate: must be solved first
@@ -560,6 +638,7 @@ func _on_search_room_pressed() -> void:
 	# Open search UI locally
 	_set_search_mode_local(true)
 
+
 func _set_search_mode_local(enable: bool) -> void:
 	_search_mode = enable
 
@@ -571,12 +650,14 @@ func _set_search_mode_local(enable: bool) -> void:
 	_apply_tool_nodes()
 	_apply_banner_frames()
 
+
 func _apply_note_interaction_gate() -> void:
 	# When Search Room UI is active, block note interaction
 	var allow_note := not _search_mode
 
 	if is_instance_valid(note_btn):
 		note_btn.disabled = not allow_note
+
 
 func _apply_banner_frames() -> void:
 	if is_instance_valid(frame_ladle):
@@ -600,6 +681,7 @@ func _all_tools_collected() -> bool:
 		if not _tools_collected.get(id, false):
 			return false
 	return true
+
 
 func update_role_visibility() -> void:
 	match GameState.local_role:
