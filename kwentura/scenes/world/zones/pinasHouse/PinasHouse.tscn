@@ -1,8 +1,8 @@
 [gd_scene load_steps=44 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
-[ext_resource type="Texture2D" uid="uid://w844nys0xd6n" path="res://assets/backgrounds/lobby.png" id="2_bg"]
-[ext_resource type="Texture2D" uid="uid://bpeh268v43cji" path="res://assets/sprites/places/KitchenBackground.png" id="2_qj22k"]
+[ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://miy70k8n04ul" path="res://assets/sprites/places/PHBackground.png" id="2_vt60f"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 [ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/inventoryboard.png" id="3_k0xpg"]
 [ext_resource type="Texture2D" uid="uid://3boff2bjwjx5" path="res://assets/sprites/zoneObjects/Pan.png" id="4_d1egf"]
@@ -109,7 +109,7 @@ scale = Vector2(0.99999994, 0.99999994)
 [node name="KitchenSprite" type="Sprite2D" parent="BackgroundLayer"]
 position = Vector2(961.50006, 545)
 scale = Vector2(0.754297, 0.7583335)
-texture = ExtResource("2_qj22k")
+texture = ExtResource("2_vt60f")
 
 [node name="InteractiveLayer" type="Node2D" parent="."]
 position = Vector2(6.1035156e-05, 6.1035156e-05)
@@ -163,12 +163,12 @@ position = Vector2(963.00006, 543.00006)
 scale = Vector2(0.66944444, 0.66913587)
 
 [node name="Sprite2D" type="Sprite2D" parent="InteractiveLayer/LadleProp"]
-position = Vector2(-528.051, 18.680725)
+position = Vector2(-547.4707, 18.680725)
 scale = Vector2(0.49232364, 0.5435424)
 texture = ExtResource("5_j1qle")
 
 [node name="LadleCollision" type="CollisionShape2D" parent="InteractiveLayer/LadleProp"]
-position = Vector2(-560.166, 15.131348)
+position = Vector2(-576.59766, -2.9890404)
 scale = Vector2(1, 0.9999999)
 shape = SubResource("RectangleShape2D_cd1wg")
 
@@ -327,7 +327,6 @@ texture = ExtResource("21_cd1wg")
 expand_mode = 1
 
 [node name="NoteBoardDetective" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
-visible = false
 layout_mode = 0
 offset_left = 217.0
 offset_top = -282.0
@@ -358,7 +357,7 @@ offset_bottom = 1118.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.9955804, 0.99558026, 0.99558026, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 80
+theme_override_font_sizes/font_size = 65
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -376,7 +375,6 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_j1qle")
 text = "Search Room"
 
 [node name="SidekickOverlays" type="Control" parent="RoleLayer/Control"]
-visible = false
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -425,41 +423,47 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 80
+theme_override_font_sizes/font_size = 65
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="XInput" type="LineEdit" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
 layout_mode = 0
-offset_left = 803.0
-offset_top = 743.0
-offset_right = 1051.0
-offset_bottom = 823.0
-theme_override_colors/font_color = Color(0.60784787, 0.6079192, 0.57901883, 1)
+offset_left = 813.0
+offset_top = 741.0
+offset_right = 1061.0
+offset_bottom = 821.0
+theme_override_colors/font_color = Color(0.9650678, 0.9650869, 0.9614435, 1)
 theme_override_colors/font_selected_color = Color(0.04755766, 0.047557645, 0.047557645, 1)
 theme_override_colors/caret_color = Color(0.014275194, 0.014275219, 0.014275289, 1)
+theme_override_colors/selection_color = Color(0.96035105, 0.96035105, 0.96035093, 1)
 theme_override_colors/clear_button_color = Color(0.021434566, 0.021434668, 0.021434598, 1)
 theme_override_colors/clear_button_color_pressed = Color(0.017732391, 0.017732391, 0.01773239, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 55
 placeholder_text = "Enter X"
 alignment = 1
+expand_to_text_length = true
+flat = true
 
 [node name="YInput" type="LineEdit" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
 layout_mode = 0
-offset_left = 804.0
-offset_top = 832.0
-offset_right = 1051.0
-offset_bottom = 911.0
-theme_override_colors/font_color = Color(0.5019608, 0.5019608, 0.5019608, 1)
+offset_left = 814.0
+offset_top = 830.0
+offset_right = 1061.0
+offset_bottom = 909.0
+theme_override_colors/font_color = Color(0.98234254, 0.9823423, 0.9823424, 1)
 theme_override_colors/font_selected_color = Color(0.056291588, 0.056291603, 0.056291595, 1)
 theme_override_colors/caret_color = Color(0.0430391, 0.043039143, 0.04303936, 1)
+theme_override_colors/selection_color = Color(0.9779369, 0.97793704, 0.9779369, 1)
 theme_override_colors/clear_button_color = Color(0.064696394, 0.0646966, 0.06469644, 1)
 theme_override_colors/clear_button_color_pressed = Color(0.043039158, 0.04303915, 0.04303915, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 55
 placeholder_text = "Enter Y"
 alignment = 1
+expand_to_text_length = true
+flat = true
 
 [node name="Submit" type="Button" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
 layout_mode = 0

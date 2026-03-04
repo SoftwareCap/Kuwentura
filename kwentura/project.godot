@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Kwentura"
+config/name="Kwentura - BACKUP"
 run/main_scene="uid://bv7e50npbvo5b"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
@@ -25,6 +25,8 @@ MusicController="*res://scenes/controls/AudioControl.tscn"
 NetworkManager="*res://scripts/systems/network_manager.gd"
 PuzzleManager="*res://scripts/systems/puzzle_manager.gd"
 LoadingScreen="*res://scenes/ui/LoadingScreen.tscn"
+DialogueSystems="*res://scripts/systems/dialogue_system.gd"
+DialogueLibraries="*res://scripts/systems/dialogue_library.gd"
 
 [display]
 
