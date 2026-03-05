@@ -25,13 +25,14 @@ MusicController="*res://scenes/controls/AudioControl.tscn"
 NetworkManager="*res://scripts/systems/network_manager.gd"
 PuzzleManager="*res://scripts/systems/puzzle_manager.gd"
 LoadingScreen="*res://scenes/ui/LoadingScreen.tscn"
+UserManager="*res://scripts/systems/user_manager.gd"
 
 [display]
 
-window/size/viewport_width=1920
-window/size/viewport_height=1080
-window/size/mode=1
+window/size/mode=3
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/defaults/default_3d_scale=0.001
 
 [input]
 
@@ -74,3 +75,7 @@ game_play={
 [input_devices]
 
 pointing/emulate_touch_from_mouse=true
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true

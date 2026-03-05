@@ -10,7 +10,10 @@ extends Control
 @onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
 @onready var back_button: TouchScreenButton = $SettingsPanel/Back
 
-# User Auth
+# User Auth UI
+@onready var avatar_texture: TextureRect = $SettingsPanel/UserSection/UserContent/AvatarTexture
+@onready var display_name_label: Label = $SettingsPanel/UserSection/UserContent/UserInfo/DisplayName
+@onready var provider_label: Label = $SettingsPanel/UserSection/UserContent/UserInfo/ProviderLabel
 @onready var sign_in_button: Button = $SettingsPanel/UserSection/AuthButtons/SignInButton
 @onready var guest_button: Button = $SettingsPanel/UserSection/AuthButtons/GuestButton
 @onready var link_google_button: Button = $SettingsPanel/UserSection/AuthButtons/LinkGoogleButton
@@ -77,6 +80,12 @@ func _ready():
 		NetworkManager.room_code_generated.connect(_on_room_code_generated)
 	if not NetworkManager.game_started.is_connected(_on_game_started):
 		NetworkManager.game_started.connect(_on_game_started)
+	
+	# Connect User Auth signals
+	_connect_auth_signals()
+	
+	# Initialize User Auth UI
+	_update_user_ui()
 
 
 # NEW: Setup visual pressed feedback for buttons
@@ -120,10 +129,164 @@ func _connect_texture_button(button: TextureButton, callback: Callable):
 		button.pressed.connect(callback)
 
 
+func _connect_auth_signals() -> void:
+	"""Connect authentication related signals."""
+	# Connect auth buttons
+	if sign_in_button and not sign_in_button.pressed.is_connected(_on_sign_in_pressed):
+		sign_in_button.pressed.connect(_on_sign_in_pressed)
+	if guest_button and not guest_button.pressed.is_connected(_on_guest_pressed):
+		guest_button.pressed.connect(_on_guest_pressed)
+	if link_google_button and not link_google_button.pressed.is_connected(_on_link_google_pressed):
+		link_google_button.pressed.connect(_on_link_google_pressed)
+	
+	# Connect to UserManager signals
+	if not UserManager.user_data_changed.is_connected(_on_user_data_changed):
+		UserManager.user_data_changed.connect(_on_user_data_changed)
+	if not UserManager.profile_picture_loaded.is_connected(_on_profile_picture_loaded):
+		UserManager.profile_picture_loaded.connect(_on_profile_picture_loaded)
+	
+	# Connect to FirebaseAuth signals
+	if not FirebaseAuth.google_auth_success.is_connected(_on_google_auth_success):
+		FirebaseAuth.google_auth_success.connect(_on_google_auth_success)
+	if not FirebaseAuth.google_auth_failed.is_connected(_on_google_auth_failed):
+		FirebaseAuth.google_auth_failed.connect(_on_google_auth_failed)
+	if not FirebaseAuth.account_linked_success.is_connected(_on_account_linked):
+		FirebaseAuth.account_linked_success.connect(_on_account_linked)
+	if not FirebaseAuth.account_link_failed.is_connected(_on_link_failed):
+		FirebaseAuth.account_link_failed.connect(_on_link_failed)
+
+
+func _update_user_ui() -> void:
+	"""Update the user profile UI based on current auth state."""
+	var user_data = UserManager.get_user_data()
+	
+	# Update display name
+	if display_name_label:
+		display_name_label.text = user_data.display_name if not user_data.display_name.is_empty() else "Guest"
+	
+	# Update provider label and button visibility
+	if provider_label:
+		match user_data.provider:
+			"google":
+				provider_label.text = "Google Account"
+				if link_google_button:
+					link_google_button.visible = false
+				if sign_in_button:
+					sign_in_button.visible = false
+				if guest_button:
+					guest_button.visible = false
+			"anonymous":
+				provider_label.text = "Guest"
+				if link_google_button:
+					link_google_button.visible = true
+				if sign_in_button:
+					sign_in_button.visible = true
+				if guest_button:
+					guest_button.visible = true
+	
+	# Update avatar
+	if avatar_texture:
+		var cached = UserManager.get_cached_profile_texture()
+		if cached:
+			avatar_texture.texture = cached
+		elif not user_data.photo_url.is_empty():
+			UserManager.load_profile_picture(user_data.photo_url)
+		else:
+			avatar_texture.texture = preload("res://assets/sprites/userIcon.png")
+
+
+func _on_user_data_changed(_data: Dictionary) -> void:
+	_update_user_ui()
+
+
+func _on_profile_picture_loaded(texture: Texture2D) -> void:
+	if texture and avatar_texture:
+		avatar_texture.texture = texture
+
+
+# ============================================
+# AUTH BUTTON HANDLERS
+# ============================================
+
+func _on_sign_in_pressed() -> void:
+	print("[MainMenu] Sign in button pressed")
+	FirebaseAuth.sign_in_with_google()
+	_show_status("Opening Google Sign-In...")
+
+
+func _on_guest_pressed() -> void:
+	print("[MainMenu] Guest button pressed")
+	_show_status("Continuing as Guest...")
+
+
+func _on_link_google_pressed() -> void:
+	print("[MainMenu] Link Google button pressed")
+	if not FirebaseAuth.is_authenticated:
+		_show_status("Please sign in anonymously first")
+		return
+	
+	# Store current anonymous UID before linking
+	UserManager.update_user_data({"anonymous_uid": FirebaseAuth.current_user_id})
+	
+	# Start Google sign-in flow for linking
+	FirebaseAuth.link_with_google()
+	_show_status("Linking Google account...")
+
+
+# ============================================
+# FIREBASE AUTH CALLBACKS
+# ============================================
+
+func _on_google_auth_success(user_data: Dictionary) -> void:
+	print("[MainMenu] Google sign-in success")
+	_show_status("Signed in successfully!")
+	
+	# Update UserManager
+	UserManager.update_user_data(user_data)
+	
+	# Save to Firestore
+	FirebaseFirestore.save_user_profile(user_data.user_id, user_data)
+	
+	# Load profile picture if available
+	if not user_data.photo_url.is_empty():
+		UserManager.load_profile_picture(user_data.photo_url)
+	
+	# Update UI
+	_update_user_ui()
+
+
+func _on_google_auth_failed(error: String) -> void:
+	print("[MainMenu] Google sign-in failed: ", error)
+	_show_status("Sign in failed: " + error)
+
+
+func _on_account_linked(user_data: Dictionary) -> void:
+	print("[MainMenu] Account linked successfully")
+	_show_status("Account linked successfully!")
+	
+	# Update with linked status
+	user_data["is_linked"] = true
+	UserManager.update_user_data(user_data)
+	
+	# Save to Firestore
+	FirebaseFirestore.save_user_profile(user_data.user_id, user_data)
+	
+	# Update UI
+	_update_user_ui()
+
+
+func _on_link_failed(error: String) -> void:
+	print("[MainMenu] Account link failed: ", error)
+	_show_status("Linking failed: " + error)
+
+
 func _on_settings_pressed() -> void:
 	print("[MainMenu] Opening settings panel")
 	if settings_panel:
 		settings_panel.visible = true
+		# Hide the settings button when panel is open
+		if settings_control:
+			settings_control.hide_button()
 		# Update slider to current volume
 		if volume_slider:
 			volume_slider.value = MusicController.get_volume() * 100
@@ -135,6 +298,9 @@ func _on_back_settings_pressed() -> void:
 	print("[MainMenu] Closing settings panel")
 	if settings_panel:
 		settings_panel.visible = false
+	# Show the settings button again when panel is closed
+	if settings_control:
+		settings_control.show_button()
 	_save_settings()
 
 
@@ -260,7 +426,9 @@ func _process_join_code(code: String) -> void:
 	
 	if not result.success:
 		print("[MainMenu] Join failed: ", result.get("error", "Unknown"))
-		_show_status("Failed to join: " + result.get("error", "Unknown error"))
+		
+		# Show error popup with retry option
+		_show_join_error_with_retry(result.get("error", "Unknown error"), code)
 		return
 	
 	print("[MainMenu] Connected to host!")
@@ -278,6 +446,31 @@ func _show_join_error(message: String) -> void:
 		tween.tween_property(code_input, "position:x", code_input.position.x + 5, 0.05)
 		tween.tween_property(code_input, "position:x", code_input.position.x - 5, 0.05)
 		tween.tween_property(code_input, "position:x", code_input.position.x, 0.05)
+
+
+func _show_join_error_with_retry(error_msg: String, code: String) -> void:
+	"""Show join error with option to retry."""
+	print("[MainMenu] Showing error with retry: ", error_msg)
+	
+	# Show popup again with error message
+	if sidekick_popup:
+		sidekick_popup.visible = true
+	
+	if code_input:
+		code_input.text = code
+		code_input.placeholder_text = "Try again or check Wi-Fi"
+		code_input.grab_focus()
+	
+	# Show helpful error message
+	var helpful_error = error_msg + "\n\nTips:\n• Ensure both devices on same Wi-Fi\n• Try re-entering the code\n• Ask host to restart hosting"
+	_show_status(helpful_error)
+	
+	# Shake the popup
+	if sidekick_popup:
+		var tween = create_tween()
+		tween.tween_property(sidekick_popup, "position:x", sidekick_popup.position.x + 10, 0.05)
+		tween.tween_property(sidekick_popup, "position:x", sidekick_popup.position.x - 10, 0.05)
+		tween.tween_property(sidekick_popup, "position:x", sidekick_popup.position.x, 0.05)
 
 
 func _on_connection_established(peer_id: int):

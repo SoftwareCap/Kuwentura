@@ -215,6 +215,11 @@ func _start_broadcasting():
 	_broadcast_socket.set_broadcast_enabled(true)
 	# Don't bind! Just use it to send broadcasts
 	print("[Network] Started broadcasting code: ", _invite_code)
+	
+	# Send initial burst of broadcasts for better discovery
+	for i in range(3):
+		_broadcast_host_presence()
+		await get_tree().create_timer(0.1).timeout
 
 
 func _broadcast_host_presence():
@@ -235,12 +240,29 @@ func _broadcast_host_presence():
 	
 	var packet = JSON.stringify(broadcast_data).to_utf8_buffer()
 	
-	# Send to broadcast address on BROADCAST_PORT
-	_broadcast_socket.set_dest_address("255.255.255.255", BROADCAST_PORT)
-	var err = _broadcast_socket.put_packet(packet)
+	# Send to multiple broadcast addresses for better coverage
+	var broadcast_addresses = [
+		"255.255.255.255",  # Global broadcast
+		_get_subnet_broadcast(host_ip),  # Subnet broadcast
+		"224.0.0.1"  # Multicast (all hosts)
+	]
 	
-	if err != OK:
-		print("[Network] Broadcast failed: ", err)
+	for address in broadcast_addresses:
+		if not address.is_empty():
+			_broadcast_socket.set_dest_address(address, BROADCAST_PORT)
+			var err = _broadcast_socket.put_packet(packet)
+			if err != OK and err != 0:  # 0 is OK for some Godot versions
+				print("[Network] Broadcast to ", address, " failed: ", err)
+
+
+func _get_subnet_broadcast(ip: String) -> String:
+	"""Calculate subnet broadcast address from IP."""
+	var parts = ip.split(".")
+	if parts.size() != 4:
+		return "255.255.255.255"
+	
+	# Assume /24 subnet (255.255.255.0) for common WiFi networks
+	return "%s.%s.%s.255" % [parts[0], parts[1], parts[2]]
 
 
 #------------------------------------------------------------------------------
@@ -290,13 +312,16 @@ func join_game_with_code(invite_code: String) -> Dictionary:
 	if not discovery_active:
 		return {"error": "Failed to start discovery", "success": false}
 	
-	# Wait for discovery with timeout
+	# Wait for discovery with timeout - longer for mobile networks
 	var attempts = 0
-	var max_attempts = 10  # 5 seconds total
+	var max_attempts = 20  # 10 seconds total (increased from 5)
 	var host_info = {}
 	
 	while attempts < max_attempts:
 		await get_tree().create_timer(0.5).timeout
+		
+		# Poll for packets more frequently
+		_poll_discovery()
 		
 		host_info = get_discovered_host(target_code)
 		if not host_info.is_empty():
@@ -304,21 +329,77 @@ func join_game_with_code(invite_code: String) -> Dictionary:
 			break
 		
 		attempts += 1
-		print("[Network] Discovery attempt ", attempts, "/", max_attempts)
+		if attempts % 5 == 0:  # Print every 2.5 seconds
+			print("[Network] Discovery attempt ", attempts, "/", max_attempts)
 	
 	_stop_discovery()
 	
 	if host_info.is_empty():
-		return {
-			"error": "Could not find game with code: " + target_code + "\nMake sure:\n• Both on same Wi-Fi\n• Host is still hosting", 
-			"success": false
-		}
+		# Try last resort: scan common local IP ranges
+		print("[Network] Broadcast discovery failed, trying IP scan...")
+		host_info = await _scan_local_network(target_code)
+		
+		if host_info.is_empty():
+			return {
+				"error": "Could not find game with code: " + target_code + "\nMake sure:\n• Both on same Wi-Fi\n• Host is still hosting", 
+				"success": false
+			}
 	
 	# Connect to discovered host
 	var host_ip = host_info.get("host_ip", "")
 	print("[Network] Connecting to host at: ", host_ip)
 	
 	return await _connect_to_host(host_ip, target_code)
+
+
+## Last resort: Scan common local IP ranges
+func _scan_local_network(target_code: String) -> Dictionary:
+	"""Scan local network for host as fallback when broadcast fails."""
+	var local_ip = _get_host_ip()
+	var base_ip = local_ip.rsplit(".", false, 1)[0]  # Get first 3 octets
+	
+	print("[Network] Scanning range: ", base_ip, ".x")
+	
+	# Scan .1 to .254 (skip .255 broadcast and .0 network)
+	for i in range(1, 255):
+		var test_ip = base_ip + "." + str(i)
+		if test_ip == local_ip:
+			continue  # Skip self
+		
+		# Quick connection test
+		var test_socket = PacketPeerUDP.new()
+		var err = test_socket.bind(0)  # Bind to any available port
+		if err != OK:
+			continue
+		
+		test_socket.set_dest_address(test_ip, DEFAULT_PORT)
+		
+		# Try to send a ping
+		var ping_data = JSON.stringify({"ping": target_code}).to_utf8_buffer()
+		test_socket.put_packet(ping_data)
+		
+		# Wait a tiny bit for response
+		await get_tree().create_timer(0.01).timeout
+		
+		if test_socket.get_available_packet_count() > 0:
+			var packet = test_socket.get_packet()
+			var data = JSON.parse_string(packet.get_string_from_utf8())
+			if data is Dictionary and data.get("code") == target_code:
+				test_socket.close()
+				print("[Network] Found host via scan at: ", test_ip)
+				return {
+					"host_ip": test_ip,
+					"port": DEFAULT_PORT,
+					"code": target_code
+				}
+		
+		test_socket.close()
+		
+		# Every 50 IPs, yield to prevent freezing
+		if i % 50 == 0:
+			await get_tree().process_frame
+	
+	return {}
 
 
 ## Join directly with IP (for testing or when discovery fails)
@@ -334,7 +415,12 @@ func _poll_discovery():
 	if not _listen_socket:
 		return
 	
-	while _listen_socket.get_available_packet_count() > 0:
+	# Poll multiple times per frame to catch all packets
+	var poll_count = 0
+	var max_polls = 10  # Prevent infinite loop
+	
+	while _listen_socket.get_available_packet_count() > 0 and poll_count < max_polls:
+		poll_count += 1
 		var packet = _listen_socket.get_packet()
 		var from_ip = _listen_socket.get_packet_ip()
 		
@@ -750,12 +836,59 @@ func _generate_invite_code() -> String:
 
 func _get_host_ip() -> String:
 	var ips = IP.get_local_addresses()
+	var best_ip = ""
+	print("[Network] Available IPs: ", ips)
+	
 	for ip in ips:
 		if ip.begins_with("127."):
 			continue
-		if "." in ip and not ip.begins_with("0."):
-			return ip
+		if ip.begins_with("0."):
+			continue
+		# Prefer 192.168.x.x or 10.x.x.x (private networks)
+		if "." in ip:
+			if ip.begins_with("192.168.") or ip.begins_with("10."):
+				print("[Network] Found private IP: ", ip)
+				return ip
+			if best_ip.is_empty():
+				best_ip = ip
+	
+	if not best_ip.is_empty():
+		print("[Network] Using IP: ", best_ip)
+		return best_ip
+		
+	print("[Network] Warning: No suitable IP found, using localhost")
 	return "localhost"
+
+
+## Get network diagnostics for debugging
+func get_network_diagnostics() -> Dictionary:
+	var result = {
+		"local_ips": IP.get_local_addresses(),
+		"selected_ip": _get_host_ip(),
+		"is_host": _is_host,
+		"state": _state_name(_state),
+		"invite_code": _invite_code,
+		"port": DEFAULT_PORT,
+		"broadcast_port": BROADCAST_PORT
+	}
+	
+	if _is_host and _multiplayer_peer:
+		result["hosting_on"] = _get_host_ip() + ":" + str(DEFAULT_PORT)
+	
+	return result
+
+
+## Print network diagnostics to console
+func print_network_diagnostics() -> void:
+	var diag = get_network_diagnostics()
+	print("\n=== NETWORK DIAGNOSTICS ===")
+	print("Local IPs: ", diag.local_ips)
+	print("Selected IP: ", diag.selected_ip)
+	print("State: ", diag.state)
+	print("Is Host: ", diag.is_host)
+	print("Port: ", diag.port)
+	print("Broadcast Port: ", diag.broadcast_port)
+	print("==========================\n")
 
 
 func _get_device_name() -> String:

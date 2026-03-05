@@ -1,28 +1,24 @@
-[gd_scene load_steps=19 format=3 uid="uid://ecol225bxgli"]
+[gd_scene load_steps=29 format=3 uid="uid://ecol225bxgli"]
 
 [ext_resource type="Script" uid="uid://dxdvx5uj13ngo" path="res://scripts/mainMenu/detective_lobby.gd" id="1_8ywx3"]
-[ext_resource type="Texture2D" uid="uid://w844nys0xd6n" path="res://assets/backgrounds/Lobby.png" id="2_pge74"]
+[ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_pge74"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_4bddd"]
 [ext_resource type="FontFile" uid="uid://bpff8oqdskuog" path="res://assets/fonts/Pixeled.ttf" id="4_58gs4"]
 [ext_resource type="PackedScene" uid="uid://2ktjes4bfwlo" path="res://scenes/players/PlayerHost.tscn" id="5_pge74"]
 [ext_resource type="PackedScene" uid="uid://udt37i3bt31c" path="res://scenes/players/PlayerSidekick.tscn" id="6_4bddd"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftBack2.png" id="7_arrow_left"]
 [ext_resource type="Texture2D" uid="uid://5hqcc5yhq64a" path="res://assets/buttons/rightBack2.png" id="8_arrow_right"]
+[ext_resource type="PackedScene" uid="uid://cmsvb2etjodsk" path="res://scenes/controls/SettingsControl.tscn" id="9_6xa24"]
+[ext_resource type="Script" uid="uid://b7hu8uq82xslq" path="res://scripts/controls/settings_control.gd" id="10_w0uso"]
+[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/closeBttn.png" id="11_6xa24"]
+[ext_resource type="Texture2D" uid="uid://bbdlqfcqkbbwk" path="res://assets/sprites/userIcon.png" id="12_8x8i8"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ab31o"]
 texture = ExtResource("2_pge74")
 modulate_color = Color(0.36659476, 0.36659455, 0.36659473, 1)
 
-[sub_resource type="LabelSettings" id="LabelSettings_title"]
-font = ExtResource("4_58gs4")
-font_size = 120
-outline_size = 8
-outline_color = Color(0, 0, 0, 0.5)
-shadow_size = 12
-shadow_color = Color(0, 0, 0, 0.4)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_green"]
-bg_color = Color(1, 1, 1, 1)
+bg_color = Color(0.43529412, 0.28627452, 0.24313726, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -32,7 +28,7 @@ shadow_size = 8
 shadow_offset = Vector2(0, 4)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_green_pressed"]
-bg_color = Color(1, 1, 1, 1)
+bg_color = Color(0.43529412, 0.28627452, 0.24313726, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -42,7 +38,7 @@ shadow_size = 4
 shadow_offset = Vector2(0, 2)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sngst"]
-bg_color = Color(1, 1, 1, 1)
+bg_color = Color(0.43529412, 0.28627452, 0.24313726, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -52,7 +48,7 @@ shadow_size = 6
 shadow_offset = Vector2(0, 3)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fbpcy"]
-bg_color = Color(1, 1, 1, 1)
+bg_color = Color(0.43529412, 0.28627452, 0.24313726, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -64,7 +60,7 @@ shadow_offset = Vector2(0, 2)
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_758ce"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3m1b5"]
-bg_color = Color(1, 1, 1, 1)
+bg_color = Color(0.43529412, 0.28627452, 0.24313726, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -89,6 +85,58 @@ outline_color = Color(0.2, 0.1, 0, 0.8)
 shadow_size = 4
 shadow_color = Color(0, 0, 0, 0.6)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_28lu3"]
+bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_rk1wc"]
+color = Color(1, 1, 1, 1)
+thickness = 6
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_2b6dv"]
+color = Color(0.48324937, 0.54248023, 1, 1)
+thickness = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qnt0v"]
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fqwwo"]
+bg_color = Color(0.63529414, 0.63529414, 0.63529414, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oh2lh"]
+bg_color = Color(0.8235294, 0.8235294, 0.8235294, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t5cgj"]
+
 [node name="DetectiveLobby" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -112,26 +160,32 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -504.0
-offset_top = 40.0
-offset_right = 504.0
-offset_bottom = 376.0
+offset_left = -498.0
+offset_right = 498.0
+offset_bottom = 280.0
 grow_horizontal = 2
-text = "KWENTURA"
-label_settings = SubResource("LabelSettings_title")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_y = 15
+theme_override_fonts/font = ExtResource("4_58gs4")
+theme_override_font_sizes/font_size = 100
+text = "KUWENTURA"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="RoomCode" type="Label" parent="."]
 layout_mode = 1
-anchors_preset = 5
+anchors_preset = 8
 anchor_left = 0.5
+anchor_top = 0.5
 anchor_right = 0.5
+anchor_bottom = 0.5
 offset_left = -298.0
-offset_top = 376.0
+offset_top = -76.0
 offset_right = 298.0
-offset_bottom = 445.0
+offset_bottom = -7.0
 grow_horizontal = 2
+grow_vertical = 2
 theme_override_font_sizes/font_size = 50
 text = "Code:"
 horizontal_alignment = 1
@@ -144,15 +198,15 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -350.0
-offset_top = -3.0
+offset_top = 12.0
 offset_right = 350.0
-offset_bottom = 97.0
+offset_bottom = 112.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 25
 text = "Waiting for partner..."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -160,23 +214,23 @@ vertical_alignment = 1
 [node name="StartButton" type="Button" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 8
+anchors_preset = 7
 anchor_left = 0.5
-anchor_top = 0.5
+anchor_top = 1.0
 anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = 220.0
-offset_right = 200.0
-offset_bottom = 300.0
+anchor_bottom = 1.0
+offset_left = -168.0
+offset_top = -184.0
+offset_right = 168.0
+offset_bottom = -112.0
 grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
 theme_override_fonts/font = ExtResource("3_4bddd")
-theme_override_font_sizes/font_size = 42
+theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxFlat_green")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_green_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_sngst")
@@ -187,16 +241,16 @@ text = "Start Game"
 [node name="BackButton" type="Button" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
-offset_left = 60.0
-offset_top = 60.0
-offset_right = 220.0
-offset_bottom = 125.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+offset_left = 48.0
+offset_top = 40.0
+offset_right = 152.0
+offset_bottom = 80.0
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
 theme_override_fonts/font = ExtResource("3_4bddd")
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxFlat_3m1b5")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_fbpcy")
 theme_override_styles/hover = SubResource("StyleBoxFlat_sngst")
@@ -204,28 +258,34 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_758ce")
 text = "Back"
 
 [node name="DetectiveArea" type="Control" parent="."]
-anchors_preset = 0
-offset_left = 150.0
-offset_top = 50.0
-offset_right = 750.0
-offset_bottom = 950.0
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -455.0
+offset_right = 368.0
+grow_vertical = 0
 
 [node name="DetectiveLeftBtn" type="TextureButton" parent="DetectiveArea"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = -23.0
-offset_top = 540.0
-offset_right = 277.0
-offset_bottom = 840.0
-scale = Vector2(0.28, 0.28)
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -39.0
+offset_top = -141.5
+offset_right = 191.0
+offset_bottom = 88.5
+grow_vertical = 2
+scale = Vector2(0.3, 0.3)
 pivot_offset = Vector2(150, 150)
 texture_normal = ExtResource("7_arrow_left")
 ignore_texture_size = true
 stretch_mode = 0
 
 [node name="PlayerHost" parent="DetectiveArea" instance=ExtResource("5_pge74")]
-position = Vector2(300, 580)
-scale = Vector2(0.42, 0.42)
+position = Vector2(230, 193.5)
+scale = Vector2(0.3, 0.3)
 motion_mode = 1
 
 [node name="DetectiveName" type="Label" parent="DetectiveArea/PlayerHost"]
@@ -239,12 +299,16 @@ horizontal_alignment = 1
 
 [node name="DetectiveRightBtn" type="TextureButton" parent="DetectiveArea"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 317.0
-offset_top = 540.0
-offset_right = 617.0
-offset_bottom = 840.0
-scale = Vector2(0.28, 0.28)
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 208.0
+offset_top = -141.5
+offset_right = 438.0
+offset_bottom = 88.5
+grow_vertical = 2
+scale = Vector2(0.3, 0.3)
 pivot_offset = Vector2(150, 150)
 texture_normal = ExtResource("8_arrow_right")
 ignore_texture_size = true
@@ -252,11 +316,12 @@ stretch_mode = 0
 
 [node name="DetectiveCostumeName" type="Label" parent="DetectiveArea"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 150.0
-offset_top = 755.0
-offset_right = 450.0
-offset_bottom = 805.0
+layout_mode = 1
+offset_left = 146.0
+offset_top = 319.0
+offset_right = 356.0
+offset_bottom = 351.0
+scale = Vector2(0.8, 0.8)
 text = "Classic Outfit"
 label_settings = SubResource("LabelSettings_costume")
 horizontal_alignment = 1
@@ -264,17 +329,17 @@ vertical_alignment = 1
 
 [node name="DetectiveSelectBtn" type="Button" parent="DetectiveArea"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 175.0
-offset_top = 830.0
-offset_right = 425.0
-offset_bottom = 900.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
-theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 26
+layout_mode = 1
+offset_left = 136.0
+offset_top = 359.0
+offset_right = 304.0
+offset_bottom = 399.0
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_disabled_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxFlat_3m1b5")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_fbpcy")
 theme_override_styles/hover = SubResource("StyleBoxFlat_sngst")
@@ -283,28 +348,40 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_758ce")
 text = "Select Costume"
 
 [node name="SidekickArea" type="Control" parent="."]
-anchors_preset = 0
-offset_left = 1170.0
-offset_top = 50.0
-offset_right = 1770.0
-offset_bottom = 950.0
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -360.0
+offset_top = -455.0
+grow_horizontal = 0
+grow_vertical = 0
 
 [node name="SidekickLeftBtn" type="TextureButton" parent="SidekickArea"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = -21.0
-offset_top = 540.0
-offset_right = 279.0
-offset_bottom = 840.0
-scale = Vector2(0.28, 0.28)
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -487.0
+offset_top = -140.5
+offset_right = -257.0
+offset_bottom = 89.5
+grow_horizontal = 0
+grow_vertical = 2
+scale = Vector2(0.3, 0.3)
 pivot_offset = Vector2(150, 150)
 texture_normal = ExtResource("7_arrow_left")
 ignore_texture_size = true
 stretch_mode = 0
 
 [node name="PlayerSidekick" parent="SidekickArea" instance=ExtResource("6_4bddd")]
-position = Vector2(300, 580)
-scale = Vector2(0.42, 0.42)
+position = Vector2(144, 191)
+scale = Vector2(0.3, 0.3)
 
 [node name="SidekickName" type="Label" parent="SidekickArea/PlayerSidekick"]
 offset_left = -200.0
@@ -315,50 +392,248 @@ text = "Sidekick"
 label_settings = SubResource("LabelSettings_role")
 horizontal_alignment = 1
 
-[node name="SidekickCostumeName" type="Label" parent="SidekickArea"]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 150.0
-offset_top = 755.0
-offset_right = 450.0
-offset_bottom = 805.0
-text = "Classic Outfit"
-label_settings = SubResource("LabelSettings_costume")
-horizontal_alignment = 1
-vertical_alignment = 1
-
 [node name="SidekickRightBtn" type="TextureButton" parent="SidekickArea"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 319.0
-offset_top = 540.0
-offset_right = 619.0
-offset_bottom = 840.0
-scale = Vector2(0.28, 0.28)
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -242.0
+offset_top = -140.5
+offset_right = -12.0
+offset_bottom = 89.5
+grow_horizontal = 0
+grow_vertical = 2
+scale = Vector2(0.3, 0.3)
 pivot_offset = Vector2(150, 150)
 texture_normal = ExtResource("8_arrow_right")
 ignore_texture_size = true
 stretch_mode = 0
 
+[node name="SidekickCostumeName" type="Label" parent="SidekickArea"]
+unique_name_in_owner = true
+layout_mode = 1
+offset_left = 60.0
+offset_top = 319.0
+offset_right = 270.0
+offset_bottom = 351.0
+scale = Vector2(0.8, 0.8)
+text = "Classic Outfit"
+label_settings = SubResource("LabelSettings_costume")
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="SidekickSelectBtn" type="Button" parent="SidekickArea"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 175.0
-offset_top = 830.0
-offset_right = 425.0
-offset_bottom = 900.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
-theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 26
+layout_mode = 1
+offset_left = 56.0
+offset_top = 359.0
+offset_right = 224.0
+offset_bottom = 399.0
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_disabled_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxFlat_3m1b5")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_fbpcy")
 theme_override_styles/hover = SubResource("StyleBoxFlat_sngst")
 theme_override_styles/disabled = SubResource("StyleBoxFlat_fbpcy")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_758ce")
 text = "Select Costume"
+
+[node name="SettingsControl" parent="." instance=ExtResource("9_6xa24")]
+script = ExtResource("10_w0uso")
+
+[node name="SettingsPanel" type="Panel" parent="."]
+visible = false
+top_level = true
+z_index = 10
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -604.40625
+offset_top = -473.75
+offset_right = 604.40625
+offset_bottom = 473.75
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_28lu3")
+
+[node name="Label" type="Label" parent="SettingsPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 35.0
+offset_bottom = 144.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("3_4bddd")
+theme_override_font_sizes/font_size = 65
+text = "Settings"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Back" type="TouchScreenButton" parent="SettingsPanel"]
+position = Vector2(1112.406, -1.25)
+scale = Vector2(0.4, 0.4)
+texture_normal = ExtResource("11_6xa24")
+
+[node name="Separator" type="Line2D" parent="SettingsPanel"]
+position = Vector2(0, -13)
+points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+width = 2.0
+default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+
+[node name="VolumeSliderControl" type="HBoxContainer" parent="SettingsPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -480.8125
+offset_top = -283.0
+offset_right = 480.8125
+offset_bottom = -158.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 30
+
+[node name="VolumeLabel" type="Label" parent="SettingsPanel/VolumeSliderControl"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_4bddd")
+theme_override_font_sizes/font_size = 40
+text = "Music Volume:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VolumeSlider" type="HSlider" parent="SettingsPanel/VolumeSliderControl"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/slider = SubResource("StyleBoxLine_rk1wc")
+theme_override_styles/grabber_area = SubResource("StyleBoxLine_2b6dv")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_2b6dv")
+value = 80.0
+
+[node name="VolumeValue" type="Label" parent="SettingsPanel/VolumeSliderControl"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "80%"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Separator2" type="Line2D" parent="SettingsPanel"]
+position = Vector2(0, 130)
+points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+width = 2.0
+default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+
+[node name="UserSection" type="VBoxContainer" parent="SettingsPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -265.875
+offset_top = -122.5
+offset_right = 265.875
+offset_bottom = 430.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 2
+
+[node name="UserHeaderLabel" type="Label" parent="SettingsPanel/UserSection"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_4bddd")
+theme_override_font_sizes/font_size = 40
+text = "User Profile"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="UserContent" type="HBoxContainer" parent="SettingsPanel/UserSection"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 10
+
+[node name="AvatarTexture" type="TextureRect" parent="SettingsPanel/UserSection/UserContent"]
+layout_mode = 2
+texture = ExtResource("12_8x8i8")
+
+[node name="UserInfo" type="VBoxContainer" parent="SettingsPanel/UserSection/UserContent"]
+layout_mode = 2
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="DisplayName" type="Label" parent="SettingsPanel/UserSection/UserContent/UserInfo"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 25
+text = "\"Player Name\""
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ProviderLabel" type="Label" parent="SettingsPanel/UserSection/UserContent/UserInfo"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 25
+text = "\"Guest\""
+vertical_alignment = 1
+
+[node name="AuthButtons" type="VBoxContainer" parent="SettingsPanel/UserSection"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 25
+
+[node name="SignInButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_4bddd")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxFlat_qnt0v")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_fqwwo")
+theme_override_styles/hover = SubResource("StyleBoxFlat_oh2lh")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_t5cgj")
+text = "Sign in"
+
+[node name="GuestButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_4bddd")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxFlat_qnt0v")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_fqwwo")
+theme_override_styles/hover = SubResource("StyleBoxFlat_oh2lh")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_t5cgj")
+text = "Guest"
+
+[node name="LinkGoogleButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_4bddd")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxFlat_qnt0v")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_fqwwo")
+theme_override_styles/hover = SubResource("StyleBoxFlat_oh2lh")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_t5cgj")
+text = "Link Google"
 
 [connection signal="pressed" from="StartButton" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]

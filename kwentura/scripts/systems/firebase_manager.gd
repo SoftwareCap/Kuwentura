@@ -1,7 +1,7 @@
 extends Node
 
-const API_KEY: String = "AIzaSyDvqAXKBbK8F4e6c_jg6_vBQ16bvqevhT0"
-const PROJECT_ID: String = "kwentura-89df4"
+const API_KEY: String = "AIzaSyBbfAbGualst8-7qpa7CwefDk-j2Xe1aHU"
+const PROJECT_ID: String = "kuwentura"
 const AUTH_DOMAIN: String = "https://identitytoolkit.googleapis.com/v1"
 const FIRESTORE_URL: String = (
 	"https://firestore.googleapis.com/v1/projects/%s/databases/(default)/documents" % PROJECT_ID
