@@ -1,6 +1,6 @@
 extends Node
 
-const PROJECT_ID = "kwentura-89df4"
+const PROJECT_ID = "kuwentura"
 const BASE_URL = (
 	"https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents"
 )
@@ -174,3 +174,86 @@ func _firestore_value_to_godot(field: Dictionary):
 		return _convert_from_firestore(field["mapValue"]["fields"])
 	else:
 		return null
+
+
+# ============================================
+# USER PROFILE FUNCTIONS
+# ============================================
+
+const USERS_COLLECTION = "users"
+
+func save_user_profile(user_id: String, profile_data: Dictionary):
+	"""Save user profile data to Firestore."""
+	if user_id.is_empty():
+		print("[Firestore] Cannot save: No user ID")
+		return
+	
+	var id_token = FirebaseAuth.id_token
+	if id_token.is_empty():
+		print("[Firestore] Cannot save: Not authenticated")
+		return
+	
+	var url = BASE_URL + "/" + USERS_COLLECTION + "/" + user_id
+	var headers = ["Content-Type: application/json", "Authorization: Bearer " + id_token]
+	
+	var doc = {
+		"fields": {
+			"display_name": {"stringValue": profile_data.get("display_name", "")},
+			"email": {"stringValue": profile_data.get("email", "")},
+			"photo_url": {"stringValue": profile_data.get("photo_url", "")},
+			"provider": {"stringValue": profile_data.get("provider", "anonymous")},
+			"is_linked": {"booleanValue": profile_data.get("is_linked", false)},
+			"last_login": {"stringValue": str(Time.get_unix_time_from_system())}
+		}
+	}
+	
+	var body = JSON.stringify(doc)
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(_on_save_profile_response.bind(http))
+	http.request(url, headers, HTTPClient.METHOD_PATCH, body)
+
+func _on_save_profile_response(_result, response_code, _headers, body, http):
+	if response_code == 200 or response_code == 201:
+		print("[Firestore] User profile saved successfully")
+	else:
+		print("[Firestore] Profile save failed: ", response_code, " - ", body.get_string_from_utf8())
+	http.queue_free()
+
+func load_user_profile(user_id: String):
+	"""Load user profile data from Firestore."""
+	if user_id.is_empty():
+		print("[Firestore] Cannot load: No user ID")
+		return
+	
+	var id_token = FirebaseAuth.id_token
+	if id_token.is_empty():
+		print("[Firestore] Cannot load: Not authenticated")
+		return
+	
+	var url = BASE_URL + "/" + USERS_COLLECTION + "/" + user_id
+	var headers = ["Authorization: Bearer " + id_token]
+	
+	print("[Firestore] Loading profile from: ", url)
+	
+	var http = HTTPRequest.new()
+	add_child(http)
+	http.request_completed.connect(_on_load_profile_response.bind(http))
+	http.request(url, headers, HTTPClient.METHOD_GET)
+
+func _on_load_profile_response(_result, response_code, _headers, body, http):
+	print("[Firestore] Load profile response: ", response_code)
+	if response_code == 200:
+		var json = JSON.parse_string(body.get_string_from_utf8())
+		if json and json.has("fields"):
+			var profile = _convert_from_firestore(json["fields"])
+			print("[Firestore] Profile loaded successfully")
+			# Update UserManager with loaded data
+			UserManager.update_user_data(profile)
+		else:
+			print("[Firestore] No profile data found")
+	elif response_code == 404:
+		print("[Firestore] Profile not found (new user)")
+	else:
+		print("[Firestore] Profile load failed: ", response_code)
+	http.queue_free()

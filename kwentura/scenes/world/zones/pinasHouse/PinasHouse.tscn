@@ -1,7 +1,7 @@
 [gd_scene load_steps=44 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
-[ext_resource type="Texture2D" uid="uid://w844nys0xd6n" path="res://assets/backgrounds/lobby.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
 [ext_resource type="Texture2D" uid="uid://bpeh268v43cji" path="res://assets/sprites/places/KitchenBackground.png" id="2_qj22k"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 [ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/inventoryboard.png" id="3_k0xpg"]

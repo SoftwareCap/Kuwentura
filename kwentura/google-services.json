@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "974746402245",
+    "project_id": "kuwentura",
+    "storage_bucket": "kuwentura.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:974746402245:android:eab5f46bfcce2b8f61dfac",
+        "android_client_info": {
+          "package_name": "com.kuwentura.game"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "974746402245-ilt85juj6bpf6t8m5gs54htdbojpq65a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kuwentura.game",
+            "certificate_hash": "06a1e9e10ee33a6298325bdff9047421515ec3f6"
+          }
+        },
+        {
+          "client_id": "974746402245-34kijm006b16svughjfe9irh1mcl965m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbfAbGualst8-7qpa7CwefDk-j2Xe1aHU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "974746402245-34kijm006b16svughjfe9irh1mcl965m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
