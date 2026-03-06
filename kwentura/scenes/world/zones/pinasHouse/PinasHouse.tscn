@@ -27,7 +27,7 @@
 [ext_resource type="Texture2D" uid="uid://deqmdh6dbokyd" path="res://assets/sprites/zoneObjects/x.png" id="19_vt60f"]
 [ext_resource type="Texture2D" uid="uid://ci6sa4iwt7x0l" path="res://assets/sprites/zoneObjects/y.png" id="20_eedqa"]
 [ext_resource type="Texture2D" uid="uid://bcwl2rqppjo6k" path="res://assets/sprites/zoneObjects/z.png" id="21_cd1wg"]
-[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/Close.png" id="22_vt60f"]
+[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/closebutton.png" id="22_vt60f"]
 [ext_resource type="Texture2D" uid="uid://d2b4d66dls22f" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Banner.png" id="24_vt60f"]
 [ext_resource type="Texture2D" uid="uid://b216jsk5hyag5" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Ladle.png" id="25_eedqa"]
 [ext_resource type="Texture2D" uid="uid://llr505ongc63" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pan.png" id="26_cd1wg"]

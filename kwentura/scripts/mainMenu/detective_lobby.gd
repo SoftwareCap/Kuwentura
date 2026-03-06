@@ -13,14 +13,17 @@ const SETTINGS_FILE = "user://settings.json"
 @onready var volume_slider: HSlider = $SettingsPanel/VolumeSliderControl/VolumeSlider
 @onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
 @onready var back_button_settings: TouchScreenButton = $SettingsPanel/Back
+@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
+@onready var user_profile_panel: Panel = $SettingsPanel/UserProfile
+@onready var user_profile_back_button: TouchScreenButton = $SettingsPanel/UserProfile/BackToPrevious
 
-# User Auth UI
-@onready var avatar_texture: TextureRect = $SettingsPanel/UserSection/UserContent/AvatarTexture
-@onready var display_name_label: Label = $SettingsPanel/UserSection/UserContent/UserInfo/DisplayName
-@onready var provider_label: Label = $SettingsPanel/UserSection/UserContent/UserInfo/ProviderLabel
-@onready var sign_in_button: Button = $SettingsPanel/UserSection/AuthButtons/SignInButton
-@onready var guest_button: Button = $SettingsPanel/UserSection/AuthButtons/GuestButton
-@onready var link_google_button: Button = $SettingsPanel/UserSection/AuthButtons/LinkGoogleButton
+# User Auth UI (inside UserProfile panel)
+@onready var avatar_texture: TextureRect = $SettingsPanel/UserProfile/UserContent/AvatarTexture
+@onready var display_name_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/DisplayName
+@onready var provider_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/ProviderLabel
+@onready var sign_in_button: Button = $SettingsPanel/UserProfile/AuthButtons/SignInButton
+@onready var guest_button: Button = $SettingsPanel/UserProfile/AuthButtons/GuestButton
+@onready var link_google_button: Button = $SettingsPanel/UserProfile/AuthButtons/LinkGoogleButton
 
 @onready var start_button: Button = %StartButton
 @onready var back_button: Button = %BackButton
@@ -172,16 +175,14 @@ func _setup_base_lobby_ui() -> void:
 		start_button.disabled = true
 		
 		var invite_code := NetworkManager.get_invite_code()
-		var diag = NetworkManager.get_network_diagnostics()
 		
-		room_code_label.text = "Code: %s" % invite_code if not invite_code.is_empty() else "Code: ???"
+		# Only show room code, NOT the IP (for security and cleaner UI)
+		if not invite_code.is_empty():
+			room_code_label.text = "Code: %s" % invite_code
+		else:
+			room_code_label.text = "Code: ???"
 		
-		# Show room code and connection info
-		status_label.text = "Waiting for Sidekick...\n\nCode: %s\nWiFi: %s" % [invite_code, diag.selected_ip]
-		status_label.modulate = Color(1, 1, 1)
-		
-		print("[DetectiveLobby] Hosting on: ", diag.selected_ip, ":", diag.port)
-		print("[DetectiveLobby] Code: ", invite_code)
+		print("[DetectiveLobby] Room Code: ", invite_code)
 		
 		# Sidekick elements hidden initially
 		if sidekick_sprite:
@@ -224,6 +225,14 @@ func _connect_signals() -> void:
 	
 	if volume_slider and not volume_slider.value_changed.is_connected(_on_volume_changed):
 		volume_slider.value_changed.connect(_on_volume_changed)
+	
+	# View User Profile button
+	if view_user_profile_button and not view_user_profile_button.pressed.is_connected(_on_view_user_profile_pressed):
+		view_user_profile_button.pressed.connect(_on_view_user_profile_pressed)
+	
+	# Back from profile button
+	if user_profile_back_button and not user_profile_back_button.pressed.is_connected(_on_back_from_profile_pressed):
+		user_profile_back_button.pressed.connect(_on_back_from_profile_pressed)
 
 
 func _disconnect_signals() -> void:
@@ -394,10 +403,30 @@ func _on_link_failed(error: String) -> void:
 	print("[DetectiveLobby] Account link failed: ", error)
 
 
+func _set_main_buttons_visible(is_visible: bool) -> void:
+	"""Toggle visibility of main lobby buttons.
+	In DetectiveLobby, only the Back button needs to be hidden when settings opens.
+	The settings button is handled by settings_control.hide_button()/show_button().
+	"""
+	if back_button:
+		back_button.visible = is_visible
+
+
 func _on_settings_pressed() -> void:
 	print("[DetectiveLobby] Opening settings panel")
 	if settings_panel:
 		settings_panel.visible = true
+		# Hide back button when settings panel opens
+		_set_main_buttons_visible(false)
+		# Hide the settings button when panel is open
+		if settings_control:
+			settings_control.hide_button()
+		# Make sure user profile panel is hidden when opening settings
+		if user_profile_panel:
+			user_profile_panel.visible = false
+		# Show view user profile button
+		if view_user_profile_button:
+			view_user_profile_button.visible = true
 		# Update slider to current volume
 		if volume_slider:
 			volume_slider.value = MusicController.get_volume() * 100
@@ -409,7 +438,33 @@ func _on_back_settings_pressed() -> void:
 	print("[DetectiveLobby] Closing settings panel")
 	if settings_panel:
 		settings_panel.visible = false
+	# Also hide user profile panel
+	if user_profile_panel:
+		user_profile_panel.visible = false
+	# Show back button again when settings panel closes
+	_set_main_buttons_visible(true)
+	# Show the settings button again when panel is closed
+	if settings_control:
+		settings_control.show_button()
 	_save_settings()
+
+
+func _on_view_user_profile_pressed() -> void:
+	print("[DetectiveLobby] Opening user profile panel")
+	if user_profile_panel:
+		user_profile_panel.visible = true
+	# Hide the view user profile button while in profile view
+	if view_user_profile_button:
+		view_user_profile_button.visible = false
+
+
+func _on_back_from_profile_pressed() -> void:
+	print("[DetectiveLobby] Closing user profile panel")
+	if user_profile_panel:
+		user_profile_panel.visible = false
+	# Show the view user profile button again
+	if view_user_profile_button:
+		view_user_profile_button.visible = true
 
 
 func _on_volume_changed(value: float) -> void:
@@ -671,8 +726,10 @@ func _update_connection_indicator() -> void:
 
 func _on_room_code_generated(code: String) -> void:
 	if NetworkManager.get_my_role() == "detective":
+		# Only show room code, NOT the IP
 		room_code_label.text = "Code: %s" % code
 		room_code_label.modulate = Color(1, 0.9, 0.2)
+		print("[DetectiveLobby] Room Code: ", code)
 
 
 func _on_partner_connected(data: Dictionary) -> void:

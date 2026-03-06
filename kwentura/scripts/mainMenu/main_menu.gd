@@ -9,20 +9,23 @@ extends Control
 @onready var volume_slider: HSlider = $SettingsPanel/VolumeSliderControl/VolumeSlider
 @onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
 @onready var back_button: TouchScreenButton = $SettingsPanel/Back
+@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
+@onready var user_profile_panel: Panel = $SettingsPanel/UserProfile
+@onready var back_from_profile_button: TouchScreenButton = $SettingsPanel/UserProfile/BackToPrevious
 
-# User Auth UI
-@onready var avatar_texture: TextureRect = $SettingsPanel/UserSection/UserContent/AvatarTexture
-@onready var display_name_label: Label = $SettingsPanel/UserSection/UserContent/UserInfo/DisplayName
-@onready var provider_label: Label = $SettingsPanel/UserSection/UserContent/UserInfo/ProviderLabel
-@onready var sign_in_button: Button = $SettingsPanel/UserSection/AuthButtons/SignInButton
-@onready var guest_button: Button = $SettingsPanel/UserSection/AuthButtons/GuestButton
-@onready var link_google_button: Button = $SettingsPanel/UserSection/AuthButtons/LinkGoogleButton
+# User Auth UI (inside UserProfile panel)
+@onready var avatar_texture: TextureRect = $SettingsPanel/UserProfile/UserContent/AvatarTexture
+@onready var display_name_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/DisplayName
+@onready var provider_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/ProviderLabel
+@onready var sign_in_button: Button = $SettingsPanel/UserProfile/AuthButtons/SignInButton
+@onready var guest_button: Button = $SettingsPanel/UserProfile/AuthButtons/GuestButton
+@onready var link_google_button: Button = $SettingsPanel/UserProfile/AuthButtons/LinkGoogleButton
 
 # Sidekick Join Popup nodes
 @onready var sidekick_popup: Panel = $SidekickPopup
 @onready var code_input: LineEdit = $SidekickPopup/VBoxContainer/LineEdit
-@onready var join_code_ok_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/Button
-@onready var join_code_cancel_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/Button2
+@onready var join_code_cancel_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/Cancel
+@onready var join_code_ok_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/Join
 
 var is_joining: bool = false
 
@@ -58,6 +61,14 @@ func _ready():
 	
 	if volume_slider and not volume_slider.value_changed.is_connected(_on_volume_changed):
 		volume_slider.value_changed.connect(_on_volume_changed)
+	
+	# Connect View User Profile button
+	if view_user_profile_button and not view_user_profile_button.pressed.is_connected(_on_view_user_profile_pressed):
+		view_user_profile_button.pressed.connect(_on_view_user_profile_pressed)
+	
+	# Connect back from profile button
+	if back_from_profile_button and not back_from_profile_button.pressed.is_connected(_on_back_from_profile_pressed):
+		back_from_profile_button.pressed.connect(_on_back_from_profile_pressed)
 	
 	# Connect sidekick popup signals
 	if join_code_ok_button and not join_code_ok_button.pressed.is_connected(_on_join_code_ok_pressed):
@@ -280,13 +291,28 @@ func _on_link_failed(error: String) -> void:
 	_show_status("Linking failed: " + error)
 
 
+func _set_main_buttons_visible(is_visible: bool) -> void:
+	"""Toggle visibility of main menu buttons."""
+	if host_button:
+		host_button.visible = is_visible
+	if join_button:
+		join_button.visible = is_visible
+	if exit_button:
+		exit_button.visible = is_visible
+
+
 func _on_settings_pressed() -> void:
 	print("[MainMenu] Opening settings panel")
 	if settings_panel:
 		settings_panel.visible = true
+		# Hide main menu buttons when panel is open
+		_set_main_buttons_visible(false)
 		# Hide the settings button when panel is open
 		if settings_control:
 			settings_control.hide_button()
+		# Make sure user profile panel is hidden when opening settings
+		if user_profile_panel:
+			user_profile_panel.visible = false
 		# Update slider to current volume
 		if volume_slider:
 			volume_slider.value = MusicController.get_volume() * 100
@@ -298,10 +324,30 @@ func _on_back_settings_pressed() -> void:
 	print("[MainMenu] Closing settings panel")
 	if settings_panel:
 		settings_panel.visible = false
+	# Show main menu buttons again when panel is closed
+	_set_main_buttons_visible(true)
 	# Show the settings button again when panel is closed
 	if settings_control:
 		settings_control.show_button()
 	_save_settings()
+
+
+func _on_view_user_profile_pressed() -> void:
+	print("[MainMenu] Opening user profile panel")
+	if user_profile_panel:
+		user_profile_panel.visible = true
+	# Hide the view user profile button while in profile view
+	if view_user_profile_button:
+		view_user_profile_button.visible = false
+
+
+func _on_back_from_profile_pressed() -> void:
+	print("[MainMenu] Closing user profile panel")
+	if user_profile_panel:
+		user_profile_panel.visible = false
+	# Show the view user profile button again
+	if view_user_profile_button:
+		view_user_profile_button.visible = true
 
 
 func _on_volume_changed(value: float) -> void:
@@ -416,6 +462,10 @@ func _process_join_code(code: String) -> void:
 		
 		get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 		return
+	
+	# NOTE: Removed automatic IP detection - only room codes are used
+	# This prevents confusion and forces the discovery-based connection flow
+	# If direct IP is needed for debugging, use the "LOCAL" code instead
 	
 	_show_status("Searching for game with code: " + code + "...")
 	print("[MainMenu] Starting discovery for code: ", code)

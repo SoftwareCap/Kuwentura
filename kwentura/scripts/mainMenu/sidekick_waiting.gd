@@ -16,14 +16,17 @@ const SETTINGS_FILE = "user://settings.json"
 @onready var volume_slider: HSlider = $SettingsPanel/VolumeSliderControl/VolumeSlider
 @onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
 @onready var back_button_settings: TouchScreenButton = $SettingsPanel/Back
+@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
+@onready var user_profile_panel: Panel = $SettingsPanel/UserProfile
+@onready var user_profile_back_button: TouchScreenButton = $SettingsPanel/UserProfile/BackToPrevious
 
-# User Auth UI
-@onready var avatar_texture: TextureRect = $SettingsPanel/UserSection/UserContent/AvatarTexture
-@onready var display_name_label: Label = $SettingsPanel/UserSection/UserContent/UserInfo/DisplayName
-@onready var provider_label: Label = $SettingsPanel/UserSection/UserContent/UserInfo/ProviderLabel
-@onready var sign_in_button: Button = $SettingsPanel/UserSection/AuthButtons/SignInButton
-@onready var guest_button: Button = $SettingsPanel/UserSection/AuthButtons/GuestButton
-@onready var link_google_button: Button = $SettingsPanel/UserSection/AuthButtons/LinkGoogleButton
+# User Auth UI (inside UserProfile panel)
+@onready var avatar_texture: TextureRect = $SettingsPanel/UserProfile/UserContent/AvatarTexture
+@onready var display_name_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/DisplayName
+@onready var provider_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/ProviderLabel
+@onready var sign_in_button: Button = $SettingsPanel/UserProfile/AuthButtons/SignInButton
+@onready var guest_button: Button = $SettingsPanel/UserProfile/AuthButtons/GuestButton
+@onready var link_google_button: Button = $SettingsPanel/UserProfile/AuthButtons/LinkGoogleButton
 
 @onready var status_label: Label = $StatusLabel
 @onready var cancel_button: Button = %CancelButton
@@ -181,6 +184,14 @@ func _connect_signals() -> void:
 	
 	if volume_slider and not volume_slider.value_changed.is_connected(_on_volume_changed):
 		volume_slider.value_changed.connect(_on_volume_changed)
+	
+	# View User Profile button
+	if view_user_profile_button and not view_user_profile_button.pressed.is_connected(_on_view_user_profile_pressed):
+		view_user_profile_button.pressed.connect(_on_view_user_profile_pressed)
+	
+	# Back from profile button
+	if user_profile_back_button and not user_profile_back_button.pressed.is_connected(_on_back_from_profile_pressed):
+		user_profile_back_button.pressed.connect(_on_back_from_profile_pressed)
 
 
 func _disconnect_signals() -> void:
@@ -209,12 +220,36 @@ func _disconnect_signals() -> void:
 		back_button_settings.pressed.disconnect(_on_back_settings_pressed)
 	if volume_slider and volume_slider.value_changed.is_connected(_on_volume_changed):
 		volume_slider.value_changed.disconnect(_on_volume_changed)
+	if view_user_profile_button and view_user_profile_button.pressed.is_connected(_on_view_user_profile_pressed):
+		view_user_profile_button.pressed.disconnect(_on_view_user_profile_pressed)
+	if user_profile_back_button and user_profile_back_button.pressed.is_connected(_on_back_from_profile_pressed):
+		user_profile_back_button.pressed.disconnect(_on_back_from_profile_pressed)
+
+
+func _set_main_buttons_visible(is_visible: bool) -> void:
+	"""Toggle visibility of main lobby buttons.
+	In SidekickWaiting, only the Cancel button needs to be hidden when settings opens.
+	The settings button is handled by settings_control.hide_button()/show_button().
+	"""
+	if cancel_button:
+		cancel_button.visible = is_visible
 
 
 func _on_settings_pressed() -> void:
 	print("[SidekickWaiting] Opening settings panel")
 	if settings_panel:
 		settings_panel.visible = true
+		# Hide cancel button when settings panel opens
+		_set_main_buttons_visible(false)
+		# Hide the settings button when panel is open
+		if settings_control:
+			settings_control.hide_button()
+		# Make sure user profile panel is hidden when opening settings
+		if user_profile_panel:
+			user_profile_panel.visible = false
+		# Show view user profile button
+		if view_user_profile_button:
+			view_user_profile_button.visible = true
 		# Update slider to current volume
 		if volume_slider:
 			volume_slider.value = MusicController.get_volume() * 100
@@ -226,7 +261,33 @@ func _on_back_settings_pressed() -> void:
 	print("[SidekickWaiting] Closing settings panel")
 	if settings_panel:
 		settings_panel.visible = false
+	# Also hide user profile panel
+	if user_profile_panel:
+		user_profile_panel.visible = false
+	# Show cancel button again when settings panel closes
+	_set_main_buttons_visible(true)
+	# Show the settings button again when panel is closed
+	if settings_control:
+		settings_control.show_button()
 	_save_settings()
+
+
+func _on_view_user_profile_pressed() -> void:
+	print("[SidekickWaiting] Opening user profile panel")
+	if user_profile_panel:
+		user_profile_panel.visible = true
+	# Hide the view user profile button while in profile view
+	if view_user_profile_button:
+		view_user_profile_button.visible = false
+
+
+func _on_back_from_profile_pressed() -> void:
+	print("[SidekickWaiting] Closing user profile panel")
+	if user_profile_panel:
+		user_profile_panel.visible = false
+	# Show the view user profile button again
+	if view_user_profile_button:
+		view_user_profile_button.visible = true
 
 
 func _on_volume_changed(value: float) -> void:
@@ -607,6 +668,7 @@ func _call_join_if_playing() -> void:
 	_host_connected = true
 	_update_connection_indicator()
 	
+	# Only show UI elements if they exist
 	if detective_sprite:
 		detective_sprite.visible = true
 		detective_sprite.play("idle")
@@ -621,8 +683,9 @@ func _call_join_if_playing() -> void:
 	if sidekick_name_label:
 		sidekick_name_label.visible = true
 	
-	status_label.text = "Connected to Host!"
-	status_label.modulate = Color(1, 1, 0)
+	if status_label:
+		status_label.text = "Connected to Host!"
+		status_label.modulate = Color(1, 1, 0)
 
 
 func _on_connection_established(_peer_id: int) -> void:
