@@ -393,3 +393,116 @@ If you want cloud save functionality:
 **For Cloud Save (Optional)**:
 - Internet connection
 - Firebase project configured
+
+## UI Patterns
+
+### Settings Panel Pattern
+
+All menu scenes use a consistent settings panel structure:
+
+#### Scene Structure
+
+```
+Control (root)
+├── Main UI Buttons (Host/Join/Exit or Start/Back or Cancel)
+├── SettingsControl (CanvasLayer with settings button)
+└── SettingsPanel (Panel - hidden by default)
+    ├── Back (TouchScreenButton) - closes settings
+    ├── ViewUserProfile (Button) - opens user profile
+    ├── VolumeSliderControl
+    └── UserProfile (Panel - hidden by default)
+        ├── BackToPrevious (TouchScreenButton) - back to settings
+        ├── UserContent (Avatar, DisplayName, ProviderLabel)
+        └── AuthButtons (SignIn, Guest, LinkGoogle)
+```
+
+#### Button Visibility Pattern
+
+Only hide buttons that could interfere with the settings panel. Keep other UI visible for context.
+
+```gdscript
+# Node references
+@onready var settings_control: CanvasLayer = $SettingsControl
+@onready var settings_panel: Panel = $SettingsPanel
+@onready var back_button: Button = %BackButton  # or cancel_button, etc.
+
+# Toggle only the buttons that need to be hidden
+func _set_main_buttons_visible(visible: bool) -> void:
+    if back_button:
+        back_button.visible = visible
+
+# Open settings - hide relevant buttons
+func _on_settings_pressed() -> void:
+    settings_panel.visible = true
+    _set_main_buttons_visible(false)      # Hide main buttons
+    settings_control.hide_button()        # Hide settings button itself
+    if user_profile_panel:
+        user_profile_panel.visible = false
+    if view_user_profile_button:
+        view_user_profile_button.visible = true
+
+# Close settings - restore buttons  
+func _on_back_settings_pressed() -> void:
+    settings_panel.visible = false
+    if user_profile_panel:
+        user_profile_panel.visible = false
+    _set_main_buttons_visible(true)       # Show main buttons
+    settings_control.show_button()        # Show settings button
+    _save_settings()
+```
+
+**Per-Scene Configuration:**
+
+| Scene | Buttons Hidden | Notes |
+|-------|---------------|-------|
+| MainMenu | Host, Join, Exit | All main menu buttons |
+| DetectiveLobby | Back only | Start, room code, costumes remain visible |
+| SidekickWaiting | Cancel only | Status, costumes remain visible |
+
+#### User Profile Navigation
+
+```gdscript
+@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
+@onready var user_profile_panel: Panel = $SettingsPanel/UserProfile
+@onready var user_profile_back_button: TouchScreenButton = $SettingsPanel/UserProfile/BackToPrevious
+
+# Navigate to user profile
+func _on_view_user_profile_pressed() -> void:
+    user_profile_panel.visible = true
+    view_user_profile_button.visible = false
+
+# Return to settings
+func _on_back_from_profile_pressed() -> void:
+    user_profile_panel.visible = false
+    view_user_profile_button.visible = true
+```
+
+**Navigation Flow:**
+1. User clicks Settings → SettingsPanel opens
+2. User clicks "View User Profile" → UserProfile panel shows
+3. User clicks back arrow → Returns to SettingsPanel
+4. User clicks X → Returns to main menu
+
+#### Reusable Base Class
+
+For new scenes, you can use `SettingsPanelBase` (`scripts/controls/settings_panel_base.gd`) as a reference or extend it:
+
+```gdscript
+extends SettingsPanelBase
+
+func _ready():
+    # Set up node references
+    settings_control = $SettingsControl
+    settings_panel = $SettingsPanel
+    # ... other nodes
+    
+    # Set which buttons to hide
+    set_main_ui_buttons([back_button])
+    
+    # Connect all signals
+    setup_settings_signals()
+```
+
+See `main_menu.gd` for the implementation:
+- `_on_view_user_profile_pressed()` - Opens user profile
+- `_on_back_from_profile_pressed()` - Returns to settings

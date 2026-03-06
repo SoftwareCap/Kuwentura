@@ -30,11 +30,15 @@ func _ready():
 	
 	if not _is_in_lobby:
 		scale = avatar_scale
-		floor_snap_length = 32.0
+		# Scale floor snap length proportionally to avatar scale to prevent sinking
+		# Base snap length of 32.0 at scale 1.0, scaled down for smaller avatars
+		floor_snap_length = 32.0 * avatar_scale.y
 		floor_max_angle = deg_to_rad(60.0)
 		floor_block_on_wall = true
 		floor_stop_on_slope = true
 		motion_mode = MOTION_MODE_GROUNDED
+		# Increase safe margin slightly for better collision at small scales
+		safe_margin = 0.08
 
 
 func _process(_delta):

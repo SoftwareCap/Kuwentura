@@ -10,7 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://5hqcc5yhq64a" path="res://assets/buttons/rightBack2.png" id="8_arrow_right"]
 [ext_resource type="PackedScene" uid="uid://cmsvb2etjodsk" path="res://scenes/controls/SettingsControl.tscn" id="9_6xa24"]
 [ext_resource type="Script" uid="uid://b7hu8uq82xslq" path="res://scripts/controls/settings_control.gd" id="10_w0uso"]
-[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/closeBttn.png" id="11_6xa24"]
+[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/closebutton.png" id="11_6xa24"]
 [ext_resource type="Texture2D" uid="uid://bbdlqfcqkbbwk" path="res://assets/sprites/userIcon.png" id="12_8x8i8"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ab31o"]
@@ -28,7 +28,7 @@ shadow_size = 8
 shadow_offset = Vector2(0, 4)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_green_pressed"]
-bg_color = Color(0.43529412, 0.28627452, 0.24313726, 1)
+bg_color = Color(0.83137256, 0.5058824, 0.3529412, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -36,16 +36,6 @@ corner_radius_bottom_left = 16
 shadow_color = Color(0, 0, 0, 0.2)
 shadow_size = 4
 shadow_offset = Vector2(0, 2)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sngst"]
-bg_color = Color(0.43529412, 0.28627452, 0.24313726, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.25)
-shadow_size = 6
-shadow_offset = Vector2(0, 3)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fbpcy"]
 bg_color = Color(0.43529412, 0.28627452, 0.24313726, 1)
@@ -69,6 +59,16 @@ shadow_color = Color(0, 0, 0, 0.3)
 shadow_size = 8
 shadow_offset = Vector2(0, 4)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sngst"]
+bg_color = Color(0.83137256, 0.5058824, 0.3529412, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
 [sub_resource type="LabelSettings" id="LabelSettings_role"]
 font_size = 50
 outline_size = 4
@@ -85,7 +85,7 @@ outline_color = Color(0.2, 0.1, 0, 0.8)
 shadow_size = 4
 shadow_color = Color(0, 0, 0, 0.6)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_28lu3"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6xa24"]
 bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
 border_width_left = 2
 border_width_top = 2
@@ -97,45 +97,45 @@ corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w0uso"]
+bg_color = Color(0.43529412, 0.28627452, 0.24313726, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vwhyu"]
+bg_color = Color(0.83137256, 0.5058824, 0.3529412, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8x8i8"]
+bg_color = Color(0.83137256, 0.5058824, 0.3529412, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_28lu3"]
+
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_rk1wc"]
 color = Color(1, 1, 1, 1)
-thickness = 6
+thickness = 20
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_2b6dv"]
-color = Color(0.48324937, 0.54248023, 1, 1)
-thickness = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qnt0v"]
-bg_color = Color(1, 1, 1, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.20392157)
-shadow_size = 5
-shadow_offset = Vector2(0, 3.41)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fqwwo"]
-bg_color = Color(0.63529414, 0.63529414, 0.63529414, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.20392157)
-shadow_size = 5
-shadow_offset = Vector2(0, 3.41)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oh2lh"]
-bg_color = Color(0.8235294, 0.8235294, 0.8235294, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.20392157)
-shadow_size = 5
-shadow_offset = Vector2(0, 3.41)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t5cgj"]
+color = Color(0.83137256, 0.5058824, 0.3529412, 1)
+thickness = 20
 
 [node name="DetectiveLobby" type="Control"]
 layout_mode = 3
@@ -233,7 +233,6 @@ theme_override_fonts/font = ExtResource("3_4bddd")
 theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxFlat_green")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_green_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_sngst")
 theme_override_styles/disabled = SubResource("StyleBoxFlat_fbpcy")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_758ce")
 text = "Start Game"
@@ -241,16 +240,16 @@ text = "Start Game"
 [node name="BackButton" type="Button" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
-offset_left = 48.0
-offset_top = 40.0
-offset_right = 152.0
-offset_bottom = 80.0
+offset_left = 61.0
+offset_top = 31.0
+offset_right = 207.0
+offset_bottom = 76.0
 theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
 theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
 theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
 theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
 theme_override_fonts/font = ExtResource("3_4bddd")
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_3m1b5")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_fbpcy")
 theme_override_styles/hover = SubResource("StyleBoxFlat_sngst")
@@ -458,37 +457,67 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -604.40625
-offset_top = -473.75
-offset_right = 604.40625
-offset_bottom = 473.75
+offset_left = -507.5
+offset_top = -288.0
+offset_right = 507.5
+offset_bottom = 288.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_28lu3")
+theme_override_styles/panel = SubResource("StyleBoxFlat_6xa24")
 
 [node name="Label" type="Label" parent="SettingsPanel"]
 layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 35.0
-offset_bottom = 144.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -114.5
+offset_top = 25.0
+offset_right = 114.5
+offset_bottom = 134.0
 grow_horizontal = 2
 theme_override_fonts/font = ExtResource("3_4bddd")
-theme_override_font_sizes/font_size = 65
+theme_override_font_sizes/font_size = 60
 text = "Settings"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Back" type="TouchScreenButton" parent="SettingsPanel"]
-position = Vector2(1112.406, -1.25)
-scale = Vector2(0.4, 0.4)
+position = Vector2(875.5, -3)
+scale = Vector2(0.6, 0.6)
 texture_normal = ExtResource("11_6xa24")
 
-[node name="Separator" type="Line2D" parent="SettingsPanel"]
-position = Vector2(0, -13)
-points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+[node name="Line2D" type="Line2D" parent="SettingsPanel"]
+position = Vector2(-72.27711, -41)
+scale = Vector2(1.0109453, 1)
+points = PackedVector2Array(73, 189, 1074, 189)
 width = 2.0
 default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+
+[node name="ViewUserProfile" type="Button" parent="SettingsPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -205.5
+offset_top = -89.0
+offset_right = 205.5
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_fonts/font = ExtResource("3_4bddd")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxFlat_w0uso")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_vwhyu")
+theme_override_styles/hover = SubResource("StyleBoxFlat_8x8i8")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_28lu3")
+text = "View User Profile"
 
 [node name="VolumeSliderControl" type="HBoxContainer" parent="SettingsPanel"]
 layout_mode = 1
@@ -497,10 +526,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -480.8125
-offset_top = -283.0
-offset_right = 480.8125
-offset_bottom = -158.0
+offset_left = -441.0
+offset_top = 35.0
+offset_right = 441.0
+offset_bottom = 172.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 30
@@ -508,7 +537,7 @@ theme_override_constants/separation = 30
 [node name="VolumeLabel" type="Label" parent="SettingsPanel/VolumeSliderControl"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_4bddd")
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 45
 text = "Music Volume:"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -529,110 +558,141 @@ text = "80%"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Separator2" type="Line2D" parent="SettingsPanel"]
-position = Vector2(0, 130)
-points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
-width = 2.0
-default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+[node name="UserProfile" type="Panel" parent="SettingsPanel"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_6xa24")
 
-[node name="UserSection" type="VBoxContainer" parent="SettingsPanel"]
+[node name="Label" type="Label" parent="SettingsPanel/UserProfile"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -114.5
+offset_top = 39.0
+offset_right = 114.5
+offset_bottom = 148.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("3_4bddd")
+theme_override_font_sizes/font_size = 60
+text = "User Profile"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackToPrevious" type="TouchScreenButton" parent="SettingsPanel/UserProfile"]
+position = Vector2(20, 10)
+scale = Vector2(0.3, 0.3)
+texture_normal = ExtResource("7_arrow_left")
+
+[node name="UserContent" type="HBoxContainer" parent="SettingsPanel/UserProfile"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -265.875
-offset_top = -122.5
-offset_right = 265.875
-offset_bottom = 430.5
+offset_left = -243.0
+offset_top = -191.0
+offset_right = 243.0
+offset_bottom = 109.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 2
-
-[node name="UserHeaderLabel" type="Label" parent="SettingsPanel/UserSection"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("3_4bddd")
-theme_override_font_sizes/font_size = 40
-text = "User Profile"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="UserContent" type="HBoxContainer" parent="SettingsPanel/UserSection"]
-layout_mode = 2
 size_flags_horizontal = 4
-theme_override_constants/separation = 10
+theme_override_constants/separation = 47
 
-[node name="AvatarTexture" type="TextureRect" parent="SettingsPanel/UserSection/UserContent"]
+[node name="AvatarTexture" type="TextureRect" parent="SettingsPanel/UserProfile/UserContent"]
+custom_minimum_size = Vector2(200, 200)
 layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
 texture = ExtResource("12_8x8i8")
+expand_mode = 1
 
-[node name="UserInfo" type="VBoxContainer" parent="SettingsPanel/UserSection/UserContent"]
+[node name="UserInfo" type="VBoxContainer" parent="SettingsPanel/UserProfile/UserContent"]
 layout_mode = 2
 theme_override_constants/separation = 30
 alignment = 1
 
-[node name="DisplayName" type="Label" parent="SettingsPanel/UserSection/UserContent/UserInfo"]
+[node name="DisplayName" type="Label" parent="SettingsPanel/UserProfile/UserContent/UserInfo"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/font_size = 30
 text = "\"Player Name\""
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ProviderLabel" type="Label" parent="SettingsPanel/UserSection/UserContent/UserInfo"]
+[node name="ProviderLabel" type="Label" parent="SettingsPanel/UserProfile/UserContent/UserInfo"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/font_size = 30
 text = "\"Guest\""
 vertical_alignment = 1
 
-[node name="AuthButtons" type="VBoxContainer" parent="SettingsPanel/UserSection"]
-layout_mode = 2
+[node name="AuthButtons" type="HBoxContainer" parent="SettingsPanel/UserProfile"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -461.625
+offset_top = -160.0
+offset_right = 461.625
+offset_bottom = -81.0
+grow_horizontal = 2
+grow_vertical = 0
 size_flags_vertical = 3
-theme_override_constants/separation = 25
+theme_override_constants/separation = 50
+alignment = 1
 
-[node name="SignInButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+[node name="SignInButton" type="Button" parent="SettingsPanel/UserProfile/AuthButtons"]
 layout_mode = 2
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
 theme_override_fonts/font = ExtResource("3_4bddd")
 theme_override_font_sizes/font_size = 35
-theme_override_styles/normal = SubResource("StyleBoxFlat_qnt0v")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_fqwwo")
-theme_override_styles/hover = SubResource("StyleBoxFlat_oh2lh")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_t5cgj")
+theme_override_styles/normal = SubResource("StyleBoxFlat_w0uso")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_vwhyu")
+theme_override_styles/hover = SubResource("StyleBoxFlat_8x8i8")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_28lu3")
 text = "Sign in"
 
-[node name="GuestButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+[node name="GuestButton" type="Button" parent="SettingsPanel/UserProfile/AuthButtons"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
 theme_override_fonts/font = ExtResource("3_4bddd")
 theme_override_font_sizes/font_size = 35
-theme_override_styles/normal = SubResource("StyleBoxFlat_qnt0v")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_fqwwo")
-theme_override_styles/hover = SubResource("StyleBoxFlat_oh2lh")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_t5cgj")
+theme_override_styles/normal = SubResource("StyleBoxFlat_w0uso")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_vwhyu")
+theme_override_styles/hover = SubResource("StyleBoxFlat_8x8i8")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_28lu3")
 text = "Guest"
 
-[node name="LinkGoogleButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+[node name="LinkGoogleButton" type="Button" parent="SettingsPanel/UserProfile/AuthButtons"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
 theme_override_fonts/font = ExtResource("3_4bddd")
 theme_override_font_sizes/font_size = 35
-theme_override_styles/normal = SubResource("StyleBoxFlat_qnt0v")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_fqwwo")
-theme_override_styles/hover = SubResource("StyleBoxFlat_oh2lh")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_t5cgj")
+theme_override_styles/normal = SubResource("StyleBoxFlat_w0uso")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_vwhyu")
+theme_override_styles/hover = SubResource("StyleBoxFlat_8x8i8")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_28lu3")
 text = "Link Google"
 
 [connection signal="pressed" from="StartButton" to="." method="_on_start_pressed"]

@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://bv7e50npbvo5b"]
+[gd_scene load_steps=27 format=3 uid="uid://bv7e50npbvo5b"]
 
 [ext_resource type="Script" uid="uid://ba7x4f4qnudae" path="res://scripts/mainMenu/main_menu.gd" id="1_bkukm"]
 [ext_resource type="Texture2D" uid="uid://c1y03w2wn6cx5" path="res://assets/backgrounds/mainMenu.png" id="2_40cj7"]
@@ -8,9 +8,10 @@
 [ext_resource type="PackedScene" uid="uid://cmsvb2etjodsk" path="res://scenes/controls/SettingsControl.tscn" id="5_2oq2w"]
 [ext_resource type="Texture2D" uid="uid://bmkmc4nfkkd7y" path="res://assets/buttons/exitGame.png" id="5_r2guf"]
 [ext_resource type="Script" uid="uid://b7hu8uq82xslq" path="res://scripts/controls/settings_control.gd" id="6_r2guf"]
-[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/closeBttn.png" id="7_t3fh1"]
+[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/closebutton.png" id="7_t3fh1"]
 [ext_resource type="Texture2D" uid="uid://c2w32odtn3c80" path="res://assets/buttons/joinGame.png" id="8_join"]
 [ext_resource type="Texture2D" uid="uid://bbdlqfcqkbbwk" path="res://assets/sprites/userIcon.png" id="11_2oq2w"]
+[ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftBack2.png" id="11_r2guf"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_nlkkf"]
 texture = ExtResource("2_40cj7")
@@ -31,7 +32,7 @@ corner_radius_bottom_left = 16
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w35ku"]
 content_margin_top = 10.0
 content_margin_bottom = 10.0
-bg_color = Color(1, 1, 1, 1)
+bg_color = Color(0.43529412, 0.28627452, 0.24313726, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -43,6 +44,7 @@ shadow_size = 5
 shadow_offset = Vector2(0, 3.41)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8bsd5"]
+bg_color = Color(0.83137256, 0.5058824, 0.3529412, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -54,7 +56,7 @@ shadow_size = 5
 shadow_offset = Vector2(0, 3.41)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2oq2w"]
-bg_color = Color(0.8235294, 0.8235294, 0.8235294, 1)
+bg_color = Color(0.83137256, 0.5058824, 0.3529412, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -63,6 +65,20 @@ expand_margin_top = 16.0
 expand_margin_bottom = 16.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r2guf"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t3fh1"]
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.43529412, 0.28627452, 0.24313726, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bkukm"]
 bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
@@ -76,16 +92,8 @@ corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
-[sub_resource type="StyleBoxLine" id="StyleBoxLine_w35ku"]
-color = Color(1, 1, 1, 1)
-thickness = 20
-
-[sub_resource type="StyleBoxLine" id="StyleBoxLine_8bsd5"]
-color = Color(0.48324937, 0.54248023, 1, 1)
-thickness = 20
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rhts7"]
-bg_color = Color(1, 1, 1, 1)
+bg_color = Color(0.43529412, 0.28627452, 0.24313726, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -95,7 +103,7 @@ shadow_size = 5
 shadow_offset = Vector2(0, 3.41)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fu7sn"]
-bg_color = Color(0.63529414, 0.63529414, 0.63529414, 1)
+bg_color = Color(0.83137256, 0.5058824, 0.3529412, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -105,7 +113,7 @@ shadow_size = 5
 shadow_offset = Vector2(0, 3.41)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jix8l"]
-bg_color = Color(0.8235294, 0.8235294, 0.8235294, 1)
+bg_color = Color(0.83137256, 0.5058824, 0.3529412, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -115,6 +123,14 @@ shadow_size = 5
 shadow_offset = Vector2(0, 3.41)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fu7sn"]
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_w35ku"]
+color = Color(1, 1, 1, 1)
+thickness = 20
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_8bsd5"]
+color = Color(0.83137256, 0.5058824, 0.3529412, 1)
+thickness = 20
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -191,11 +207,11 @@ stretch_mode = 5
 
 [node name="ExitButton" type="TextureButton" parent="."]
 layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
+anchors_preset = -1
+anchor_left = 0.49913195
+anchor_top = 1.0262346
+anchor_right = 0.49913195
+anchor_bottom = 1.0262346
 offset_left = -658.0
 offset_top = -663.0
 offset_right = -490.60944
@@ -245,14 +261,14 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -329.2
-offset_top = -226.25
+offset_top = -229.25
 offset_right = 329.2
-offset_bottom = 226.25
+offset_bottom = 223.25
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 0
-theme_override_constants/separation = 106
+theme_override_constants/separation = 55
 
 [node name="Label" type="Label" parent="SidekickPopup/VBoxContainer"]
 layout_mode = 2
@@ -271,7 +287,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/minimum_character_width = 4
 theme_override_font_sizes/font_size = 45
-placeholder_text = "enter code"
+placeholder_text = "code here"
 alignment = 1
 caret_blink = true
 caret_force_displayed = true
@@ -279,35 +295,18 @@ caret_force_displayed = true
 [node name="HBoxContainer" type="HBoxContainer" parent="SidekickPopup/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
-size_flags_vertical = 4
+size_flags_vertical = 6
 theme_override_constants/separation = 60
 
-[node name="Button" type="Button" parent="SidekickPopup/VBoxContainer/HBoxContainer"]
+[node name="Cancel" type="Button" parent="SidekickPopup/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(200, 40)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
-theme_override_fonts/font = ExtResource("3_w35ku")
-theme_override_font_sizes/font_size = 30
-theme_override_styles/normal = SubResource("StyleBoxFlat_w35ku")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_8bsd5")
-theme_override_styles/hover = SubResource("StyleBoxFlat_2oq2w")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_r2guf")
-text = "Join"
-
-[node name="Button2" type="Button" parent="SidekickPopup/VBoxContainer/HBoxContainer"]
-custom_minimum_size = Vector2(200, 40)
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
 theme_override_fonts/font = ExtResource("3_w35ku")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_w35ku")
@@ -316,43 +315,95 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_2oq2w")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_r2guf")
 text = "Cancel"
 
+[node name="Join" type="Button" parent="SidekickPopup/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(200, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_fonts/font = ExtResource("3_w35ku")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_t3fh1")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_8bsd5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_2oq2w")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_r2guf")
+text = "Join"
+
 [node name="SettingsControl" parent="." instance=ExtResource("5_2oq2w")]
 script = ExtResource("6_r2guf")
 
 [node name="SettingsPanel" type="Panel" parent="."]
 visible = false
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -507.5
+offset_top = -288.0
+offset_right = 507.5
+offset_bottom = 288.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bkukm")
 
 [node name="Label" type="Label" parent="SettingsPanel"]
 layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 35.0
-offset_bottom = 144.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -114.5
+offset_top = 25.0
+offset_right = 114.5
+offset_bottom = 134.0
 grow_horizontal = 2
 theme_override_fonts/font = ExtResource("3_w35ku")
-theme_override_font_sizes/font_size = 80
+theme_override_font_sizes/font_size = 60
 text = "Settings"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Back" type="TouchScreenButton" parent="SettingsPanel"]
-position = Vector2(1759, 11)
+position = Vector2(875.5, -3)
 scale = Vector2(0.6, 0.6)
 texture_normal = ExtResource("7_t3fh1")
 
-[node name="Separator" type="Line2D" parent="SettingsPanel"]
-position = Vector2(0, -135)
-scale = Vector2(1.59, 1.59)
-points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+[node name="Line2D" type="Line2D" parent="SettingsPanel"]
+position = Vector2(-72.27711, -41)
+scale = Vector2(1.0109453, 1)
+points = PackedVector2Array(73, 189, 1074, 189)
 width = 2.0
 default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+
+[node name="ViewUserProfile" type="Button" parent="SettingsPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -205.5
+offset_top = -89.0
+offset_right = 205.5
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_fonts/font = ExtResource("3_w35ku")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxFlat_rhts7")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_fu7sn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_jix8l")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fu7sn")
+text = "View User Profile"
 
 [node name="VolumeSliderControl" type="HBoxContainer" parent="SettingsPanel"]
 layout_mode = 1
@@ -361,10 +412,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -550.0
-offset_top = -357.0
-offset_right = 550.0
-offset_bottom = -232.0
+offset_left = -441.0
+offset_top = 35.0
+offset_right = 441.0
+offset_bottom = 172.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 30
@@ -372,7 +423,7 @@ theme_override_constants/separation = 30
 [node name="VolumeLabel" type="Label" parent="SettingsPanel/VolumeSliderControl"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_w35ku")
-theme_override_font_sizes/font_size = 50
+theme_override_font_sizes/font_size = 45
 text = "Music Volume:"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -393,108 +444,137 @@ text = "80%"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Separator2" type="Line2D" parent="SettingsPanel"]
-position = Vector2(0, 8)
-scale = Vector2(1.59, 1.59)
-points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
-width = 2.0
-default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+[node name="UserProfile" type="Panel" parent="SettingsPanel"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bkukm")
 
-[node name="UserSection" type="VBoxContainer" parent="SettingsPanel"]
+[node name="Label" type="Label" parent="SettingsPanel/UserProfile"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -114.5
+offset_top = 39.0
+offset_right = 114.5
+offset_bottom = 148.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("3_w35ku")
+theme_override_font_sizes/font_size = 60
+text = "User Profile"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackToPrevious" type="TouchScreenButton" parent="SettingsPanel/UserProfile"]
+position = Vector2(20, 10)
+scale = Vector2(0.3, 0.3)
+texture_normal = ExtResource("11_r2guf")
+
+[node name="UserContent" type="HBoxContainer" parent="SettingsPanel/UserProfile"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -253.875
-offset_top = -150.5
-offset_right = 277.875
-offset_bottom = 402.5
+offset_left = -243.0
+offset_top = -191.0
+offset_right = 243.0
+offset_bottom = 109.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 2
-
-[node name="UserHeaderLabel" type="Label" parent="SettingsPanel/UserSection"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("3_w35ku")
-theme_override_font_sizes/font_size = 50
-text = "User Profile"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="UserContent" type="HBoxContainer" parent="SettingsPanel/UserSection"]
-layout_mode = 2
 size_flags_horizontal = 4
-theme_override_constants/separation = 10
+theme_override_constants/separation = 47
 
-[node name="AvatarTexture" type="TextureRect" parent="SettingsPanel/UserSection/UserContent"]
+[node name="AvatarTexture" type="TextureRect" parent="SettingsPanel/UserProfile/UserContent"]
+custom_minimum_size = Vector2(200, 200)
 layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
 texture = ExtResource("11_2oq2w")
+expand_mode = 1
 
-[node name="UserInfo" type="VBoxContainer" parent="SettingsPanel/UserSection/UserContent"]
+[node name="UserInfo" type="VBoxContainer" parent="SettingsPanel/UserProfile/UserContent"]
 layout_mode = 2
 theme_override_constants/separation = 30
 alignment = 1
 
-[node name="DisplayName" type="Label" parent="SettingsPanel/UserSection/UserContent/UserInfo"]
+[node name="DisplayName" type="Label" parent="SettingsPanel/UserProfile/UserContent/UserInfo"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/font_size = 30
 text = "\"Player Name\""
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ProviderLabel" type="Label" parent="SettingsPanel/UserSection/UserContent/UserInfo"]
+[node name="ProviderLabel" type="Label" parent="SettingsPanel/UserProfile/UserContent/UserInfo"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/font_size = 30
 text = "\"Guest\""
 vertical_alignment = 1
 
-[node name="AuthButtons" type="HBoxContainer" parent="SettingsPanel/UserSection"]
-layout_mode = 2
+[node name="AuthButtons" type="HBoxContainer" parent="SettingsPanel/UserProfile"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -461.625
+offset_top = -160.0
+offset_right = 461.625
+offset_bottom = -81.0
+grow_horizontal = 2
+grow_vertical = 0
 size_flags_vertical = 3
-theme_override_constants/separation = 45
+theme_override_constants/separation = 50
 alignment = 1
 
-[node name="SignInButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+[node name="SignInButton" type="Button" parent="SettingsPanel/UserProfile/AuthButtons"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
 theme_override_fonts/font = ExtResource("3_w35ku")
-theme_override_font_sizes/font_size = 50
+theme_override_font_sizes/font_size = 35
 theme_override_styles/normal = SubResource("StyleBoxFlat_rhts7")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_fu7sn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_jix8l")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_fu7sn")
 text = "Sign in"
 
-[node name="GuestButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+[node name="GuestButton" type="Button" parent="SettingsPanel/UserProfile/AuthButtons"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
 theme_override_fonts/font = ExtResource("3_w35ku")
-theme_override_font_sizes/font_size = 50
+theme_override_font_sizes/font_size = 35
 theme_override_styles/normal = SubResource("StyleBoxFlat_rhts7")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_fu7sn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_jix8l")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_fu7sn")
 text = "Guest"
 
-[node name="LinkGoogleButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+[node name="LinkGoogleButton" type="Button" parent="SettingsPanel/UserProfile/AuthButtons"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
 theme_override_fonts/font = ExtResource("3_w35ku")
-theme_override_font_sizes/font_size = 50
+theme_override_font_sizes/font_size = 35
 theme_override_styles/normal = SubResource("StyleBoxFlat_rhts7")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_fu7sn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_jix8l")
@@ -505,7 +585,7 @@ text = "Link Google"
 [connection signal="pressed" from="JoinButton" to="." method="_on_join_pressed"]
 [connection signal="pressed" from="ExitButton" to="." method="_on_exit_pressed"]
 [connection signal="text_changed" from="SidekickPopup/VBoxContainer/LineEdit" to="." method="_on_code_text_changed"]
-[connection signal="pressed" from="SidekickPopup/VBoxContainer/HBoxContainer/Button" to="." method="_on_join_code_ok_pressed"]
-[connection signal="pressed" from="SidekickPopup/VBoxContainer/HBoxContainer/Button2" to="." method="_on_join_code_cancel_pressed"]
+[connection signal="pressed" from="SidekickPopup/VBoxContainer/HBoxContainer/Cancel" to="." method="_on_join_code_cancel_pressed"]
+[connection signal="pressed" from="SidekickPopup/VBoxContainer/HBoxContainer/Join" to="." method="_on_join_code_ok_pressed"]
 [connection signal="pressed" from="SettingsPanel/Back" to="." method="_on_back_settings_pressed"]
 [connection signal="value_changed" from="SettingsPanel/VolumeSliderControl/VolumeSlider" to="." method="_on_volume_changed"]
