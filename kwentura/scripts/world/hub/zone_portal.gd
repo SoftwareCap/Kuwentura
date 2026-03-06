@@ -128,7 +128,7 @@ func detect_player_out(body: Node2D):
 	# Update enter button visibility
 	_update_enter_button_visibility()
 
-func _input(event: InputEvent) -> void:
+func _input(_event: InputEvent) -> void:
 	# Jump no longer triggers zone entry - use Enter button instead
 	pass
 

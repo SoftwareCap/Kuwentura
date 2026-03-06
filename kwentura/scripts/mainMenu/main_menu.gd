@@ -165,6 +165,11 @@ func _connect_auth_signals() -> void:
 		FirebaseAuth.account_linked_success.connect(_on_account_linked)
 	if not FirebaseAuth.account_link_failed.is_connected(_on_link_failed):
 		FirebaseAuth.account_link_failed.connect(_on_link_failed)
+	# Connect anonymous auth signals
+	if not FirebaseAuth.auth_success.is_connected(_on_anonymous_auth_success):
+		FirebaseAuth.auth_success.connect(_on_anonymous_auth_success)
+	if not FirebaseAuth.auth_failed.is_connected(_on_anonymous_auth_failed):
+		FirebaseAuth.auth_failed.connect(_on_anonymous_auth_failed)
 
 
 func _update_user_ui() -> void:
@@ -226,8 +231,9 @@ func _on_sign_in_pressed() -> void:
 
 
 func _on_guest_pressed() -> void:
-	print("[MainMenu] Guest button pressed")
+	print("[MainMenu] Guest button pressed - starting anonymous login")
 	_show_status("Continuing as Guest...")
+	FirebaseAuth.anonymous_login()
 
 
 func _on_link_google_pressed() -> void:
@@ -291,14 +297,36 @@ func _on_link_failed(error: String) -> void:
 	_show_status("Linking failed: " + error)
 
 
-func _set_main_buttons_visible(is_visible: bool) -> void:
+func _on_anonymous_auth_success(user_id: String, _token: String) -> void:
+	print("[MainMenu] Anonymous auth success: ", user_id)
+	_show_status("Playing as Guest")
+	
+	# Update UserManager with guest data
+	var user_data = {
+		"user_id": user_id,
+		"display_name": "Guest",
+		"email": "",
+		"photo_url": "",
+		"provider": "anonymous",
+		"is_linked": false
+	}
+	UserManager.update_user_data(user_data)
+	_update_user_ui()
+
+
+func _on_anonymous_auth_failed(error: String) -> void:
+	print("[MainMenu] Anonymous auth failed: ", error)
+	_show_status("Guest login failed: " + error)
+
+
+func _set_main_buttons_visible(show_buttons: bool) -> void:
 	"""Toggle visibility of main menu buttons."""
 	if host_button:
-		host_button.visible = is_visible
+		host_button.visible = show_buttons
 	if join_button:
-		join_button.visible = is_visible
+		join_button.visible = show_buttons
 	if exit_button:
-		exit_button.visible = is_visible
+		exit_button.visible = show_buttons
 
 
 func _on_settings_pressed() -> void:
@@ -567,3 +595,40 @@ func _input(event):
 		if sidekick_popup:
 			sidekick_popup.visible = false
 		_process_join_code("LOCAL")
+
+
+func _exit_tree() -> void:
+	"""Clean up signals when leaving the scene."""
+	# Disconnect network signals
+	if NetworkManager.connection_established.is_connected(_on_connection_established):
+		NetworkManager.connection_established.disconnect(_on_connection_established)
+	if NetworkManager.connection_failed.is_connected(_on_connection_failed):
+		NetworkManager.connection_failed.disconnect(_on_connection_failed)
+	if NetworkManager.player_joined.is_connected(_on_player_joined):
+		NetworkManager.player_joined.disconnect(_on_player_joined)
+	if NetworkManager.role_assignment_received.is_connected(_on_role_assigned):
+		NetworkManager.role_assignment_received.disconnect(_on_role_assigned)
+	if NetworkManager.room_code_generated.is_connected(_on_room_code_generated):
+		NetworkManager.room_code_generated.disconnect(_on_room_code_generated)
+	if NetworkManager.game_started.is_connected(_on_game_started):
+		NetworkManager.game_started.disconnect(_on_game_started)
+	
+	# Disconnect auth signals
+	if FirebaseAuth.google_auth_success.is_connected(_on_google_auth_success):
+		FirebaseAuth.google_auth_success.disconnect(_on_google_auth_success)
+	if FirebaseAuth.google_auth_failed.is_connected(_on_google_auth_failed):
+		FirebaseAuth.google_auth_failed.disconnect(_on_google_auth_failed)
+	if FirebaseAuth.account_linked_success.is_connected(_on_account_linked):
+		FirebaseAuth.account_linked_success.disconnect(_on_account_linked)
+	if FirebaseAuth.account_link_failed.is_connected(_on_link_failed):
+		FirebaseAuth.account_link_failed.disconnect(_on_link_failed)
+	if FirebaseAuth.auth_success.is_connected(_on_anonymous_auth_success):
+		FirebaseAuth.auth_success.disconnect(_on_anonymous_auth_success)
+	if FirebaseAuth.auth_failed.is_connected(_on_anonymous_auth_failed):
+		FirebaseAuth.auth_failed.disconnect(_on_anonymous_auth_failed)
+	
+	# Disconnect UserManager signals
+	if UserManager.user_data_changed.is_connected(_on_user_data_changed):
+		UserManager.user_data_changed.disconnect(_on_user_data_changed)
+	if UserManager.profile_picture_loaded.is_connected(_on_profile_picture_loaded):
+		UserManager.profile_picture_loaded.disconnect(_on_profile_picture_loaded)

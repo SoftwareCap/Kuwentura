@@ -68,6 +68,11 @@ func _ready():
 		_original_scales[jump_button] = jump_button.scale
 	if pause_button:
 		_original_scales[pause_button] = pause_button.scale
+	if map_button:
+		_original_scales[map_button] = map_button.scale
+		print("[TouchControls] Map button found at ", map_button.position, " with scale ", map_button.scale)
+	else:
+		print("[TouchControls] WARNING: Map button NOT found in scene!")
 	
 	_connect_button_signals()
 	_apply_visibility_mode()
@@ -89,6 +94,9 @@ func _connect_button_signals():
 		pause_button.released.connect(_on_pause_released)
 	if map_button:
 		map_button.pressed.connect(_on_map_pressed)
+		print("[TouchControls] Map button connected: visible=", map_button.visible, " shape=", map_button.shape)
+	else:
+		print("[TouchControls] WARNING: Map button not found!")
 	if ledger_button:
 		ledger_button.pressed.connect(_on_ledger_pressed)
 	if briefcase_button:
@@ -234,5 +242,6 @@ func _on_briefcase_pressed() -> void:
 
 
 func _on_map_pressed() -> void:
-	print("[TouchControls] Map button pressed, emitting signal")
+	print("[TouchControls] Map button PRESSED! Emitting map_pressed signal")
 	map_pressed.emit()
+	print("[TouchControls] map_pressed signal emitted")
