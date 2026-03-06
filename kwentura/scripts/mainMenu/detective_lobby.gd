@@ -293,6 +293,11 @@ func _connect_auth_signals() -> void:
 		FirebaseAuth.account_linked_success.connect(_on_account_linked)
 	if not FirebaseAuth.account_link_failed.is_connected(_on_link_failed):
 		FirebaseAuth.account_link_failed.connect(_on_link_failed)
+	# Connect anonymous auth signals
+	if not FirebaseAuth.auth_success.is_connected(_on_anonymous_auth_success):
+		FirebaseAuth.auth_success.connect(_on_anonymous_auth_success)
+	if not FirebaseAuth.auth_failed.is_connected(_on_anonymous_auth_failed):
+		FirebaseAuth.auth_failed.connect(_on_anonymous_auth_failed)
 
 
 func _update_user_ui() -> void:
@@ -349,7 +354,8 @@ func _on_sign_in_pressed() -> void:
 
 
 func _on_guest_pressed() -> void:
-	print("[DetectiveLobby] Guest button pressed")
+	print("[DetectiveLobby] Guest button pressed - starting anonymous login")
+	FirebaseAuth.anonymous_login()
 
 
 func _on_link_google_pressed() -> void:
@@ -403,13 +409,33 @@ func _on_link_failed(error: String) -> void:
 	print("[DetectiveLobby] Account link failed: ", error)
 
 
-func _set_main_buttons_visible(is_visible: bool) -> void:
+func _on_anonymous_auth_success(user_id: String, _token: String) -> void:
+	print("[DetectiveLobby] Anonymous auth success: ", user_id)
+	
+	# Update UserManager with guest data
+	var user_data = {
+		"user_id": user_id,
+		"display_name": "Guest",
+		"email": "",
+		"photo_url": "",
+		"provider": "anonymous",
+		"is_linked": false
+	}
+	UserManager.update_user_data(user_data)
+	_update_user_ui()
+
+
+func _on_anonymous_auth_failed(error: String) -> void:
+	print("[DetectiveLobby] Anonymous auth failed: ", error)
+
+
+func _set_main_buttons_visible(show_buttons: bool) -> void:
 	"""Toggle visibility of main lobby buttons.
 	In DetectiveLobby, only the Back button needs to be hidden when settings opens.
 	The settings button is handled by settings_control.hide_button()/show_button().
 	"""
 	if back_button:
-		back_button.visible = is_visible
+		back_button.visible = show_buttons
 
 
 func _on_settings_pressed() -> void:

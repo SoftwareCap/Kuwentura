@@ -94,29 +94,25 @@ func _update_from_network_state():
 func _physics_process(delta):
 	if _is_in_lobby:
 		return
-
-	# Local movement input
-	var direction := Input.get_axis("game_left", "game_right")
-	velocity.x = direction * speed
-
-	# Gravity
-	if not is_on_floor():
-		velocity += get_gravity() * delta
-	elif velocity.y > 0:
-		velocity.y = 0
-
-	# Jump
-	if Input.is_action_just_pressed("game_jump"):
-		_try_jump()
-
-	move_and_slide()
 	
-	# Only do local animation and sync if we have authority
-	# Skip if no multiplayer peer available
-	if not multiplayer.has_multiplayer_peer():
-		return
-	
+	# Only process input if we have authority (this is our local player)
 	if is_multiplayer_authority():
+		# Local movement input - ONLY for authority player
+		var direction := Input.get_axis("game_left", "game_right")
+		velocity.x = direction * speed
+
+		# Gravity
+		if not is_on_floor():
+			velocity += get_gravity() * delta
+		elif velocity.y > 0:
+			velocity.y = 0
+
+		# Jump
+		if Input.is_action_just_pressed("game_jump"):
+			_try_jump()
+
+		move_and_slide()
+		
 		# Local animation
 		var current_anim = "idle"
 		if velocity.x == 0:
@@ -141,3 +137,9 @@ func _physics_process(delta):
 				"left" if sprite.flip_h else "right",
 				current_anim
 			)
+	else:
+		# Remote player - just apply gravity and move_and_slide for collision
+		# Position is updated from network in _process
+		if not is_on_floor():
+			velocity += get_gravity() * delta
+		move_and_slide()

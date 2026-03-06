@@ -82,10 +82,10 @@ func set_main_ui_buttons(buttons: Array[Control]) -> void:
 #------------------------------------------------------------------------------
 
 ## Toggle visibility of main UI buttons
-func set_main_buttons_visible(is_visible: bool) -> void:
+func set_main_buttons_visible(show_buttons: bool) -> void:
 	for button in main_ui_buttons:
 		if is_instance_valid(button):
-			button.visible = is_visible
+			button.visible = show_buttons
 
 
 ## Open the settings panel

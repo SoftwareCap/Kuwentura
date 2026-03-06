@@ -31,12 +31,15 @@ extends Node2D
 @onready var guest_button: Button = $PauseCanvasLayer/InGamePausePanel/UserProfile/AuthButtons/GuestButton
 @onready var link_google_button: Button = $PauseCanvasLayer/InGamePausePanel/UserProfile/AuthButtons/LinkGoogleButton
 
-@onready var map_panel: Panel = $SidekickLayer/MapPanel
+@onready var map_panel: Panel = get_node_or_null("SidekickLayer/MapPanel")
 
 # Ledger, Briefcase, and Map panels
 @onready var sidekick_layer: CanvasLayer = $SidekickLayer
 @onready var ledger_panel: Panel = $SidekickLayer/LedgerPanel
 @onready var briefcase_panel: Panel = $SidekickLayer/BriefcasePanel
+
+# Room Code Label (Host only)
+@onready var room_code_label: Label = $RoomCode
 
 # Track spawned players
 var _spawned_players: Dictionary = {}
@@ -99,9 +102,14 @@ func _ready():
 		
 		# Connect map signal (available to both)
 		if touch_controls.has_signal("map_pressed"):
+			print("[ForestHub] TouchControls has map_pressed signal, connecting...")
 			if not touch_controls.map_pressed.is_connected(_on_map_button_pressed):
 				touch_controls.map_pressed.connect(_on_map_button_pressed)
-				print("[ForestHub] Connected map_pressed signal")
+				print("[ForestHub] Connected map_pressed signal to _on_map_button_pressed")
+			else:
+				print("[ForestHub] map_pressed already connected")
+		else:
+			print("[ForestHub] TouchControls does NOT have map_pressed signal")
 		
 		# Connect ledger and briefcase signals (sidekick only)
 		if touch_controls.has_signal("ledger_pressed"):
@@ -133,9 +141,10 @@ func _ready():
 			user_profile_panel.visible = false
 			print("[ForestHub] User profile panel initialized")
 		
-		# Connect user profile signals
-		_connect_user_profile_signals()
-		_update_user_ui()
+		# Connect user profile signals (only if in tree)
+		if is_inside_tree():
+			_connect_user_profile_signals()
+			_update_user_ui()
 	else:
 		push_error("[ForestHub] InGamePausePanel not found!")
 	
@@ -145,6 +154,11 @@ func _ready():
 	# Determine if local player is sidekick (peer_id != 1 means sidekick)
 	_is_sidekick = multiplayer.get_unique_id() != 1
 	print("[ForestHub] Local player is sidekick: ", _is_sidekick)
+	
+	# Setup room code label - only visible for host (detective)
+	_setup_room_code_label()
+	
+	# Initialize panels (hide initially)
 	
 	# Initialize panels (hide initially)
 	if ledger_panel:
@@ -621,14 +635,19 @@ func _on_briefcase_close_pressed() -> void:
 
 ## Map button pressed - toggles the map panel (Available to both)
 func _on_map_button_pressed() -> void:
-	print("[ForestHub] Map button pressed")
+	print("[ForestHub] ========== MAP BUTTON HANDLER CALLED ==========")
+	print("[ForestHub] _current_open_panel = ", _current_open_panel)
+	print("[ForestHub] map_panel = ", map_panel)
 	
 	if _current_open_panel == "map":
 		# Toggle off - close map
+		print("[ForestHub] Toggling map OFF")
 		_close_all_panels()
 	else:
 		# Open map with overlay
+		print("[ForestHub] Toggling map ON")
 		_show_panel_with_overlay(map_panel, "map")
+		print("[ForestHub] Map panel should be visible now: ", map_panel.visible if map_panel else "N/A")
 
 
 ## Close map panel - kept for compatibility but not used
@@ -694,9 +713,9 @@ func _on_overlay_clicked(event: InputEvent) -> void:
 
 
 ## Handle debug input
-func _input(event: InputEvent) -> void:
+func _input(_event: InputEvent) -> void:
 	# Handle debug F1 key
-	if event is InputEventKey and event.pressed and event.keycode == KEY_F1:
+	if _event is InputEventKey and _event.pressed and _event.keycode == KEY_F1:
 		print("[ForestHub] === DEBUG: Spawned players ===")
 		for peer_id in _spawned_players:
 			var p = _spawned_players[peer_id]
@@ -718,6 +737,26 @@ func _exit_tree():
 		NetworkManager.spawn_player_requested.disconnect(_on_spawn_player_requested)
 	if NetworkManager.despawn_player_requested.is_connected(_on_despawn_player_requested):
 		NetworkManager.despawn_player_requested.disconnect(_on_despawn_player_requested)
+	
+	# Disconnect Firebase auth signals
+	if FirebaseAuth.google_auth_success.is_connected(_on_google_auth_success):
+		FirebaseAuth.google_auth_success.disconnect(_on_google_auth_success)
+	if FirebaseAuth.google_auth_failed.is_connected(_on_google_auth_failed):
+		FirebaseAuth.google_auth_failed.disconnect(_on_google_auth_failed)
+	if FirebaseAuth.account_linked_success.is_connected(_on_account_linked):
+		FirebaseAuth.account_linked_success.disconnect(_on_account_linked)
+	if FirebaseAuth.account_link_failed.is_connected(_on_link_failed):
+		FirebaseAuth.account_link_failed.disconnect(_on_link_failed)
+	if FirebaseAuth.auth_success.is_connected(_on_anonymous_auth_success):
+		FirebaseAuth.auth_success.disconnect(_on_anonymous_auth_success)
+	if FirebaseAuth.auth_failed.is_connected(_on_anonymous_auth_failed):
+		FirebaseAuth.auth_failed.disconnect(_on_anonymous_auth_failed)
+	
+	# Disconnect UserManager signals
+	if UserManager.user_data_changed.is_connected(_on_user_data_changed):
+		UserManager.user_data_changed.disconnect(_on_user_data_changed)
+	if UserManager.profile_picture_loaded.is_connected(_on_profile_picture_loaded):
+		UserManager.profile_picture_loaded.disconnect(_on_profile_picture_loaded)
 
 
 func _on_back_pressed() -> void:
@@ -732,6 +771,45 @@ func _set_buttons_process_mode(container: Node, mode: Node.ProcessMode) -> void:
 		# Recursively set for nested children
 		if child.get_child_count() > 0:
 			_set_buttons_process_mode(child, mode)
+
+
+## Setup room code label with retry logic
+func _setup_room_code_label() -> void:
+	if not room_code_label:
+		return
+	
+	if _is_sidekick:
+		# Sidekick - hide room code label
+		room_code_label.visible = false
+		print("[ForestHub] Room code label hidden for sidekick")
+		return
+	
+	# Host - try to get room code with retry
+	var invite_code = NetworkManager.get_invite_code()
+	print("[ForestHub] Retrieved invite code from NetworkManager: '", invite_code, "'")
+	
+	if not invite_code.is_empty():
+		room_code_label.text = "Room Code: %s" % invite_code
+		room_code_label.visible = true
+		print("[ForestHub] Room code displayed for host: ", invite_code)
+	else:
+		# Try again after a short delay (NetworkManager might still be initializing)
+		room_code_label.text = "Room Code: ..."
+		room_code_label.visible = true
+		await get_tree().create_timer(0.5).timeout
+		
+		if not is_inside_tree():
+			return
+			
+		invite_code = NetworkManager.get_invite_code()
+		print("[ForestHub] Retry invite code: '", invite_code, "'")
+		
+		if not invite_code.is_empty():
+			room_code_label.text = "Room Code: %s" % invite_code
+			print("[ForestHub] Room code displayed for host (retry): ", invite_code)
+		else:
+			room_code_label.text = "Room Code: N/A"
+			print("[ForestHub] No room code available - displaying N/A")
 
 
 # =============================================================================
@@ -767,6 +845,11 @@ func _connect_user_profile_signals() -> void:
 		FirebaseAuth.account_linked_success.connect(_on_account_linked)
 	if not FirebaseAuth.account_link_failed.is_connected(_on_link_failed):
 		FirebaseAuth.account_link_failed.connect(_on_link_failed)
+	# Connect anonymous auth signals
+	if not FirebaseAuth.auth_success.is_connected(_on_anonymous_auth_success):
+		FirebaseAuth.auth_success.connect(_on_anonymous_auth_success)
+	if not FirebaseAuth.auth_failed.is_connected(_on_anonymous_auth_failed):
+		FirebaseAuth.auth_failed.connect(_on_anonymous_auth_failed)
 	
 	# Connect to UserManager signals
 	if not UserManager.user_data_changed.is_connected(_on_user_data_changed):
@@ -836,7 +919,9 @@ func _on_sign_in_pressed() -> void:
 
 
 func _on_guest_pressed() -> void:
-	print("[ForestHub] Guest button pressed")
+	print("[ForestHub] Guest button pressed - starting anonymous login")
+	# Call Firebase anonymous login
+	FirebaseAuth.anonymous_login()
 
 
 func _on_link_google_pressed() -> void:
@@ -897,3 +982,22 @@ func _on_user_data_changed(_data: Dictionary) -> void:
 func _on_profile_picture_loaded(texture: Texture2D) -> void:
 	if texture and avatar_texture:
 		avatar_texture.texture = texture
+
+
+func _on_anonymous_auth_success(user_id: String, token: String) -> void:
+	print("[ForestHub] Anonymous auth success: ", user_id)
+	# Update UserManager with guest data
+	var user_data = {
+		"user_id": user_id,
+		"display_name": "Guest",
+		"email": "",
+		"photo_url": "",
+		"provider": "anonymous",
+		"is_linked": false
+	}
+	UserManager.update_user_data(user_data)
+	_update_user_ui()
+
+
+func _on_anonymous_auth_failed(error: String) -> void:
+	print("[ForestHub] Anonymous auth failed: ", error)

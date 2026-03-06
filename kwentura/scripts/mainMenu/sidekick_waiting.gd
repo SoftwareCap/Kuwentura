@@ -226,13 +226,13 @@ func _disconnect_signals() -> void:
 		user_profile_back_button.pressed.disconnect(_on_back_from_profile_pressed)
 
 
-func _set_main_buttons_visible(is_visible: bool) -> void:
+func _set_main_buttons_visible(show_buttons: bool) -> void:
 	"""Toggle visibility of main lobby buttons.
 	In SidekickWaiting, only the Cancel button needs to be hidden when settings opens.
 	The settings button is handled by settings_control.hide_button()/show_button().
 	"""
 	if cancel_button:
-		cancel_button.visible = is_visible
+		cancel_button.visible = show_buttons
 
 
 func _on_settings_pressed() -> void:

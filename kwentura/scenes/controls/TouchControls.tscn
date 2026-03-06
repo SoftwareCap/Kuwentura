@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://i2gpufiq0ql0"]
+[gd_scene load_steps=16 format=3 uid="uid://i2gpufiq0ql0"]
 
 [ext_resource type="Script" uid="uid://ci46mv31xj0do" path="res://scripts/controls/touch_controls.gd" id="1_sv83y"]
 [ext_resource type="Texture2D" uid="uid://dp27skv21m3fj" path="res://assets/buttons/left.png" id="2_hcjou"]
@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://bc40nmjniu431" path="res://assets/buttons/jump.png" id="4_dlgvd"]
 [ext_resource type="Texture2D" uid="uid://chff8f3cdvqaf" path="res://assets/buttons/pause.png" id="5_d6yqq"]
 [ext_resource type="Texture2D" uid="uid://b4ff13vwedej7" path="res://assets/buttons/players/ledgerbutton.png" id="6_256s7"]
+[ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settings.png" id="6_vwhch"]
 [ext_resource type="Texture2D" uid="uid://lrijshq5upgf" path="res://assets/buttons/players/briefcasebutton.png" id="7_vwhch"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_left"]
@@ -20,8 +21,8 @@ size = Vector2(200, 200)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gputu"]
 size = Vector2(200, 200)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_256s7"]
-size = Vector2(250, 250)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_map"]
+size = Vector2(200, 200)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_w2x6p"]
 size = Vector2(900, 1200)
@@ -30,7 +31,7 @@ size = Vector2(900, 1200)
 size = Vector2(1200, 1050)
 
 [node name="TouchControls" type="CanvasLayer"]
-layer = 101
+layer = 1
 script = ExtResource("1_sv83y")
 
 [node name="Left" type="TouchScreenButton" parent="."]
@@ -69,10 +70,11 @@ passby_press = true
 action = "game_pause"
 
 [node name="Map" type="TouchScreenButton" parent="."]
+z_index = 1
 position = Vector2(1256, 138)
 scale = Vector2(0.3, 0.3)
-texture_normal = ExtResource("5_d6yqq")
-shape = SubResource("RectangleShape2D_256s7")
+texture_normal = ExtResource("6_vwhch")
+shape = SubResource("RectangleShape2D_map")
 passby_press = true
 
 [node name="Ledger" type="TouchScreenButton" parent="."]
