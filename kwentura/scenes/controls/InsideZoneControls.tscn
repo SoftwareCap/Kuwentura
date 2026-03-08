@@ -10,8 +10,9 @@ size = Vector2(200, 200)
 script = ExtResource("1_5l088")
 
 [node name="Pause" type="TouchScreenButton" parent="."]
-position = Vector2(1695, 32)
-scale = Vector2(0.5, 0.5)
+z_index = 8
+position = Vector2(1033, 15)
+scale = Vector2(0.33333334, 0.33)
 texture_normal = ExtResource("2_6v7nm")
 shape = SubResource("RectangleShape2D_0aggx")
 passby_press = true

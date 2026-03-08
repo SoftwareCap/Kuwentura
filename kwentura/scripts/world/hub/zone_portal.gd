@@ -31,6 +31,7 @@ func detect_player(body: Node2D):
 		print("[ZonePortal] ", zone_name, " - Sidekick entered")
 	
 	print("[ZonePortal] Status - Player: ", is_player_on_door, ", Sidekick: ", is_sidekick_on_door)
+	
 
 func detect_player_out(body: Node2D):
 	print("[ZonePortal] Body exited: ", body.name)
@@ -47,23 +48,19 @@ func detect_player_out(body: Node2D):
 		print("[ZonePortal] ", zone_name, " - Sidekick exited")
 	
 	print("[ZonePortal] Status - Player: ", is_player_on_door, ", Sidekick: ", is_sidekick_on_door)
-
+	
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("game_jump"):
 		print("[ZonePortal] Jump pressed on ", zone_name, " - Player: ", is_player_on_door, ", Sidekick: ", is_sidekick_on_door)
-		change_scene()
+		_try_enter_zone()
 
-func change_scene():
-	if is_player_on_door and is_sidekick_on_door:
-		print("[ZonePortal] Both players detected! Changing to: ", scene_path)
-		
-		# Save positions and sync before changing scene
-		_save_and_sync_positions()
-		
-		get_tree().change_scene_to_file(scene_path)
-	else:
-		print("[ZonePortal] bawal - Need both players. Player: ", is_player_on_door, ", Sidekick: ", is_sidekick_on_door)
+func change_scene() -> void:
+	# Server-authoritative entry
+	_try_enter_zone()
 
+	# If client presses jump, do nothing except request (optional)
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		print("[ZonePortal] Client pressed enter; waiting for server decision.")
 
 func _save_and_sync_positions():
 	"""Save all player positions and sync between clients."""
@@ -91,3 +88,34 @@ func _save_and_sync_positions():
 			GameState._report_position_to_host_rpc.rpc_id(1, local_peer_id, sidekick_body.global_position)
 			GameState.save_spawn_position(local_peer_id, sidekick_body.global_position, "forest_hub")
 			print("[ZonePortal] Client reported position: ", sidekick_body.global_position)
+
+func _try_enter_zone() -> void:
+	# Need both players on the door
+	if not (is_player_on_door and is_sidekick_on_door):
+		print("[ZonePortal] bawal - Need both players. Player:", is_player_on_door, " Sidekick:", is_sidekick_on_door)
+		return
+
+	# Only server decides (offline allowed)
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		print("[ZonePortal] Client pressed jump; server must approve.")
+		return
+
+	var zid := zone_name.strip_edges()
+
+	if GameState.is_zone_locked_temp(zid):
+		var rem: int = GameState.get_zone_lock_remaining(zid)
+		print("[ZonePortal] DENIED:", zid, "locked. Remaining=", rem, "s")
+		return
+
+	print("[ZonePortal] ALLOWED: entering ", zid, " -> ", scene_path)
+
+	_save_and_sync_positions()
+	rpc_enter_zone.rpc(scene_path)
+
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_enter_zone(path: String) -> void:
+	get_tree().change_scene_to_file(path)
+
+func _zone_id() -> String:
+	return zone_name.strip_edges()
