@@ -112,7 +112,6 @@ func _ready():
 						print("[ForestHub] Telling peer ", other_peer, " to spawn peer ", peer_id)
 						NetworkManager.request_spawn_player(other_peer, peer_id, false)
 
-
 ## Open the pause panel (called when touch controls option button is pressed)
 func _on_pause_button_pressed() -> void:
 	print("[ForestHub] ========== PAUSE BUTTON PRESSED ==========")
