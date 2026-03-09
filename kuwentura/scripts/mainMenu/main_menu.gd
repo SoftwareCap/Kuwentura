@@ -10,6 +10,11 @@ extends Control
 @onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
 @onready var back_button: TouchScreenButton = $SettingsPanel/Back
 
+# User Profile
+@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
+@onready var user_section: Panel = $SettingsPanel/UserSection
+@onready var user_section_back_button: TouchScreenButton = $SettingsPanel/UserSection/Back
+
 # User Auth
 @onready var sign_in_button: Button = $SettingsPanel/UserSection/AuthButtons/SignInButton
 @onready var guest_button: Button = $SettingsPanel/UserSection/AuthButtons/GuestButton
@@ -55,6 +60,13 @@ func _ready():
 	
 	if volume_slider and not volume_slider.value_changed.is_connected(_on_volume_changed):
 		volume_slider.value_changed.connect(_on_volume_changed)
+	
+	# Connect user profile signals
+	if view_user_profile_button and not view_user_profile_button.pressed.is_connected(_on_view_user_profile_pressed):
+		view_user_profile_button.pressed.connect(_on_view_user_profile_pressed)
+	
+	if user_section_back_button and not user_section_back_button.pressed.is_connected(_on_back_from_profile_pressed):
+		user_section_back_button.pressed.connect(_on_back_from_profile_pressed)
 	
 	# Connect sidekick popup signals
 	if join_code_ok_button and not join_code_ok_button.pressed.is_connected(_on_join_code_ok_pressed):
@@ -124,18 +136,46 @@ func _on_settings_pressed() -> void:
 	print("[MainMenu] Opening settings panel")
 	if settings_panel:
 		settings_panel.visible = true
+		# Hide user section when opening settings
+		if user_section:
+			user_section.visible = false
+		# Show view user profile button when opening settings
+		if view_user_profile_button:
+			view_user_profile_button.visible = true
 		# Update slider to current volume
 		if volume_slider:
 			volume_slider.value = MusicController.get_volume() * 100
 		if volume_value_label:
 			volume_value_label.text = str(int(volume_slider.value)) + "%"
+	# Hide settings button
+	if settings_control:
+		settings_control.hide_button()
 
 
 func _on_back_settings_pressed() -> void:
 	print("[MainMenu] Closing settings panel")
 	if settings_panel:
 		settings_panel.visible = false
+	# Show settings button again
+	if settings_control:
+		settings_control.show_button()
 	_save_settings()
+
+
+func _on_view_user_profile_pressed() -> void:
+	print("[MainMenu] Opening user profile")
+	if user_section:
+		user_section.visible = true
+	if view_user_profile_button:
+		view_user_profile_button.visible = false
+
+
+func _on_back_from_profile_pressed() -> void:
+	print("[MainMenu] Back from user profile to settings")
+	if user_section:
+		user_section.visible = false
+	if view_user_profile_button:
+		view_user_profile_button.visible = true
 
 
 func _on_volume_changed(value: float) -> void:
