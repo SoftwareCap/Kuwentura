@@ -1,0 +1,513 @@
+[gd_scene load_steps=25 format=3 uid="uid://bv7e50npbvo5b"]
+
+[ext_resource type="Script" uid="uid://ba7x4f4qnudae" path="res://scripts/mainMenu/main_menu.gd" id="1_bkukm"]
+[ext_resource type="Texture2D" uid="uid://c1y03w2wn6cx5" path="res://assets/backgrounds/mainMenu.png" id="2_40cj7"]
+[ext_resource type="Texture2D" uid="uid://cu1ojlw72jgih" path="res://assets/buttons/hostGame.png" id="3_8bsd5"]
+[ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_w35ku"]
+[ext_resource type="FontFile" uid="uid://bpff8oqdskuog" path="res://assets/fonts/Pixeled.ttf" id="4_8bsd5"]
+[ext_resource type="PackedScene" uid="uid://cmsvb2etjodsk" path="res://scenes/controls/SettingsControl.tscn" id="5_2oq2w"]
+[ext_resource type="Texture2D" uid="uid://bmkmc4nfkkd7y" path="res://assets/buttons/exitGame.png" id="5_r2guf"]
+[ext_resource type="Script" uid="uid://b7hu8uq82xslq" path="res://scripts/controls/settings_control.gd" id="6_r2guf"]
+[ext_resource type="Texture2D" uid="uid://bhxj8dd714vd8" path="res://assets/buttons/closebtn.png" id="7_t3fh1"]
+[ext_resource type="Texture2D" uid="uid://c2w32odtn3c80" path="res://assets/buttons/joinGame.png" id="8_join"]
+[ext_resource type="Texture2D" uid="uid://bbdlqfcqkbbwk" path="res://assets/sprites/userIcon.png" id="11_2oq2w"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_nlkkf"]
+texture = ExtResource("2_40cj7")
+modulate_color = Color(0.7121294, 0.7121294, 0.71212924, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r2guf"]
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w35ku"]
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8bsd5"]
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2oq2w"]
+bg_color = Color(0.8235294, 0.8235294, 0.8235294, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r2guf"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bkukm"]
+bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_w35ku"]
+color = Color(1, 1, 1, 1)
+thickness = 6
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_8bsd5"]
+color = Color(0.48324937, 0.54248023, 1, 1)
+thickness = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rhts7"]
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fu7sn"]
+bg_color = Color(0.63529414, 0.63529414, 0.63529414, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jix8l"]
+bg_color = Color(0.8235294, 0.8235294, 0.8235294, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fu7sn"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bkukm")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_nlkkf")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -681.5
+offset_right = 681.5
+offset_bottom = 443.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_y = 15
+theme_override_fonts/font = ExtResource("4_8bsd5")
+theme_override_font_sizes/font_size = 145
+text = "KUWENTURA"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HostButton" type="TextureButton" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -555.0
+offset_top = -173.0
+offset_right = -60.0
+offset_bottom = 173.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("3_8bsd5")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="JoinButton" type="TextureButton" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 40.0
+offset_top = -173.5
+offset_right = 535.0
+offset_bottom = 173.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("8_join")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="ExitButton" type="TextureButton" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -324.78113
+offset_top = 103.0
+offset_right = 324.78113
+offset_bottom = 380.70276
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("5_r2guf")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="StatusLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -98.0
+offset_top = -217.0
+offset_right = 98.0
+offset_bottom = -107.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="SidekickPopup" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -442.25
+offset_top = -294.0
+offset_right = 442.25
+offset_bottom = 294.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_r2guf")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SidekickPopup"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -329.2
+offset_top = -226.25
+offset_right = 329.2
+offset_bottom = 226.25
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+theme_override_constants/separation = 106
+
+[node name="Label" type="Label" parent="SidekickPopup/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/line_spacing = 7
+theme_override_fonts/font = ExtResource("3_w35ku")
+theme_override_font_sizes/font_size = 70
+text = "Enter Code:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LineEdit" type="LineEdit" parent="SidekickPopup/VBoxContainer"]
+custom_minimum_size = Vector2(600, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/minimum_character_width = 4
+theme_override_font_sizes/font_size = 45
+placeholder_text = "enter code"
+alignment = 1
+caret_blink = true
+caret_force_displayed = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SidekickPopup/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 60
+
+[node name="Button" type="Button" parent="SidekickPopup/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(200, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_w35ku")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_w35ku")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_8bsd5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_2oq2w")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_r2guf")
+text = "Join"
+
+[node name="Button2" type="Button" parent="SidekickPopup/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(200, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_w35ku")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_w35ku")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_8bsd5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_2oq2w")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_r2guf")
+text = "Cancel"
+
+[node name="SettingsControl" parent="." instance=ExtResource("5_2oq2w")]
+script = ExtResource("6_r2guf")
+
+[node name="SettingsPanel" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -604.40625
+offset_top = -473.75
+offset_right = 604.40625
+offset_bottom = 473.75
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bkukm")
+
+[node name="Label" type="Label" parent="SettingsPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 35.0
+offset_bottom = 144.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("3_w35ku")
+theme_override_font_sizes/font_size = 65
+text = "Settings"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Back" type="TouchScreenButton" parent="SettingsPanel"]
+position = Vector2(1129.4061, 14.000002)
+scale = Vector2(0.21166667, 0.21166667)
+texture_normal = ExtResource("7_t3fh1")
+
+[node name="Separator" type="Line2D" parent="SettingsPanel"]
+position = Vector2(0, -13)
+points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+width = 2.0
+default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+
+[node name="VolumeSliderControl" type="HBoxContainer" parent="SettingsPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -480.8125
+offset_top = -283.0
+offset_right = 480.8125
+offset_bottom = -158.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 30
+
+[node name="VolumeLabel" type="Label" parent="SettingsPanel/VolumeSliderControl"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_w35ku")
+theme_override_font_sizes/font_size = 40
+text = "Music Volume:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VolumeSlider" type="HSlider" parent="SettingsPanel/VolumeSliderControl"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/slider = SubResource("StyleBoxLine_w35ku")
+theme_override_styles/grabber_area = SubResource("StyleBoxLine_8bsd5")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_8bsd5")
+value = 80.0
+
+[node name="VolumeValue" type="Label" parent="SettingsPanel/VolumeSliderControl"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "80%"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Separator2" type="Line2D" parent="SettingsPanel"]
+position = Vector2(0, 130)
+points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+width = 2.0
+default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+
+[node name="UserSection" type="VBoxContainer" parent="SettingsPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -265.875
+offset_top = -122.5
+offset_right = 265.875
+offset_bottom = 430.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 2
+
+[node name="UserHeaderLabel" type="Label" parent="SettingsPanel/UserSection"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_w35ku")
+theme_override_font_sizes/font_size = 40
+text = "User Profile"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="UserContent" type="HBoxContainer" parent="SettingsPanel/UserSection"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 10
+
+[node name="AvatarTexture" type="TextureRect" parent="SettingsPanel/UserSection/UserContent"]
+layout_mode = 2
+texture = ExtResource("11_2oq2w")
+
+[node name="UserInfo" type="VBoxContainer" parent="SettingsPanel/UserSection/UserContent"]
+layout_mode = 2
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="DisplayName" type="Label" parent="SettingsPanel/UserSection/UserContent/UserInfo"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 25
+text = "\"Player Name\""
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ProviderLabel" type="Label" parent="SettingsPanel/UserSection/UserContent/UserInfo"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 25
+text = "\"Guest\""
+vertical_alignment = 1
+
+[node name="AuthButtons" type="VBoxContainer" parent="SettingsPanel/UserSection"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 25
+
+[node name="SignInButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_w35ku")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxFlat_rhts7")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_fu7sn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_jix8l")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fu7sn")
+text = "Sign in"
+
+[node name="GuestButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_w35ku")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxFlat_rhts7")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_fu7sn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_jix8l")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fu7sn")
+text = "Guest"
+
+[node name="LinkGoogleButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_w35ku")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxFlat_rhts7")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_fu7sn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_jix8l")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_fu7sn")
+text = "Link Google"
+
+[connection signal="pressed" from="HostButton" to="." method="_on_host_pressed"]
+[connection signal="pressed" from="JoinButton" to="." method="_on_join_pressed"]
+[connection signal="pressed" from="ExitButton" to="." method="_on_exit_pressed"]
+[connection signal="text_changed" from="SidekickPopup/VBoxContainer/LineEdit" to="." method="_on_code_text_changed"]
+[connection signal="pressed" from="SidekickPopup/VBoxContainer/HBoxContainer/Button" to="." method="_on_join_code_ok_pressed"]
+[connection signal="pressed" from="SidekickPopup/VBoxContainer/HBoxContainer/Button2" to="." method="_on_join_code_cancel_pressed"]
+[connection signal="pressed" from="SettingsPanel/Back" to="." method="_on_back_settings_pressed"]
+[connection signal="value_changed" from="SettingsPanel/VolumeSliderControl/VolumeSlider" to="." method="_on_volume_changed"]
