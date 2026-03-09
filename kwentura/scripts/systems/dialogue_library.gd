@@ -8,19 +8,21 @@ const PINAS_HOUSE_ENTER := [
 	{"speaker":"sidekick",  "text":"Maybe they left something behind?"}
 ]
 
+const PINAS_HOUSE_FIRST_ASWANG_WARNING := [
+	{"speaker":"detective", "text":"Aswang! Let’s hurry up before it gets to us."}
+]
+
 const PINAS_HOUSE_NOTE_CLICKED := [
 	{"speaker":"detective", "text":"I don’t think this is just random numbers…"},
 	{"speaker":"sidekick",  "text":"Maybe the ledger can help us figure it out."}
 ]
 
 const PINAS_HOUSE_NUMBERS_ONLY := [
-	{"speaker":"detective", "text":"We’re looking for numbers only."},
-	{"speaker":"detective", "text":"Let’s solve it step by step."}
+	{"speaker":"detective", "text":"Numbers only... Aswang will attack again if we mess up."}
 ]
 
 const PINAS_HOUSE_WRONG_ANSWER := [
-	{"speaker":"detective", "text":"Hmm… that doesn’t seem right."},
-	{"speaker":"detective", "text":"Maybe we just made a small mistake."}
+	{"speaker":"detective", "text":"Wrong answer... Let's try again."}
 ]
 
 const PINAS_HOUSE_AFTER_PUZZLE1 := [
