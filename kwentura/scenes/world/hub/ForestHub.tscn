@@ -15,8 +15,8 @@
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exit.png" id="13_cpdo7"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftBack2.png" id="14_wp30c"]
 [ext_resource type="Texture2D" uid="uid://bbdlqfcqkbbwk" path="res://assets/sprites/userIcon.png" id="15_1cndf"]
-[ext_resource type="Texture2D" uid="uid://mh7i0nfp5woq" path="res://assets/sprites/players/ledger.png" id="15_wp30c"]
-[ext_resource type="Texture2D" uid="uid://bx8hc6i2btrpd" path="res://assets/sprites/players/briefcase.png" id="17_t6pvo"]
+[ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="16_wp30c"]
+[ext_resource type="Texture2D" uid="uid://b2ryp42vnc38n" path="res://assets/sprites/players/briefcaseOpen.png" id="17_wp30c"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6nmbo"]
 size = Vector2(1.0549998, 11.42)
@@ -925,10 +925,10 @@ thickness = 20
 bg_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_hdutc"]
-texture = ExtResource("15_wp30c")
+texture = ExtResource("16_wp30c")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_rbch1"]
-texture = ExtResource("17_t6pvo")
+texture = ExtResource("17_wp30c")
 
 [node name="ForestHub" type="Node2D"]
 script = ExtResource("6_forest_hub")

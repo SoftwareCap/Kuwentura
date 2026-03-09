@@ -1,10 +1,11 @@
-[gd_scene load_steps=29 format=3 uid="uid://ecol225bxgli"]
+[gd_scene load_steps=30 format=3 uid="uid://ecol225bxgli"]
 
 [ext_resource type="Script" uid="uid://dxdvx5uj13ngo" path="res://scripts/mainMenu/detective_lobby.gd" id="1_8ywx3"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_pge74"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_4bddd"]
 [ext_resource type="FontFile" uid="uid://bpff8oqdskuog" path="res://assets/fonts/Pixeled.ttf" id="4_58gs4"]
 [ext_resource type="PackedScene" uid="uid://2ktjes4bfwlo" path="res://scenes/players/PlayerHost.tscn" id="5_pge74"]
+[ext_resource type="Texture2D" uid="uid://baylpfjefdeqo" path="res://assets/buttons/back.png" id="5_w0uso"]
 [ext_resource type="PackedScene" uid="uid://udt37i3bt31c" path="res://scenes/players/PlayerSidekick.tscn" id="6_4bddd"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftBack2.png" id="7_arrow_left"]
 [ext_resource type="Texture2D" uid="uid://5hqcc5yhq64a" path="res://assets/buttons/rightBack2.png" id="8_arrow_right"]
@@ -49,6 +50,22 @@ shadow_offset = Vector2(0, 2)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_758ce"]
 
+[sub_resource type="LabelSettings" id="LabelSettings_role"]
+font_size = 50
+outline_size = 4
+outline_color = Color(0, 0, 0, 0.8)
+shadow_size = 6
+shadow_color = Color(0, 0, 0, 0.5)
+
+[sub_resource type="LabelSettings" id="LabelSettings_costume"]
+font = ExtResource("3_4bddd")
+font_size = 32
+font_color = Color(1, 0.95, 0.8, 1)
+outline_size = 3
+outline_color = Color(0.2, 0.1, 0, 0.8)
+shadow_size = 4
+shadow_color = Color(0, 0, 0, 0.6)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3m1b5"]
 bg_color = Color(0.43529412, 0.28627452, 0.24313726, 1)
 corner_radius_top_left = 16
@@ -68,22 +85,6 @@ corner_radius_bottom_left = 16
 shadow_color = Color(0, 0, 0, 0.25)
 shadow_size = 6
 shadow_offset = Vector2(0, 3)
-
-[sub_resource type="LabelSettings" id="LabelSettings_role"]
-font_size = 50
-outline_size = 4
-outline_color = Color(0, 0, 0, 0.8)
-shadow_size = 6
-shadow_color = Color(0, 0, 0, 0.5)
-
-[sub_resource type="LabelSettings" id="LabelSettings_costume"]
-font = ExtResource("3_4bddd")
-font_size = 32
-font_color = Color(1, 0.95, 0.8, 1)
-outline_size = 3
-outline_color = Color(0.2, 0.1, 0, 0.8)
-shadow_size = 4
-shadow_color = Color(0, 0, 0, 0.6)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6xa24"]
 bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
@@ -237,24 +238,16 @@ theme_override_styles/disabled = SubResource("StyleBoxFlat_fbpcy")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_758ce")
 text = "Start Game"
 
-[node name="BackButton" type="Button" parent="."]
+[node name="BackButton" type="TextureButton" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
-offset_left = 61.0
-offset_top = 31.0
-offset_right = 207.0
-offset_bottom = 76.0
-theme_override_colors/font_color = Color(1, 0.9137255, 0.75686276, 1)
-theme_override_colors/font_focus_color = Color(1, 0.9137255, 0.75686276, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.9137255, 0.75686276, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9137255, 0.75686276, 1)
-theme_override_fonts/font = ExtResource("3_4bddd")
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_3m1b5")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_fbpcy")
-theme_override_styles/hover = SubResource("StyleBoxFlat_sngst")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_758ce")
-text = "Back"
+offset_left = 55.0
+offset_top = 9.0
+offset_right = 2055.0
+offset_bottom = 1134.0
+scale = Vector2(0.08, 0.08)
+texture_normal = ExtResource("5_w0uso")
+stretch_mode = 4
 
 [node name="DetectiveArea" type="Control" parent="."]
 layout_mode = 1

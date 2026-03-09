@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bx8hc6i2btrpd"
-path="res://.godot/imported/briefcase.png-fa0ade75bebb627731bc8d30f4874548.ctex"
+uid="uid://dhs2e7weqqu13"
+path="res://.godot/imported/mapbutton.png-d5dbd41a3a324bcbc899188152ffb708.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/briefcase.png"
-dest_files=["res://.godot/imported/briefcase.png-fa0ade75bebb627731bc8d30f4874548.ctex"]
+source_file="res://assets/buttons/players/mapbutton.png"
+dest_files=["res://.godot/imported/mapbutton.png-d5dbd41a3a324bcbc899188152ffb708.ctex"]
 
 [params]
 

@@ -26,7 +26,7 @@ const SETTINGS_FILE = "user://settings.json"
 @onready var link_google_button: Button = $SettingsPanel/UserProfile/AuthButtons/LinkGoogleButton
 
 @onready var start_button: Button = %StartButton
-@onready var back_button: Button = %BackButton
+@onready var back_button: TextureButton = %BackButton
 @onready var room_code_label: Label = $RoomCode
 @onready var status_label: Label = $StatusLabel
 @onready var connection_indicator: Panel = get_node_or_null("ConnectionIndicator")
@@ -252,6 +252,26 @@ func _disconnect_signals() -> void:
 		var callback: Callable = sig_data[1]
 		if sig.is_connected(callback):
 			sig.disconnect(callback)
+	
+	# Disconnect auth signals
+	if FirebaseAuth.google_auth_success.is_connected(_on_google_auth_success):
+		FirebaseAuth.google_auth_success.disconnect(_on_google_auth_success)
+	if FirebaseAuth.google_auth_failed.is_connected(_on_google_auth_failed):
+		FirebaseAuth.google_auth_failed.disconnect(_on_google_auth_failed)
+	if FirebaseAuth.account_linked_success.is_connected(_on_account_linked):
+		FirebaseAuth.account_linked_success.disconnect(_on_account_linked)
+	if FirebaseAuth.account_link_failed.is_connected(_on_link_failed):
+		FirebaseAuth.account_link_failed.disconnect(_on_link_failed)
+	if FirebaseAuth.auth_success.is_connected(_on_anonymous_auth_success):
+		FirebaseAuth.auth_success.disconnect(_on_anonymous_auth_success)
+	if FirebaseAuth.auth_failed.is_connected(_on_anonymous_auth_failed):
+		FirebaseAuth.auth_failed.disconnect(_on_anonymous_auth_failed)
+	
+	# Disconnect UserManager signals
+	if UserManager.user_data_changed.is_connected(_on_user_data_changed):
+		UserManager.user_data_changed.disconnect(_on_user_data_changed)
+	if UserManager.profile_picture_loaded.is_connected(_on_profile_picture_loaded):
+		UserManager.profile_picture_loaded.disconnect(_on_profile_picture_loaded)
 
 
 func _setup_button_animations() -> void:
@@ -306,13 +326,17 @@ func _update_user_ui() -> void:
 	
 	# Update display name
 	if display_name_label:
-		display_name_label.text = user_data.display_name if not user_data.display_name.is_empty() else "Guest"
+		var display_text = user_data.display_name if not user_data.display_name.is_empty() else "Guest"
+		if FirebaseAuth.TEST_MODE:
+			display_text += " [TEST]"
+		display_name_label.text = display_text
 	
 	# Update provider label and button visibility
 	if provider_label:
+		var provider_text = ""
 		match user_data.provider:
 			"google":
-				provider_label.text = "Google Account"
+				provider_text = "Google Account"
 				if link_google_button:
 					link_google_button.visible = false
 				if sign_in_button:
@@ -320,13 +344,16 @@ func _update_user_ui() -> void:
 				if guest_button:
 					guest_button.visible = false
 			"anonymous":
-				provider_label.text = "Guest"
+				provider_text = "Guest"
+				if FirebaseAuth.TEST_MODE:
+					provider_text += " (Test Mode)"
 				if link_google_button:
 					link_google_button.visible = true
 				if sign_in_button:
 					sign_in_button.visible = true
 				if guest_button:
 					guest_button.visible = true
+		provider_label.text = provider_text
 	
 	# Update avatar
 	if avatar_texture:
@@ -371,13 +398,14 @@ func _on_link_google_pressed() -> void:
 
 
 func _on_google_auth_success(user_data: Dictionary) -> void:
-	print("[DetectiveLobby] Google sign-in success")
+	print("[DetectiveLobby] Google sign-in success: ", user_data.get("display_name", "Unknown"))
 	
 	# Update UserManager
 	UserManager.update_user_data(user_data)
 	
-	# Save to Firestore
-	FirebaseFirestore.save_user_profile(user_data.user_id, user_data)
+	# Save to Firestore (skip in test mode)
+	if not FirebaseAuth.TEST_MODE:
+		FirebaseFirestore.save_user_profile(user_data.user_id, user_data)
 	
 	# Load profile picture if available
 	if not user_data.photo_url.is_empty():
