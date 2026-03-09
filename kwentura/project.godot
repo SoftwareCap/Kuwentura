@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Kwentura"
+config/name="Kwentura - BACKUP"
 run/main_scene="uid://bv7e50npbvo5b"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
@@ -30,6 +30,12 @@ UserManager="*res://scripts/systems/user_manager.gd"
 [display]
 
 window/size/mode=3
+DialogueSystems="*res://scripts/systems/dialogue_system.gd"
+DialogueLibraries="*res://scripts/systems/dialogue_library.gd"
+
+[display]
+
+window/size/mode=1
 window/stretch/mode="canvas_items"
 window/stretch/aspect="keep_height"
 window/defaults/default_3d_scale=0.001
