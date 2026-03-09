@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://bluayuduex4re"]
+
+[ext_resource type="Script" uid="uid://1hcej6c60n54" path="res://scripts/controls/audio_control.gd" id="1_xxxx"]
+[ext_resource type="AudioStream" uid="uid://sw1l4rvklm28" path="res://assets/audios/MainMenuBG.mp3" id="2_rpr2k"]
+
+[node name="AudioControl" type="CanvasLayer"]
+script = ExtResource("1_xxxx")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_rpr2k")
