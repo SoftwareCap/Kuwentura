@@ -31,8 +31,12 @@ UserManager="*res://scripts/systems/user_manager.gd"
 
 window/size/mode=3
 window/stretch/mode="canvas_items"
-window/stretch/aspect="expand"
+window/stretch/aspect="keep_height"
 window/defaults/default_3d_scale=0.001
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godotfirebaseandroid/plugin.cfg")
 
 [input]
 

@@ -129,6 +129,8 @@ size = Vector2(32, 32)
 collision_layer = 2
 floor_constant_speed = true
 script = ExtResource("1_f4ao3")
+speed = 150
+jump_force = -500
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_kllei")

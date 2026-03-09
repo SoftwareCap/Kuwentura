@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://bv7e50npbvo5b"]
+[gd_scene load_steps=26 format=3 uid="uid://bv7e50npbvo5b"]
 
 [ext_resource type="Script" uid="uid://ba7x4f4qnudae" path="res://scripts/mainMenu/main_menu.gd" id="1_bkukm"]
 [ext_resource type="Texture2D" uid="uid://c1y03w2wn6cx5" path="res://assets/backgrounds/mainMenu.png" id="2_40cj7"]
@@ -6,7 +6,6 @@
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_w35ku"]
 [ext_resource type="FontFile" uid="uid://bpff8oqdskuog" path="res://assets/fonts/Pixeled.ttf" id="4_8bsd5"]
 [ext_resource type="PackedScene" uid="uid://cmsvb2etjodsk" path="res://scenes/controls/SettingsControl.tscn" id="5_2oq2w"]
-[ext_resource type="Texture2D" uid="uid://bmkmc4nfkkd7y" path="res://assets/buttons/exitGame.png" id="5_r2guf"]
 [ext_resource type="Script" uid="uid://b7hu8uq82xslq" path="res://scripts/controls/settings_control.gd" id="6_r2guf"]
 [ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/closebutton.png" id="7_t3fh1"]
 [ext_resource type="Texture2D" uid="uid://c2w32odtn3c80" path="res://assets/buttons/joinGame.png" id="8_join"]
@@ -205,25 +204,6 @@ texture_normal = ExtResource("8_join")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="ExitButton" type="TextureButton" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.49913195
-anchor_top = 1.0262346
-anchor_right = 0.49913195
-anchor_bottom = 1.0262346
-offset_left = -658.0
-offset_top = -663.0
-offset_right = -490.60944
-offset_bottom = -563.0
-grow_horizontal = 2
-grow_vertical = 0
-size_flags_vertical = 3
-texture_normal = ExtResource("5_r2guf")
-ignore_texture_size = true
-stretch_mode = 5
-metadata/_edit_use_anchors_ = true
-
 [node name="StatusLabel" type="Label" parent="."]
 layout_mode = 1
 anchors_preset = 7
@@ -237,40 +217,36 @@ offset_right = 98.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="SidekickPopup" type="Panel" parent="."]
+[node name="SidekickPopupLayer" type="CanvasLayer" parent="."]
 visible = false
-layout_mode = 1
-anchors_preset = 8
+
+[node name="SidekickPopup" type="Panel" parent="SidekickPopupLayer"]
+anchors_preset = 5
 anchor_left = 0.5
-anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -442.25
-offset_top = -294.0
-offset_right = 442.25
-offset_bottom = 294.0
+offset_left = -442.5
+offset_top = 58.0
+offset_right = 442.5
+offset_bottom = 507.0
 grow_horizontal = 2
-grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_r2guf")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="SidekickPopup"]
+[node name="VBoxContainer" type="VBoxContainer" parent="SidekickPopupLayer/SidekickPopup"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -329.2
-offset_top = -229.25
-offset_right = 329.2
-offset_bottom = 223.25
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 0
 theme_override_constants/separation = 55
 
-[node name="Label" type="Label" parent="SidekickPopup/VBoxContainer"]
+[node name="Label" type="Label" parent="SidekickPopupLayer/SidekickPopup/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_constants/line_spacing = 7
@@ -280,8 +256,8 @@ text = "Enter Code:"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LineEdit" type="LineEdit" parent="SidekickPopup/VBoxContainer"]
-custom_minimum_size = Vector2(600, 40)
+[node name="LineEdit" type="LineEdit" parent="SidekickPopupLayer/SidekickPopup/VBoxContainer"]
+custom_minimum_size = Vector2(600, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -291,15 +267,16 @@ placeholder_text = "code here"
 alignment = 1
 caret_blink = true
 caret_force_displayed = true
+max_length = 6
 
-[node name="HBoxContainer" type="HBoxContainer" parent="SidekickPopup/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="SidekickPopupLayer/SidekickPopup/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 6
 theme_override_constants/separation = 60
 
-[node name="Cancel" type="Button" parent="SidekickPopup/VBoxContainer/HBoxContainer"]
-custom_minimum_size = Vector2(200, 40)
+[node name="Cancel" type="Button" parent="SidekickPopupLayer/SidekickPopup/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -315,8 +292,8 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_2oq2w")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_r2guf")
 text = "Cancel"
 
-[node name="Join" type="Button" parent="SidekickPopup/VBoxContainer/HBoxContainer"]
-custom_minimum_size = Vector2(200, 40)
+[node name="Join" type="Button" parent="SidekickPopupLayer/SidekickPopup/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -583,9 +560,8 @@ text = "Link Google"
 
 [connection signal="pressed" from="HostButton" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="JoinButton" to="." method="_on_join_pressed"]
-[connection signal="pressed" from="ExitButton" to="." method="_on_exit_pressed"]
-[connection signal="text_changed" from="SidekickPopup/VBoxContainer/LineEdit" to="." method="_on_code_text_changed"]
-[connection signal="pressed" from="SidekickPopup/VBoxContainer/HBoxContainer/Cancel" to="." method="_on_join_code_cancel_pressed"]
-[connection signal="pressed" from="SidekickPopup/VBoxContainer/HBoxContainer/Join" to="." method="_on_join_code_ok_pressed"]
+[connection signal="text_changed" from="SidekickPopupLayer/SidekickPopup/VBoxContainer/LineEdit" to="." method="_on_code_text_changed"]
+[connection signal="pressed" from="SidekickPopupLayer/SidekickPopup/VBoxContainer/HBoxContainer/Cancel" to="." method="_on_join_code_cancel_pressed"]
+[connection signal="pressed" from="SidekickPopupLayer/SidekickPopup/VBoxContainer/HBoxContainer/Join" to="." method="_on_join_code_ok_pressed"]
 [connection signal="pressed" from="SettingsPanel/Back" to="." method="_on_back_settings_pressed"]
 [connection signal="value_changed" from="SettingsPanel/VolumeSliderControl/VolumeSlider" to="." method="_on_volume_changed"]

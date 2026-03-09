@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://bc40nmjniu431" path="res://assets/buttons/jump.png" id="4_dlgvd"]
 [ext_resource type="Texture2D" uid="uid://chff8f3cdvqaf" path="res://assets/buttons/pause.png" id="5_d6yqq"]
 [ext_resource type="Texture2D" uid="uid://b4ff13vwedej7" path="res://assets/buttons/players/ledgerbutton.png" id="6_256s7"]
-[ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settings.png" id="6_vwhch"]
+[ext_resource type="Texture2D" uid="uid://dhs2e7weqqu13" path="res://assets/buttons/players/mapbutton.png" id="6_vwhch"]
 [ext_resource type="Texture2D" uid="uid://lrijshq5upgf" path="res://assets/buttons/players/briefcasebutton.png" id="7_vwhch"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_left"]
@@ -21,8 +21,8 @@ size = Vector2(200, 200)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gputu"]
 size = Vector2(200, 200)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_map"]
-size = Vector2(200, 200)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_orkyw"]
+size = Vector2(1500, 1500)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_w2x6p"]
 size = Vector2(900, 1200)
@@ -31,7 +31,6 @@ size = Vector2(900, 1200)
 size = Vector2(1200, 1050)
 
 [node name="TouchControls" type="CanvasLayer"]
-layer = 1
 script = ExtResource("1_sv83y")
 
 [node name="Left" type="TouchScreenButton" parent="."]
@@ -72,9 +71,9 @@ action = "game_pause"
 [node name="Map" type="TouchScreenButton" parent="."]
 z_index = 1
 position = Vector2(1256, 138)
-scale = Vector2(0.3, 0.3)
+scale = Vector2(0.0400391, 0.040039055)
 texture_normal = ExtResource("6_vwhch")
-shape = SubResource("RectangleShape2D_map")
+shape = SubResource("RectangleShape2D_orkyw")
 passby_press = true
 
 [node name="Ledger" type="TouchScreenButton" parent="."]
