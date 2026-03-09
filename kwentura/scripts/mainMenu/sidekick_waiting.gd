@@ -2,19 +2,34 @@ extends Control
 ## Sidekick Waiting Lobby - Costume Selection & Connection
 ## Handles costume selection UI and connection to host for sidekick player
 
-# ============================================================================
-# CONSTANTS
-# ============================================================================
+
 const ANIMATION_DURATION := 0.15
 const ARROW_SCALE_DEFAULT := Vector2(0.28, 0.28)
 const ARROW_SCALE_PRESSED := Vector2(0.24, 0.24)
 const AVATAR_BOUNCE_HEIGHT := 10.0
 
-# ============================================================================
-# NODE REFERENCES
-# ============================================================================
+# Settings keys
+const SETTINGS_FILE = "user://settings.json"
+
+@onready var settings_control: CanvasLayer = $SettingsControl
+@onready var settings_panel: Panel = $SettingsPanel
+@onready var volume_slider: HSlider = $SettingsPanel/VolumeSliderControl/VolumeSlider
+@onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
+@onready var back_button_settings: TouchScreenButton = $SettingsPanel/Back
+@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
+@onready var user_profile_panel: Panel = $SettingsPanel/UserProfile
+@onready var user_profile_back_button: TouchScreenButton = $SettingsPanel/UserProfile/BackToPrevious
+
+# User Auth UI (inside UserProfile panel)
+@onready var avatar_texture: TextureRect = $SettingsPanel/UserProfile/UserContent/AvatarTexture
+@onready var display_name_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/DisplayName
+@onready var provider_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/ProviderLabel
+@onready var sign_in_button: Button = $SettingsPanel/UserProfile/AuthButtons/SignInButton
+@onready var guest_button: Button = $SettingsPanel/UserProfile/AuthButtons/GuestButton
+@onready var link_google_button: Button = $SettingsPanel/UserProfile/AuthButtons/LinkGoogleButton
+
 @onready var status_label: Label = $StatusLabel
-@onready var cancel_button: Button = %CancelButton
+@onready var cancel_button: TextureButton = %CancelButton
 @onready var connection_indicator: Panel = get_node_or_null("ConnectionIndicator")
 
 # Detective Area (Hidden controls)
@@ -34,17 +49,13 @@ const AVATAR_BOUNCE_HEIGHT := 10.0
 @onready var sidekick_sprite: AnimatedSprite2D = $SidekickArea/PlayerSidekick/AnimatedSprite2D
 @onready var sidekick_name_label: Label = $SidekickArea/PlayerSidekick/SidekickName
 
-# ============================================================================
-# STATE VARIABLES
-# ============================================================================
+
 var _sidekick_costume_index: int = 0
 var _sidekick_costumes: Array = []
 var _host_connected: bool = false
 var _is_leaving: bool = false  # Prevents RPCs when changing scenes
 
-# ============================================================================
-# LIFECYCLE
-# ============================================================================
+
 func _ready() -> void:
 	if not status_label:
 		return
@@ -55,6 +66,13 @@ func _ready() -> void:
 	_setup_ui_visibility()
 	_connect_signals()
 	_setup_button_animations()
+	
+	# Load saved settings
+	_load_settings()
+	
+	# Initialize User Auth UI
+	_connect_auth_signals()
+	_update_user_ui()
 	
 	# Initial UI update
 	_update_costume_display()
@@ -69,9 +87,6 @@ func _exit_tree() -> void:
 	_disconnect_signals()
 
 
-# ============================================================================
-# SETUP FUNCTIONS
-# ============================================================================
 func _setup_audio() -> void:
 	"""Ensure main menu music is playing."""
 	MusicController.play_track(MusicController.MusicTrack.MAIN_MENU)
@@ -156,8 +171,27 @@ func _connect_signals() -> void:
 	if not NetworkManager.connection_state_changed.is_connected(_on_connection_state_changed):
 		NetworkManager.connection_state_changed.connect(_on_connection_state_changed)
 	
-	if not cancel_button.pressed.is_connected(_on_cancel_pressed):
+	if cancel_button and not cancel_button.pressed.is_connected(_on_cancel_pressed):
 		cancel_button.pressed.connect(_on_cancel_pressed)
+	
+	# Settings signals
+	if settings_control and not settings_control.settings_pressed.is_connected(_on_settings_pressed):
+		settings_control.settings_pressed.connect(_on_settings_pressed)
+	
+	# Settings panel signals
+	if back_button_settings and not back_button_settings.pressed.is_connected(_on_back_settings_pressed):
+		back_button_settings.pressed.connect(_on_back_settings_pressed)
+	
+	if volume_slider and not volume_slider.value_changed.is_connected(_on_volume_changed):
+		volume_slider.value_changed.connect(_on_volume_changed)
+	
+	# View User Profile button
+	if view_user_profile_button and not view_user_profile_button.pressed.is_connected(_on_view_user_profile_pressed):
+		view_user_profile_button.pressed.connect(_on_view_user_profile_pressed)
+	
+	# Back from profile button
+	if user_profile_back_button and not user_profile_back_button.pressed.is_connected(_on_back_from_profile_pressed):
+		user_profile_back_button.pressed.connect(_on_back_from_profile_pressed)
 
 
 func _disconnect_signals() -> void:
@@ -178,6 +212,319 @@ func _disconnect_signals() -> void:
 		var callback: Callable = sig_data[1]
 		if sig.is_connected(callback):
 			sig.disconnect(callback)
+	
+	# Disconnect settings signals
+	if settings_control and settings_control.settings_pressed.is_connected(_on_settings_pressed):
+		settings_control.settings_pressed.disconnect(_on_settings_pressed)
+	if back_button_settings and back_button_settings.pressed.is_connected(_on_back_settings_pressed):
+		back_button_settings.pressed.disconnect(_on_back_settings_pressed)
+	if volume_slider and volume_slider.value_changed.is_connected(_on_volume_changed):
+		volume_slider.value_changed.disconnect(_on_volume_changed)
+	if view_user_profile_button and view_user_profile_button.pressed.is_connected(_on_view_user_profile_pressed):
+		view_user_profile_button.pressed.disconnect(_on_view_user_profile_pressed)
+	if user_profile_back_button and user_profile_back_button.pressed.is_connected(_on_back_from_profile_pressed):
+		user_profile_back_button.pressed.disconnect(_on_back_from_profile_pressed)
+	
+	# Disconnect auth signals
+	if FirebaseAuth.google_auth_success.is_connected(_on_google_auth_success):
+		FirebaseAuth.google_auth_success.disconnect(_on_google_auth_success)
+	if FirebaseAuth.google_auth_failed.is_connected(_on_google_auth_failed):
+		FirebaseAuth.google_auth_failed.disconnect(_on_google_auth_failed)
+	if FirebaseAuth.account_linked_success.is_connected(_on_account_linked):
+		FirebaseAuth.account_linked_success.disconnect(_on_account_linked)
+	if FirebaseAuth.account_link_failed.is_connected(_on_link_failed):
+		FirebaseAuth.account_link_failed.disconnect(_on_link_failed)
+	if FirebaseAuth.auth_success.is_connected(_on_anonymous_auth_success):
+		FirebaseAuth.auth_success.disconnect(_on_anonymous_auth_success)
+	if FirebaseAuth.auth_failed.is_connected(_on_anonymous_auth_failed):
+		FirebaseAuth.auth_failed.disconnect(_on_anonymous_auth_failed)
+	
+	# Disconnect UserManager signals
+	if UserManager.user_data_changed.is_connected(_on_user_data_changed):
+		UserManager.user_data_changed.disconnect(_on_user_data_changed)
+	if UserManager.profile_picture_loaded.is_connected(_on_profile_picture_loaded):
+		UserManager.profile_picture_loaded.disconnect(_on_profile_picture_loaded)
+
+
+func _set_main_buttons_visible(show_buttons: bool) -> void:
+	"""Toggle visibility of main lobby buttons.
+	In SidekickWaiting, only the Cancel button needs to be hidden when settings opens.
+	The settings button is handled by settings_control.hide_button()/show_button().
+	"""
+	if cancel_button:
+		cancel_button.visible = show_buttons
+
+
+func _on_settings_pressed() -> void:
+	print("[SidekickWaiting] Opening settings panel")
+	if settings_panel:
+		settings_panel.visible = true
+		# Hide cancel button when settings panel opens
+		_set_main_buttons_visible(false)
+		# Hide the settings button when panel is open
+		if settings_control:
+			settings_control.hide_button()
+		# Make sure user profile panel is hidden when opening settings
+		if user_profile_panel:
+			user_profile_panel.visible = false
+		# Show view user profile button
+		if view_user_profile_button:
+			view_user_profile_button.visible = true
+		# Update slider to current volume
+		if volume_slider:
+			volume_slider.value = MusicController.get_volume() * 100
+		if volume_value_label:
+			volume_value_label.text = str(int(volume_slider.value)) + "%"
+
+
+func _on_back_settings_pressed() -> void:
+	print("[SidekickWaiting] Closing settings panel")
+	if settings_panel:
+		settings_panel.visible = false
+	# Also hide user profile panel
+	if user_profile_panel:
+		user_profile_panel.visible = false
+	# Show cancel button again when settings panel closes
+	_set_main_buttons_visible(true)
+	# Show the settings button again when panel is closed
+	if settings_control:
+		settings_control.show_button()
+	_save_settings()
+
+
+func _on_view_user_profile_pressed() -> void:
+	print("[SidekickWaiting] Opening user profile panel")
+	if user_profile_panel:
+		user_profile_panel.visible = true
+	# Hide the view user profile button while in profile view
+	if view_user_profile_button:
+		view_user_profile_button.visible = false
+
+
+func _on_back_from_profile_pressed() -> void:
+	print("[SidekickWaiting] Closing user profile panel")
+	if user_profile_panel:
+		user_profile_panel.visible = false
+	# Show the view user profile button again
+	if view_user_profile_button:
+		view_user_profile_button.visible = true
+
+
+func _on_volume_changed(value: float) -> void:
+	var volume = value / 100.0
+	MusicController.set_volume(volume)
+	if volume_value_label:
+		volume_value_label.text = str(int(value)) + "%"
+	print("[SidekickWaiting] Volume changed to: ", volume)
+
+
+func _load_settings() -> void:
+	if FileAccess.file_exists(SETTINGS_FILE):
+		var file = FileAccess.open(SETTINGS_FILE, FileAccess.READ)
+		if file:
+			var json = JSON.new()
+			var error = json.parse(file.get_as_text())
+			if error == OK:
+				var data = json.get_data()
+				if data is Dictionary:
+					if data.has("volume"):
+						var volume = float(data["volume"])
+						MusicController.set_volume(volume)
+						if volume_slider:
+							volume_slider.value = volume * 100
+					print("[SidekickWaiting] Settings loaded successfully")
+			else:
+				push_warning("[SidekickWaiting] Failed to parse settings file")
+			file.close()
+	else:
+		print("[SidekickWaiting] No settings file found, using defaults")
+
+
+func _save_settings() -> void:
+	var data = {
+		"volume": MusicController.get_volume()
+	}
+	
+	var file = FileAccess.open(SETTINGS_FILE, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data))
+		file.close()
+		print("[SidekickWaiting] Settings saved successfully")
+	else:
+		push_warning("[SidekickWaiting] Failed to save settings file")
+
+
+# ============================================
+# USER AUTH FUNCTIONS
+# ============================================
+
+func _connect_auth_signals() -> void:
+	"""Connect authentication related signals."""
+	# Connect auth buttons
+	if sign_in_button and not sign_in_button.pressed.is_connected(_on_sign_in_pressed):
+		sign_in_button.pressed.connect(_on_sign_in_pressed)
+	if guest_button and not guest_button.pressed.is_connected(_on_guest_pressed):
+		guest_button.pressed.connect(_on_guest_pressed)
+	if link_google_button and not link_google_button.pressed.is_connected(_on_link_google_pressed):
+		link_google_button.pressed.connect(_on_link_google_pressed)
+	
+	# Connect to UserManager signals
+	if not UserManager.user_data_changed.is_connected(_on_user_data_changed):
+		UserManager.user_data_changed.connect(_on_user_data_changed)
+	if not UserManager.profile_picture_loaded.is_connected(_on_profile_picture_loaded):
+		UserManager.profile_picture_loaded.connect(_on_profile_picture_loaded)
+	
+	# Connect to FirebaseAuth signals
+	if not FirebaseAuth.google_auth_success.is_connected(_on_google_auth_success):
+		FirebaseAuth.google_auth_success.connect(_on_google_auth_success)
+	if not FirebaseAuth.google_auth_failed.is_connected(_on_google_auth_failed):
+		FirebaseAuth.google_auth_failed.connect(_on_google_auth_failed)
+	if not FirebaseAuth.account_linked_success.is_connected(_on_account_linked):
+		FirebaseAuth.account_linked_success.connect(_on_account_linked)
+	if not FirebaseAuth.account_link_failed.is_connected(_on_link_failed):
+		FirebaseAuth.account_link_failed.connect(_on_link_failed)
+	# Connect anonymous auth signals
+	if not FirebaseAuth.auth_success.is_connected(_on_anonymous_auth_success):
+		FirebaseAuth.auth_success.connect(_on_anonymous_auth_success)
+	if not FirebaseAuth.auth_failed.is_connected(_on_anonymous_auth_failed):
+		FirebaseAuth.auth_failed.connect(_on_anonymous_auth_failed)
+
+
+func _update_user_ui() -> void:
+	"""Update the user profile UI based on current auth state."""
+	var user_data = UserManager.get_user_data()
+	
+	# Update display name
+	if display_name_label:
+		var display_text = user_data.display_name if not user_data.display_name.is_empty() else "Guest"
+		if FirebaseAuth.TEST_MODE:
+			display_text += " [TEST]"
+		display_name_label.text = display_text
+	
+	# Update provider label and button visibility
+	if provider_label:
+		var provider_text = ""
+		match user_data.provider:
+			"google":
+				provider_text = "Google Account"
+				if link_google_button:
+					link_google_button.visible = false
+				if sign_in_button:
+					sign_in_button.visible = false
+				if guest_button:
+					guest_button.visible = false
+			"anonymous":
+				provider_text = "Guest"
+				if FirebaseAuth.TEST_MODE:
+					provider_text += " (Test Mode)"
+				if link_google_button:
+					link_google_button.visible = true
+				if sign_in_button:
+					sign_in_button.visible = true
+				if guest_button:
+					guest_button.visible = true
+		provider_label.text = provider_text
+	
+	# Update avatar
+	if avatar_texture:
+		var cached = UserManager.get_cached_profile_texture()
+		if cached:
+			avatar_texture.texture = cached
+		elif not user_data.photo_url.is_empty():
+			UserManager.load_profile_picture(user_data.photo_url)
+		else:
+			avatar_texture.texture = preload("res://assets/sprites/userIcon.png")
+
+
+func _on_user_data_changed(_data: Dictionary) -> void:
+	_update_user_ui()
+
+
+func _on_profile_picture_loaded(texture: Texture2D) -> void:
+	if texture and avatar_texture:
+		avatar_texture.texture = texture
+
+
+func _on_sign_in_pressed() -> void:
+	print("[SidekickWaiting] Sign in button pressed")
+	FirebaseAuth.sign_in_with_google()
+
+
+func _on_guest_pressed() -> void:
+	print("[SidekickWaiting] Guest button pressed - starting anonymous login")
+	FirebaseAuth.anonymous_login()
+
+
+func _on_link_google_pressed() -> void:
+	print("[SidekickWaiting] Link Google button pressed")
+	if not FirebaseAuth.is_authenticated:
+		return
+	
+	# Store current anonymous UID before linking
+	UserManager.update_user_data({"anonymous_uid": FirebaseAuth.current_user_id})
+	
+	# Start Google sign-in flow for linking
+	FirebaseAuth.link_with_google()
+
+
+func _on_google_auth_success(user_data: Dictionary) -> void:
+	print("[SidekickWaiting] Google sign-in success: ", user_data.get("display_name", "Unknown"))
+	
+	# Update UserManager
+	UserManager.update_user_data(user_data)
+	
+	# Save to Firestore (skip in test mode)
+	if not FirebaseAuth.TEST_MODE:
+		FirebaseFirestore.save_user_profile(user_data.user_id, user_data)
+	
+	# Load profile picture if available
+	if not user_data.photo_url.is_empty():
+		UserManager.load_profile_picture(user_data.photo_url)
+	
+	# Update UI
+	_update_user_ui()
+
+
+func _on_google_auth_failed(error: String) -> void:
+	print("[SidekickWaiting] Google sign-in failed: ", error)
+
+
+func _on_account_linked(user_data: Dictionary) -> void:
+	print("[SidekickWaiting] Account linked successfully")
+	
+	# Update with linked status
+	user_data["is_linked"] = true
+	UserManager.update_user_data(user_data)
+	
+	# Save to Firestore
+	FirebaseFirestore.save_user_profile(user_data.user_id, user_data)
+	
+	# Update UI
+	_update_user_ui()
+
+
+func _on_link_failed(error: String) -> void:
+	print("[SidekickWaiting] Account link failed: ", error)
+
+
+func _on_anonymous_auth_success(user_id: String, _token: String) -> void:
+	print("[SidekickWaiting] Anonymous auth success: ", user_id)
+	
+	# Update UserManager with guest data
+	var user_data = {
+		"user_id": user_id,
+		"display_name": "Guest",
+		"email": "",
+		"photo_url": "",
+		"provider": "anonymous",
+		"is_linked": false
+	}
+	UserManager.update_user_data(user_data)
+	_update_user_ui()
+
+
+func _on_anonymous_auth_failed(error: String) -> void:
+	print("[SidekickWaiting] Anonymous auth failed: ", error)
 
 
 func _setup_button_animations() -> void:
@@ -189,9 +536,6 @@ func _setup_button_animations() -> void:
 		btn.button_up.connect(_on_arrow_up.bind(btn))
 
 
-# ============================================================================
-# ANIMATION FUNCTIONS
-# ============================================================================
 func _on_arrow_down(btn: TextureButton) -> void:
 	"""Visual feedback when arrow is held down."""
 	var tween := create_tween()
@@ -232,9 +576,6 @@ func _animate_costume_confirmed() -> void:
 	btn_tween.tween_property(sidekick_select_btn, "scale", Vector2(1, 1), 0.2)
 
 
-# ============================================================================
-# COSTUME SELECTION HANDLERS
-# ============================================================================
 func _on_sidekick_left_pressed() -> void:
 	# Reset confirmation when trying to change costume
 	if GameState.is_costume_confirmed("sidekick"):
@@ -335,9 +676,6 @@ func _on_costume_confirmed(_role: String, _confirmed: bool) -> void:
 	_update_costume_display()
 
 
-# ============================================================================
-# NETWORK FUNCTIONS
-# ============================================================================
 func _is_network_available() -> bool:
 	"""Check if network is available for RPC calls."""
 	return not _is_leaving and multiplayer.has_multiplayer_peer() and multiplayer.get_peers().size() > 0 and is_inside_tree()
@@ -360,9 +698,6 @@ func _update_connection_indicator() -> void:
 	connection_indicator.add_theme_stylebox_override("panel", stylebox)
 
 
-# ============================================================================
-# CONNECTION & GAME START
-# ============================================================================
 func _call_join_if_playing() -> void:
 	"""Check if game is already in progress (rejoining scenario)."""
 	await get_tree().process_frame
@@ -387,6 +722,7 @@ func _call_join_if_playing() -> void:
 	_host_connected = true
 	_update_connection_indicator()
 	
+	# Only show UI elements if they exist
 	if detective_sprite:
 		detective_sprite.visible = true
 		detective_sprite.play("idle")
@@ -401,8 +737,9 @@ func _call_join_if_playing() -> void:
 	if sidekick_name_label:
 		sidekick_name_label.visible = true
 	
-	status_label.text = "Connected to Host!"
-	status_label.modulate = Color(1, 1, 0)
+	if status_label:
+		status_label.text = "Connected to Host!"
+		status_label.modulate = Color(1, 1, 0)
 
 
 func _on_connection_established(_peer_id: int) -> void:
@@ -438,6 +775,12 @@ func _on_game_started(_checkpoint: String = "") -> void:
 	
 	_is_leaving = true
 	status_label.text = "Starting game..."
+	
+	# Hide settings button and panel during transition
+	if settings_control:
+		settings_control.hide_button()
+	if settings_panel:
+		settings_panel.visible = false
 	
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
@@ -477,6 +820,12 @@ func _on_host_disconnected(_data: Dictionary = {}) -> void:
 	status_label.text = "Detective disconnected!\nReturning to menu..."
 	status_label.modulate = Color(1, 0, 0)
 	
+	# Hide settings button and panel during transition
+	if settings_control:
+		settings_control.hide_button()
+	if settings_panel:
+		settings_panel.visible = false
+	
 	await get_tree().create_timer(2.0).timeout
 	_return_to_menu()
 
@@ -487,12 +836,25 @@ func _on_connection_state_changed(new_state: int, _old_state: int) -> void:
 		status_label.text = "Connection lost!\nReturning to menu..."
 		status_label.modulate = Color(1, 0, 0)
 		
+		# Hide settings button and panel during transition
+		if settings_control:
+			settings_control.hide_button()
+		if settings_panel:
+			settings_panel.visible = false
+		
 		await get_tree().create_timer(2.0).timeout
 		_return_to_menu()
 
 
 func _on_cancel_pressed() -> void:
 	_is_leaving = true
+	
+	# Hide settings button and panel during transition
+	if settings_control:
+		settings_control.hide_button()
+	if settings_panel:
+		settings_panel.visible = false
+	
 	NetworkManager.disconnect_network()
 	
 	# Wait for disconnect and any in-flight RPCs to be processed

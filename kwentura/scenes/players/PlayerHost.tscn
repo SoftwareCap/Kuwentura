@@ -129,6 +129,8 @@ size = Vector2(32, 32)
 collision_layer = 2
 floor_constant_speed = true
 script = ExtResource("1_f4ao3")
+speed = 150
+jump_force = -500
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_kllei")
@@ -142,6 +144,5 @@ shape = SubResource("RectangleShape2D_46ybd")
 [node name="Camera2D" type="Camera2D" parent="."]
 limit_left = 0
 limit_top = 0
-limit_right = 8000
-limit_bottom = 1080
+limit_bottom = 648
 position_smoothing_enabled = true

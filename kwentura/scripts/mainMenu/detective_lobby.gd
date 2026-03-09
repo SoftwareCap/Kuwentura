@@ -1,20 +1,32 @@
 extends Control
-## Detective Lobby - Costume Selection & Matchmaking
-## Handles costume selection UI, network synchronization, and game start
 
-# ============================================================================
-# CONSTANTS
-# ============================================================================
 const ANIMATION_DURATION := 0.15
 const ARROW_SCALE_DEFAULT := Vector2(0.28, 0.28)
 const ARROW_SCALE_PRESSED := Vector2(0.24, 0.24)
 const AVATAR_BOUNCE_HEIGHT := 10.0
 
-# ============================================================================
-# NODE REFERENCES - UI Elements
-# ============================================================================
+# Settings keys
+const SETTINGS_FILE = "user://settings.json"
+
+@onready var settings_control: CanvasLayer = $SettingsControl
+@onready var settings_panel: Panel = $SettingsPanel
+@onready var volume_slider: HSlider = $SettingsPanel/VolumeSliderControl/VolumeSlider
+@onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
+@onready var back_button_settings: TouchScreenButton = $SettingsPanel/Back
+@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
+@onready var user_profile_panel: Panel = $SettingsPanel/UserProfile
+@onready var user_profile_back_button: TouchScreenButton = $SettingsPanel/UserProfile/BackToPrevious
+
+# User Auth UI (inside UserProfile panel)
+@onready var avatar_texture: TextureRect = $SettingsPanel/UserProfile/UserContent/AvatarTexture
+@onready var display_name_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/DisplayName
+@onready var provider_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/ProviderLabel
+@onready var sign_in_button: Button = $SettingsPanel/UserProfile/AuthButtons/SignInButton
+@onready var guest_button: Button = $SettingsPanel/UserProfile/AuthButtons/GuestButton
+@onready var link_google_button: Button = $SettingsPanel/UserProfile/AuthButtons/LinkGoogleButton
+
 @onready var start_button: Button = %StartButton
-@onready var back_button: Button = %BackButton
+@onready var back_button: TextureButton = %BackButton
 @onready var room_code_label: Label = $RoomCode
 @onready var status_label: Label = $StatusLabel
 @onready var connection_indicator: Panel = get_node_or_null("ConnectionIndicator")
@@ -39,9 +51,7 @@ const AVATAR_BOUNCE_HEIGHT := 10.0
 @onready var sidekick_sprite: AnimatedSprite2D = $SidekickArea/PlayerSidekick/AnimatedSprite2D
 @onready var sidekick_name_label: Label = $SidekickArea/PlayerSidekick/SidekickName
 
-# ============================================================================
-# STATE VARIABLES
-# ============================================================================
+
 var sidekick_connected: bool = false
 var _detective_costume_index: int = 0
 var _sidekick_costume_index: int = 0
@@ -49,9 +59,7 @@ var _detective_costumes: Array = []
 var _sidekick_costumes: Array = []
 var _is_leaving: bool = false  # Prevents RPCs when changing scenes
 
-# ============================================================================
-# LIFECYCLE
-# ============================================================================
+
 func _ready() -> void:
 	_setup_audio()
 	_setup_avatars()
@@ -59,6 +67,13 @@ func _ready() -> void:
 	_setup_ui_visibility()
 	_connect_signals()
 	_setup_button_animations()
+	
+	# Load saved settings
+	_load_settings()
+	
+	# Initialize User Auth UI
+	_connect_auth_signals()
+	_update_user_ui()
 	
 	# Initial UI update
 	_update_costume_display("detective")
@@ -71,9 +86,6 @@ func _exit_tree() -> void:
 	_disconnect_signals()
 
 
-# ============================================================================
-# SETUP FUNCTIONS
-# ============================================================================
 func _setup_audio() -> void:
 	"""Ensure main menu music is playing."""
 	MusicController.play_track(MusicController.MusicTrack.MAIN_MENU)
@@ -96,8 +108,6 @@ func _setup_costume_data() -> void:
 	"""Initialize costume arrays from GameState."""
 	_detective_costumes = GameState.get_costumes_for_role("detective")
 	_sidekick_costumes = GameState.get_costumes_for_role("sidekick")
-	
-
 
 
 func _setup_ui_visibility() -> void:
@@ -165,9 +175,14 @@ func _setup_base_lobby_ui() -> void:
 		start_button.disabled = true
 		
 		var invite_code := NetworkManager.get_invite_code()
-		room_code_label.text = "Code: %s" % invite_code if not invite_code.is_empty() else "Code: ???"
-		status_label.text = "Waiting for Sidekick...\n(Code is being broadcast on LAN)"
-		status_label.modulate = Color(1, 1, 1)
+		
+		# Only show room code, NOT the IP (for security and cleaner UI)
+		if not invite_code.is_empty():
+			room_code_label.text = "Code: %s" % invite_code
+		else:
+			room_code_label.text = "Code: ???"
+		
+		print("[DetectiveLobby] Room Code: ", invite_code)
 		
 		# Sidekick elements hidden initially
 		if sidekick_sprite:
@@ -199,6 +214,25 @@ func _connect_signals() -> void:
 		NetworkManager.game_started.connect(_on_game_started)
 	if not NetworkManager.connection_failed.is_connected(_on_connection_failed):
 		NetworkManager.connection_failed.connect(_on_connection_failed)
+	
+	# Settings signals
+	if settings_control and not settings_control.settings_pressed.is_connected(_on_settings_pressed):
+		settings_control.settings_pressed.connect(_on_settings_pressed)
+	
+	# Settings panel signals
+	if back_button_settings and not back_button_settings.pressed.is_connected(_on_back_settings_pressed):
+		back_button_settings.pressed.connect(_on_back_settings_pressed)
+	
+	if volume_slider and not volume_slider.value_changed.is_connected(_on_volume_changed):
+		volume_slider.value_changed.connect(_on_volume_changed)
+	
+	# View User Profile button
+	if view_user_profile_button and not view_user_profile_button.pressed.is_connected(_on_view_user_profile_pressed):
+		view_user_profile_button.pressed.connect(_on_view_user_profile_pressed)
+	
+	# Back from profile button
+	if user_profile_back_button and not user_profile_back_button.pressed.is_connected(_on_back_from_profile_pressed):
+		user_profile_back_button.pressed.connect(_on_back_from_profile_pressed)
 
 
 func _disconnect_signals() -> void:
@@ -218,6 +252,26 @@ func _disconnect_signals() -> void:
 		var callback: Callable = sig_data[1]
 		if sig.is_connected(callback):
 			sig.disconnect(callback)
+	
+	# Disconnect auth signals
+	if FirebaseAuth.google_auth_success.is_connected(_on_google_auth_success):
+		FirebaseAuth.google_auth_success.disconnect(_on_google_auth_success)
+	if FirebaseAuth.google_auth_failed.is_connected(_on_google_auth_failed):
+		FirebaseAuth.google_auth_failed.disconnect(_on_google_auth_failed)
+	if FirebaseAuth.account_linked_success.is_connected(_on_account_linked):
+		FirebaseAuth.account_linked_success.disconnect(_on_account_linked)
+	if FirebaseAuth.account_link_failed.is_connected(_on_link_failed):
+		FirebaseAuth.account_link_failed.disconnect(_on_link_failed)
+	if FirebaseAuth.auth_success.is_connected(_on_anonymous_auth_success):
+		FirebaseAuth.auth_success.disconnect(_on_anonymous_auth_success)
+	if FirebaseAuth.auth_failed.is_connected(_on_anonymous_auth_failed):
+		FirebaseAuth.auth_failed.disconnect(_on_anonymous_auth_failed)
+	
+	# Disconnect UserManager signals
+	if UserManager.user_data_changed.is_connected(_on_user_data_changed):
+		UserManager.user_data_changed.disconnect(_on_user_data_changed)
+	if UserManager.profile_picture_loaded.is_connected(_on_profile_picture_loaded):
+		UserManager.profile_picture_loaded.disconnect(_on_profile_picture_loaded)
 
 
 func _setup_button_animations() -> void:
@@ -230,9 +284,287 @@ func _setup_button_animations() -> void:
 		btn.button_up.connect(_on_arrow_up.bind(btn))
 
 
-# ============================================================================
-# ANIMATION FUNCTIONS
-# ============================================================================
+# ============================================
+# USER AUTH FUNCTIONS
+# ============================================
+
+func _connect_auth_signals() -> void:
+	"""Connect authentication related signals."""
+	# Connect auth buttons
+	if sign_in_button and not sign_in_button.pressed.is_connected(_on_sign_in_pressed):
+		sign_in_button.pressed.connect(_on_sign_in_pressed)
+	if guest_button and not guest_button.pressed.is_connected(_on_guest_pressed):
+		guest_button.pressed.connect(_on_guest_pressed)
+	if link_google_button and not link_google_button.pressed.is_connected(_on_link_google_pressed):
+		link_google_button.pressed.connect(_on_link_google_pressed)
+	
+	# Connect to UserManager signals
+	if not UserManager.user_data_changed.is_connected(_on_user_data_changed):
+		UserManager.user_data_changed.connect(_on_user_data_changed)
+	if not UserManager.profile_picture_loaded.is_connected(_on_profile_picture_loaded):
+		UserManager.profile_picture_loaded.connect(_on_profile_picture_loaded)
+	
+	# Connect to FirebaseAuth signals
+	if not FirebaseAuth.google_auth_success.is_connected(_on_google_auth_success):
+		FirebaseAuth.google_auth_success.connect(_on_google_auth_success)
+	if not FirebaseAuth.google_auth_failed.is_connected(_on_google_auth_failed):
+		FirebaseAuth.google_auth_failed.connect(_on_google_auth_failed)
+	if not FirebaseAuth.account_linked_success.is_connected(_on_account_linked):
+		FirebaseAuth.account_linked_success.connect(_on_account_linked)
+	if not FirebaseAuth.account_link_failed.is_connected(_on_link_failed):
+		FirebaseAuth.account_link_failed.connect(_on_link_failed)
+	# Connect anonymous auth signals
+	if not FirebaseAuth.auth_success.is_connected(_on_anonymous_auth_success):
+		FirebaseAuth.auth_success.connect(_on_anonymous_auth_success)
+	if not FirebaseAuth.auth_failed.is_connected(_on_anonymous_auth_failed):
+		FirebaseAuth.auth_failed.connect(_on_anonymous_auth_failed)
+
+
+func _update_user_ui() -> void:
+	"""Update the user profile UI based on current auth state."""
+	var user_data = UserManager.get_user_data()
+	
+	# Update display name
+	if display_name_label:
+		var display_text = user_data.display_name if not user_data.display_name.is_empty() else "Guest"
+		if FirebaseAuth.TEST_MODE:
+			display_text += " [TEST]"
+		display_name_label.text = display_text
+	
+	# Update provider label and button visibility
+	if provider_label:
+		var provider_text = ""
+		match user_data.provider:
+			"google":
+				provider_text = "Google Account"
+				if link_google_button:
+					link_google_button.visible = false
+				if sign_in_button:
+					sign_in_button.visible = false
+				if guest_button:
+					guest_button.visible = false
+			"anonymous":
+				provider_text = "Guest"
+				if FirebaseAuth.TEST_MODE:
+					provider_text += " (Test Mode)"
+				if link_google_button:
+					link_google_button.visible = true
+				if sign_in_button:
+					sign_in_button.visible = true
+				if guest_button:
+					guest_button.visible = true
+		provider_label.text = provider_text
+	
+	# Update avatar
+	if avatar_texture:
+		var cached = UserManager.get_cached_profile_texture()
+		if cached:
+			avatar_texture.texture = cached
+		elif not user_data.photo_url.is_empty():
+			UserManager.load_profile_picture(user_data.photo_url)
+		else:
+			avatar_texture.texture = preload("res://assets/sprites/userIcon.png")
+
+
+func _on_user_data_changed(_data: Dictionary) -> void:
+	_update_user_ui()
+
+
+func _on_profile_picture_loaded(texture: Texture2D) -> void:
+	if texture and avatar_texture:
+		avatar_texture.texture = texture
+
+
+func _on_sign_in_pressed() -> void:
+	print("[DetectiveLobby] Sign in button pressed")
+	FirebaseAuth.sign_in_with_google()
+
+
+func _on_guest_pressed() -> void:
+	print("[DetectiveLobby] Guest button pressed - starting anonymous login")
+	FirebaseAuth.anonymous_login()
+
+
+func _on_link_google_pressed() -> void:
+	print("[DetectiveLobby] Link Google button pressed")
+	if not FirebaseAuth.is_authenticated:
+		return
+	
+	# Store current anonymous UID before linking
+	UserManager.update_user_data({"anonymous_uid": FirebaseAuth.current_user_id})
+	
+	# Start Google sign-in flow for linking
+	FirebaseAuth.link_with_google()
+
+
+func _on_google_auth_success(user_data: Dictionary) -> void:
+	print("[DetectiveLobby] Google sign-in success: ", user_data.get("display_name", "Unknown"))
+	
+	# Update UserManager
+	UserManager.update_user_data(user_data)
+	
+	# Save to Firestore (skip in test mode)
+	if not FirebaseAuth.TEST_MODE:
+		FirebaseFirestore.save_user_profile(user_data.user_id, user_data)
+	
+	# Load profile picture if available
+	if not user_data.photo_url.is_empty():
+		UserManager.load_profile_picture(user_data.photo_url)
+	
+	# Update UI
+	_update_user_ui()
+
+
+func _on_google_auth_failed(error: String) -> void:
+	print("[DetectiveLobby] Google sign-in failed: ", error)
+
+
+func _on_account_linked(user_data: Dictionary) -> void:
+	print("[DetectiveLobby] Account linked successfully")
+	
+	# Update with linked status
+	user_data["is_linked"] = true
+	UserManager.update_user_data(user_data)
+	
+	# Save to Firestore
+	FirebaseFirestore.save_user_profile(user_data.user_id, user_data)
+	
+	# Update UI
+	_update_user_ui()
+
+
+func _on_link_failed(error: String) -> void:
+	print("[DetectiveLobby] Account link failed: ", error)
+
+
+func _on_anonymous_auth_success(user_id: String, _token: String) -> void:
+	print("[DetectiveLobby] Anonymous auth success: ", user_id)
+	
+	# Update UserManager with guest data
+	var user_data = {
+		"user_id": user_id,
+		"display_name": "Guest",
+		"email": "",
+		"photo_url": "",
+		"provider": "anonymous",
+		"is_linked": false
+	}
+	UserManager.update_user_data(user_data)
+	_update_user_ui()
+
+
+func _on_anonymous_auth_failed(error: String) -> void:
+	print("[DetectiveLobby] Anonymous auth failed: ", error)
+
+
+func _set_main_buttons_visible(show_buttons: bool) -> void:
+	"""Toggle visibility of main lobby buttons.
+	In DetectiveLobby, only the Back button needs to be hidden when settings opens.
+	The settings button is handled by settings_control.hide_button()/show_button().
+	"""
+	if back_button:
+		back_button.visible = show_buttons
+
+
+func _on_settings_pressed() -> void:
+	print("[DetectiveLobby] Opening settings panel")
+	if settings_panel:
+		settings_panel.visible = true
+		# Hide back button when settings panel opens
+		_set_main_buttons_visible(false)
+		# Hide the settings button when panel is open
+		if settings_control:
+			settings_control.hide_button()
+		# Make sure user profile panel is hidden when opening settings
+		if user_profile_panel:
+			user_profile_panel.visible = false
+		# Show view user profile button
+		if view_user_profile_button:
+			view_user_profile_button.visible = true
+		# Update slider to current volume
+		if volume_slider:
+			volume_slider.value = MusicController.get_volume() * 100
+		if volume_value_label:
+			volume_value_label.text = str(int(volume_slider.value)) + "%"
+
+
+func _on_back_settings_pressed() -> void:
+	print("[DetectiveLobby] Closing settings panel")
+	if settings_panel:
+		settings_panel.visible = false
+	# Also hide user profile panel
+	if user_profile_panel:
+		user_profile_panel.visible = false
+	# Show back button again when settings panel closes
+	_set_main_buttons_visible(true)
+	# Show the settings button again when panel is closed
+	if settings_control:
+		settings_control.show_button()
+	_save_settings()
+
+
+func _on_view_user_profile_pressed() -> void:
+	print("[DetectiveLobby] Opening user profile panel")
+	if user_profile_panel:
+		user_profile_panel.visible = true
+	# Hide the view user profile button while in profile view
+	if view_user_profile_button:
+		view_user_profile_button.visible = false
+
+
+func _on_back_from_profile_pressed() -> void:
+	print("[DetectiveLobby] Closing user profile panel")
+	if user_profile_panel:
+		user_profile_panel.visible = false
+	# Show the view user profile button again
+	if view_user_profile_button:
+		view_user_profile_button.visible = true
+
+
+func _on_volume_changed(value: float) -> void:
+	var volume = value / 100.0
+	MusicController.set_volume(volume)
+	if volume_value_label:
+		volume_value_label.text = str(int(value)) + "%"
+	print("[DetectiveLobby] Volume changed to: ", volume)
+
+
+func _load_settings() -> void:
+	if FileAccess.file_exists(SETTINGS_FILE):
+		var file = FileAccess.open(SETTINGS_FILE, FileAccess.READ)
+		if file:
+			var json = JSON.new()
+			var error = json.parse(file.get_as_text())
+			if error == OK:
+				var data = json.get_data()
+				if data is Dictionary:
+					if data.has("volume"):
+						var volume = float(data["volume"])
+						MusicController.set_volume(volume)
+						if volume_slider:
+							volume_slider.value = volume * 100
+					print("[DetectiveLobby] Settings loaded successfully")
+			else:
+				push_warning("[DetectiveLobby] Failed to parse settings file")
+			file.close()
+	else:
+		print("[DetectiveLobby] No settings file found, using defaults")
+
+
+func _save_settings() -> void:
+	var data = {
+		"volume": MusicController.get_volume()
+	}
+	
+	var file = FileAccess.open(SETTINGS_FILE, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data))
+		file.close()
+		print("[DetectiveLobby] Settings saved successfully")
+	else:
+		push_warning("[DetectiveLobby] Failed to save settings file")
+
+
 func _on_arrow_pressed(btn: TextureButton) -> void:
 	"""Animate arrow button press."""
 	var tween := create_tween()
@@ -286,9 +618,6 @@ func _animate_costume_confirmed(role: String) -> void:
 	btn_tween.tween_property(btn, "scale", Vector2(1, 1), 0.2)
 
 
-# ============================================================================
-# COSTUME SELECTION HANDLERS
-# ============================================================================
 func _on_detective_left_pressed() -> void:
 	# Reset confirmation when trying to change costume
 	if GameState.is_costume_confirmed("detective"):
@@ -427,9 +756,6 @@ func _on_costume_confirmed(_role: String, _confirmed: bool) -> void:
 	_update_costume_display("sidekick")
 
 
-# ============================================================================
-# NETWORK FUNCTIONS
-# ============================================================================
 func _is_network_available() -> bool:
 	"""Check if network is available for RPC calls."""
 	return not _is_leaving and multiplayer.has_multiplayer_peer() and multiplayer.get_peers().size() > 0 and is_inside_tree()
@@ -452,16 +778,12 @@ func _update_connection_indicator() -> void:
 	connection_indicator.add_theme_stylebox_override("panel", stylebox)
 
 
-
-
-
-# ============================================================================
-# NETWORK CALLBACKS
-# ============================================================================
 func _on_room_code_generated(code: String) -> void:
 	if NetworkManager.get_my_role() == "detective":
+		# Only show room code, NOT the IP
 		room_code_label.text = "Code: %s" % code
 		room_code_label.modulate = Color(1, 0.9, 0.2)
+		print("[DetectiveLobby] Room Code: ", code)
 
 
 func _on_partner_connected(data: Dictionary) -> void:
@@ -564,6 +886,12 @@ func _on_start_pressed() -> void:
 func _on_back_pressed() -> void:
 	_is_leaving = true
 	
+	# Hide settings button and panel during transition
+	if settings_control:
+		settings_control.hide_button()
+	if settings_panel:
+		settings_panel.visible = false
+	
 	# Notify sidekick before disconnecting
 	if sidekick_connected:
 		NetworkManager.notify_host_leaving()
@@ -584,6 +912,12 @@ func _on_back_pressed() -> void:
 
 func _on_game_started(_checkpoint: String = "") -> void:
 	_is_leaving = true
+	
+	# Hide settings button and panel during transition
+	if settings_control:
+		settings_control.hide_button()
+	if settings_panel:
+		settings_panel.visible = false
 	
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)

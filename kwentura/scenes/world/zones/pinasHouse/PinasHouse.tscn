@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://bpeh268v43cji" path="res://assets/sprites/places/KitchenBackground.png" id="2_qj22k"]
 [ext_resource type="Texture2D" uid="uid://miy70k8n04ul" path="res://assets/sprites/places/PHBackground.png" id="2_vt60f"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 [ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/inventoryboard.png" id="3_k0xpg"]
@@ -27,7 +28,7 @@
 [ext_resource type="Texture2D" uid="uid://deqmdh6dbokyd" path="res://assets/sprites/zoneObjects/x.png" id="19_vt60f"]
 [ext_resource type="Texture2D" uid="uid://ci6sa4iwt7x0l" path="res://assets/sprites/zoneObjects/y.png" id="20_eedqa"]
 [ext_resource type="Texture2D" uid="uid://bcwl2rqppjo6k" path="res://assets/sprites/zoneObjects/z.png" id="21_cd1wg"]
-[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/Close.png" id="22_vt60f"]
+[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/closebutton.png" id="22_vt60f"]
 [ext_resource type="Texture2D" uid="uid://d2b4d66dls22f" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Banner.png" id="24_vt60f"]
 [ext_resource type="Texture2D" uid="uid://b216jsk5hyag5" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Ladle.png" id="25_eedqa"]
 [ext_resource type="Texture2D" uid="uid://llr505ongc63" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pan.png" id="26_cd1wg"]
