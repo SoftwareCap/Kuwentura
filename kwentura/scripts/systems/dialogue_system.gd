@@ -13,9 +13,9 @@ var _playing: bool = false
 
 # Add delay for every dialogue
 const OPEN_DELAY_SECONDS := 1.0
+const PAUSE_GAME := false
 
-# If true, dialogue pauses gameplay while it’s open.
-const PAUSE_GAME := true
+var dialogue_active: bool = false
 
 
 func is_playing() -> bool:
@@ -38,12 +38,13 @@ func play(dialogue_id: String, lines: Array, skip_delay: bool = false) -> void:
 	# Delay before showing dialogue (global behavior)
 	if not skip_delay and OPEN_DELAY_SECONDS > 0.0:
 		await get_tree().create_timer(OPEN_DELAY_SECONDS).timeout
-	
+
 	# Scene might be gone or dialogue may have been cancelled
 	if not is_inside_tree() or not _playing:
 		return
 
 	_ui.visible = true
+	dialogue_active = true
 
 	if PAUSE_GAME:
 		get_tree().paused = true
@@ -73,6 +74,8 @@ func stop() -> void:
 
 	if is_instance_valid(_ui):
 		_ui.visible = false
+
+	dialogue_active = false
 
 	if PAUSE_GAME:
 		get_tree().paused = false
@@ -109,6 +112,8 @@ func _show_current() -> void:
 
 func _end_dialogue() -> void:
 	_playing = false
+	dialogue_active = false
+
 	if is_instance_valid(_ui):
 		_ui.visible = false
 
