@@ -122,6 +122,27 @@ var _costume_confirmed_status: Dictionary = {
 	"sidekick": false
 }
 
+# Temporary zone lockouts (seconds-based)
+var zone_lock_until_unix: Dictionary = {}  # zone_id -> unix_time (seconds)
+
+# -------------------------
+# Zone temporary lock system
+# -------------------------
+var _zone_lock_until: Dictionary = {}
+
+func lock_zone_temp(zone_id: String, duration_sec: int) -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	_zone_lock_until[zone_id] = now + float(duration_sec)
+
+func is_zone_locked_temp(zone_id: String) -> bool:
+	var now := Time.get_ticks_msec() / 1000.0
+	var until := float(_zone_lock_until.get(zone_id, 0.0))
+	return now < until
+
+func get_zone_lock_remaining(zone_id: String) -> int:
+	var now := Time.get_ticks_msec() / 1000.0
+	var until := float(_zone_lock_until.get(zone_id, 0.0))
+	return max(0, int(ceil(until - now)))
 
 func _ready():
 	randomize()
