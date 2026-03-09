@@ -2,24 +2,31 @@ extends Control
 
 @onready var host_button: TextureButton = $HostButton
 @onready var join_button: TextureButton = $JoinButton
-@onready var exit_button: TextureButton = $ExitButton
+@onready var exit_button = get_node_or_null("ExitButton")
 @onready var status_label = $StatusLabel
 @onready var settings_control: CanvasLayer = $SettingsControl
 @onready var settings_panel: Panel = $SettingsPanel
 @onready var volume_slider: HSlider = $SettingsPanel/VolumeSliderControl/VolumeSlider
 @onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
 @onready var back_button: TouchScreenButton = $SettingsPanel/Back
+@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
+@onready var user_profile_panel: Panel = $SettingsPanel/UserProfile
+@onready var back_from_profile_button: TouchScreenButton = $SettingsPanel/UserProfile/BackToPrevious
 
-# User Auth
-@onready var sign_in_button: Button = $SettingsPanel/UserSection/AuthButtons/SignInButton
-@onready var guest_button: Button = $SettingsPanel/UserSection/AuthButtons/GuestButton
-@onready var link_google_button: Button = $SettingsPanel/UserSection/AuthButtons/LinkGoogleButton
+# User Auth UI (inside UserProfile panel)
+@onready var avatar_texture: TextureRect = $SettingsPanel/UserProfile/UserContent/AvatarTexture
+@onready var display_name_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/DisplayName
+@onready var provider_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/ProviderLabel
+@onready var sign_in_button: Button = $SettingsPanel/UserProfile/AuthButtons/SignInButton
+@onready var guest_button: Button = $SettingsPanel/UserProfile/AuthButtons/GuestButton
+@onready var link_google_button: Button = $SettingsPanel/UserProfile/AuthButtons/LinkGoogleButton
 
 # Sidekick Join Popup nodes
-@onready var sidekick_popup: Panel = $SidekickPopup
-@onready var code_input: LineEdit = $SidekickPopup/VBoxContainer/LineEdit
-@onready var join_code_ok_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/Button
-@onready var join_code_cancel_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/Button2
+@onready var sidekick_popup_layer: CanvasLayer = $SidekickPopupLayer
+@onready var sidekick_popup: Panel = $SidekickPopupLayer/SidekickPopup
+@onready var code_input: LineEdit = $SidekickPopupLayer/SidekickPopup/VBoxContainer/LineEdit
+@onready var join_code_cancel_button: Button = $SidekickPopupLayer/SidekickPopup/VBoxContainer/HBoxContainer/Cancel
+@onready var join_code_ok_button: Button = $SidekickPopupLayer/SidekickPopup/VBoxContainer/HBoxContainer/Join
 
 var is_joining: bool = false
 
@@ -34,15 +41,21 @@ func _ready():
 	# Load saved settings
 	_load_settings()
 	
-	# Setup visual feedback for main menu buttons
-	_setup_button_visuals(host_button)
-	_setup_button_visuals(join_button)
-	_setup_button_visuals(exit_button)
+	# Setup visual feedback for main menu buttons (skip if null)
+	if host_button:
+		_setup_button_visuals(host_button)
+	if join_button:
+		_setup_button_visuals(join_button)
+	if exit_button:
+		_setup_button_visuals(exit_button)
 	
 	# Connect button signals (use button_down/button_up for visuals, pressed for action)
-	_connect_texture_button(host_button, _on_host_pressed)
-	_connect_texture_button(join_button, _on_join_pressed)
-	_connect_texture_button(exit_button, _on_exit_pressed)
+	if host_button:
+		_connect_texture_button(host_button, _on_host_pressed)
+	if join_button:
+		_connect_texture_button(join_button, _on_join_pressed)
+	if exit_button:
+		_connect_texture_button(exit_button, _on_exit_pressed)
 
 	# Connect settings signals
 	if settings_control and not settings_control.settings_pressed.is_connected(_on_settings_pressed):
@@ -56,6 +69,14 @@ func _ready():
 	if volume_slider and not volume_slider.value_changed.is_connected(_on_volume_changed):
 		volume_slider.value_changed.connect(_on_volume_changed)
 	
+	# Connect View User Profile button
+	if view_user_profile_button and not view_user_profile_button.pressed.is_connected(_on_view_user_profile_pressed):
+		view_user_profile_button.pressed.connect(_on_view_user_profile_pressed)
+	
+	# Connect back from profile button
+	if back_from_profile_button and not back_from_profile_button.pressed.is_connected(_on_back_from_profile_pressed):
+		back_from_profile_button.pressed.connect(_on_back_from_profile_pressed)
+	
 	# Connect sidekick popup signals
 	if join_code_ok_button and not join_code_ok_button.pressed.is_connected(_on_join_code_ok_pressed):
 		join_code_ok_button.pressed.connect(_on_join_code_ok_pressed)
@@ -63,6 +84,8 @@ func _ready():
 		join_code_cancel_button.pressed.connect(_on_join_code_cancel_pressed)
 	if code_input and not code_input.text_changed.is_connected(_on_code_text_changed):
 		code_input.text_changed.connect(_on_code_text_changed)
+	
+	# Note: CanvasLayer doesn't have popup_hide signal, handled in button handlers
 
 	# Connect to network signals
 	if not NetworkManager.connection_established.is_connected(_on_connection_established):
@@ -77,6 +100,12 @@ func _ready():
 		NetworkManager.room_code_generated.connect(_on_room_code_generated)
 	if not NetworkManager.game_started.is_connected(_on_game_started):
 		NetworkManager.game_started.connect(_on_game_started)
+	
+	# Connect User Auth signals
+	_connect_auth_signals()
+	
+	# Initialize User Auth UI
+	_update_user_ui()
 
 
 # NEW: Setup visual pressed feedback for buttons
@@ -120,10 +149,243 @@ func _connect_texture_button(button: TextureButton, callback: Callable):
 		button.pressed.connect(callback)
 
 
+func _connect_auth_signals() -> void:
+	"""Connect authentication related signals."""
+	print("[MainMenu] Connecting auth signals...")
+	
+	# Connect auth buttons
+	if sign_in_button:
+		if not sign_in_button.pressed.is_connected(_on_sign_in_pressed):
+			sign_in_button.pressed.connect(_on_sign_in_pressed)
+			print("[MainMenu] ✅ Sign In button connected")
+	else:
+		print("[MainMenu] ❌ Sign In button NOT found")
+		
+	if guest_button:
+		if not guest_button.pressed.is_connected(_on_guest_pressed):
+			guest_button.pressed.connect(_on_guest_pressed)
+			print("[MainMenu] ✅ Guest button connected")
+	else:
+		print("[MainMenu] ❌ Guest button NOT found")
+		
+	if link_google_button:
+		if not link_google_button.pressed.is_connected(_on_link_google_pressed):
+			link_google_button.pressed.connect(_on_link_google_pressed)
+			print("[MainMenu] ✅ Link Google button connected")
+	else:
+		print("[MainMenu] ❌ Link Google button NOT found")
+	
+	# Connect to UserManager signals
+	if not UserManager.user_data_changed.is_connected(_on_user_data_changed):
+		UserManager.user_data_changed.connect(_on_user_data_changed)
+	if not UserManager.profile_picture_loaded.is_connected(_on_profile_picture_loaded):
+		UserManager.profile_picture_loaded.connect(_on_profile_picture_loaded)
+	
+	# Connect to FirebaseAuth signals
+	if not FirebaseAuth.google_auth_success.is_connected(_on_google_auth_success):
+		FirebaseAuth.google_auth_success.connect(_on_google_auth_success)
+	if not FirebaseAuth.google_auth_failed.is_connected(_on_google_auth_failed):
+		FirebaseAuth.google_auth_failed.connect(_on_google_auth_failed)
+	if not FirebaseAuth.account_linked_success.is_connected(_on_account_linked):
+		FirebaseAuth.account_linked_success.connect(_on_account_linked)
+	if not FirebaseAuth.account_link_failed.is_connected(_on_link_failed):
+		FirebaseAuth.account_link_failed.connect(_on_link_failed)
+	# Connect anonymous auth signals
+	if not FirebaseAuth.auth_success.is_connected(_on_anonymous_auth_success):
+		FirebaseAuth.auth_success.connect(_on_anonymous_auth_success)
+	if not FirebaseAuth.auth_failed.is_connected(_on_anonymous_auth_failed):
+		FirebaseAuth.auth_failed.connect(_on_anonymous_auth_failed)
+
+
+func _update_user_ui() -> void:
+	"""Update the user profile UI based on current auth state."""
+	var user_data = UserManager.get_user_data()
+	
+	# Update display name
+	if display_name_label:
+		var display_text = user_data.display_name if not user_data.display_name.is_empty() else "Guest"
+		# Show TEST MODE indicator
+		if FirebaseAuth.TEST_MODE:
+			display_text += " [TEST]"
+		display_name_label.text = display_text
+	
+	# Update provider label and button visibility
+	if provider_label:
+		var provider_text = ""
+		match user_data.provider:
+			"google":
+				provider_text = "Google Account"
+				if link_google_button:
+					link_google_button.visible = false
+				if sign_in_button:
+					sign_in_button.visible = false
+				if guest_button:
+					guest_button.visible = false
+			"anonymous":
+				provider_text = "Guest"
+				if FirebaseAuth.TEST_MODE:
+					provider_text += " (Test Mode)"
+				if link_google_button:
+					link_google_button.visible = true
+				if sign_in_button:
+					sign_in_button.visible = true
+				if guest_button:
+					guest_button.visible = true
+		provider_label.text = provider_text
+	
+	# Update avatar
+	if avatar_texture:
+		var cached = UserManager.get_cached_profile_texture()
+		if cached:
+			avatar_texture.texture = cached
+		elif not user_data.photo_url.is_empty():
+			UserManager.load_profile_picture(user_data.photo_url)
+		else:
+			avatar_texture.texture = preload("res://assets/sprites/userIcon.png")
+
+
+func _on_user_data_changed(_data: Dictionary) -> void:
+	_update_user_ui()
+
+
+func _on_profile_picture_loaded(texture: Texture2D) -> void:
+	if texture and avatar_texture:
+		avatar_texture.texture = texture
+
+
+# ============================================
+# AUTH BUTTON HANDLERS
+# ============================================
+
+func _on_sign_in_pressed() -> void:
+	print("[MainMenu] ==========================================")
+	print("[MainMenu] SIGN IN BUTTON PRESSED")
+	print("[MainMenu] ==========================================")
+	FirebaseAuth.sign_in_with_google()
+	_show_status("Opening Google Sign-In...")
+
+
+func _on_guest_pressed() -> void:
+	print("[MainMenu] Guest button pressed - starting anonymous login")
+	_show_status("Continuing as Guest...")
+	FirebaseAuth.anonymous_login()
+
+
+func _on_link_google_pressed() -> void:
+	print("[MainMenu] Link Google button pressed")
+	if not FirebaseAuth.is_authenticated:
+		_show_status("Please sign in anonymously first")
+		return
+	
+	# Store current anonymous UID before linking
+	UserManager.update_user_data({"anonymous_uid": FirebaseAuth.current_user_id})
+	
+	# Start Google sign-in flow for linking
+	FirebaseAuth.link_with_google()
+	_show_status("Linking Google account...")
+
+
+# ============================================
+# FIREBASE AUTH CALLBACKS
+# ============================================
+
+func _on_google_auth_success(user_data: Dictionary) -> void:
+	print("[MainMenu] Google sign-in success: ", user_data.get("display_name", "Unknown"))
+	
+	var status_msg = "Signed in as " + user_data.get("display_name", "Google User")
+	if FirebaseAuth.TEST_MODE:
+		status_msg += " [TEST MODE]"
+	_show_status(status_msg)
+	
+	# Update UserManager
+	UserManager.update_user_data(user_data)
+	
+	# Save to Firestore (skip in test mode)
+	if not FirebaseAuth.TEST_MODE:
+		FirebaseFirestore.save_user_profile(user_data.user_id, user_data)
+	
+	# Load profile picture if available
+	if not user_data.photo_url.is_empty():
+		UserManager.load_profile_picture(user_data.photo_url)
+	
+	# Update UI
+	_update_user_ui()
+
+
+func _on_google_auth_failed(error: String) -> void:
+	print("[MainMenu] Google sign-in failed: ", error)
+	_show_status("Sign in failed: " + error)
+
+
+func _on_account_linked(user_data: Dictionary) -> void:
+	print("[MainMenu] Account linked successfully")
+	_show_status("Account linked successfully!")
+	
+	# Update with linked status
+	user_data["is_linked"] = true
+	UserManager.update_user_data(user_data)
+	
+	# Save to Firestore
+	FirebaseFirestore.save_user_profile(user_data.user_id, user_data)
+	
+	# Update UI
+	_update_user_ui()
+
+
+func _on_link_failed(error: String) -> void:
+	print("[MainMenu] Account link failed: ", error)
+	_show_status("Linking failed: " + error)
+
+
+func _on_anonymous_auth_success(user_id: String, _token: String) -> void:
+	print("[MainMenu] Anonymous auth success: ", user_id)
+	
+	var status_msg = "Playing as Guest"
+	if FirebaseAuth.TEST_MODE:
+		status_msg += " [TEST MODE]"
+	_show_status(status_msg)
+	
+	# Update UserManager with guest data
+	var user_data = {
+		"user_id": user_id,
+		"display_name": "Guest",
+		"email": "",
+		"photo_url": "",
+		"provider": "anonymous",
+		"is_linked": false
+	}
+	UserManager.update_user_data(user_data)
+	_update_user_ui()
+
+
+func _on_anonymous_auth_failed(error: String) -> void:
+	print("[MainMenu] Anonymous auth failed: ", error)
+	_show_status("Guest login failed: " + error)
+	_show_status("Guest login failed: " + error)
+
+
+func _set_main_buttons_visible(show_buttons: bool) -> void:
+	"""Toggle visibility of main menu buttons."""
+	if host_button:
+		host_button.visible = show_buttons
+	if join_button:
+		join_button.visible = show_buttons
+	if exit_button:
+		exit_button.visible = show_buttons
+
+
 func _on_settings_pressed() -> void:
 	print("[MainMenu] Opening settings panel")
 	if settings_panel:
 		settings_panel.visible = true
+		# Hide main menu buttons when panel is open
+		_set_main_buttons_visible(false)
+		# Hide the settings button when panel is open
+		if settings_control:
+			settings_control.hide_button()
+		# Make sure user profile panel is hidden when opening settings
+		if user_profile_panel:
+			user_profile_panel.visible = false
 		# Update slider to current volume
 		if volume_slider:
 			volume_slider.value = MusicController.get_volume() * 100
@@ -135,7 +397,30 @@ func _on_back_settings_pressed() -> void:
 	print("[MainMenu] Closing settings panel")
 	if settings_panel:
 		settings_panel.visible = false
+	# Show main menu buttons again when panel is closed
+	_set_main_buttons_visible(true)
+	# Show the settings button again when panel is closed
+	if settings_control:
+		settings_control.show_button()
 	_save_settings()
+
+
+func _on_view_user_profile_pressed() -> void:
+	print("[MainMenu] Opening user profile panel")
+	if user_profile_panel:
+		user_profile_panel.visible = true
+	# Hide the view user profile button while in profile view
+	if view_user_profile_button:
+		view_user_profile_button.visible = false
+
+
+func _on_back_from_profile_pressed() -> void:
+	print("[MainMenu] Closing user profile panel")
+	if user_profile_panel:
+		user_profile_panel.visible = false
+	# Show the view user profile button again
+	if view_user_profile_button:
+		view_user_profile_button.visible = true
 
 
 func _on_volume_changed(value: float) -> void:
@@ -201,10 +486,15 @@ func _on_host_pressed() -> void:
 
 func _on_join_pressed() -> void:
 	print("[MainMenu] Opening join popup")
-	if sidekick_popup:
-		sidekick_popup.visible = true
+	if sidekick_popup_layer:
+		# Disable main menu buttons and settings while popup is open
+		_set_main_ui_interactive(false)
+		# Show CanvasLayer - this won't glitch when keyboard appears
+		sidekick_popup_layer.visible = true
 		if code_input:
 			code_input.text = ""
+			# Delay focus to ensure popup is fully shown
+			await get_tree().create_timer(0.1).timeout
 			code_input.grab_focus()
 
 
@@ -219,19 +509,48 @@ func _on_join_code_ok_pressed() -> void:
 		return
 	
 	# Hide popup and process the code
-	sidekick_popup.visible = false
+	sidekick_popup_layer.visible = false
+	# Re-enable main menu buttons and settings
+	_set_main_ui_interactive(true)
 	_process_join_code(code)
 
 
 func _on_join_code_cancel_pressed() -> void:
 	print("[MainMenu] Join cancelled")
-	sidekick_popup.visible = false
+	sidekick_popup_layer.visible = false
+	# Re-enable main menu buttons and settings
+	_set_main_ui_interactive(true)
+
+
+
+
+
+func _set_main_ui_interactive(interactive: bool) -> void:
+	"""Enable/disable main menu buttons and settings button when popup is open/closed."""
+	if host_button:
+		host_button.disabled = not interactive
+	if join_button:
+		join_button.disabled = not interactive
+	if settings_control:
+		if interactive:
+			settings_control.show_button()
+		else:
+			settings_control.hide_button()
 
 
 func _on_code_text_changed(new_text: String) -> void:
-	if code_input:
-		code_input.text = new_text.to_upper()
-		code_input.caret_column = code_input.text.length()
+	if not code_input:
+		return
+	
+	# Only update if text actually changed (case difference)
+	var upper_text = new_text.to_upper()
+	if new_text != upper_text:
+		# Store current caret position
+		var caret_pos = code_input.caret_column
+		# Update text to uppercase
+		code_input.text = upper_text
+		# Restore caret position (adjust for any length changes)
+		code_input.caret_column = min(caret_pos, upper_text.length())
 
 
 func _process_join_code(code: String) -> void:
@@ -251,6 +570,10 @@ func _process_join_code(code: String) -> void:
 		get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 		return
 	
+	# NOTE: Removed automatic IP detection - only room codes are used
+	# This prevents confusion and forces the discovery-based connection flow
+	# If direct IP is needed for debugging, use the "LOCAL" code instead
+	
 	_show_status("Searching for game with code: " + code + "...")
 	print("[MainMenu] Starting discovery for code: ", code)
 	
@@ -260,7 +583,9 @@ func _process_join_code(code: String) -> void:
 	
 	if not result.success:
 		print("[MainMenu] Join failed: ", result.get("error", "Unknown"))
-		_show_status("Failed to join: " + result.get("error", "Unknown error"))
+		
+		# Show error popup with retry option
+		_show_join_error_with_retry(result.get("error", "Unknown error"), code)
 		return
 	
 	print("[MainMenu] Connected to host!")
@@ -278,6 +603,33 @@ func _show_join_error(message: String) -> void:
 		tween.tween_property(code_input, "position:x", code_input.position.x + 5, 0.05)
 		tween.tween_property(code_input, "position:x", code_input.position.x - 5, 0.05)
 		tween.tween_property(code_input, "position:x", code_input.position.x, 0.05)
+
+
+func _show_join_error_with_retry(error_msg: String, code: String) -> void:
+	"""Show join error with option to retry."""
+	print("[MainMenu] Showing error with retry: ", error_msg)
+	
+	# Show popup again with error message - disable main UI again
+	if sidekick_popup_layer:
+		_set_main_ui_interactive(false)
+		sidekick_popup_layer.visible = true
+	
+	if code_input:
+		code_input.text = code
+		code_input.placeholder_text = "Try again or check Wi-Fi"
+		code_input.grab_focus()
+	
+	# Show helpful error message
+	var helpful_error = error_msg + "\n\nTips:\n• Ensure both devices on same Wi-Fi\n• Try re-entering the code\n• Ask host to restart hosting"
+	_show_status(helpful_error)
+	
+	# Shake the popup
+	if sidekick_popup:
+		var tween = create_tween()
+		tween.tween_property(sidekick_popup, "position:x", sidekick_popup.position.x + 10, 0.05)
+		tween.tween_property(sidekick_popup, "position:x", sidekick_popup.position.x - 10, 0.05)
+		tween.tween_property(sidekick_popup, "position:x", sidekick_popup.position.x, 0.05)
+		await tween.finished
 
 
 func _on_connection_established(peer_id: int):
@@ -321,6 +673,46 @@ func _input(event):
 	# DEBUG: Press F12 to auto-connect to localhost for same-PC testing
 	if event is InputEventKey and event.pressed and event.keycode == KEY_F12:
 		print("[DEBUG] F12 pressed - auto-connecting to localhost")
-		if sidekick_popup:
-			sidekick_popup.visible = false
+		if sidekick_popup_layer:
+			sidekick_popup_layer.visible = false
+		# Re-enable main UI when using debug shortcut
+		_set_main_ui_interactive(true)
 		_process_join_code("LOCAL")
+
+
+func _exit_tree() -> void:
+	"""Clean up signals when leaving the scene."""
+
+	# Disconnect network signals
+	if NetworkManager.connection_established.is_connected(_on_connection_established):
+		NetworkManager.connection_established.disconnect(_on_connection_established)
+	if NetworkManager.connection_failed.is_connected(_on_connection_failed):
+		NetworkManager.connection_failed.disconnect(_on_connection_failed)
+	if NetworkManager.player_joined.is_connected(_on_player_joined):
+		NetworkManager.player_joined.disconnect(_on_player_joined)
+	if NetworkManager.role_assignment_received.is_connected(_on_role_assigned):
+		NetworkManager.role_assignment_received.disconnect(_on_role_assigned)
+	if NetworkManager.room_code_generated.is_connected(_on_room_code_generated):
+		NetworkManager.room_code_generated.disconnect(_on_room_code_generated)
+	if NetworkManager.game_started.is_connected(_on_game_started):
+		NetworkManager.game_started.disconnect(_on_game_started)
+	
+	# Disconnect auth signals
+	if FirebaseAuth.google_auth_success.is_connected(_on_google_auth_success):
+		FirebaseAuth.google_auth_success.disconnect(_on_google_auth_success)
+	if FirebaseAuth.google_auth_failed.is_connected(_on_google_auth_failed):
+		FirebaseAuth.google_auth_failed.disconnect(_on_google_auth_failed)
+	if FirebaseAuth.account_linked_success.is_connected(_on_account_linked):
+		FirebaseAuth.account_linked_success.disconnect(_on_account_linked)
+	if FirebaseAuth.account_link_failed.is_connected(_on_link_failed):
+		FirebaseAuth.account_link_failed.disconnect(_on_link_failed)
+	if FirebaseAuth.auth_success.is_connected(_on_anonymous_auth_success):
+		FirebaseAuth.auth_success.disconnect(_on_anonymous_auth_success)
+	if FirebaseAuth.auth_failed.is_connected(_on_anonymous_auth_failed):
+		FirebaseAuth.auth_failed.disconnect(_on_anonymous_auth_failed)
+	
+	# Disconnect UserManager signals
+	if UserManager.user_data_changed.is_connected(_on_user_data_changed):
+		UserManager.user_data_changed.disconnect(_on_user_data_changed)
+	if UserManager.profile_picture_loaded.is_connected(_on_profile_picture_loaded):
+		UserManager.profile_picture_loaded.disconnect(_on_profile_picture_loaded)

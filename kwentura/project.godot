@@ -25,6 +25,11 @@ MusicController="*res://scenes/controls/AudioControl.tscn"
 NetworkManager="*res://scripts/systems/network_manager.gd"
 PuzzleManager="*res://scripts/systems/puzzle_manager.gd"
 LoadingScreen="*res://scenes/ui/LoadingScreen.tscn"
+UserManager="*res://scripts/systems/user_manager.gd"
+
+[display]
+
+window/size/mode=3
 DialogueSystems="*res://scripts/systems/dialogue_system.gd"
 DialogueLibraries="*res://scripts/systems/dialogue_library.gd"
 
@@ -32,6 +37,12 @@ DialogueLibraries="*res://scripts/systems/dialogue_library.gd"
 
 window/size/mode=1
 window/stretch/mode="canvas_items"
+window/stretch/aspect="keep_height"
+window/defaults/default_3d_scale=0.001
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godotfirebaseandroid/plugin.cfg")
 
 [input]
 
@@ -74,3 +85,7 @@ game_play={
 [input_devices]
 
 pointing/emulate_touch_from_mouse=true
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true
