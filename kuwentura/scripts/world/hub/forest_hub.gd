@@ -315,9 +315,11 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 		
 		if spawn_marker:
 			spawn_pos = spawn_marker.global_position
+			print("[ForestHub] Using spawn marker for ", "Detective" if is_detective else "Sidekick", " at: ", spawn_pos)
 		else:
-			spawn_pos = Vector2(400 if is_detective else 200, ground_y)
-			push_warning("[ForestHub] Spawn marker not found for " + ("Detective" if is_detective else "Sidekick") + ", using default position")
+			# FIXED: Detective on LEFT (200), Sidekick on RIGHT (600) to match spawn marker layout
+			spawn_pos = Vector2(200 if is_detective else 600, ground_y)
+			push_warning("[ForestHub] Spawn marker not found for " + ("Detective" if is_detective else "Sidekick") + ", using default position: " + str(spawn_pos))
 	
 	player.global_position = spawn_pos
 	
@@ -483,9 +485,11 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 		
 		if spawn_marker:
 			spawn_pos = spawn_marker.global_position
+			print("[ForestHub] RPC: Using spawn marker for ", "Detective" if is_detective_role else "Sidekick", " at: ", spawn_pos)
 		else:
-			spawn_pos = Vector2(400 if is_detective_role else 200, ground_y)
-			push_warning("[ForestHub] RPC: Spawn marker not found, using default position")
+			# FIXED: Detective on LEFT (200), Sidekick on RIGHT (600) to match spawn marker layout
+			spawn_pos = Vector2(200 if is_detective_role else 600, ground_y)
+			push_warning("[ForestHub] RPC: Spawn marker not found for " + ("Detective" if is_detective_role else "Sidekick") + ", using default position: " + str(spawn_pos))
 	
 	player.global_position = spawn_pos
 	

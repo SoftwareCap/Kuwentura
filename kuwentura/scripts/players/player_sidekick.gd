@@ -18,6 +18,12 @@ var _last_sent_position: Vector2 = Vector2.ZERO
 var _last_sent_animation: String = ""
 var _remote_animation: String = ""
 
+# Landing fix - track previous floor state
+var _was_on_floor: bool = true
+
+# Horizontal drift fix - store intended X position when not moving
+var _intended_x_position: float = 0.0
+
 
 func _ready():
 	_is_in_lobby = get_parent() is Control
@@ -42,6 +48,9 @@ func _ready():
 		
 		# Apply scale AFTER physics settings
 		scale = avatar_scale
+		
+		# Store initial X position for drift prevention
+		_intended_x_position = global_position.x
 		
 		# Force immediate floor check
 		force_update_transform()
@@ -163,18 +172,33 @@ func _force_grounded() -> void:
 
 func _process_local_movement(delta):
 	"""Process local player movement physics."""
-	# Local movement input
+	# Store intended X position when not moving horizontally
 	var direction := Input.get_axis("game_left", "game_right")
+	if direction == 0 and is_on_floor():
+		_intended_x_position = global_position.x
+	
+	# Local movement input
 	velocity.x = direction * speed
 
 	# Gravity
 	if not is_on_floor():
 		velocity += get_gravity() * delta
-	elif velocity.y > 0:
-		velocity.y = 0
+		_was_on_floor = false
+	else:
+		# Just landed - reset velocity and ensure proper floor contact
+		if not _was_on_floor:
+			velocity.y = 0
+			_was_on_floor = true
+		elif velocity.y > 0:
+			velocity.y = 0
 
 	# Jump
 	if Input.is_action_just_pressed("game_jump"):
 		_try_jump()
 
 	move_and_slide()
+	
+	# CRITICAL FIX: Prevent horizontal drift on landing
+	# If we're on floor and not trying to move horizontally, lock X position
+	if is_on_floor() and direction == 0:
+		global_position.x = _intended_x_position
