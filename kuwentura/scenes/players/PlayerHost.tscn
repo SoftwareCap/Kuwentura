@@ -132,7 +132,7 @@ floor_snap_length = 8.0
 safe_margin = 0.05
 script = ExtResource("1_f4ao3")
 speed = 200
-jump_force = -300
+jump_force = -500
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_kllei")
