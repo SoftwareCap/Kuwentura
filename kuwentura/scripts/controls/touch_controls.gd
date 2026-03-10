@@ -4,6 +4,9 @@ extends CanvasLayer
 ## The TouchScreenButton nodes automatically trigger input actions when pressed
 
 signal pause_pressed
+signal map_pressed
+signal ledger_pressed
+signal briefcase_pressed
 
 enum VisibilityMode {
 	AUTO,       ## Show on mobile/tablet, hide on desktop
@@ -19,6 +22,9 @@ enum VisibilityMode {
 @onready var right_button: TouchScreenButton = $Right
 @onready var jump_button: TouchScreenButton = $Jump
 @onready var pause_button: TouchScreenButton = $Pause
+@onready var map_button: TouchScreenButton = $Map
+@onready var ledger_button: TouchScreenButton = $Ledger
+@onready var briefcase_button: TouchScreenButton = $Briefcase
 
 
 func _notification(what: int):
@@ -54,6 +60,12 @@ func _ready():
 		_original_scales[jump_button] = jump_button.scale
 	if pause_button:
 		_original_scales[pause_button] = pause_button.scale
+	if map_button:
+		_original_scales[map_button] = map_button.scale
+	if ledger_button:
+		_original_scales[ledger_button] = ledger_button.scale
+	if briefcase_button:
+		_original_scales[briefcase_button] = briefcase_button.scale
 	
 	_connect_button_signals()
 	_apply_visibility_mode()
@@ -73,6 +85,15 @@ func _connect_button_signals():
 	if pause_button:
 		pause_button.pressed.connect(_on_pause_pressed)
 		pause_button.released.connect(_on_pause_released)
+	if map_button:
+		map_button.pressed.connect(_on_map_pressed)
+		map_button.released.connect(_on_map_released)
+	if ledger_button:
+		ledger_button.pressed.connect(_on_ledger_pressed)
+		ledger_button.released.connect(_on_ledger_released)
+	if briefcase_button:
+		briefcase_button.pressed.connect(_on_briefcase_pressed)
+		briefcase_button.released.connect(_on_briefcase_released)
 
 
 func _apply_visibility_mode():
@@ -186,3 +207,33 @@ func _on_pause_pressed() -> void:
 
 func _on_pause_released() -> void:
 	_animate_button_press(pause_button, false)
+
+
+func _on_map_pressed() -> void:
+	_animate_button_press(map_button, true)
+	print("[TouchControls] Map button pressed, emitting signal")
+	map_pressed.emit()
+
+
+func _on_map_released() -> void:
+	_animate_button_press(map_button, false)
+
+
+func _on_ledger_pressed() -> void:
+	_animate_button_press(ledger_button, true)
+	print("[TouchControls] Ledger button pressed, emitting signal")
+	ledger_pressed.emit()
+
+
+func _on_ledger_released() -> void:
+	_animate_button_press(ledger_button, false)
+
+
+func _on_briefcase_pressed() -> void:
+	_animate_button_press(briefcase_button, true)
+	print("[TouchControls] Briefcase button pressed, emitting signal")
+	briefcase_pressed.emit()
+
+
+func _on_briefcase_released() -> void:
+	_animate_button_press(briefcase_button, false)

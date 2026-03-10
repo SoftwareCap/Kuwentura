@@ -1,12 +1,20 @@
 extends Node
 
-const PROJECT_ID = "kwentura-89df4"
+const PROJECT_ID = "kuwentura"
 const BASE_URL = (
 	"https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents"
 )
 
 
+func _is_configured() -> bool:
+	"""Check if Firebase is properly configured."""
+	return FirebaseAuth.API_KEY != "YOUR_API_KEY_HERE" and not FirebaseAuth.API_KEY.is_empty()
+
+
 func save_game_state(user_id: String, data: Dictionary):
+	if not _is_configured():
+		print("[FirebaseFirestore] Skipping save - Firebase not configured")
+		return
 	if user_id.is_empty():
 		print("Cannot save: No user ID")
 		return
@@ -98,6 +106,10 @@ func _on_save_response(_result, response_code, _headers, body, http):
 
 
 func load_game_state():
+	if not _is_configured():
+		print("[FirebaseFirestore] Skipping load - Firebase not configured")
+		return
+	
 	var user_id = FirebaseAuth.current_user_id
 	var id_token = FirebaseAuth.id_token
 	if user_id.is_empty():

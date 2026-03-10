@@ -32,6 +32,7 @@ DialogueLibraries="*res://scripts/systems/dialogue_library.gd"
 
 window/size/mode=1
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [input]
 
@@ -74,3 +75,7 @@ game_play={
 [input_devices]
 
 pointing/emulate_touch_from_mouse=true
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true

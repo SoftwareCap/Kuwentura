@@ -137,12 +137,16 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_coail"]
-size = Vector2(32, 32)
+size = Vector2(100, 100)
 
 [node name="PlayerSidekick" type="CharacterBody2D"]
 collision_layer = 2
-floor_constant_speed = true
+floor_max_angle = 1.0472
+floor_snap_length = 8.0
+safe_margin = 0.05
 script = ExtResource("1_script")
+speed = 200
+jump_force = -500
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_wm3to")
@@ -155,5 +159,5 @@ shape = SubResource("RectangleShape2D_coail")
 limit_left = 0
 limit_top = 0
 limit_right = 8000
-limit_bottom = 1080
+limit_bottom = 648
 position_smoothing_enabled = true
