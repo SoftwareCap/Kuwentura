@@ -1,11 +1,14 @@
 extends Node
 
-const API_KEY: String = "AIzaSyDvqAXKBbK8F4e6c_jg6_vBQ16bvqevhT0"
-const PROJECT_ID: String = "kwentura-89df4"
+const API_KEY: String = "AIzaSyBbfAbGualst8-7qpa7CwefDk-j2Xe1aHU"
+const PROJECT_ID: String = "kuwentura"
 const AUTH_DOMAIN: String = "https://identitytoolkit.googleapis.com/v1"
 const FIRESTORE_URL: String = (
 	"https://firestore.googleapis.com/v1/projects/%s/databases/(default)/documents" % PROJECT_ID
 )
+
+# Set to true to disable Firebase (game will work without internet)
+const OFFLINE_MODE: bool = false
 
 var auth_token: String = ""
 var user_id: String = ""
@@ -20,6 +23,16 @@ signal load_failed(error: String)
 
 
 func _ready():
+	# Check if API key is configured
+	if API_KEY == "YOUR_API_KEY_HERE" or API_KEY.is_empty():
+		print("[FirebaseManager] API Key not configured - cloud save disabled")
+		print("[FirebaseManager] Game will work normally without cloud save")
+		return
+	
+	if OFFLINE_MODE:
+		print("[FirebaseManager] Offline mode enabled")
+		return
+	
 	# Connect to auth signals
 	FirebaseAuth.auth_success.connect(_on_auth_success)
 	FirebaseAuth.auth_failed.connect(_on_auth_failed)
@@ -41,7 +54,9 @@ func _on_auth_success(new_user_id: String, token: String):
 
 func _on_auth_failed(error: String):
 	is_authenticated = false
-	print("Firebase Manager: Auth failed - ", error)
+	# Only print warning if Firebase is actually configured
+	if API_KEY != "YOUR_API_KEY_HERE" and not API_KEY.is_empty():
+		push_warning("Firebase Manager: Auth failed - " + error)
 	emit_signal("auth_failed", error)
 
 

@@ -2,7 +2,6 @@ extends Control
 
 @onready var host_button: TextureButton = $HostButton
 @onready var join_button: TextureButton = $JoinButton
-@onready var exit_button: TextureButton = $ExitButton
 @onready var status_label = $StatusLabel
 @onready var settings_control: CanvasLayer = $SettingsControl
 @onready var settings_panel: Panel = $SettingsPanel
@@ -23,8 +22,8 @@ extends Control
 # Sidekick Join Popup nodes
 @onready var sidekick_popup: Panel = $SidekickPopup
 @onready var code_input: LineEdit = $SidekickPopup/VBoxContainer/LineEdit
-@onready var join_code_ok_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/Button
-@onready var join_code_cancel_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/Button2
+@onready var join_code_ok_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/JoinButton
+@onready var join_code_cancel_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/CancelButton
 
 var is_joining: bool = false
 
@@ -42,12 +41,10 @@ func _ready():
 	# Setup visual feedback for main menu buttons
 	_setup_button_visuals(host_button)
 	_setup_button_visuals(join_button)
-	_setup_button_visuals(exit_button)
 	
 	# Connect button signals (use button_down/button_up for visuals, pressed for action)
 	_connect_texture_button(host_button, _on_host_pressed)
 	_connect_texture_button(join_button, _on_join_pressed)
-	_connect_texture_button(exit_button, _on_exit_pressed)
 
 	# Connect settings signals
 	if settings_control and not settings_control.settings_pressed.is_connected(_on_settings_pressed):
@@ -268,10 +265,34 @@ func _on_join_code_cancel_pressed() -> void:
 	sidekick_popup.visible = false
 
 
+func _on_direct_ip_pressed() -> void:
+	print("[MainMenu] Direct IP connection selected")
+	# Hide the code popup and show IP input
+	if code_input:
+		code_input.placeholder_text = "Enter IP (e.g., 192.168.1.5)"
+		code_input.text = ""
+		code_input.grab_focus()
+	_show_status("Enter the host's IP address directly\nAsk host to check their IP in the lobby")
+
+
 func _on_code_text_changed(new_text: String) -> void:
 	if code_input:
 		code_input.text = new_text.to_upper()
 		code_input.caret_column = code_input.text.length()
+
+
+func _process_direct_ip(host_ip: String) -> void:
+	print("[MainMenu] Connecting directly to IP: ", host_ip)
+	_show_status("Connecting to " + host_ip + "...")
+	
+	var result = await NetworkManager.join_game_with_ip(host_ip, "DIRECT")
+	
+	if not result.success:
+		_show_status("Failed to connect to " + host_ip + ":\n" + result.get("error", "Unknown error"))
+		return
+	
+	_show_status("Connected! Waiting for game to start...")
+	get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 
 
 func _process_join_code(code: String) -> void:
@@ -291,7 +312,7 @@ func _process_join_code(code: String) -> void:
 		get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 		return
 	
-	_show_status("Searching for game with code: " + code + "...")
+	_show_status("Step 1/2: Searching for host...\nCode: " + code + "\n\nMake sure:\n• Same Wi-Fi network\n• Host is still in lobby")
 	print("[MainMenu] Starting discovery for code: ", code)
 	
 	var result = await NetworkManager.join_game_with_code(code)
@@ -300,11 +321,11 @@ func _process_join_code(code: String) -> void:
 	
 	if not result.success:
 		print("[MainMenu] Join failed: ", result.get("error", "Unknown"))
-		_show_status("Failed to join: " + result.get("error", "Unknown error"))
+		_show_status("Failed to join:\n" + result.get("error", "Unknown error") + "\n\nTroubleshooting:\n1. Check Windows Firewall\n2. Disable VPN\n3. Try 'LOCAL' for same-PC test")
 		return
 	
 	print("[MainMenu] Connected to host!")
-	_show_status("Connected! Waiting for game to start...")
+	_show_status("Step 2/2: Connected!\nWaiting for Detective to start...")
 	
 	get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 

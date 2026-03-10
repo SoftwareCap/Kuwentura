@@ -20,7 +20,8 @@ enum Role { NONE, DETECTIVE, SIDEKICK }
 
 const DEFAULT_PORT: int = 17777
 const MAX_PLAYERS: int = 2
-const BROADCAST_PORT: int = 17778  # Host broadcasts here, Client listens here
+const BROADCAST_PORT: int = 17778  # Host broadcasts here
+const LISTEN_PORT: int = 17779    # Client listens here (different to avoid conflicts)
 const DISCOVERY_BROADCAST_INTERVAL: float = 0.5
 const DISCOVERY_TIMEOUT: float = 5.0
 
@@ -140,7 +141,7 @@ func _process(delta: float):
 	if _is_discovering and _listen_socket:
 		_poll_discovery()
 	
-	if _is_host:
+	if _is_host and _state == ConnectionState.HOSTING:
 		_discovery_broadcast_timer += delta
 		if _discovery_broadcast_timer >= DISCOVERY_BROADCAST_INTERVAL:
 			_discovery_broadcast_timer = 0.0
@@ -235,8 +236,8 @@ func _broadcast_host_presence():
 	
 	var packet = JSON.stringify(broadcast_data).to_utf8_buffer()
 	
-	# Send to broadcast address on BROADCAST_PORT
-	_broadcast_socket.set_dest_address("255.255.255.255", BROADCAST_PORT)
+	# Send to broadcast address on LISTEN_PORT (where clients are listening)
+	_broadcast_socket.set_dest_address("255.255.255.255", LISTEN_PORT)
 	var err = _broadcast_socket.put_packet(packet)
 	
 	if err != OK:
@@ -257,8 +258,8 @@ func start_discovery_for_code(target_code: String) -> bool:
 	_listen_socket = PacketPeerUDP.new()
 	_listen_socket.set_broadcast_enabled(true)
 	
-	# Bind to LISTEN_PORT (different from broadcast port!)
-	var error = _listen_socket.bind(BROADCAST_PORT)
+	# Bind to LISTEN_PORT (different from broadcast port to avoid conflicts)
+	var error = _listen_socket.bind(LISTEN_PORT)
 	if error != OK:
 		push_warning("[Network] Failed to bind listen socket: " + str(error))
 		_listen_socket = null
@@ -284,15 +285,19 @@ func join_game_with_code(invite_code: String) -> Dictionary:
 	var target_code = invite_code.to_upper()
 	
 	# Start discovery
+	print("[Network] ==========================================")
 	print("[Network] Searching for game with code: ", target_code)
+	print("[Network] Make sure host is on the same Wi-Fi network")
+	print("[Network] ==========================================")
+	
 	var discovery_active = start_discovery_for_code(target_code)
 	
 	if not discovery_active:
-		return {"error": "Failed to start discovery", "success": false}
+		return {"error": "Failed to start discovery - port may be in use. Try restarting the app.", "success": false}
 	
 	# Wait for discovery with timeout
 	var attempts = 0
-	var max_attempts = 10  # 5 seconds total
+	var max_attempts = 20  # 10 seconds total (increased for reliability)
 	var host_info = {}
 	
 	while attempts < max_attempts:
@@ -309,8 +314,9 @@ func join_game_with_code(invite_code: String) -> Dictionary:
 	_stop_discovery()
 	
 	if host_info.is_empty():
+		print("[Network] Discovery failed - no host found")
 		return {
-			"error": "Could not find game with code: " + target_code + "\nMake sure:\n• Both on same Wi-Fi\n• Host is still hosting", 
+			"error": "Could not find game with code: " + target_code + "\n\nTroubleshooting:\n• Both devices on same Wi-Fi\n• Disable Windows Firewall\n• Try 'LOCAL' code for same-PC test", 
 			"success": false
 		}
 	
@@ -750,11 +756,32 @@ func _generate_invite_code() -> String:
 
 func _get_host_ip() -> String:
 	var ips = IP.get_local_addresses()
+	print("[Network] Available IPs: ", ips)
+	
+	# Prefer common local network ranges
+	for ip in ips:
+		# Skip loopback
+		if ip.begins_with("127."):
+			continue
+		# Skip invalid
+		if not "." in ip or ip.begins_with("0."):
+			continue
+		
+		# Prefer Wi-Fi / Ethernet local addresses (most common)
+		# 192.168.x.x is most common for home networks
+		if ip.begins_with("192.168."):
+			print("[Network] Selected IP (192.168.x.x): ", ip)
+			return ip
+	
+	# Fallback to any valid IPv4
 	for ip in ips:
 		if ip.begins_with("127."):
 			continue
 		if "." in ip and not ip.begins_with("0."):
+			print("[Network] Selected IP (fallback): ", ip)
 			return ip
+	
+	print("[Network] No valid IP found, using localhost")
 	return "localhost"
 
 
