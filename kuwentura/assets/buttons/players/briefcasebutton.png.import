@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bhxj8dd714vd8"
-path="res://.godot/imported/closebtn.png-1c08080953ff870a600e41641b6b7990.ctex"
+uid="uid://lrijshq5upgf"
+path="res://.godot/imported/briefcasebutton.png-7358d13a1a6941239b1e36849d004006.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/buttons/closebtn.png"
-dest_files=["res://.godot/imported/closebtn.png-1c08080953ff870a600e41641b6b7990.ctex"]
+source_file="res://assets/buttons/players/briefcasebutton.png"
+dest_files=["res://.godot/imported/briefcasebutton.png-7358d13a1a6941239b1e36849d004006.ctex"]
 
 [params]
 
