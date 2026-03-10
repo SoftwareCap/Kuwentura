@@ -29,12 +29,22 @@ func _ready():
 		z_index = 10  # Default to local player visuals if no multiplayer
 	
 	if not _is_in_lobby:
-		scale = avatar_scale
-		floor_snap_length = 32.0
-		floor_max_angle = deg_to_rad(60.0)
-		floor_block_on_wall = true
+		# Apply physics settings BEFORE scaling to prevent sliding
+		# These settings prevent sliding on slopes at small scales
+		floor_constant_speed = false  # CRITICAL: Must be false to prevent sliding
 		floor_stop_on_slope = true
+		floor_block_on_wall = true
+		floor_max_angle = deg_to_rad(60.0)  # Slightly increased for smoother movement
+		floor_snap_length = 0.0  # Disabled to prevent jump position glitch - avatars return to exact original position
 		motion_mode = MOTION_MODE_GROUNDED
+		safe_margin = 0.05  # Reduced for more precise collision at small scale
+		up_direction = Vector2.UP
+		
+		# Apply scale AFTER physics settings
+		scale = avatar_scale
+		
+		# Force immediate floor check
+		force_update_transform()
 
 
 func _process(_delta):
@@ -69,9 +79,18 @@ func _update_from_network_state():
 	if state.is_empty():
 		return
 	
-	# Update position
+	# Update position with smooth interpolation
 	var target_pos = state.get("position", global_position)
-	global_position = global_position.lerp(target_pos, 0.3)
+	var distance = global_position.distance_to(target_pos)
+	
+	# Use different lerp factors based on distance for smoother movement
+	var lerp_factor = 0.15  # Smoother default
+	if distance > 50.0:
+		lerp_factor = 0.5  # Snap faster if far away (teleport)
+	elif distance > 10.0:
+		lerp_factor = 0.3  # Medium speed for medium distances
+	
+	global_position = global_position.lerp(target_pos, lerp_factor)
 	
 	# Update facing
 	var facing = state.get("facing", "right")
@@ -90,29 +109,17 @@ func _update_from_network_state():
 func _physics_process(delta):
 	if _is_in_lobby:
 		return
-
-	# Local movement input
-	var direction := Input.get_axis("game_left", "game_right")
-	velocity.x = direction * speed
-
-	# Gravity
-	if not is_on_floor():
-		velocity += get_gravity() * delta
-	elif velocity.y > 0:
-		velocity.y = 0
-
-	# Jump
-	if Input.is_action_just_pressed("game_jump"):
-		_try_jump()
-
-	move_and_slide()
 	
-	# Only do local animation and sync if we have authority
 	# Skip if no multiplayer peer available
 	if not multiplayer.has_multiplayer_peer():
+		# Single player mode - just do local physics
+		_process_local_movement(delta)
 		return
 	
 	if is_multiplayer_authority():
+		# Local player - process movement and sync to network
+		_process_local_movement(delta)
+		
 		# Local animation
 		var current_anim = "idle"
 		if velocity.x == 0:
@@ -137,3 +144,37 @@ func _physics_process(delta):
 				"left" if sprite.flip_h else "right",
 				current_anim
 			)
+	else:
+		# Remote player - don't run physics, just interpolate position
+		# Position is updated in _process via _update_from_network_state
+		# Keep velocity zero to prevent sliding
+		velocity = Vector2.ZERO
+
+
+## Force the player to be grounded - called after scene transition
+func _force_grounded() -> void:
+	velocity = Vector2.ZERO
+	# Perform a small downward move to snap to floor
+	if not is_on_floor():
+		velocity.y = 100  # Small downward velocity to trigger floor detection
+		move_and_slide()
+	velocity = Vector2.ZERO
+
+
+func _process_local_movement(delta):
+	"""Process local player movement physics."""
+	# Local movement input
+	var direction := Input.get_axis("game_left", "game_right")
+	velocity.x = direction * speed
+
+	# Gravity
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+	elif velocity.y > 0:
+		velocity.y = 0
+
+	# Jump
+	if Input.is_action_just_pressed("game_jump"):
+		_try_jump()
+
+	move_and_slide()

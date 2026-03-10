@@ -7,8 +7,8 @@ extends Node2D
 @onready var player_sidekick_scene: PackedScene = preload("res://scenes/players/PlayerSidekick.tscn")
 
 # Scale configuration for Forest Hub
-@export var detective_scale: Vector2 = Vector2(0.3, 0.3)
-@export var sidekick_scale: Vector2 = Vector2(0.3, 0.3)
+@export var detective_scale: Vector2 = Vector2(0.2, 0.2)
+@export var sidekick_scale: Vector2 = Vector2(0.2, 0.2)
 @export var ground_y: float = 750.0
 
 @onready var spawn_points: Node2D = $SpawnPoints
@@ -16,39 +16,35 @@ extends Node2D
 @onready var pause_canvas_layer: CanvasLayer = $PauseCanvasLayer
 @onready var in_game_pause_panel: Panel = $PauseCanvasLayer/InGamePausePanel
 @onready var option_sub_panel: Panel = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel
-@onready var volume_slider: HSlider = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer/VolumeSlider
-@onready var volume_value_label: Label = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer/VolumeValue
+@onready var volume_slider: HSlider = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeSlider
+@onready var volume_value_label: Label = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeValue
 
 # Track spawned players
 var _spawned_players: Dictionary = {}
 
-# Role tracking
-var _is_sidekick: bool = false
-
 # Panel management
-var _current_open_panel: String = ""
+var _current_open_panel: String = ""  # "map", "ledger", "briefcase", or ""
+var _is_animating: bool = false
+
+# Animation constants
+const PANEL_ANIMATION_DURATION: float = 0.4
+const LEDGER_OPEN_SCALE: Vector2 = Vector2(1.0, 1.0)
+const LEDGER_CLOSED_SCALE: Vector2 = Vector2(0.1, 1.0)
+const BRIEFCASE_OPEN_SCALE: Vector2 = Vector2(1.0, 1.0)
+const BRIEFCASE_CLOSED_SCALE: Vector2 = Vector2(1.0, 0.1)
 
 # Sidekick UI elements
 @onready var sidekick_layer: CanvasLayer = $SidekickLayer
-@onready var ledger_panel: Panel = $SidekickLayer/LedgerPanel
-@onready var briefcase_panel: Panel = $SidekickLayer/BriefcasePanel
+@onready var ledger_panel: Panel = $SidekickLayer/Ledger
+@onready var briefcase_panel: Panel = $SidekickLayer/Briefcase
 
-# Map panel
-@onready var map_panel: Panel = $MapPanel
+# Map panel (accessible by both)
+@onready var map_layer: CanvasLayer = $MapLayer
+@onready var map_panel: Panel = $MapLayer/Map
 
-# Room code display
-@onready var room_code_label: Label = $RoomCode
+# Portal references
+@onready var portals: Node2D = $"Zone Portals"
 
-# Settings and User Profile UI
-@onready var user_profile_panel: Panel = $SettingsPanel/UserProfile
-@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
-@onready var user_profile_back_button: TouchScreenButton = $SettingsPanel/UserProfile/BackToPrevious
-@onready var avatar_texture: TextureRect = $SettingsPanel/UserProfile/UserContent/AvatarTexture
-@onready var display_name_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/DisplayName
-@onready var provider_label: Label = $SettingsPanel/UserProfile/UserContent/UserInfo/ProviderLabel
-@onready var sign_in_button: Button = $SettingsPanel/UserProfile/AuthButtons/SignInButton
-@onready var guest_button: Button = $SettingsPanel/UserProfile/AuthButtons/GuestButton
-@onready var link_google_button: Button = $SettingsPanel/UserProfile/AuthButtons/LinkGoogleButton
 
 func _ready():
 	# Verify required nodes exist
@@ -117,6 +113,9 @@ func _ready():
 	
 	# Spawn local player
 	_spawn_local_player()
+	
+	# Setup UI controls (Map, Ledger, Briefcase buttons)
+	_setup_ui_controls()
 	
 	# Spawn already connected peers (both server and client)
 	for peer_id in multiplayer.get_peers():
@@ -263,13 +262,11 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 	
 	if is_detective:
 		player = player_host_scene.instantiate()
-		spawn_marker = spawn_points.get_node_or_null("DetectiveSpawn")
 		player.role = "Detective"
 		player.avatar_scale = detective_scale
 		print("[ForestHub] Instantiated Detective scene")
 	else:
 		player = player_sidekick_scene.instantiate()
-		spawn_marker = spawn_points.get_node_or_null("SidekickSpawn")
 		player.role = "Sidekick"
 		player.avatar_scale = sidekick_scale
 		print("[ForestHub] Instantiated Sidekick scene")
@@ -279,17 +276,27 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 	# Get spawn position - use saved position if returning from a zone
 	var saved_pos = GameState.get_spawn_position(peer_id)
 	if saved_pos != Vector2.ZERO:
-		# Use saved position from before entering zone
+		# Use saved return position from the zone portal (outside the zone entrance)
 		spawn_pos = saved_pos
 		GameState.clear_spawn_position(peer_id)  # Clear after using
-		print("[ForestHub] Using saved spawn position for ", "Detective" if is_detective else "Sidekick", ": ", spawn_pos)
-	elif spawn_marker:
-		spawn_pos = spawn_marker.global_position
+		print("[ForestHub] Using saved return position for ", "Detective" if is_detective else "Sidekick", ": ", spawn_pos)
 	else:
-		spawn_pos = Vector2(400 if is_detective else 200, ground_y)
-		push_warning("[ForestHub] Spawn marker not found for " + ("Detective" if is_detective else "Sidekick") + ", using default position")
+		# First time spawn - use initial spawn markers
+		if is_detective:
+			spawn_marker = spawn_points.get_node_or_null("DetectiveSpawn")
+		else:
+			spawn_marker = spawn_points.get_node_or_null("SidekickSpawn")
+		
+		if spawn_marker:
+			spawn_pos = spawn_marker.global_position
+		else:
+			spawn_pos = Vector2(400 if is_detective else 200, ground_y)
+			push_warning("[ForestHub] Spawn marker not found for " + ("Detective" if is_detective else "Sidekick") + ", using default position")
 	
 	player.global_position = spawn_pos
+	
+	# Stabilize physics immediately to prevent sliding
+	_stabilize_player_physics(player)
 	
 	# Set multiplayer authority
 	player.set_multiplayer_authority(peer_id)
@@ -298,8 +305,9 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 	_spawned_players[peer_id] = player
 	add_child(player, true)
 	
-	# Force visibility
+	# Force visibility and re-stabilize after adding to tree
 	player.visible = true
+	_call_stabilize_after_frame(player)
 	
 	print("[ForestHub] === SPAWNED ", player.role, " (ID: ", peer_id, ") at ", spawn_pos, " visible=", player.visible, " in_tree=", player.is_inside_tree())
 
@@ -419,16 +427,15 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 	
 	var player: CharacterBody2D
 	var spawn_marker: Marker2D
+	var spawn_pos: Vector2
 	
 	if is_detective_role:
 		player = player_host_scene.instantiate()
-		spawn_marker = spawn_points.get_node_or_null("DetectiveSpawn")
 		player.role = "Detective"
 		player.avatar_scale = detective_scale
 		print("[ForestHub] RPC: Instantiated Detective")
 	else:
 		player = player_sidekick_scene.instantiate()
-		spawn_marker = spawn_points.get_node_or_null("SidekickSpawn")
 		player.role = "Sidekick"
 		player.avatar_scale = sidekick_scale
 		print("[ForestHub] RPC: Instantiated Sidekick")
@@ -438,20 +445,72 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 	# Check for saved position (returning from zone)
 	var saved_pos = GameState.get_spawn_position(peer_id)
 	if saved_pos != Vector2.ZERO:
-		player.global_position = saved_pos
-		print("[ForestHub] RPC: Using saved position for ", "Detective" if is_detective_role else "Sidekick", ": ", saved_pos)
-	elif spawn_marker:
-		player.global_position = spawn_marker.global_position
+		# Use saved return position from the zone portal (outside the zone entrance)
+		spawn_pos = saved_pos
+		print("[ForestHub] RPC: Using saved return position for ", "Detective" if is_detective_role else "Sidekick", ": ", spawn_pos)
 	else:
-		player.global_position = Vector2(400 if is_detective_role else 200, ground_y)
-		push_warning("[ForestHub] RPC: Spawn marker not found, using default position")
+		# Use initial spawn markers
+		if is_detective_role:
+			spawn_marker = spawn_points.get_node_or_null("DetectiveSpawn")
+		else:
+			spawn_marker = spawn_points.get_node_or_null("SidekickSpawn")
+		
+		if spawn_marker:
+			spawn_pos = spawn_marker.global_position
+		else:
+			spawn_pos = Vector2(400 if is_detective_role else 200, ground_y)
+			push_warning("[ForestHub] RPC: Spawn marker not found, using default position")
+	
+	player.global_position = spawn_pos
+	
+	# Stabilize physics to prevent sliding
+	_stabilize_player_physics(player)
 	
 	player.set_multiplayer_authority(peer_id)
 	player.visible = true
 	_spawned_players[peer_id] = player
 	add_child(player, true)
 	
+	# Stabilize after adding to tree
+	_call_stabilize_after_frame(player)
+	
 	print("[ForestHub] === RPC SPAWNED ", player.role, " (ID: ", peer_id, ") at ", player.global_position, " visible=", player.visible)
+
+
+## Stabilize player physics to prevent sliding after spawn
+func _stabilize_player_physics(player: CharacterBody2D) -> void:
+	"""Set physics properties to ensure player stays grounded."""
+	# Reset velocity to prevent any inherited motion
+	player.velocity = Vector2.ZERO
+	
+	# Ensure player is grounded by adjusting position slightly if needed
+	# This is done before adding to tree, so we set a flag for post-add stabilization
+	player.set_meta("_needs_grounding", true)
+
+
+## Call stabilization after player is added to scene tree
+func _call_stabilize_after_frame(player: CharacterBody2D) -> void:
+	"""Stabilize player after they've been added to the scene tree."""
+	# Wait for physics to settle - multiple frames for safety
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	
+	if not is_instance_valid(player):
+		return
+	
+	# Reset velocity to zero
+	player.velocity = Vector2.ZERO
+	
+	# Force the player onto the floor
+	if player.has_method("_force_grounded"):
+		player._force_grounded()
+	
+	# Additional safety: wait another frame and verify grounded
+	await get_tree().physics_frame
+	if is_instance_valid(player):
+		player.velocity = Vector2.ZERO
+		if player.has_method("_force_grounded"):
+			player._force_grounded()
 
 
 func _rpc_despawn_player(peer_id: int) -> void:
@@ -476,6 +535,11 @@ func _exit_tree():
 		NetworkManager.despawn_player_requested.disconnect(_on_despawn_player_requested)
 
 
+func _process(_delta):
+	# Button positions are now controlled via Inspector - no dynamic updates needed
+	pass
+
+
 func _input(event):
 	# Debug: Press F1 to list all players
 	if event is InputEventKey and event.pressed and event.keycode == KEY_F1:
@@ -487,3 +551,213 @@ func _input(event):
 		for child in get_children():
 			if child is CharacterBody2D:
 				print("  Node: ", child.name, " role=", child.role, " pos=", child.global_position)
+
+
+# ============================================================================
+# PANEL MANAGEMENT (Map, Ledger, Briefcase)
+# ============================================================================
+func _setup_ui_controls() -> void:
+	"""Setup UI controls visibility based on role and connect signals."""
+	var my_role := NetworkManager.get_my_role()
+	var is_sidekick := (my_role != "detective")
+	
+	print("[ForestHub] Setting up UI controls for role: ", my_role)
+	
+	# Connect to TouchControls signals
+	if touch_controls:
+		if not touch_controls.map_pressed.is_connected(_on_map_button_pressed):
+			touch_controls.map_pressed.connect(_on_map_button_pressed)
+		if not touch_controls.ledger_pressed.is_connected(_on_ledger_button_pressed):
+			touch_controls.ledger_pressed.connect(_on_ledger_button_pressed)
+		if not touch_controls.briefcase_pressed.is_connected(_on_briefcase_button_pressed):
+			touch_controls.briefcase_pressed.connect(_on_briefcase_button_pressed)
+		
+		# Set visibility based on role
+		if touch_controls.map_button:
+			touch_controls.map_button.visible = true  # Map is visible to both
+		if touch_controls.ledger_button:
+			touch_controls.ledger_button.visible = is_sidekick  # Ledger only for sidekick
+		if touch_controls.briefcase_button:
+			touch_controls.briefcase_button.visible = is_sidekick  # Briefcase only for sidekick
+	
+	# Initialize panels as hidden
+	_close_all_panels(false)
+
+
+func _on_map_button_pressed() -> void:
+	"""Toggle map panel."""
+	if _is_animating:
+		return
+	
+	if _current_open_panel == "map":
+		_close_all_panels()
+	else:
+		_close_all_panels(false)
+		_open_panel("map")
+
+
+func _on_ledger_button_pressed() -> void:
+	"""Toggle ledger panel with book opening animation."""
+	if _is_animating:
+		return
+	
+	if _current_open_panel == "ledger":
+		_close_all_panels()
+	else:
+		_close_all_panels(false)
+		_open_panel("ledger")
+
+
+func _on_briefcase_button_pressed() -> void:
+	"""Toggle briefcase panel with opening animation."""
+	if _is_animating:
+		return
+	
+	if _current_open_panel == "briefcase":
+		_close_all_panels()
+	else:
+		_close_all_panels(false)
+		_open_panel("briefcase")
+
+
+func _open_panel(panel_name: String) -> void:
+	"""Open a specific panel with animation."""
+	match panel_name:
+		"map":
+			_open_map()
+		"ledger":
+			_open_ledger()
+		"briefcase":
+			_open_briefcase()
+	
+	_current_open_panel = panel_name
+	print("[ForestHub] Opened panel: ", panel_name)
+
+
+func _close_all_panels(animate: bool = true) -> void:
+	"""Close all panels."""
+	if _current_open_panel == "":
+		return
+	
+	match _current_open_panel:
+		"map":
+			_close_map(animate)
+		"ledger":
+			_close_ledger(animate)
+		"briefcase":
+			_close_briefcase(animate)
+	
+	_current_open_panel = ""
+
+
+# ============================================================================
+# MAP PANEL
+# ============================================================================
+func _open_map() -> void:
+	if not map_panel:
+		return
+	
+	map_panel.visible = true
+	map_panel.modulate = Color(1, 1, 1, 0)
+	map_panel.scale = Vector2(0.8, 0.8)
+	
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(map_panel, "modulate", Color(1, 1, 1, 1), PANEL_ANIMATION_DURATION)
+	tween.parallel().tween_property(map_panel, "scale", Vector2(1, 1), PANEL_ANIMATION_DURATION)
+
+
+func _close_map(animate: bool = true) -> void:
+	if not map_panel or not map_panel.visible:
+		return
+	
+	if animate:
+		var tween := create_tween()
+		tween.set_trans(Tween.TRANS_BACK)
+		tween.set_ease(Tween.EASE_IN)
+		tween.tween_property(map_panel, "modulate", Color(1, 1, 1, 0), PANEL_ANIMATION_DURATION * 0.5)
+		tween.parallel().tween_property(map_panel, "scale", Vector2(0.8, 0.8), PANEL_ANIMATION_DURATION * 0.5)
+		tween.tween_callback(func(): map_panel.visible = false)
+	else:
+		map_panel.visible = false
+
+
+# ============================================================================
+# LEDGER PANEL (Book Opening Animation)
+# ============================================================================
+func _open_ledger() -> void:
+	if not ledger_panel:
+		return
+	
+	_is_animating = true
+	ledger_panel.visible = true
+	ledger_panel.scale = LEDGER_CLOSED_SCALE
+	ledger_panel.pivot_offset = ledger_panel.size / 2
+	
+	# Book opening animation (scale X from 0.1 to 1.0)
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_ELASTIC)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(ledger_panel, "scale", LEDGER_OPEN_SCALE, PANEL_ANIMATION_DURATION)
+	tween.tween_callback(func(): _is_animating = false)
+
+
+func _close_ledger(animate: bool = true) -> void:
+	if not ledger_panel or not ledger_panel.visible:
+		return
+	
+	if animate:
+		_is_animating = true
+		# Book closing animation
+		var tween := create_tween()
+		tween.set_trans(Tween.TRANS_BACK)
+		tween.set_ease(Tween.EASE_IN)
+		tween.tween_property(ledger_panel, "scale", LEDGER_CLOSED_SCALE, PANEL_ANIMATION_DURATION * 0.5)
+		tween.tween_callback(func(): 
+			ledger_panel.visible = false
+			_is_animating = false
+		)
+	else:
+		ledger_panel.visible = false
+		ledger_panel.scale = LEDGER_CLOSED_SCALE
+
+
+# ============================================================================
+# BRIEFCASE PANEL (Case Opening Animation)
+# ============================================================================
+func _open_briefcase() -> void:
+	if not briefcase_panel:
+		return
+	
+	_is_animating = true
+	briefcase_panel.visible = true
+	briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
+	briefcase_panel.pivot_offset = Vector2(briefcase_panel.size.x / 2, 0)  # Pivot at top
+	
+	# Briefcase opening animation (scale Y from 0.1 to 1.0)
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_BOUNCE)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(briefcase_panel, "scale", BRIEFCASE_OPEN_SCALE, PANEL_ANIMATION_DURATION)
+	tween.tween_callback(func(): _is_animating = false)
+
+
+func _close_briefcase(animate: bool = true) -> void:
+	if not briefcase_panel or not briefcase_panel.visible:
+		return
+	
+	if animate:
+		_is_animating = true
+		# Briefcase closing animation
+		var tween := create_tween()
+		tween.set_trans(Tween.TRANS_BACK)
+		tween.set_ease(Tween.EASE_IN)
+		tween.tween_property(briefcase_panel, "scale", BRIEFCASE_CLOSED_SCALE, PANEL_ANIMATION_DURATION * 0.5)
+		tween.tween_callback(func(): 
+			briefcase_panel.visible = false
+			_is_animating = false
+		)
+	else:
+		briefcase_panel.visible = false
+		briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE

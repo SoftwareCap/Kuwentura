@@ -9,12 +9,13 @@ const ANIMATION_DURATION := 0.15
 const ARROW_SCALE_DEFAULT := Vector2(0.28, 0.28)
 const ARROW_SCALE_PRESSED := Vector2(0.24, 0.24)
 const AVATAR_BOUNCE_HEIGHT := 10.0
+const SETTINGS_FILE = "user://settings.json"
 
 # ============================================================================
 # NODE REFERENCES
 # ============================================================================
 @onready var status_label: Label = $StatusLabel
-@onready var cancel_button: Button = %CancelButton
+@onready var cancel_button: TextureButton = %CancelButton
 @onready var connection_indicator: Panel = get_node_or_null("ConnectionIndicator")
 
 # Detective Area (Hidden controls)
@@ -33,6 +34,17 @@ const AVATAR_BOUNCE_HEIGHT := 10.0
 @onready var player_sidekick: CharacterBody2D = $SidekickArea/PlayerSidekick
 @onready var sidekick_sprite: AnimatedSprite2D = $SidekickArea/PlayerSidekick/AnimatedSprite2D
 @onready var sidekick_name_label: Label = $SidekickArea/PlayerSidekick/SidekickName
+
+# Settings
+@onready var settings_control: CanvasLayer = $SettingsControl
+@onready var settings_panel: Panel = $SettingsPanel
+@onready var volume_slider: HSlider = $SettingsPanel/VolumeSliderControl/VolumeSlider
+@onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
+
+# User Profile
+@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
+@onready var user_section: Panel = $SettingsPanel/UserSection
+@onready var user_section_back_button: TouchScreenButton = $SettingsPanel/UserSection/Back
 
 # ============================================================================
 # STATE VARIABLES
@@ -55,6 +67,7 @@ func _ready() -> void:
 	_setup_ui_visibility()
 	_connect_signals()
 	_setup_button_animations()
+	_setup_settings()
 	
 	# Initial UI update
 	_update_costume_display()
@@ -84,10 +97,19 @@ func _setup_avatars() -> void:
 	if player_sidekick:
 		player_sidekick.set_physics_process(false)
 	
+	# Make avatars visible by default
 	if detective_sprite:
 		detective_sprite.play("idle")
+		detective_sprite.visible = true
 	if sidekick_sprite:
 		sidekick_sprite.play("idle")
+		sidekick_sprite.visible = true
+	
+	# Make name labels visible
+	if detective_name_label:
+		detective_name_label.visible = true
+	if sidekick_name_label:
+		sidekick_name_label.visible = true
 
 
 func _setup_costume_data() -> void:
@@ -106,17 +128,21 @@ func _setup_ui_visibility() -> void:
 
 func _detective_set_controls_visible(controls_visible: bool) -> void:
 	"""Set visibility of detective costume controls.
-	Costume label hidden until host connects, controls only for local player."""
-	# Controls hidden for partner
-	var detective_btns = [$DetectiveArea/DetectiveLeftBtn, $DetectiveArea/DetectiveRightBtn, $DetectiveArea/DetectiveSelectBtn]
+	Costume label always visible to show detective's costume selection."""
+	# Controls hidden for partner (detective controls on sidekick screen)
+	var detective_left = get_node_or_null("DetectiveArea/DetectiveLeftBtn")
+	var detective_right = get_node_or_null("DetectiveArea/DetectiveRightBtn")
+	var detective_select = get_node_or_null("DetectiveArea/DetectiveSelectBtn")
+	
+	var detective_btns = [detective_left, detective_right, detective_select]
 	for btn in detective_btns:
 		if is_instance_valid(btn):
 			btn.visible = controls_visible
 	
-	# Costume label hidden until host connects (synced with sprite visibility)
-	var label: Label = $DetectiveArea/DetectiveCostumeName
+	# Costume label always visible to show detective's costume name
+	var label: Label = get_node_or_null("DetectiveArea/DetectiveCostumeName")
 	if is_instance_valid(label):
-		label.visible = _host_connected
+		label.visible = true
 
 
 func _sidekick_set_controls_visible(controls_visible: bool) -> void:
@@ -158,6 +184,14 @@ func _connect_signals() -> void:
 	
 	if not cancel_button.pressed.is_connected(_on_cancel_pressed):
 		cancel_button.pressed.connect(_on_cancel_pressed)
+	
+	# Sidekick costume selection buttons
+	if sidekick_left_btn and not sidekick_left_btn.pressed.is_connected(_on_sidekick_left_pressed):
+		sidekick_left_btn.pressed.connect(_on_sidekick_left_pressed)
+	if sidekick_right_btn and not sidekick_right_btn.pressed.is_connected(_on_sidekick_right_pressed):
+		sidekick_right_btn.pressed.connect(_on_sidekick_right_pressed)
+	if sidekick_select_btn and not sidekick_select_btn.pressed.is_connected(_on_sidekick_select_pressed):
+		sidekick_select_btn.pressed.connect(_on_sidekick_select_pressed)
 
 
 func _disconnect_signals() -> void:
@@ -178,15 +212,32 @@ func _disconnect_signals() -> void:
 		var callback: Callable = sig_data[1]
 		if sig.is_connected(callback):
 			sig.disconnect(callback)
+	
+	# Disconnect settings signals
+	if settings_control and settings_control.settings_pressed.is_connected(_on_settings_pressed):
+		settings_control.settings_pressed.disconnect(_on_settings_pressed)
+	
+	# Disconnect sidekick button signals
+	if sidekick_left_btn and sidekick_left_btn.pressed.is_connected(_on_sidekick_left_pressed):
+		sidekick_left_btn.pressed.disconnect(_on_sidekick_left_pressed)
+	if sidekick_right_btn and sidekick_right_btn.pressed.is_connected(_on_sidekick_right_pressed):
+		sidekick_right_btn.pressed.disconnect(_on_sidekick_right_pressed)
+	if sidekick_select_btn and sidekick_select_btn.pressed.is_connected(_on_sidekick_select_pressed):
+		sidekick_select_btn.pressed.disconnect(_on_sidekick_select_pressed)
 
 
 func _setup_button_animations() -> void:
 	"""Setup button press animations for sidekick arrows."""
+	if not sidekick_left_btn or not sidekick_right_btn:
+		push_warning("[SidekickWaiting] Arrow buttons not found!")
+		return
+	
 	var arrow_buttons := [sidekick_left_btn, sidekick_right_btn]
 	
 	for btn in arrow_buttons:
-		btn.button_down.connect(_on_arrow_down.bind(btn))
-		btn.button_up.connect(_on_arrow_up.bind(btn))
+		if is_instance_valid(btn):
+			btn.button_down.connect(_on_arrow_down.bind(btn))
+			btn.button_up.connect(_on_arrow_up.bind(btn))
 
 
 # ============================================================================
@@ -219,6 +270,9 @@ func _animate_avatar_bounce() -> void:
 
 func _animate_costume_confirmed() -> void:
 	"""Animate costume confirmation visual feedback."""
+	if not is_instance_valid(sidekick_costume_label) or not is_instance_valid(sidekick_select_btn):
+		return
+	
 	# Flash the label
 	var tween := create_tween()
 	tween.tween_property(sidekick_costume_label, "modulate", Color(0.5, 1, 0.5), 0.2)
@@ -299,6 +353,12 @@ func _update_costume_display() -> void:
 	"""Update costume display for sidekick and show partner's costume."""
 	if not is_instance_valid(self) or not is_inside_tree():
 		return
+	
+	# Ensure labels are visible
+	if is_instance_valid(sidekick_costume_label):
+		sidekick_costume_label.visible = true
+	if is_instance_valid(detective_costume_label):
+		detective_costume_label.visible = true
 	
 	# Update local player (sidekick) display
 	var costume_id := GameState.get_selected_costume("sidekick")
@@ -383,10 +443,12 @@ func _call_join_if_playing() -> void:
 		_change_to_game()
 		return
 	
-	# Connection established - show both avatars and costume labels
-	_host_connected = true
+	# Sidekick screen always shows avatars immediately (no need to wait for connection)
+	# Connection status is shown via the connection indicator
+	_host_connected = NetworkManager.has_active_connection()
 	_update_connection_indicator()
 	
+	# Ensure avatars are visible
 	if detective_sprite:
 		detective_sprite.visible = true
 		detective_sprite.play("idle")
@@ -401,35 +463,58 @@ func _call_join_if_playing() -> void:
 	if sidekick_name_label:
 		sidekick_name_label.visible = true
 	
-	status_label.text = "Connected to Host!"
-	status_label.modulate = Color(1, 1, 0)
+	# Update costume display to show both players' selections
+	_update_costume_display()
+	
+	# Update status based on connection
+	if _host_connected:
+		status_label.text = "Connected to Host!"
+		status_label.modulate = Color(0, 1, 0)
+	else:
+		status_label.text = "Waiting for Host..."
+		status_label.modulate = Color(1, 1, 0)
 
 
 func _on_connection_established(_peer_id: int) -> void:
 	_host_connected = true
 	_update_connection_indicator()
 	
-	status_label.text = "Connected!\nWaiting for Detective to start..."
-	status_label.modulate = Color(0, 1, 0)
+	if is_instance_valid(status_label):
+		status_label.text = "Connected!\nWaiting for Detective to start..."
+		status_label.modulate = Color(0, 1, 0)
 	
-	if sidekick_sprite:
+	if is_instance_valid(sidekick_sprite):
 		sidekick_sprite.visible = true
 		sidekick_sprite.play("idle")
 		sidekick_sprite.modulate = Color(1, 1, 1, 0)
 		var tween := create_tween()
 		tween.tween_property(sidekick_sprite, "modulate", Color(1, 1, 1, 1), 0.5)
 	
-	if sidekick_name_label:
+	if is_instance_valid(sidekick_name_label):
 		sidekick_name_label.visible = true
 	
-	# Note: Detective avatar and costume label visibility is handled by _call_join_if_playing
+	# Show detective costume label and update display
+	if is_instance_valid(detective_costume_label):
+		detective_costume_label.visible = true
+	
+	# Update costume display to show detective's selection
+	_update_costume_display()
 
 
 func _on_partner_connected(_data: Dictionary) -> void:
 	_host_connected = true
 	_update_connection_indicator()
-	status_label.text = "Connected!\nWaiting for Detective to start..."
-	status_label.modulate = Color(0, 1, 0)
+	if is_instance_valid(status_label):
+		status_label.text = "Connected!\nWaiting for Detective to start..."
+		status_label.modulate = Color(0, 1, 0)
+	
+	# Ensure avatars are visible on partner connect
+	if is_instance_valid(sidekick_sprite):
+		sidekick_sprite.visible = true
+		sidekick_sprite.play("idle")
+	if is_instance_valid(detective_sprite):
+		detective_sprite.visible = true
+		detective_sprite.play("idle")
 
 
 func _on_game_started(_checkpoint: String = "") -> void:
@@ -438,6 +523,12 @@ func _on_game_started(_checkpoint: String = "") -> void:
 	
 	_is_leaving = true
 	status_label.text = "Starting game..."
+	
+	# Hide settings button and panel during transition
+	if settings_control:
+		settings_control.hide_button()
+	if settings_panel:
+		settings_panel.visible = false
 	
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
@@ -511,3 +602,107 @@ func _return_to_menu() -> void:
 		return
 	
 	tree.change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
+
+
+# ============================================================================
+# SETTINGS FUNCTIONS
+# ============================================================================
+func _setup_settings() -> void:
+	"""Setup settings panel and signals."""
+	# Connect settings signals
+	if settings_control and not settings_control.settings_pressed.is_connected(_on_settings_pressed):
+		settings_control.settings_pressed.connect(_on_settings_pressed)
+	
+	# Load saved settings
+	_load_settings()
+	
+	# Update slider to current volume
+	if volume_slider:
+		volume_slider.value = MusicController.get_volume() * 100
+	if volume_value_label:
+		volume_value_label.text = str(int(volume_slider.value)) + "%"
+
+
+func _on_settings_pressed() -> void:
+	print("[SidekickWaiting] Opening settings panel")
+	if settings_panel:
+		settings_panel.visible = true
+		# Hide user section when opening settings
+		if user_section:
+			user_section.visible = false
+		# Show view user profile button when opening settings
+		if view_user_profile_button:
+			view_user_profile_button.visible = true
+	# Hide settings button
+	if settings_control:
+		settings_control.hide_button()
+
+
+func _on_back_settings_pressed() -> void:
+	print("[SidekickWaiting] Closing settings panel")
+	if settings_panel:
+		settings_panel.visible = false
+	# Show settings button again
+	if settings_control:
+		settings_control.show_button()
+	_save_settings()
+
+
+func _on_view_user_profile_pressed() -> void:
+	print("[SidekickWaiting] Opening user profile")
+	if user_section:
+		user_section.visible = true
+	if view_user_profile_button:
+		view_user_profile_button.visible = false
+
+
+func _on_back_from_profile_pressed() -> void:
+	print("[SidekickWaiting] Back from user profile to settings")
+	if user_section:
+		user_section.visible = false
+	if view_user_profile_button:
+		view_user_profile_button.visible = true
+
+
+func _on_volume_changed(value: float) -> void:
+	var volume = value / 100.0
+	MusicController.set_volume(volume)
+	if volume_value_label:
+		volume_value_label.text = str(int(value)) + "%"
+	print("[SidekickWaiting] Volume changed to: ", volume)
+
+
+func _load_settings() -> void:
+	if FileAccess.file_exists(SETTINGS_FILE):
+		var file = FileAccess.open(SETTINGS_FILE, FileAccess.READ)
+		if file:
+			var json = JSON.new()
+			var error = json.parse(file.get_as_text())
+			if error == OK:
+				var data = json.get_data()
+				if data is Dictionary:
+					if data.has("volume"):
+						var volume = float(data["volume"])
+						MusicController.set_volume(volume)
+						if volume_slider:
+							volume_slider.value = volume * 100
+					print("[SidekickWaiting] Settings loaded successfully")
+			else:
+				push_warning("[SidekickWaiting] Failed to parse settings file")
+			file.close()
+	else:
+		print("[SidekickWaiting] No settings file found, using defaults")
+
+
+func _save_settings() -> void:
+	var data = {
+		"volume": MusicController.get_volume()
+	}
+	
+	var file = FileAccess.open(SETTINGS_FILE, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data))
+		file.close()
+		print("[SidekickWaiting] Settings saved successfully")
+	else:
+		push_warning("[SidekickWaiting] Failed to save settings file")

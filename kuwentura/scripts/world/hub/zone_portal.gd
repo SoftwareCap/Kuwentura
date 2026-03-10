@@ -2,120 +2,132 @@ extends Area2D
 
 @export var zone_name : String
 @export var scene_path : String
-var is_player_on_door : bool = false
-var is_sidekick_on_door: bool = false
 
-# Track which bodies are on the portal
-var player_body: Node2D = null
-var sidekick_body: Node2D = null
+# Track which peers are on this portal (server authoritative)
+var _detective_present: bool = false
+var _sidekick_present: bool = false
+var _detective_peer_id: int = 0
+var _sidekick_peer_id: int = 0
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	connect("body_entered", detect_player)
-	connect("body_exited", detect_player_out)
-	print("[ZonePortal] Ready: ", zone_name, " at ", global_position)
+	print("[ZonePortal] ", zone_name, " READY")
+	
+	connect("body_entered", _on_body_entered)
+	connect("body_exited", _on_body_exited)
 
-func detect_player(body: Node2D):
-	print("[ZonePortal] Body entered: ", body.name, " (", body.get_class(), ")")
-	
-	# Detective is peer 1, Sidekick is the other peer
-	var body_peer_id = int(body.name) if body.name.is_valid_int() else 0
-	
-	if body_peer_id == 1:
-		is_player_on_door = true
-		player_body = body
-		print("[ZonePortal] ", zone_name, " - Player (Detective) entered")
-	elif body_peer_id > 1:
-		is_sidekick_on_door = true
-		sidekick_body = body
-		print("[ZonePortal] ", zone_name, " - Sidekick entered")
-	
-	print("[ZonePortal] Status - Player: ", is_player_on_door, ", Sidekick: ", is_sidekick_on_door)
-	
 
-func detect_player_out(body: Node2D):
-	print("[ZonePortal] Body exited: ", body.name)
+func _on_body_entered(body: Node2D):
+	if not body is CharacterBody2D:
+		return
 	
-	var body_peer_id = int(body.name) if body.name.is_valid_int() else 0
+	var peer_id = int(body.name) if body.name.is_valid_int() else 0
+	if peer_id <= 0:
+		return
 	
-	if body_peer_id == 1:
-		is_player_on_door = false
-		player_body = null
-		print("[ZonePortal] ", zone_name, " - Player (Detective) exited")
-	elif body_peer_id > 1:
-		is_sidekick_on_door = false
-		sidekick_body = null
-		print("[ZonePortal] ", zone_name, " - Sidekick exited")
+	print("[ZonePortal] ", zone_name, " ENTERED: ", peer_id)
 	
-	print("[ZonePortal] Status - Player: ", is_player_on_door, ", Sidekick: ", is_sidekick_on_door)
-	
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("game_jump"):
-		print("[ZonePortal] Jump pressed on ", zone_name, " - Player: ", is_player_on_door, ", Sidekick: ", is_sidekick_on_door)
-		_try_enter_zone()
-
-func change_scene() -> void:
-	# Server-authoritative entry
-	_try_enter_zone()
-
-	# If client presses jump, do nothing except request (optional)
-	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
-		print("[ZonePortal] Client pressed enter; waiting for server decision.")
-
-func _save_and_sync_positions():
-	"""Save all player positions and sync between clients."""
-	var local_peer_id = multiplayer.get_unique_id()
-	
-	print("[ZonePortal] Saving positions - local peer: ", local_peer_id)
-	
-	# Host (Detective) collects and broadcasts positions
 	if multiplayer.is_server():
-		# Get detective position
-		if player_body:
-			GameState.save_spawn_position(1, player_body.global_position, "forest_hub")
-			GameState._broadcast_position_rpc.rpc(1, player_body.global_position)
-			print("[ZonePortal] Host saved detective position: ", player_body.global_position)
+		if peer_id == 1:
+			_detective_present = true
+			_detective_peer_id = peer_id
+		else:
+			_sidekick_present = true
+			_sidekick_peer_id = peer_id
 		
-		# Get sidekick position if available locally
-		if sidekick_body:
-			var sidekick_id = int(sidekick_body.name)
-			GameState.save_spawn_position(sidekick_id, sidekick_body.global_position, "forest_hub")
-			GameState._broadcast_position_rpc.rpc(sidekick_id, sidekick_body.global_position)
-			print("[ZonePortal] Host saved sidekick position: ", sidekick_body.global_position)
+		print("[ZonePortal] Server state: D=", _detective_present, " S=", _sidekick_present)
 	else:
-		# Client reports their position to host
-		if sidekick_body and local_peer_id != 1:
-			GameState._report_position_to_host_rpc.rpc_id(1, local_peer_id, sidekick_body.global_position)
-			GameState.save_spawn_position(local_peer_id, sidekick_body.global_position, "forest_hub")
-			print("[ZonePortal] Client reported position: ", sidekick_body.global_position)
+		# Client reports to server
+		_report_entered.rpc_id(1, peer_id)
 
-func _try_enter_zone() -> void:
-	# Need both players on the door
-	if not (is_player_on_door and is_sidekick_on_door):
-		print("[ZonePortal] bawal - Need both players. Player:", is_player_on_door, " Sidekick:", is_sidekick_on_door)
+
+func _on_body_exited(body: Node2D):
+	if not body is CharacterBody2D:
 		return
-
-	# Only server decides (offline allowed)
-	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
-		print("[ZonePortal] Client pressed jump; server must approve.")
+	
+	var peer_id = int(body.name) if body.name.is_valid_int() else 0
+	if peer_id <= 0:
 		return
+	
+	print("[ZonePortal] ", zone_name, " EXITED: ", peer_id)
+	
+	if multiplayer.is_server():
+		if peer_id == 1:
+			_detective_present = false
+			_detective_peer_id = 0
+		else:
+			_sidekick_present = false
+			_sidekick_peer_id = 0
+	else:
+		_report_exited.rpc_id(1, peer_id)
 
+
+@rpc("any_peer", "reliable")
+func _report_entered(peer_id: int):
+	if not multiplayer.is_server():
+		return
+	
+	if peer_id == 1:
+		_detective_present = true
+		_detective_peer_id = peer_id
+	else:
+		_sidekick_present = true
+		_sidekick_peer_id = peer_id
+	
+	print("[ZonePortal] Server got ENTER from ", peer_id, " -> D:", _detective_present, " S:", _sidekick_present)
+
+
+@rpc("any_peer", "reliable")
+func _report_exited(peer_id: int):
+	if not multiplayer.is_server():
+		return
+	
+	if peer_id == 1:
+		_detective_present = false
+		_detective_peer_id = 0
+	else:
+		_sidekick_present = false
+		_sidekick_peer_id = 0
+
+
+# Call this to check if zone can be entered
+func can_enter() -> bool:
+	if multiplayer.is_server():
+		return _detective_present and _sidekick_present
+	return false
+
+
+# Called by external systems to trigger zone entry
+func try_enter() -> bool:
+	if not multiplayer.is_server():
+		print("[ZonePortal] Only server can initiate zone entry")
+		return false
+	
+	if not (_detective_present and _sidekick_present):
+		print("[ZonePortal] Cannot enter - need both players. D:", _detective_present, " S:", _sidekick_present)
+		return false
+	
 	var zid := zone_name.strip_edges()
-
 	if GameState.is_zone_locked_temp(zid):
 		var rem: int = GameState.get_zone_lock_remaining(zid)
 		print("[ZonePortal] DENIED:", zid, "locked. Remaining=", rem, "s")
-		return
-
-	print("[ZonePortal] ALLOWED: entering ", zid, " -> ", scene_path)
-
-	_save_and_sync_positions()
+		return false
+	
+	print("[ZonePortal] ENTERING ", zone_name)
+	_save_positions()
 	rpc_enter_zone.rpc(scene_path)
+	return true
+
+
+func _save_positions():
+	var return_marker = get_node_or_null("ReturnMarker")
+	var return_pos = return_marker.global_position if return_marker else global_position + Vector2(0, 100)
+	
+	if _detective_present:
+		GameState.save_spawn_position(1, return_pos, "forest_hub")
+	if _sidekick_present:
+		GameState.save_spawn_position(_sidekick_peer_id, return_pos, "forest_hub")
 
 
 @rpc("any_peer", "reliable", "call_local")
-func rpc_enter_zone(path: String) -> void:
+func rpc_enter_zone(path: String):
 	get_tree().change_scene_to_file(path)
-
-func _zone_id() -> String:
-	return zone_name.strip_edges()

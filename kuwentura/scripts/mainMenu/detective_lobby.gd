@@ -9,15 +9,28 @@ const ANIMATION_DURATION := 0.15
 const ARROW_SCALE_DEFAULT := Vector2(0.28, 0.28)
 const ARROW_SCALE_PRESSED := Vector2(0.24, 0.24)
 const AVATAR_BOUNCE_HEIGHT := 10.0
+const SETTINGS_FILE = "user://settings.json"
 
 # ============================================================================
 # NODE REFERENCES - UI Elements
 # ============================================================================
 @onready var start_button: Button = %StartButton
-@onready var back_button: Button = %BackButton
+@onready var back_button: TextureButton = %BackButton
 @onready var room_code_label: Label = $RoomCode
 @onready var status_label: Label = $StatusLabel
 @onready var connection_indicator: Panel = get_node_or_null("ConnectionIndicator")
+
+# Settings
+@onready var settings_control: CanvasLayer = $SettingsControl
+@onready var settings_panel: Panel = $SettingsPanel
+@onready var volume_slider: HSlider = $SettingsPanel/VolumeSliderControl/VolumeSlider
+@onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
+@onready var settings_back_button: TouchScreenButton = $SettingsPanel/Back
+
+# User Profile
+@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
+@onready var user_section: Panel = $SettingsPanel/UserSection
+@onready var user_section_back_button: TouchScreenButton = $SettingsPanel/UserSection/Back
 
 # Detective Area
 @onready var detective_area: Control = $DetectiveArea
@@ -59,6 +72,7 @@ func _ready() -> void:
 	_setup_ui_visibility()
 	_connect_signals()
 	_setup_button_animations()
+	_setup_settings()
 	
 	# Initial UI update
 	_update_costume_display("detective")
@@ -166,7 +180,7 @@ func _setup_base_lobby_ui() -> void:
 		
 		var invite_code := NetworkManager.get_invite_code()
 		room_code_label.text = "Code: %s" % invite_code if not invite_code.is_empty() else "Code: ???"
-		status_label.text = "Waiting for Sidekick...\n(Code is being broadcast on LAN)"
+		status_label.text = "Waiting for Sidekick..."
 		status_label.modulate = Color(1, 1, 1)
 		
 		# Sidekick elements hidden initially
@@ -218,16 +232,51 @@ func _disconnect_signals() -> void:
 		var callback: Callable = sig_data[1]
 		if sig.is_connected(callback):
 			sig.disconnect(callback)
+	
+	# Disconnect settings signals
+	if settings_control and settings_control.settings_pressed.is_connected(_on_settings_pressed):
+		settings_control.settings_pressed.disconnect(_on_settings_pressed)
+	
+	# Disconnect button handlers
+	if is_instance_valid(detective_left_btn) and detective_left_btn.pressed.is_connected(_on_detective_left_pressed):
+		detective_left_btn.pressed.disconnect(_on_detective_left_pressed)
+	if is_instance_valid(detective_right_btn) and detective_right_btn.pressed.is_connected(_on_detective_right_pressed):
+		detective_right_btn.pressed.disconnect(_on_detective_right_pressed)
+	if is_instance_valid(detective_select_btn) and detective_select_btn.pressed.is_connected(_on_detective_select_pressed):
+		detective_select_btn.pressed.disconnect(_on_detective_select_pressed)
+	if is_instance_valid(sidekick_left_btn) and sidekick_left_btn.pressed.is_connected(_on_sidekick_left_pressed):
+		sidekick_left_btn.pressed.disconnect(_on_sidekick_left_pressed)
+	if is_instance_valid(sidekick_right_btn) and sidekick_right_btn.pressed.is_connected(_on_sidekick_right_pressed):
+		sidekick_right_btn.pressed.disconnect(_on_sidekick_right_pressed)
+	if is_instance_valid(sidekick_select_btn) and sidekick_select_btn.pressed.is_connected(_on_sidekick_select_pressed):
+		sidekick_select_btn.pressed.disconnect(_on_sidekick_select_pressed)
 
 
 func _setup_button_animations() -> void:
-	"""Setup button press animations."""
+	"""Setup button press animations and connect button handlers."""
+	# Arrow buttons with animations
 	var arrow_buttons := [detective_left_btn, detective_right_btn, sidekick_left_btn, sidekick_right_btn]
 	
 	for btn in arrow_buttons:
-		btn.pressed.connect(_on_arrow_pressed.bind(btn))
-		btn.button_down.connect(_on_arrow_down.bind(btn))
-		btn.button_up.connect(_on_arrow_up.bind(btn))
+		if is_instance_valid(btn):
+			btn.pressed.connect(_on_arrow_pressed.bind(btn))
+			btn.button_down.connect(_on_arrow_down.bind(btn))
+			btn.button_up.connect(_on_arrow_up.bind(btn))
+	
+	# Connect costume selection button handlers
+	if is_instance_valid(detective_left_btn) and not detective_left_btn.pressed.is_connected(_on_detective_left_pressed):
+		detective_left_btn.pressed.connect(_on_detective_left_pressed)
+	if is_instance_valid(detective_right_btn) and not detective_right_btn.pressed.is_connected(_on_detective_right_pressed):
+		detective_right_btn.pressed.connect(_on_detective_right_pressed)
+	if is_instance_valid(detective_select_btn) and not detective_select_btn.pressed.is_connected(_on_detective_select_pressed):
+		detective_select_btn.pressed.connect(_on_detective_select_pressed)
+	
+	if is_instance_valid(sidekick_left_btn) and not sidekick_left_btn.pressed.is_connected(_on_sidekick_left_pressed):
+		sidekick_left_btn.pressed.connect(_on_sidekick_left_pressed)
+	if is_instance_valid(sidekick_right_btn) and not sidekick_right_btn.pressed.is_connected(_on_sidekick_right_pressed):
+		sidekick_right_btn.pressed.connect(_on_sidekick_right_pressed)
+	if is_instance_valid(sidekick_select_btn) and not sidekick_select_btn.pressed.is_connected(_on_sidekick_select_pressed):
+		sidekick_select_btn.pressed.connect(_on_sidekick_select_pressed)
 
 
 # ============================================================================
@@ -585,6 +634,12 @@ func _on_back_pressed() -> void:
 func _on_game_started(_checkpoint: String = "") -> void:
 	_is_leaving = true
 	
+	# Hide settings button and panel during transition
+	if settings_control:
+		settings_control.hide_button()
+	if settings_panel:
+		settings_panel.visible = false
+	
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
 	await tween.finished
@@ -603,3 +658,107 @@ func _on_connection_failed(error: String) -> void:
 	if is_instance_valid(status_label):
 		status_label.text = "Connection failed: %s" % error
 		status_label.modulate = Color(1, 0, 0)
+
+
+# ============================================================================
+# SETTINGS FUNCTIONS
+# ============================================================================
+func _setup_settings() -> void:
+	"""Setup settings panel and signals."""
+	# Connect settings signals
+	if settings_control and not settings_control.settings_pressed.is_connected(_on_settings_pressed):
+		settings_control.settings_pressed.connect(_on_settings_pressed)
+	
+	# Load saved settings
+	_load_settings()
+	
+	# Update slider to current volume
+	if volume_slider:
+		volume_slider.value = MusicController.get_volume() * 100
+	if volume_value_label:
+		volume_value_label.text = str(int(volume_slider.value)) + "%"
+
+
+func _on_settings_pressed() -> void:
+	print("[DetectiveLobby] Opening settings panel")
+	if settings_panel:
+		settings_panel.visible = true
+		# Hide user section when opening settings
+		if user_section:
+			user_section.visible = false
+		# Show view user profile button when opening settings
+		if view_user_profile_button:
+			view_user_profile_button.visible = true
+	# Hide settings button
+	if settings_control:
+		settings_control.hide_button()
+
+
+func _on_back_settings_pressed() -> void:
+	print("[DetectiveLobby] Closing settings panel")
+	if settings_panel:
+		settings_panel.visible = false
+	# Show settings button again
+	if settings_control:
+		settings_control.show_button()
+	_save_settings()
+
+
+func _on_view_user_profile_pressed() -> void:
+	print("[DetectiveLobby] Opening user profile")
+	if user_section:
+		user_section.visible = true
+	if view_user_profile_button:
+		view_user_profile_button.visible = false
+
+
+func _on_back_from_profile_pressed() -> void:
+	print("[DetectiveLobby] Back from user profile to settings")
+	if user_section:
+		user_section.visible = false
+	if view_user_profile_button:
+		view_user_profile_button.visible = true
+
+
+func _on_volume_changed(value: float) -> void:
+	var volume = value / 100.0
+	MusicController.set_volume(volume)
+	if volume_value_label:
+		volume_value_label.text = str(int(value)) + "%"
+	print("[DetectiveLobby] Volume changed to: ", volume)
+
+
+func _load_settings() -> void:
+	if FileAccess.file_exists(SETTINGS_FILE):
+		var file = FileAccess.open(SETTINGS_FILE, FileAccess.READ)
+		if file:
+			var json = JSON.new()
+			var error = json.parse(file.get_as_text())
+			if error == OK:
+				var data = json.get_data()
+				if data is Dictionary:
+					if data.has("volume"):
+						var volume = float(data["volume"])
+						MusicController.set_volume(volume)
+						if volume_slider:
+							volume_slider.value = volume * 100
+					print("[DetectiveLobby] Settings loaded successfully")
+			else:
+				push_warning("[DetectiveLobby] Failed to parse settings file")
+			file.close()
+	else:
+		print("[DetectiveLobby] No settings file found, using defaults")
+
+
+func _save_settings() -> void:
+	var data = {
+		"volume": MusicController.get_volume()
+	}
+	
+	var file = FileAccess.open(SETTINGS_FILE, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data))
+		file.close()
+		print("[DetectiveLobby] Settings saved successfully")
+	else:
+		push_warning("[DetectiveLobby] Failed to save settings file")
