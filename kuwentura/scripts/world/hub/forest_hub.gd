@@ -45,8 +45,14 @@ const BRIEFCASE_CLOSED_SCALE: Vector2 = Vector2(1.0, 0.1)
 # Portal references
 @onready var portals: Node2D = $"Zone Portals"
 
+# Room code label (only visible to host, follows camera via CanvasLayer)
+@onready var room_code_label: Label = $HUDLayer/RoomCode
+
 
 func _ready():
+	# Setup room code label - only visible to host
+	_setup_room_code_label()
+	
 	# Verify required nodes exist
 	if spawn_points == null:
 		push_error("[ForestHub] SpawnPoints node not found! Creating fallback spawn points.")
@@ -137,6 +143,26 @@ func _ready():
 					if other_peer != peer_id and other_peer != multiplayer.get_unique_id():
 						print("[ForestHub] Telling peer ", other_peer, " to spawn peer ", peer_id)
 						NetworkManager.request_spawn_player(other_peer, peer_id, false)
+
+
+## Setup room code label - only visible to host
+func _setup_room_code_label() -> void:
+	if not room_code_label:
+		return
+	
+	# Only show room code to the host (Detective)
+	if multiplayer.is_server():
+		var room_code = NetworkManager.get_room_code()
+		if room_code.is_empty():
+			room_code = "N/A"
+		room_code_label.text = "Code: " + room_code
+		room_code_label.visible = true
+		print("[ForestHub] Room code displayed for host: ", room_code)
+	else:
+		# Hide from sidekick
+		room_code_label.visible = false
+		print("[ForestHub] Room code hidden for sidekick")
+
 
 ## Open the pause panel (called when touch controls option button is pressed)
 func _on_pause_button_pressed() -> void:
