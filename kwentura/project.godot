@@ -30,6 +30,7 @@ DialogueLibraries="*res://scripts/systems/dialogue_library.gd"
 
 [display]
 
+window/size/viewport_width=1240
 window/size/mode=1
 window/stretch/mode="canvas_items"
 
