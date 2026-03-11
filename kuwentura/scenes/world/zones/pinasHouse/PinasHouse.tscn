@@ -1,4 +1,4 @@
-[gd_scene load_steps=58 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=62 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
@@ -33,6 +33,10 @@
 [ext_resource type="Texture2D" uid="uid://llr505ongc63" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pan.png" id="26_cd1wg"]
 [ext_resource type="Texture2D" uid="uid://cnu6aahk6prn6" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pot.png" id="27_egl2a"]
 [ext_resource type="Texture2D" uid="uid://xav0rox1o7wd" path="res://assets/sprites/consequences/aswang/aswang10.png" id="33_eedqa"]
+[ext_resource type="Texture2D" uid="uid://mx5pteuiy8od" path="res://assets/sprites/zoneObjects/DarkPanel.png" id="34_c70e8"]
+[ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/Sparkle.png" id="35_dcipd"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="36_u6sy3"]
+[ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/zoneObjects/LadleClue.png" id="37_dcipd"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_btbyq"]
 size = Vector2(271.49985, 321.00024)
@@ -406,7 +410,6 @@ theme_override_font_sizes/font_size = 32
 text = "← Back to Forest"
 
 [node name="RoleLayer" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="Control" type="Control" parent="RoleLayer"]
 layout_mode = 3
@@ -645,6 +648,7 @@ scale = Vector2(0.2778321, 0.26074222)
 texture = ExtResource("33_eedqa")
 
 [node name="SearchRoomUI" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Root" type="Control" parent="SearchRoomUI"]
 layout_mode = 3
@@ -715,6 +719,7 @@ vertical_alignment = 2
 [node name="PauseCanvasLayer" type="CanvasLayer" parent="."]
 process_mode = 3
 layer = 100
+visible = false
 
 [node name="InGamePausePanel" type="Panel" parent="PauseCanvasLayer"]
 anchors_preset = 8
@@ -896,6 +901,62 @@ theme_override_font_sizes/font_size = 30
 text = "80%"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="RewardLayer" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="DarkOverlay" type="ColorRect" parent="RewardLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.011087579, 0.011087578, 0.01108758, 1)
+
+[node name="RewardPanel" type="Sprite2D" parent="RewardLayer"]
+position = Vector2(622.25, 322.37506)
+scale = Vector2(0.57847226, 0.5425926)
+texture = ExtResource("34_c70e8")
+
+[node name="Sparkle" type="Sprite2D" parent="RewardLayer"]
+position = Vector2(622.25006, 325.49997)
+scale = Vector2(0.5719907, 0.5358025)
+texture = ExtResource("35_dcipd")
+
+[node name="RewardBanner" type="Sprite2D" parent="RewardLayer"]
+position = Vector2(617.0001, 325.5)
+scale = Vector2(0.587963, 0.5390947)
+texture = ExtResource("36_u6sy3")
+
+[node name="RewardText" type="Label" parent="RewardLayer"]
+offset_left = 136.0
+offset_top = 496.0
+offset_right = 1044.0
+offset_bottom = 558.0
+theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ClueSprite" type="Sprite2D" parent="RewardLayer"]
+position = Vector2(592.99994, 198)
+scale = Vector2(0.25199997, 0.2303333)
+texture = ExtResource("37_dcipd")
+
+[node name="CollectButton" type="Button" parent="RewardLayer"]
+process_mode = 3
+offset_left = 483.0
+offset_top = 401.0
+offset_right = 701.0
+offset_bottom = 454.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_j1qle")
+text = "Collect Clue"
 
 [connection signal="input_event" from="InteractiveLayer/Objects/WrongClickZone" to="." method="_on_wrong_object_input"]
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
