@@ -647,8 +647,12 @@ func reward_sequence() -> void:
 
 	await get_tree().create_timer(0.6, true).timeout
 
-	# STEP 5 — show collect button only for sidekick
-	collect_button.visible = not multiplayer.is_server()
+	# STEP 5 — show collect button only for sidekick (or always in offline play)
+	if multiplayer.has_multiplayer_peer():
+		collect_button.visible = GameState.local_role == GameState.Role.SIDEKICK
+	else:
+		# In offline/single-player, always allow collecting so the game can proceed
+		collect_button.visible = true
 	
 
 @rpc("any_peer", "call_local", "reliable")
