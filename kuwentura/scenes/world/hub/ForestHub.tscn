@@ -24,7 +24,7 @@ size = Vector2(1.0549998, 9.77)
 size = Vector2(156, 244.25)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cpdo7"]
-bg_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
+bg_color = Color(0.360784, 0.215686, 0.180392, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -34,7 +34,7 @@ shadow_size = 8
 shadow_offset = Vector2(0, 4)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wp30c"]
-bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+bg_color = Color(0.65098, 0.439216, 0.266667, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -44,7 +44,7 @@ shadow_size = 4
 shadow_offset = Vector2(0, 2)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1cndf"]
-bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+bg_color = Color(0.752941, 0.505882, 0.329412, 1)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
@@ -988,6 +988,7 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_wp30c")
 theme_override_styles/hover = SubResource("StyleBoxFlat_1cndf")
 theme_override_styles/disabled = SubResource("StyleBoxFlat_wp30c")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_t6pvo")
+action_mode = 0
 text = "Enter Pina's House"
 
 [node name="OldWell" type="Area2D" parent="Zone Portals"]
@@ -1037,6 +1038,7 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_wp30c")
 theme_override_styles/hover = SubResource("StyleBoxFlat_1cndf")
 theme_override_styles/disabled = SubResource("StyleBoxFlat_wp30c")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_t6pvo")
+action_mode = 0
 text = "Enter Old Well"
 
 [node name="Backyard" type="Area2D" parent="Zone Portals"]
@@ -1086,6 +1088,7 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_wp30c")
 theme_override_styles/hover = SubResource("StyleBoxFlat_1cndf")
 theme_override_styles/disabled = SubResource("StyleBoxFlat_wp30c")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_t6pvo")
+action_mode = 0
 text = "Enter Backyard Path"
 
 [node name="StorageHut" type="Area2D" parent="Zone Portals"]
@@ -1135,6 +1138,7 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_wp30c")
 theme_override_styles/hover = SubResource("StyleBoxFlat_1cndf")
 theme_override_styles/disabled = SubResource("StyleBoxFlat_wp30c")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_t6pvo")
+action_mode = 0
 text = "Enter Storage Hut"
 
 [node name="AbandonedHouse" type="Area2D" parent="Zone Portals"]
@@ -1184,6 +1188,7 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_wp30c")
 theme_override_styles/hover = SubResource("StyleBoxFlat_1cndf")
 theme_override_styles/disabled = SubResource("StyleBoxFlat_wp30c")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_t6pvo")
+action_mode = 0
 text = "Enter Abandoned House"
 
 [node name="Terrain" type="TileMapLayer" parent="."]

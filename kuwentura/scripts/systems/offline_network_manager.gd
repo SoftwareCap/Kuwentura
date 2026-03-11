@@ -43,10 +43,7 @@ signal game_resumed
 signal host_info_updated(info: Dictionary)
 signal role_assignment_received(role: Role)
 signal room_code_generated(code: String)
-signal session_started(world_data: Dictionary)
-signal discovery_started
-signal discovery_stopped
-signal host_discovered(host_info: Dictionary)
+signal rejoin_game_requested(world_state: Dictionary)
 signal spawn_player_requested(peer_id: int, is_detective: bool)
 signal despawn_player_requested(peer_id: int)
 
@@ -64,6 +61,12 @@ var _session_seed: int = 0
 var _host_ip: String = ""
 var _world_progress: Dictionary = {}
 var _partner_states: Dictionary = {}
+
+# Track if game has been started (for rejoin detection)
+var _has_game_started: bool = false
+
+# Store current player positions for rejoin sync
+var _last_known_positions: Dictionary = {}  # peer_id -> {"position": Vector2, "timestamp": int}
 
 # Discovery (UDP Broadcast for room code joining)
 var _broadcast_socket: PacketPeerUDP = null
@@ -88,6 +91,11 @@ func _ready():
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
+	# Connect to GameState signals to keep world_progress in sync
+	if GameState:
+		GameState.clue_collected.connect(_on_clue_collected)
+		GameState.zone_completed.connect(_on_zone_completed)
+	
 	print("[OfflineNetwork] Initialized")
 
 
@@ -95,9 +103,51 @@ func _exit_tree():
 	disconnect_network()
 
 
+func _on_clue_collected(_zone_id: String, _clue_data: Dictionary) -> void:
+	"""Update world progress when a clue is collected."""
+	if _is_host:
+		sync_world_progress_from_gamestate()
+
+
+func _on_zone_completed(_zone_id: String) -> void:
+	"""Update world progress when a zone is completed."""
+	if _is_host:
+		sync_world_progress_from_gamestate()
+
+
+## Report position to host (called by local player)
+func report_position(peer_id: int, position: Vector2) -> void:
+	"""Clients report their position to host, host stores it for rejoin sync."""
+	if not _is_host:
+		# Client sends position to host via RPC
+		_report_position_to_host_rpc.rpc_id(1, peer_id, position)
+	else:
+		# Host stores its own position directly
+		_store_position(peer_id, position)
+
+
+func _store_position(peer_id: int, position: Vector2) -> void:
+	"""Store position for a player (host only)."""
+	if not _is_host:
+		return
+	_last_known_positions[str(peer_id)] = {
+		"position": {"x": position.x, "y": position.y},
+		"timestamp": Time.get_unix_time_from_system()
+	}
+
+
+@rpc("any_peer", "unreliable")
+func _report_position_to_host_rpc(peer_id: int, position: Vector2) -> void:
+	"""RPC for clients to report their position to host."""
+	if not multiplayer.is_server():
+		return
+	_store_position(peer_id, position)
+
+
 func _process(delta: float):
 	# Handle discovery broadcasting (host)
-	if _is_host and _state == ConnectionState.HOSTING:
+	# Broadcast in both HOSTING and PLAYING states so reconnecting sidekicks can find us
+	if _is_host and (_state == ConnectionState.HOSTING or _state == ConnectionState.PLAYING):
 		_discovery_timer += delta
 		if _discovery_timer >= DISCOVERY_BROADCAST_INTERVAL:
 			_discovery_timer = 0.0
@@ -322,6 +372,9 @@ func host_game() -> Dictionary:
 		"session_seed": _session_seed
 	}
 	
+	# Reset game started flag for new session
+	_has_game_started = false
+	
 	GameState.set_session_seed(_session_seed)
 	
 	_change_state(ConnectionState.HOSTING)
@@ -515,10 +568,14 @@ func start_game() -> bool:
 		push_warning("[OfflineNetwork] No partner connected")
 		return false
 	
+	# Update world progress before starting
+	sync_world_progress_from_gamestate()
+	
 	# Sync world state to client
 	_rpc_sync_world_state.rpc(_world_progress)
 	
 	_change_state(ConnectionState.PLAYING)
+	_has_game_started = true
 	
 	# Notify all clients
 	_game_started_rpc.rpc("forest_hub")
@@ -542,6 +599,19 @@ func resume_game() -> bool:
 	
 	emit_signal("game_resumed")
 	return true
+
+
+## Sync world progress from GameState (call this when game state changes)
+func sync_world_progress_from_gamestate() -> void:
+	"""Update _world_progress with current GameState data."""
+	_world_progress = {
+		"collected_clues": GameState.collected_clues.duplicate(true),
+		"zones_status": GameState.zones_status.duplicate(true),
+		"current_zone": GameState.current_zone,
+		"session_seed": _session_seed,
+		"climax_triggered": GameState.climax_triggered,
+		"game_completed": GameState.game_completed
+	}
 
 
 ## Disconnect from current session
@@ -647,6 +717,39 @@ func _notify_host_leaving():
 	emit_signal("game_paused", "host_leaving")
 
 
+@rpc("authority", "reliable")
+func _rejoin_game_rpc(rejoin_data: Dictionary):
+	"""Called on sidekick when joining an active game session."""
+	print("[OfflineNetwork] Rejoining active game session")
+	
+	var world_state = rejoin_data.get("world_progress", {})
+	var player_positions = rejoin_data.get("player_positions", {})
+	
+	_world_progress = world_state
+	
+	# Update GameState with host's world progress
+	if world_state.has("collected_clues"):
+		GameState.collected_clues = world_state.collected_clues.duplicate(true)
+	if world_state.has("zones_status"):
+		GameState.zones_status = world_state.zones_status.duplicate(true)
+	if world_state.has("current_zone"):
+		GameState.current_zone = world_state.current_zone
+	
+	# Store ONLY the detective (host) position for spawning on sidekick's screen
+	# Sidekick should spawn fresh at spawn point, not at their last known position
+	for peer_id_str in player_positions.keys():
+		var peer_id = int(peer_id_str)
+		# Only store position for host (peer_id == 1) - this is the detective's position
+		if peer_id == 1:
+			var pos_data = player_positions[peer_id_str]
+			if pos_data is Dictionary and pos_data.has("position"):
+				var pos = Vector2(pos_data.position.x, pos_data.position.y)
+				GameState.save_spawn_position(peer_id, pos, "forest_hub")
+				print("[OfflineNetwork] Stored detective rejoin position: ", pos)
+	
+	emit_signal("rejoin_game_requested", rejoin_data)
+
+
 # ============================================================================
 # MULTIPLAYER EVENT HANDLERS
 # ============================================================================
@@ -666,9 +769,20 @@ func _on_multiplayer_peer_connected(peer_id: int):
 		})
 		emit_signal("player_joined", peer_id, Role.SIDEKICK)
 		
-		# If host is already playing, sync immediately
-		if _state == ConnectionState.PLAYING:
-			_game_started_rpc.rpc_id(peer_id, "forest_hub")
+		# If host has already started a game (or is currently playing), notify sidekick to rejoin directly
+		if _state == ConnectionState.PLAYING or _has_game_started:
+			print("[OfflineNetwork] Game already started - sending rejoin signal to sidekick")
+			# Ensure we have the latest world state before sending
+			sync_world_progress_from_gamestate()
+			# Include current player positions for proper sync
+			var rejoin_data = {
+				"world_progress": _world_progress,
+				"player_positions": _last_known_positions.duplicate(true)
+			}
+			# Wait a moment for sidekick to load their scene before sending rejoin signal
+			await get_tree().create_timer(0.5).timeout
+			if multiplayer.get_peers().has(peer_id):
+				_rejoin_game_rpc.rpc_id(peer_id, rejoin_data)
 	else:
 		emit_signal("player_joined", peer_id, Role.DETECTIVE)
 
@@ -962,7 +1076,7 @@ func is_likely_hotspot() -> bool:
 # ============================================================================
 
 ## DEPRECATED: Discovery is no longer supported
-func start_discovery_for_code(_target_code: String) -> bool:
+func start_discovery_for_code(target_code: String) -> bool:
 	push_warning("[OfflineNetwork] Discovery is deprecated. Use direct IP connection.")
 	return false
 
