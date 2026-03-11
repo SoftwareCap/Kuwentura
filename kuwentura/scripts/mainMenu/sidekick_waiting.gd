@@ -475,7 +475,7 @@ func _call_join_if_playing() -> void:
 		status_label.modulate = Color(1, 1, 0)
 
 
-func _on_connection_established(_peer_id: int) -> void:
+func _on_connection_established(_peer_id: int, _role: int = 0) -> void:
 	_host_connected = true
 	_update_connection_indicator()
 	
