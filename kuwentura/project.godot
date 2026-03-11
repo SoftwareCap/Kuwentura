@@ -28,6 +28,7 @@ PuzzleManager="*res://scripts/systems/puzzle_manager.gd"
 LoadingScreen="*res://scenes/ui/LoadingScreen.tscn"
 DialogueSystems="*res://scripts/systems/dialogue_system.gd"
 DialogueLibraries="*res://scripts/systems/dialogue_library.gd"
+ClueManager="*res://scripts/systems/clue_manager.gd"
 
 [display]
 
