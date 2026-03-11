@@ -664,15 +664,10 @@ func _on_collect_clue_pressed() -> void:
 	var reward_data = PuzzleManager.PUZZLE_DATA["pinas_house"]["reward"]
 	var clue_name = reward_data["clue"]
 
-	var clue_data = {
-		"zone": "pinas_house",
-		"name": clue_name
-	}
-
-	ClueManager.add_clue("pinas_house", clue_data)
+	# Record clue collection using the authoritative GameState system
+	GameState.collect_clue("pinas_house")
 
 	print("Collected clue:", clue_name)
-	print("Total clues:", ClueManager.get_clue_count())
 
 	get_tree().paused = false
 
