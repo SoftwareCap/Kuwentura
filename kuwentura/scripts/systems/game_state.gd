@@ -1,5 +1,16 @@
 extends Node
 
+## Game State - Central Game Progression Manager
+##
+## This singleton manages all game progression data including:
+## - Collected clues and zone completion
+## - Player roles and session data
+## - Puzzle seeds and game reset handling
+##
+## SAVE SYSTEM INTEGRATION:
+## - Primary: LocalSaveManager (always works offline)
+## - Secondary: FirebaseManager (cloud backup when online)
+
 signal clue_collected(zone_id: String, clue_data: Dictionary)
 signal zone_completed(zone_id: String)
 signal all_clues_collected
@@ -8,6 +19,7 @@ signal player_role_assigned(role: Role)
 signal data_synced
 signal costume_changed(role: String, costume_id: String)
 signal costume_confirmed(role: String, confirmed: bool)
+signal save_triggered(source: String)
 
 enum Role { NONE, DETECTIVE, SIDEKICK }
 enum ZoneStatus { LOCKED, AVAILABLE, COMPLETED }
@@ -85,6 +97,9 @@ var max_nightfall_attempts: int = 3
 # Key: peer_id, Value: {position: Vector2, zone: String}
 var saved_spawn_positions: Dictionary = {}
 
+# Puzzle Completion State (per zone)
+var solved_puzzles: Dictionary = {}  # zone_id -> bool
+
 # Costume System
 # NOTE: Only classic outfit is available for now.
 const COSTUMES_IMPLEMENTED: bool = false
@@ -130,60 +145,72 @@ var zone_lock_until_unix: Dictionary = {}  # zone_id -> unix_time (seconds)
 # -------------------------
 var _zone_lock_until: Dictionary = {}
 
-func lock_zone_temp(zone_id: String, duration_sec: int) -> void:
-	var now := Time.get_ticks_msec() / 1000.0
-	_zone_lock_until[zone_id] = now + float(duration_sec)
-
-func is_zone_locked_temp(zone_id: String) -> bool:
-	var now := Time.get_ticks_msec() / 1000.0
-	var until := float(_zone_lock_until.get(zone_id, 0.0))
-	return now < until
-
-func get_zone_lock_remaining(zone_id: String) -> int:
-	var now := Time.get_ticks_msec() / 1000.0
-	var until := float(_zone_lock_until.get(zone_id, 0.0))
-	return max(0, int(ceil(until - now)))
 
 func _ready():
 	randomize()
-	# Note: puzzle seeds are now initialized via set_session_seed()
-	# when NetworkManager establishes connection
-
-
-func _initialize_puzzle_seeds():
-	# Generate unique seeds for each zone's puzzles
-	# These regenerate if game resets (Bakunawa catches player)
-	# If no session seed set yet, use random (for offline/testing)
-	if _session_seed == 0:
-		_session_seed = randi()
 	
-	# Derive zone seeds deterministically from session seed
-	for zone in zones_status.keys():
-		puzzle_seeds[zone] = hash(_session_seed + zone.hash())
+	# Load from LOCAL storage first (always works)
+	_load_from_local_save()
 
 
-func set_session_seed(session_seed: int):
-	# Called by NetworkManager when joining/hosting
-	_session_seed = session_seed
-	_initialize_puzzle_seeds()
-	print("[GameState] Session seed set: ", _session_seed)
-	print("[GameState] Zone seeds derived: ", puzzle_seeds)
+# ============================================================================
+# SAVE/LOAD INTEGRATION
+# ============================================================================
 
+func _load_from_local_save():
+	"""Load game data from local storage on startup"""
+	if LocalSaveManager:
+		var data = LocalSaveManager.load_game()
+		if data.size() > 0:
+			load_save_data(data)
+			print("[GameState] Loaded from local save")
+		else:
+			print("[GameState] No local save found, starting fresh")
+			# Optionally try cloud restore
+			_attempt_cloud_restore()
+	else:
+		push_warning("[GameState] LocalSaveManager not available")
+		_initialize_puzzle_seeds()
+
+
+func _attempt_cloud_restore():
+	"""Attempt to restore from cloud if no local save"""
+	if FirebaseManager and FirebaseManager.is_cloud_available():
+		print("[GameState] Attempting cloud restore...")
+		FirebaseManager.restore_from_cloud()
+
+
+func _save_progress(source: String = "auto"):
+	"""Save progress to local storage (primary) and optionally cloud"""
+	emit_signal("save_triggered", source)
+	
+	# Always save to local first (guaranteed to work)
+	if LocalSaveManager:
+		LocalSaveManager.save_game(get_save_data())
+	
+	# Optional cloud backup (non-blocking)
+	if FirebaseManager and FirebaseManager.is_cloud_available():
+		FirebaseManager.sync_to_cloud()
+
+
+# ============================================================================
+# PUBLIC API - Game Progression
+# ============================================================================
 
 func assign_role(role: Role):
 	local_role = role
 	is_host = (role == Role.DETECTIVE)
 	emit_signal("player_role_assigned", role)
-	print("Role assigned: ", Role.keys()[role], " | Is Host: ", is_host)
+	print("[GameState] Role assigned: ", Role.keys()[role], " | Is Host: ", is_host)
 
 
 func collect_clue(zone_id: String) -> bool:
 	if not collected_clues.has(zone_id):
 		return false
-
+	
 	collected_clues[zone_id].collected = true
 	var clue_data = collected_clues[zone_id]
-
+	
 	# Add to ledger
 	ledger_entries.append(
 		{
@@ -193,20 +220,19 @@ func collect_clue(zone_id: String) -> bool:
 			"timestamp": Time.get_unix_time_from_system()
 		}
 	)
-
+	
 	zones_status[zone_id] = ZoneStatus.COMPLETED
 	emit_signal("clue_collected", zone_id, clue_data)
 	emit_signal("zone_completed", zone_id)
-
+	
 	# Check for all clues
 	if _check_all_clues_collected():
 		climax_triggered = true
 		emit_signal("all_clues_collected")
-
-	# Auto-save
-	if FirebaseManager:
-		FirebaseManager.save_progress()
-
+	
+	# Auto-save to local storage
+	_save_progress("clue_collected")
+	
 	return true
 
 
@@ -226,64 +252,61 @@ func get_collected_count() -> int:
 
 
 func reset_game_after_nightfall():
-	# Called when Bakunawa catches players
+	"""Called when Bakunawa catches players"""
 	attempt_count += 1
 	nightfall_attempts += 1
-
+	
 	# Reset clues but keep zones available
 	for zone_id in collected_clues.keys():
 		collected_clues[zone_id].collected = false
-
+	
 	# Generate NEW session seed for new puzzle variations
 	_session_seed = randi()
 	_initialize_puzzle_seeds()
 	print("[GameState] Nightfall reset - new session seed: ", _session_seed)
-
+	
 	# Reset position
 	current_zone = "forest_hub"
 	climax_triggered = false
-
+	solved_puzzles.clear()
+	
 	emit_signal("game_reset")
-
+	
 	# Save the reset state
-	if FirebaseManager:
-		FirebaseManager.save_progress()
+	_save_progress("nightfall_reset")
 
 
-func get_puzzle_seed(zone_id: String) -> int:
-	# Return cached seed or derive if not initialized
-	if puzzle_seeds.has(zone_id):
-		return puzzle_seeds[zone_id]
-	# Fallback: derive from session seed or generate random
-	if _session_seed != 0:
-		return hash(_session_seed + zone_id.hash())
-	return randi()
-
+# ============================================================================
+# PUBLIC API - Save Data Serialization
+# ============================================================================
 
 func get_save_data() -> Dictionary:
+	"""Get complete game state for saving"""
 	return {
-		"collected_clues": collected_clues,
-		"solved_puzzles": solved_puzzles,
-		"zones_status": zones_status,
+		"collected_clues": collected_clues.duplicate(true),
+		"solved_puzzles": solved_puzzles.duplicate(true),
+		"zones_status": zones_status.duplicate(true),
 		"current_zone": current_zone,
 		"climax_triggered": climax_triggered,
 		"game_completed": game_completed,
 		"attempt_count": attempt_count,
 		"nightfall_attempts": nightfall_attempts,
-		"ledger_entries": ledger_entries,
-		"puzzle_seeds": puzzle_seeds,
+		"ledger_entries": ledger_entries.duplicate(true),
+		"puzzle_seeds": puzzle_seeds.duplicate(true),
 		"session_seed": _session_seed,
-		"timestamp": Time.get_unix_time_from_system()
+		"selected_costumes": selected_costumes.duplicate(true),
+		"_costume_confirmed_status": _costume_confirmed_status.duplicate(true)
 	}
 
 
 func load_save_data(data: Dictionary):
+	"""Load game state from save data"""
 	if data.has("collected_clues"):
-		collected_clues = data.collected_clues
+		collected_clues = data.collected_clues.duplicate(true)
 	if data.has("solved_puzzles"):
-		solved_puzzles = data.solved_puzzles
+		solved_puzzles = data.solved_puzzles.duplicate(true)
 	if data.has("zones_status"):
-		zones_status = data.zones_status
+		zones_status = data.zones_status.duplicate(true)
 	if data.has("current_zone"):
 		current_zone = data.current_zone
 	if data.has("climax_triggered"):
@@ -295,18 +318,83 @@ func load_save_data(data: Dictionary):
 	if data.has("nightfall_attempts"):
 		nightfall_attempts = data.nightfall_attempts
 	if data.has("ledger_entries"):
-		ledger_entries = data.ledger_entries
+		ledger_entries = data.ledger_entries.duplicate(true)
 	if data.has("puzzle_seeds"):
-		puzzle_seeds = data.puzzle_seeds
+		puzzle_seeds = data.puzzle_seeds.duplicate(true)
 	if data.has("session_seed"):
 		_session_seed = data.session_seed
-		# Re-derive zone seeds from loaded session seed
 		_initialize_puzzle_seeds()
-
+	if data.has("selected_costumes"):
+		selected_costumes = data.selected_costumes.duplicate(true)
+	if data.has("_costume_confirmed_status"):
+		_costume_confirmed_status = data._costume_confirmed_status.duplicate(true)
+	
 	emit_signal("data_synced")
 
 
-# === SPAWN POSITION SAVE/RESTORE ===
+# ============================================================================
+# PUBLIC API - Puzzle System
+# ============================================================================
+
+func _initialize_puzzle_seeds():
+	"""Generate unique seeds for each zone's puzzles"""
+	if _session_seed == 0:
+		_session_seed = randi()
+	
+	# Derive zone seeds deterministically from session seed
+	puzzle_seeds.clear()
+	for zone in zones_status.keys():
+		puzzle_seeds[zone] = hash(_session_seed + zone.hash())
+
+
+func set_session_seed(session_seed: int):
+	"""Called by NetworkManager when joining/hosting"""
+	_session_seed = session_seed
+	_initialize_puzzle_seeds()
+	print("[GameState] Session seed set: ", _session_seed)
+
+
+func get_puzzle_seed(zone_id: String) -> int:
+	"""Return cached seed or derive if not initialized"""
+	if puzzle_seeds.has(zone_id):
+		return puzzle_seeds[zone_id]
+	if _session_seed != 0:
+		return hash(_session_seed + zone_id.hash())
+	return randi()
+
+
+func is_puzzle_solved(zone_id: String) -> bool:
+	return bool(solved_puzzles.get(zone_id, false))
+
+
+func set_puzzle_solved(zone_id: String, solved: bool = true) -> void:
+	solved_puzzles[zone_id] = solved
+
+
+# ============================================================================
+# PUBLIC API - Zone Lock System
+# ============================================================================
+
+func lock_zone_temp(zone_id: String, duration_sec: int) -> void:
+	var now := float(Time.get_ticks_msec()) / 1000.0
+	_zone_lock_until[zone_id] = now + float(duration_sec)
+
+
+func is_zone_locked_temp(zone_id: String) -> bool:
+	var now := float(Time.get_ticks_msec()) / 1000.0
+	var until := float(_zone_lock_until.get(zone_id, 0.0))
+	return now < until
+
+
+func get_zone_lock_remaining(zone_id: String) -> int:
+	var now := float(Time.get_ticks_msec()) / 1000.0
+	var until := float(_zone_lock_until.get(zone_id, 0.0))
+	return max(0, int(ceil(until - now)))
+
+
+# ============================================================================
+# PUBLIC API - Spawn Position Management
+# ============================================================================
 
 func save_spawn_position(peer_id: int, position: Vector2, zone: String = "forest_hub"):
 	"""Save a player's position before entering a zone."""
@@ -315,7 +403,6 @@ func save_spawn_position(peer_id: int, position: Vector2, zone: String = "forest
 		"zone": zone,
 		"timestamp": Time.get_unix_time_from_system()
 	}
-	print("[GameState] Saved spawn position for peer ", peer_id, ": ", position)
 
 
 func get_spawn_position(peer_id: int) -> Vector2:
@@ -329,7 +416,6 @@ func clear_spawn_position(peer_id: int):
 	"""Clear saved spawn position after using it."""
 	if saved_spawn_positions.has(peer_id):
 		saved_spawn_positions.erase(peer_id)
-		print("[GameState] Cleared spawn position for peer ", peer_id)
 
 
 func has_spawn_position(peer_id: int) -> bool:
@@ -337,29 +423,9 @@ func has_spawn_position(peer_id: int) -> bool:
 	return saved_spawn_positions.has(peer_id)
 
 
-# === RPC FUNCTIONS FOR POSITION SYNC ===
-# These are here because GameState is a singleton that exists in all scenes
-
-@rpc("authority", "reliable", "call_local")
-func _broadcast_position_rpc(peer_id: int, pos: Vector2):
-	"""Host broadcasts a player's position to all clients."""
-	save_spawn_position(peer_id, pos, "forest_hub")
-	print("[GameState] Received position for peer ", peer_id, ": ", pos)
-
-
-@rpc("any_peer", "reliable")
-func _report_position_to_host_rpc(peer_id: int, pos: Vector2):
-	"""Client reports their position to host."""
-	if not multiplayer.is_server():
-		return
-	
-	# Host saves and broadcasts to all
-	save_spawn_position(peer_id, pos, "forest_hub")
-	_broadcast_position_rpc.rpc(peer_id, pos)
-	print("[GameState] Host received and broadcast position for peer ", peer_id, ": ", pos)
-
-
-# === COSTUME SYSTEM FUNCTIONS ===
+# ============================================================================
+# PUBLIC API - Costume System
+# ============================================================================
 
 func get_costumes_for_role(role: String) -> Array:
 	"""Get available costumes for a role (detective or sidekick)."""
@@ -402,11 +468,61 @@ func reset_costume_selections():
 	selected_costumes = {"detective": "default", "sidekick": "default"}
 	_costume_confirmed_status = {"detective": false, "sidekick": false}
 
-# Puzzle Completion State (per zone)
-var solved_puzzles: Dictionary = {}  # zone_id -> bool
 
-func is_puzzle_solved(zone_id: String) -> bool:
-	return bool(solved_puzzles.get(zone_id, false))
+# ============================================================================
+# RPC FUNCTIONS - Position Sync
+# ============================================================================
 
-func set_puzzle_solved(zone_id: String, solved: bool = true) -> void:
-	solved_puzzles[zone_id] = solved
+@rpc("authority", "reliable", "call_local")
+func _broadcast_position_rpc(peer_id: int, pos: Vector2):
+	"""Host broadcasts a player's position to all clients."""
+	save_spawn_position(peer_id, pos, "forest_hub")
+
+
+@rpc("any_peer", "reliable")
+func _report_position_to_host_rpc(peer_id: int, pos: Vector2):
+	"""Client reports their position to host."""
+	if not multiplayer.is_server():
+		return
+	
+	# Host saves and broadcasts to all
+	save_spawn_position(peer_id, pos, "forest_hub")
+	_broadcast_position_rpc.rpc(peer_id, pos)
+
+
+# ============================================================================
+# PUBLIC API - Game Reset
+# ============================================================================
+
+func reset_all_progress():
+	"""Reset all game progress (for new game)"""
+	# Reset clues
+	for zone_id in collected_clues.keys():
+		collected_clues[zone_id].collected = false
+	
+	# Reset zones
+	for zone_id in zones_status.keys():
+		zones_status[zone_id] = ZoneStatus.AVAILABLE
+	
+	# Reset state
+	current_zone = "forest_hub"
+	climax_triggered = false
+	game_completed = false
+	attempt_count = 0
+	nightfall_attempts = 0
+	ledger_entries.clear()
+	solved_puzzles.clear()
+	
+	# Reset session
+	_session_seed = randi()
+	_initialize_puzzle_seeds()
+	
+	# Reset costumes
+	reset_costume_selections()
+	
+	# Clear saves
+	if LocalSaveManager:
+		LocalSaveManager.delete_save()
+	
+	emit_signal("game_reset")
+	print("[GameState] All progress reset")

@@ -312,7 +312,7 @@ func _process_join_code(code: String) -> void:
 		get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 		return
 	
-	_show_status("Step 1/2: Searching for host...\nCode: " + code + "\n\nMake sure:\n• Same Wi-Fi network\n• Host is still in lobby")
+	_show_status("Step 1/2: Searching for host...\nCode: " + code + "\n\nConnection Options:\n• Same Wi-Fi (no internet needed)\n• Hotspot: Host enables mobile hotspot")
 	print("[MainMenu] Starting discovery for code: ", code)
 	
 	var result = await NetworkManager.join_game_with_code(code)
@@ -341,7 +341,7 @@ func _show_join_error(message: String) -> void:
 		tween.tween_property(code_input, "position:x", code_input.position.x, 0.05)
 
 
-func _on_connection_established(peer_id: int):
+func _on_connection_established(peer_id: int, _role: int = 0):
 	print("Connected! Peer ID: ", peer_id)
 
 
