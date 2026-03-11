@@ -221,7 +221,7 @@ func _on_connection_state_changed(new_state: int, old_state: int):
 	_update_ui_for_state()
 
 
-func _on_connection_established(peer_id: int):
+func _on_connection_established(peer_id: int, _role: int = 0):
 	_update_status("Connected! Peer ID: " + str(peer_id))
 
 

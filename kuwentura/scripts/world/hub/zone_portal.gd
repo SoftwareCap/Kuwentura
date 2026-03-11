@@ -166,13 +166,13 @@ func _update_button_visibility():
 
 ## Sync button visibility and ready state to all clients
 @rpc("authority", "reliable")
-func _sync_button_visibility(visible: bool, detective_ready: bool, sidekick_ready: bool):
+func _sync_button_visibility(is_visible: bool, detective_ready: bool, sidekick_ready: bool):
 	# Update button visibility on client
 	if _enter_button:
-		_enter_button.visible = visible
+		_enter_button.visible = is_visible
 	
 	# On client, track presence based on visibility (both present = visible)
-	if visible:
+	if is_visible:
 		_detective_present = true
 		_sidekick_present = true
 	else:
@@ -186,7 +186,7 @@ func _sync_button_visibility(visible: bool, detective_ready: bool, sidekick_read
 	# Update button text to show status
 	_update_button_text()
 	
-	print("[ZonePortal] ", zone_name, " client synced - visible: ", visible, " ready D:", detective_ready, " S:", sidekick_ready)
+	print("[ZonePortal] ", zone_name, " client synced - visible: ", is_visible, " ready D:", detective_ready, " S:", sidekick_ready)
 
 
 ## Called when the enter button is pressed
