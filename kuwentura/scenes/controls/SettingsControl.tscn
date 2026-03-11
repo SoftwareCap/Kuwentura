@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://cmsvb2etjodsk"]
+
+[ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settings.png" id="1_chhvf"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_etj13"]
+size = Vector2(250, 250)
+
+[node name="SettingsControl" type="CanvasLayer"]
+
+[node name="Settings" type="TouchScreenButton" parent="."]
+position = Vector2(1240, 10.000001)
+scale = Vector2(0.4, 0.4)
+texture_normal = ExtResource("1_chhvf")
+shape = SubResource("RectangleShape2D_etj13")
+passby_press = true
+action = "game_option"
