@@ -962,7 +962,7 @@ shape = SubResource("RectangleShape2D_87r7r")
 position = Vector2(28, -1)
 
 [node name="ReturnMarker" type="Marker2D" parent="Zone Portals/PortalPinasHouse"]
-position = Vector2(28, 120)
+position = Vector2(28, 68)
 
 [node name="EnterButton" type="Button" parent="Zone Portals/PortalPinasHouse"]
 z_index = 1
@@ -1185,7 +1185,6 @@ theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_cpdo7")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_wp30c")
-theme_override_styles/hover = SubResource("StyleBoxFlat_1cndf")
 theme_override_styles/disabled = SubResource("StyleBoxFlat_wp30c")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_t6pvo")
 action_mode = 0

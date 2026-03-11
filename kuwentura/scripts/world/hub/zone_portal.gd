@@ -17,6 +17,10 @@ var _sidekick_ready: bool = false
 var _detective_confirming: bool = false
 var _sidekick_confirming: bool = false
 
+# Store individual player positions when they entered the portal area
+var _detective_entry_position: Vector2 = Vector2.ZERO
+var _sidekick_entry_position: Vector2 = Vector2.ZERO
+
 # Reference to the enter button (set via inspector or found dynamically)
 var _enter_button: Button = null
 
@@ -74,19 +78,25 @@ func _on_body_entered(body: Node2D):
 	
 	print("[ZonePortal] ", zone_name, " ENTERED: ", peer_id)
 	
+	# Safety check - don't process if scene is changing or multiplayer not available
+	if not is_inside_tree() or multiplayer == null or multiplayer.multiplayer_peer == null:
+		return
+	
 	if multiplayer.is_server():
 		if peer_id == 1:
 			_detective_present = true
 			_detective_peer_id = peer_id
+			_detective_entry_position = body.global_position
 		else:
 			_sidekick_present = true
 			_sidekick_peer_id = peer_id
+			_sidekick_entry_position = body.global_position
 		
 		print("[ZonePortal] Server state: D=", _detective_present, " S=", _sidekick_present)
 		_update_button_visibility()
 	else:
-		# Client reports to server
-		_report_entered.rpc_id(1, peer_id)
+		# Client reports to server with position
+		_report_entered.rpc_id(1, peer_id, body.global_position)
 
 
 func _on_body_exited(body: Node2D):
@@ -99,15 +109,21 @@ func _on_body_exited(body: Node2D):
 	
 	print("[ZonePortal] ", zone_name, " EXITED: ", peer_id)
 	
+	# Safety check - don't process if scene is changing or multiplayer not available
+	if not is_inside_tree() or multiplayer == null or multiplayer.multiplayer_peer == null:
+		return
+	
 	if multiplayer.is_server():
 		if peer_id == 1:
 			_detective_present = false
 			_detective_peer_id = 0
 			_detective_ready = false  # Reset ready state when leaving
+			_detective_entry_position = Vector2.ZERO  # Clear stored position
 		else:
 			_sidekick_present = false
 			_sidekick_peer_id = 0
 			_sidekick_ready = false  # Reset ready state when leaving
+			_sidekick_entry_position = Vector2.ZERO  # Clear stored position
 		
 		_update_button_visibility()
 	else:
@@ -115,18 +131,22 @@ func _on_body_exited(body: Node2D):
 
 
 @rpc("any_peer", "reliable")
-func _report_entered(peer_id: int):
+func _report_entered(peer_id: int, entry_position: Vector2 = Vector2.ZERO):
+	if not is_inside_tree() or multiplayer == null:
+		return
 	if not multiplayer.is_server():
 		return
 	
 	if peer_id == 1:
 		_detective_present = true
 		_detective_peer_id = peer_id
+		_detective_entry_position = entry_position
 	else:
 		_sidekick_present = true
 		_sidekick_peer_id = peer_id
+		_sidekick_entry_position = entry_position
 	
-	print("[ZonePortal] Server got ENTER from ", peer_id, " -> D:", _detective_present, " S:", _sidekick_present)
+	print("[ZonePortal] Server got ENTER from ", peer_id, " at position ", entry_position, " -> D:", _detective_present, " S:", _sidekick_present)
 	_update_button_visibility()
 	
 	# If both players are now present, update button text immediately
@@ -136,6 +156,8 @@ func _report_entered(peer_id: int):
 
 @rpc("any_peer", "reliable")
 func _report_exited(peer_id: int):
+	if not is_inside_tree() or multiplayer == null:
+		return
 	if not multiplayer.is_server():
 		return
 	
@@ -143,16 +165,22 @@ func _report_exited(peer_id: int):
 		_detective_present = false
 		_detective_peer_id = 0
 		_detective_ready = false
+		_detective_entry_position = Vector2.ZERO
 	else:
 		_sidekick_present = false
 		_sidekick_peer_id = 0
 		_sidekick_ready = false
+		_sidekick_entry_position = Vector2.ZERO
 	
 	_update_button_visibility()
 
 
 ## Update button visibility - only visible when BOTH players are present
 func _update_button_visibility():
+	# Safety check - don't sync if scene is changing
+	if not is_inside_tree() or multiplayer == null or multiplayer.multiplayer_peer == null:
+		return
+	
 	var both_present = _detective_present and _sidekick_present
 	
 	# Update local button
@@ -176,6 +204,10 @@ func _update_button_visibility():
 ## Sync button visibility and ready state to all clients
 @rpc("authority", "reliable")
 func _sync_button_visibility(button_visible: bool, detective_ready: bool, sidekick_ready: bool):
+	# Safety check - node might have been destroyed
+	if not is_inside_tree():
+		return
+	
 	# Update button visibility on client
 	if _enter_button:
 		_enter_button.visible = button_visible
@@ -203,6 +235,10 @@ func _sync_button_visibility(button_visible: bool, detective_ready: bool, sideki
 
 ## Called when the enter button is pressed
 func _on_enter_button_pressed():
+	# Safety check
+	if not is_inside_tree() or multiplayer == null:
+		return
+	
 	var my_peer_id = multiplayer.get_unique_id()
 	
 	if multiplayer.is_server():
@@ -239,6 +275,8 @@ func _on_enter_button_pressed():
 ## Client notifies server that they confirmed (first click)
 @rpc("any_peer", "reliable")
 func _player_confirm_rpc(peer_id: int):
+	if not is_inside_tree() or multiplayer == null:
+		return
 	if not multiplayer.is_server():
 		return
 	
@@ -258,6 +296,8 @@ func _player_confirm_rpc(peer_id: int):
 ## Client notifies server that they cancelled (second click)
 @rpc("any_peer", "reliable")
 func _player_cancel_rpc(peer_id: int):
+	if not is_inside_tree() or multiplayer == null:
+		return
 	if not multiplayer.is_server():
 		return
 	
@@ -276,6 +316,8 @@ func _player_cancel_rpc(peer_id: int):
 ## Sync confirming state to all clients for UI updates
 @rpc("authority", "reliable")
 func _sync_confirming_state(detective_confirming: bool, sidekick_confirming: bool):
+	if not is_inside_tree():
+		return
 	_detective_confirming = detective_confirming
 	_sidekick_confirming = sidekick_confirming
 	# Update ready states based on confirming states
@@ -287,6 +329,10 @@ func _sync_confirming_state(detective_confirming: bool, sidekick_confirming: boo
 ## Update button text to show ready status
 func _update_button_text():
 	if not _enter_button:
+		return
+	
+	# Safety check for multiplayer
+	if not is_inside_tree() or multiplayer == null:
 		return
 	
 	var my_peer_id = multiplayer.get_unique_id()
@@ -323,6 +369,9 @@ func _update_button_text():
 
 ## Check if both players are ready and enter the zone
 func _check_and_enter():
+	# Safety check
+	if not is_inside_tree() or multiplayer == null or multiplayer.multiplayer_peer == null:
+		return
 	if not multiplayer.is_server():
 		return
 	
@@ -347,22 +396,44 @@ func _check_and_enter():
 
 ## Perform the actual zone entry
 func _enter_zone():
+	# Safety check
+	if not is_inside_tree() or multiplayer == null or multiplayer.multiplayer_peer == null:
+		return
 	_save_positions()
 	rpc_enter_zone.rpc(scene_path)
 
 
 func _save_positions():
-	var return_marker = get_node_or_null("ReturnMarker")
-	var return_pos = return_marker.global_position if return_marker else global_position + Vector2(0, 100)
+	# Safety check
+	if not is_inside_tree():
+		return
 	
+	# Save individual player positions where they entered the portal
+	# This ensures they return to the exact spot they left
 	if _detective_present:
-		GameState.save_spawn_position(1, return_pos, "forest_hub")
+		var detective_pos = _detective_entry_position
+		# If position wasn't recorded (shouldn't happen), fall back to ReturnMarker
+		if detective_pos == Vector2.ZERO:
+			var return_marker = get_node_or_null("ReturnMarker")
+			detective_pos = return_marker.global_position if return_marker else global_position + Vector2(0, 100)
+		GameState.save_spawn_position(1, detective_pos, "forest_hub")
+		print("[ZonePortal] Saved detective return position: ", detective_pos)
+	
 	if _sidekick_present:
-		GameState.save_spawn_position(_sidekick_peer_id, return_pos, "forest_hub")
+		var sidekick_pos = _sidekick_entry_position
+		# If position wasn't recorded (shouldn't happen), fall back to ReturnMarker
+		if sidekick_pos == Vector2.ZERO:
+			var return_marker = get_node_or_null("ReturnMarker")
+			sidekick_pos = return_marker.global_position if return_marker else global_position + Vector2(-50, 100)
+		GameState.save_spawn_position(_sidekick_peer_id, sidekick_pos, "forest_hub")
+		print("[ZonePortal] Saved sidekick return position: ", sidekick_pos)
 
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_enter_zone(path: String):
+	# Safety check - scene might already be changing
+	if not is_inside_tree():
+		return
 	print("[ZonePortal] Changing scene to: ", path)
 	get_tree().change_scene_to_file(path)
 

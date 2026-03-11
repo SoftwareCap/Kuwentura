@@ -201,9 +201,11 @@ func _start_discovery_listen(target_code: String) -> Dictionary:
 	_listen_socket = PacketPeerUDP.new()
 	_listen_socket.set_broadcast_enabled(true)
 	
+	# Must bind to DISCOVERY_PORT to receive broadcasts from host
 	var error = _listen_socket.bind(DISCOVERY_PORT)
 	if error != OK:
 		push_warning("[OfflineNetwork] Failed to bind discovery socket: " + str(error))
+		_listen_socket = null
 		return {"success": false, "error": "Port in use"}
 	
 	_is_listening = true
@@ -418,8 +420,9 @@ func get_host_connection_info() -> Dictionary:
 ## Join a game using direct IP address
 ## This is the primary connection method - works across any network
 func join_with_ip(host_ip: String, code: String = "") -> Dictionary:
+	# Force cleanup if in any state other than DISCONNECTED
 	if _state != ConnectionState.DISCONNECTED:
-		return {"success": false, "error": "Already connected"}
+		force_reset_for_reconnection()
 	
 	if host_ip.is_empty():
 		return {"success": false, "error": "IP address is required"}
@@ -479,8 +482,9 @@ func join_with_qr(qr_string: String) -> Dictionary:
 func join_game_with_code(invite_code: String) -> Dictionary:
 	print("[OfflineNetwork] Starting discovery for code: ", invite_code)
 	
+	# Force cleanup if in any state other than DISCONNECTED
 	if _state != ConnectionState.DISCONNECTED:
-		return {"success": false, "error": "Already connected"}
+		force_reset_for_reconnection()
 	
 	var target_code = invite_code.to_upper()
 	var discovery = _start_discovery_listen(target_code)
@@ -633,6 +637,17 @@ func disconnect_network():
 	_change_state(ConnectionState.DISCONNECTED)
 	
 	print("[OfflineNetwork] Disconnected")
+
+
+## Force reset network state for reconnection
+func force_reset_for_reconnection():
+	"""Force cleanup all network state to ensure clean reconnection."""
+	if multiplayer.multiplayer_peer:
+		multiplayer.multiplayer_peer.close()
+		multiplayer.multiplayer_peer = null
+	_cleanup()
+	_state = ConnectionState.DISCONNECTED
+	print("[OfflineNetwork] Force reset for reconnection")
 
 
 func disconnect_from_session():
@@ -855,15 +870,24 @@ func _cleanup():
 	_world_progress.clear()
 	_partner_states.clear()
 	
+	# Ensure multiplayer peer is fully cleaned up
 	if multiplayer.multiplayer_peer:
 		multiplayer.multiplayer_peer.close()
 		multiplayer.multiplayer_peer = null
+	
+	# Force clear multiplayer peer reference
+	multiplayer.multiplayer_peer = null
+	_multiplayer_peer = null
 	
 	# Clean up discovery sockets
 	if _broadcast_socket:
 		_broadcast_socket.close()
 		_broadcast_socket = null
 	_stop_discovery_listen()
+	
+	# Reset discovery target
+	_target_code = ""
+	_last_discovered_host = {}
 
 
 func _wait_for_connection() -> Dictionary:

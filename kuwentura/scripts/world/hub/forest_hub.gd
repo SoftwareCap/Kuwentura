@@ -147,6 +147,13 @@ func _ready():
 					if other_peer != peer_id and other_peer != multiplayer.get_unique_id():
 						print("[ForestHub] Telling peer ", other_peer, " to spawn peer ", peer_id)
 						NetworkManager.request_spawn_player(other_peer, peer_id, false)
+		
+		# Clear saved spawn positions after all players have been spawned
+		# This prevents positions from being used for lobby/rejoin spawns
+		await get_tree().create_timer(0.5).timeout
+		GameState.clear_spawn_position(1)
+		for peer_id in multiplayer.get_peers():
+			GameState.clear_spawn_position(peer_id)
 
 
 ## Setup room code label - only visible to host
@@ -304,22 +311,17 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 	player.name = str(peer_id)
 	
 	# Get spawn position
-	# For rejoin: sidekick spawns at spawn point, detective uses saved position if available
+	# Check if player has a saved position (from returning from a zone)
 	var saved_pos = GameState.get_spawn_position(peer_id)
-	var is_rejoin_scenario = GameState.has_spawn_position(1)  # If detective has saved position, it's a rejoin
+	var has_saved_pos = saved_pos != Vector2.ZERO
 	
-	if saved_pos != Vector2.ZERO and is_detective:
-		# Detective (host) uses saved position from rejoin
+	if has_saved_pos:
+		# Player is returning from a zone - use their saved position
 		spawn_pos = saved_pos
-		GameState.clear_spawn_position(peer_id)  # Clear after using
-		print("[ForestHub] Using saved rejoin position for Detective: ", spawn_pos)
-	elif saved_pos != Vector2.ZERO and not is_detective and not is_rejoin_scenario:
-		# Sidekick returning from zone (normal gameplay, not rejoin)
-		spawn_pos = saved_pos
-		GameState.clear_spawn_position(peer_id)  # Clear after using
-		print("[ForestHub] Using saved return position for Sidekick (zone exit): ", spawn_pos)
+		# Don't clear here - clear after all players are spawned to avoid race conditions
+		print("[ForestHub] Using saved return position for ", "Detective" if is_detective else "Sidekick", ": ", spawn_pos)
 	else:
-		# First time spawn - use initial spawn markers
+		# First time spawn or rejoin - use initial spawn markers
 		if is_detective:
 			spawn_marker = spawn_points.get_node_or_null("DetectiveSpawn")
 		else:
@@ -430,6 +432,9 @@ func _on_partner_disconnected(reason: String) -> void:
 		# Unpause before leaving
 		get_tree().paused = false
 		
+		# Ensure network is fully disconnected
+		NetworkManager.disconnect_network()
+		
 		# Show a message to the player (optional - could add a popup here)
 		
 		# Return to main menu after a short delay to allow cleanup
@@ -490,20 +495,15 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 	
 	player.name = str(peer_id)
 	
-	# Check for saved position (rejoin or returning from zone)
+	# Check for saved position (from returning from a zone)
 	var saved_pos = GameState.get_spawn_position(peer_id)
-	var is_rejoin_scenario = GameState.has_spawn_position(1)  # If detective has saved position, it's a rejoin
+	var has_saved_pos = saved_pos != Vector2.ZERO
 	
-	if saved_pos != Vector2.ZERO and is_detective_role:
-		# Detective uses saved position (from rejoin)
+	if has_saved_pos:
+		# Player is returning from a zone - use their saved position
 		spawn_pos = saved_pos
-		GameState.clear_spawn_position(peer_id)  # Clear after using
-		print("[ForestHub] RPC: Using saved rejoin position for Detective: ", spawn_pos)
-	elif saved_pos != Vector2.ZERO and not is_detective_role and not is_rejoin_scenario:
-		# Sidekick returning from zone (normal gameplay, not rejoin)
-		spawn_pos = saved_pos
-		GameState.clear_spawn_position(peer_id)  # Clear after using
-		print("[ForestHub] RPC: Using saved return position for Sidekick (zone exit): ", spawn_pos)
+		# Don't clear here - server clears after all players are spawned
+		print("[ForestHub] RPC: Using saved return position for ", "Detective" if is_detective_role else "Sidekick", ": ", spawn_pos)
 	else:
 		# Use initial spawn markers
 		if is_detective_role:
