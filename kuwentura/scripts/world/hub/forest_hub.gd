@@ -88,6 +88,10 @@ func _ready():
 	if not NetworkManager.despawn_player_requested.is_connected(_on_despawn_player_requested):
 		NetworkManager.despawn_player_requested.connect(_on_despawn_player_requested)
 	
+	# Connect to rejoin signal for position sync
+	if not NetworkManager.rejoin_game_requested.is_connected(_on_rejoin_game_requested):
+		NetworkManager.rejoin_game_requested.connect(_on_rejoin_game_requested)
+	
 	# Connect touch controls pause button
 	print("[ForestHub] Setting up touch controls...")
 	if touch_controls:
@@ -299,13 +303,21 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 	
 	player.name = str(peer_id)
 	
-	# Get spawn position - use saved position if returning from a zone
+	# Get spawn position
+	# For rejoin: sidekick spawns at spawn point, detective uses saved position if available
 	var saved_pos = GameState.get_spawn_position(peer_id)
-	if saved_pos != Vector2.ZERO:
-		# Use saved return position from the zone portal (outside the zone entrance)
+	var is_rejoin_scenario = GameState.has_spawn_position(1)  # If detective has saved position, it's a rejoin
+	
+	if saved_pos != Vector2.ZERO and is_detective:
+		# Detective (host) uses saved position from rejoin
 		spawn_pos = saved_pos
 		GameState.clear_spawn_position(peer_id)  # Clear after using
-		print("[ForestHub] Using saved return position for ", "Detective" if is_detective else "Sidekick", ": ", spawn_pos)
+		print("[ForestHub] Using saved rejoin position for Detective: ", spawn_pos)
+	elif saved_pos != Vector2.ZERO and not is_detective and not is_rejoin_scenario:
+		# Sidekick returning from zone (normal gameplay, not rejoin)
+		spawn_pos = saved_pos
+		GameState.clear_spawn_position(peer_id)  # Clear after using
+		print("[ForestHub] Using saved return position for Sidekick (zone exit): ", spawn_pos)
 	else:
 		# First time spawn - use initial spawn markers
 		if is_detective:
@@ -334,13 +346,16 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 	add_child(player, true)
 	
 	# Force visibility and re-stabilize after adding to tree
-	player.visible = true
+	_force_visibility_recursive(player)
 	_call_stabilize_after_frame(player)
+	
+	# Deferred visibility check to ensure it sticks
+	_call_deferred_visibility_check(player)
 	
 	print("[ForestHub] === SPAWNED ", player.role, " (ID: ", peer_id, ") at ", spawn_pos, " visible=", player.visible, " in_tree=", player.is_inside_tree())
 
 
-func _on_player_connected(peer_id: int) -> void:
+func _on_player_connected(peer_id: int, _role: int = 0) -> void:
 	print("[ForestHub] Player connected signal: ", peer_id)
 	
 	if multiplayer.is_server():
@@ -364,6 +379,8 @@ func _on_player_connected(peer_id: int) -> void:
 		# Server spawns the new player locally
 		if not _spawned_players.has(peer_id):
 			_spawn_player_for_peer(peer_id)
+			# Ensure the player is visible after spawning
+			_ensure_player_visible(peer_id)
 		
 		# Tell the new peer to spawn the host (ID 1)
 		print("[ForestHub] Telling peer ", peer_id, " to spawn host (ID 1)")
@@ -374,6 +391,8 @@ func _on_player_connected(peer_id: int) -> void:
 			if other_peer != peer_id:
 				print("[ForestHub] Telling peer ", other_peer, " to spawn new player ", peer_id)
 				NetworkManager.request_spawn_player(other_peer, peer_id, false)
+				# Ensure visibility on the remote peer's side as well
+				_ensure_player_visible_on_peer.rpc_id(other_peer, peer_id)
 
 
 func _on_player_disconnected(peer_id: int) -> void:
@@ -396,15 +415,16 @@ func _on_player_disconnected(peer_id: int) -> void:
 
 
 ## Called when partner disconnects (host disconnected for sidekick, or sidekick disconnected for host)
-func _on_partner_disconnected(player_data: Dictionary) -> void:
-	print("[ForestHub] Partner disconnected: ", player_data)
+func _on_partner_disconnected(reason: String) -> void:
+	print("[ForestHub] Partner disconnected, reason: ", reason)
 	
-	# Get the reason for disconnection
-	var reason = player_data.get("reason", "")
+	# Only go back to main menu if WE are the sidekick and the HOST disconnected
+	# The host (detective) should stay in the game when sidekick disconnects
+	var my_role = NetworkManager.get_my_role()
 	
-	# If host disconnected (detected via reason or by checking if we were the sidekick)
-	# Host disconnection can be detected by reason or by having no active connection
-	if reason == "host_disconnected" or not NetworkManager.has_active_connection():
+	# Host disconnected → sidekick goes back to menu
+	# Sidekick disconnected → host stays in game (can wait for rejoin)
+	if reason == "host_disconnected" or (not NetworkManager.has_active_connection() and my_role != "detective"):
 		print("[ForestHub] Host disconnected! Returning to main menu...")
 		
 		# Unpause before leaving
@@ -470,12 +490,20 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 	
 	player.name = str(peer_id)
 	
-	# Check for saved position (returning from zone)
+	# Check for saved position (rejoin or returning from zone)
 	var saved_pos = GameState.get_spawn_position(peer_id)
-	if saved_pos != Vector2.ZERO:
-		# Use saved return position from the zone portal (outside the zone entrance)
+	var is_rejoin_scenario = GameState.has_spawn_position(1)  # If detective has saved position, it's a rejoin
+	
+	if saved_pos != Vector2.ZERO and is_detective_role:
+		# Detective uses saved position (from rejoin)
 		spawn_pos = saved_pos
-		print("[ForestHub] RPC: Using saved return position for ", "Detective" if is_detective_role else "Sidekick", ": ", spawn_pos)
+		GameState.clear_spawn_position(peer_id)  # Clear after using
+		print("[ForestHub] RPC: Using saved rejoin position for Detective: ", spawn_pos)
+	elif saved_pos != Vector2.ZERO and not is_detective_role and not is_rejoin_scenario:
+		# Sidekick returning from zone (normal gameplay, not rejoin)
+		spawn_pos = saved_pos
+		GameState.clear_spawn_position(peer_id)  # Clear after using
+		print("[ForestHub] RPC: Using saved return position for Sidekick (zone exit): ", spawn_pos)
 	else:
 		# Use initial spawn markers
 		if is_detective_role:
@@ -497,12 +525,15 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 	_stabilize_player_physics(player)
 	
 	player.set_multiplayer_authority(peer_id)
-	player.visible = true
+	_force_visibility_recursive(player)
 	_spawned_players[peer_id] = player
 	add_child(player, true)
 	
 	# Stabilize after adding to tree
 	_call_stabilize_after_frame(player)
+	
+	# Deferred visibility check
+	_call_deferred_visibility_check(player)
 	
 	print("[ForestHub] === RPC SPAWNED ", player.role, " (ID: ", peer_id, ") at ", player.global_position, " visible=", player.visible)
 
@@ -543,6 +574,45 @@ func _call_stabilize_after_frame(player: CharacterBody2D) -> void:
 			player._force_grounded()
 
 
+## Force visibility on a player and all its children recursively
+func _force_visibility_recursive(node: Node) -> void:
+	if node is CanvasItem:
+		node.visible = true
+		if node is AnimatedSprite2D:
+			node.play("idle")
+	for child in node.get_children():
+		_force_visibility_recursive(child)
+
+
+## Deferred visibility check to ensure player stays visible
+func _call_deferred_visibility_check(player: CharacterBody2D) -> void:
+	await get_tree().create_timer(0.1).timeout
+	if is_instance_valid(player):
+		_force_visibility_recursive(player)
+		print("[ForestHub] Deferred visibility check for player ", player.name)
+
+
+## Ensure a player is visible (called after spawning)
+func _ensure_player_visible(peer_id: int) -> void:
+	var player_node = get_node_or_null(str(peer_id))
+	if not player_node:
+		return
+	
+	_force_visibility_recursive(player_node)
+	print("[ForestHub] Ensured visibility for player ", peer_id)
+
+
+## RPC to ensure player visibility on a specific peer
+@rpc("authority", "reliable")
+func _ensure_player_visible_on_peer(peer_id: int) -> void:
+	var player_node = get_node_or_null(str(peer_id))
+	if not player_node:
+		return
+	
+	_force_visibility_recursive(player_node)
+	print("[ForestHub] Ensured visibility on peer for player ", peer_id)
+
+
 func _rpc_despawn_player(peer_id: int) -> void:
 	if peer_id == multiplayer.get_unique_id():
 		return
@@ -563,6 +633,36 @@ func _exit_tree():
 		NetworkManager.spawn_player_requested.disconnect(_on_spawn_player_requested)
 	if NetworkManager.despawn_player_requested.is_connected(_on_despawn_player_requested):
 		NetworkManager.despawn_player_requested.disconnect(_on_despawn_player_requested)
+	if NetworkManager.rejoin_game_requested.is_connected(_on_rejoin_game_requested):
+		NetworkManager.rejoin_game_requested.disconnect(_on_rejoin_game_requested)
+
+
+## Handle rejoin game - update detective position if already in forest
+func _on_rejoin_game_requested(rejoin_data: Dictionary) -> void:
+	print("[ForestHub] Rejoin data received, updating player positions...")
+	
+	var player_positions = rejoin_data.get("player_positions", {})
+	
+	# Update detective position if they're already spawned
+	var detective_node = get_node_or_null("1")
+	if detective_node and str(detective_node.name) == "1":
+		var host_pos_data = player_positions.get("1", {})
+		if host_pos_data is Dictionary and host_pos_data.has("position"):
+			var pos = Vector2(host_pos_data.position.x, host_pos_data.position.y)
+			detective_node.global_position = pos
+			print("[ForestHub] Updated detective position to: ", pos)
+	
+	# Spawn any missing players and ensure visibility
+	for peer_id_str in player_positions.keys():
+		var peer_id = int(peer_id_str)
+		if peer_id != multiplayer.get_unique_id() and not _spawned_players.has(peer_id):
+			print("[ForestHub] Spawning missing player from rejoin: ", peer_id)
+			if peer_id == 1:
+				_rpc_spawn_player(peer_id, true)  # Detective
+			else:
+				_rpc_spawn_player(peer_id, false)  # Sidekick
+			# Ensure visibility after spawn
+			_ensure_player_visible(peer_id)
 
 
 func _process(_delta):

@@ -13,8 +13,15 @@ var _sidekick_peer_id: int = 0
 var _detective_ready: bool = false
 var _sidekick_ready: bool = false
 
+# Track if players are in "confirming" state (first click - showing "Cancel")
+var _detective_confirming: bool = false
+var _sidekick_confirming: bool = false
+
 # Reference to the enter button (set via inspector or found dynamically)
 var _enter_button: Button = null
+
+# Store the original button text
+var _base_button_text: String = "Enter Zone"
 
 
 func _ready() -> void:
@@ -26,6 +33,7 @@ func _ready() -> void:
 	# Find the enter button (expected naming: "Enter[ZoneName]Button")
 	_enter_button = _find_enter_button()
 	if _enter_button:
+		_base_button_text = _enter_button.text
 		_enter_button.visible = false  # Start invisible
 		_enter_button.pressed.connect(_on_enter_button_pressed)
 		print("[ZonePortal] ", zone_name, " found button: ", _enter_button.name)
@@ -102,7 +110,6 @@ func _on_body_exited(body: Node2D):
 			_sidekick_ready = false  # Reset ready state when leaving
 		
 		_update_button_visibility()
-		_sync_ready_state.rpc(_detective_ready, _sidekick_ready)  # Sync reset state
 	else:
 		_report_exited.rpc_id(1, peer_id)
 
@@ -152,10 +159,12 @@ func _update_button_visibility():
 	if _enter_button:
 		_enter_button.visible = both_present
 	
-	# Reset ready states if not both present
+	# Reset all states if not both present
 	if not both_present:
 		_detective_ready = false
 		_sidekick_ready = false
+		_detective_confirming = false
+		_sidekick_confirming = false
 		_update_button_text()
 	
 	# Sync visibility to all clients
@@ -166,18 +175,21 @@ func _update_button_visibility():
 
 ## Sync button visibility and ready state to all clients
 @rpc("authority", "reliable")
-func _sync_button_visibility(is_visible: bool, detective_ready: bool, sidekick_ready: bool):
+func _sync_button_visibility(button_visible: bool, detective_ready: bool, sidekick_ready: bool):
 	# Update button visibility on client
 	if _enter_button:
-		_enter_button.visible = is_visible
+		_enter_button.visible = button_visible
 	
 	# On client, track presence based on visibility (both present = visible)
-	if is_visible:
+	if button_visible:
 		_detective_present = true
 		_sidekick_present = true
 	else:
 		_detective_present = false
 		_sidekick_present = false
+		# Reset confirming states when players leave
+		_detective_confirming = false
+		_sidekick_confirming = false
 	
 	# Update ready states
 	_detective_ready = detective_ready
@@ -186,7 +198,7 @@ func _sync_button_visibility(is_visible: bool, detective_ready: bool, sidekick_r
 	# Update button text to show status
 	_update_button_text()
 	
-	print("[ZonePortal] ", zone_name, " client synced - visible: ", is_visible, " ready D:", detective_ready, " S:", sidekick_ready)
+	print("[ZonePortal] ", zone_name, " client synced - visible: ", button_visible, " ready D:", detective_ready, " S:", sidekick_ready)
 
 
 ## Called when the enter button is pressed
@@ -196,40 +208,79 @@ func _on_enter_button_pressed():
 	if multiplayer.is_server():
 		# Host (Detective) clicked
 		if _detective_present:
-			_detective_ready = true
-			print("[ZonePortal] Detective is ready to enter ", zone_name)
-			_check_and_enter()
-			_sync_ready_state.rpc(_detective_ready, _sidekick_ready)
+			if _detective_confirming:
+				# Second click - cancel
+				_detective_confirming = false
+				_detective_ready = false
+				print("[ZonePortal] Detective cancelled entering ", zone_name)
+			else:
+				# First click - confirm
+				_detective_confirming = true
+				_detective_ready = true
+				print("[ZonePortal] Detective is ready to enter ", zone_name)
+				_check_and_enter()
+			_sync_confirming_state.rpc(_detective_confirming, _sidekick_confirming)
+			_update_button_text()
 	else:
 		# Client (Sidekick) clicked - notify server
-		_player_ready_rpc.rpc_id(1, my_peer_id)
-		# Update local UI immediately for responsiveness
-		_sidekick_ready = true
+		if _sidekick_confirming:
+			# Second click - cancel
+			_player_cancel_rpc.rpc_id(1, my_peer_id)
+			_sidekick_confirming = false
+			_sidekick_ready = false
+		else:
+			# First click - confirm
+			_player_confirm_rpc.rpc_id(1, my_peer_id)
+			_sidekick_confirming = true
+			_sidekick_ready = true
 		_update_button_text()
 
 
-## Client notifies server that they clicked the button
+## Client notifies server that they confirmed (first click)
 @rpc("any_peer", "reliable")
-func _player_ready_rpc(peer_id: int):
+func _player_confirm_rpc(peer_id: int):
 	if not multiplayer.is_server():
 		return
 	
 	if peer_id == 1:
+		_detective_confirming = true
 		_detective_ready = true
 	else:
+		_sidekick_confirming = true
 		_sidekick_ready = true
 	
-	print("[ZonePortal] Player ", peer_id, " is ready to enter ", zone_name)
+	print("[ZonePortal] Player ", peer_id, " confirmed entering ", zone_name)
 	_update_button_text()
-	_sync_ready_state.rpc(_detective_ready, _sidekick_ready)
+	_sync_confirming_state.rpc(_detective_confirming, _sidekick_confirming)
 	_check_and_enter()
 
 
-## Sync ready state to all clients for UI updates
+## Client notifies server that they cancelled (second click)
+@rpc("any_peer", "reliable")
+func _player_cancel_rpc(peer_id: int):
+	if not multiplayer.is_server():
+		return
+	
+	if peer_id == 1:
+		_detective_confirming = false
+		_detective_ready = false
+	else:
+		_sidekick_confirming = false
+		_sidekick_ready = false
+	
+	print("[ZonePortal] Player ", peer_id, " cancelled entering ", zone_name)
+	_update_button_text()
+	_sync_confirming_state.rpc(_detective_confirming, _sidekick_confirming)
+
+
+## Sync confirming state to all clients for UI updates
 @rpc("authority", "reliable")
-func _sync_ready_state(detective_ready: bool, sidekick_ready: bool):
-	_detective_ready = detective_ready
-	_sidekick_ready = sidekick_ready
+func _sync_confirming_state(detective_confirming: bool, sidekick_confirming: bool):
+	_detective_confirming = detective_confirming
+	_sidekick_confirming = sidekick_confirming
+	# Update ready states based on confirming states
+	_detective_ready = detective_confirming
+	_sidekick_ready = sidekick_confirming
 	_update_button_text()
 
 
@@ -238,22 +289,36 @@ func _update_button_text():
 	if not _enter_button:
 		return
 	
-	# Get original button text (strip any ready indicators)
-	var base_text = _enter_button.text.replace(" ✓", "").split(" (")[0]
+	var my_peer_id = multiplayer.get_unique_id()
+	var is_detective = (my_peer_id == 1)
 	
 	# Only update text if both are present
 	if not (_detective_present and _sidekick_present):
-		_enter_button.text = base_text
+		_enter_button.text = _base_button_text
 		return
 	
-	if _detective_ready and _sidekick_ready:
-		_enter_button.text = base_text + " (Entering...)"
-	elif _detective_ready:
-		_enter_button.text = base_text + " (Waiting for Sidekick...)"
-	elif _sidekick_ready:
-		_enter_button.text = base_text + " (Waiting for Detective...)"
+	# Check if local player is confirming (show "Cancel")
+	if is_detective:
+		if _detective_confirming:
+			_enter_button.text = "Cancel"
+			return
 	else:
-		_enter_button.text = base_text
+		if _sidekick_confirming:
+			_enter_button.text = "Cancel"
+			return
+	
+	# Local player not confirming - show waiting message only if local player is ready
+	if _detective_ready and _sidekick_ready:
+		_enter_button.text = _base_button_text + " (Entering...)"
+	elif is_detective and _detective_ready:
+		# Detective is ready, waiting for sidekick
+		_enter_button.text = _base_button_text + " (Waiting for Sidekick...)"
+	elif not is_detective and _sidekick_ready:
+		# Sidekick is ready, waiting for detective
+		_enter_button.text = _base_button_text + " (Waiting for Detective...)"
+	else:
+		# Local player not ready, show default text
+		_enter_button.text = _base_button_text
 
 
 ## Check if both players are ready and enter the zone

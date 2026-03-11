@@ -153,6 +153,8 @@ func _physics_process(delta):
 				"left" if sprite.flip_h else "right",
 				current_anim
 			)
+			# Also report position to host for rejoin sync
+			NetworkManager.report_position(multiplayer.get_unique_id(), global_position)
 	else:
 		# Remote player - don't run physics, just interpolate position
 		# Position is updated in _process via _update_from_network_state

@@ -86,6 +86,8 @@ func _ready():
 		NetworkManager.room_code_generated.connect(_on_room_code_generated)
 	if not NetworkManager.game_started.is_connected(_on_game_started):
 		NetworkManager.game_started.connect(_on_game_started)
+	if not NetworkManager.rejoin_game_requested.is_connected(_on_rejoin_game_requested):
+		NetworkManager.rejoin_game_requested.connect(_on_rejoin_game_requested)
 
 
 # NEW: Setup visual pressed feedback for buttons
@@ -291,6 +293,13 @@ func _process_direct_ip(host_ip: String) -> void:
 		_show_status("Failed to connect to " + host_ip + ":\n" + result.get("error", "Unknown error"))
 		return
 	
+	# Wait a moment to check if host is already playing (rejoin scenario)
+	await get_tree().create_timer(0.5).timeout
+	
+	# Check if we're still in the main menu (not already transitioned by rejoin signal)
+	if not is_inside_tree():
+		return  # Already transitioned to another scene
+	
 	_show_status("Connected! Waiting for game to start...")
 	get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 
@@ -309,6 +318,13 @@ func _process_join_code(code: String) -> void:
 			_show_status("Failed to join localhost: " + local_result.get("error", "Unknown"))
 			return
 		
+		# Wait a moment to check if host is already playing (rejoin scenario)
+		await get_tree().create_timer(0.5).timeout
+		
+		# Check if we're still in the main menu (not already transitioned by rejoin signal)
+		if not is_inside_tree():
+			return  # Already transitioned to another scene
+		
 		get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 		return
 	
@@ -325,8 +341,16 @@ func _process_join_code(code: String) -> void:
 		return
 	
 	print("[MainMenu] Connected to host!")
-	_show_status("Step 2/2: Connected!\nWaiting for Detective to start...")
 	
+	# Wait a moment to check if host is already playing (rejoin scenario)
+	# The host will send a rejoin signal if game is already in progress
+	await get_tree().create_timer(0.5).timeout
+	
+	# Check if we're still in the main menu (not already transitioned by rejoin signal)
+	if not is_inside_tree():
+		return  # Already transitioned to another scene
+	
+	_show_status("Step 2/2: Connected!\nWaiting for Detective to start...")
 	get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 
 
@@ -360,6 +384,15 @@ func _on_role_assigned(role):
 
 func _on_game_started(checkpoint: String):
 	print("Game started at: ", checkpoint)
+	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
+
+
+func _on_rejoin_game_requested(world_state: Dictionary) -> void:
+	"""Called when sidekick joins an active game session."""
+	print("[MainMenu] Rejoining active game session, skipping lobby...")
+	print("[MainMenu] World state: ", world_state)
+	
+	# The sidekick should go directly to the forest without lobby or cutscene
 	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 
 

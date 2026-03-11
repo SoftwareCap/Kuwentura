@@ -181,6 +181,8 @@ func _connect_signals() -> void:
 		NetworkManager.connection_established.connect(_on_connection_established)
 	if not NetworkManager.connection_state_changed.is_connected(_on_connection_state_changed):
 		NetworkManager.connection_state_changed.connect(_on_connection_state_changed)
+	if not NetworkManager.rejoin_game_requested.is_connected(_on_rejoin_game_requested):
+		NetworkManager.rejoin_game_requested.connect(_on_rejoin_game_requested)
 	
 	if not cancel_button.pressed.is_connected(_on_cancel_pressed):
 		cancel_button.pressed.connect(_on_cancel_pressed)
@@ -204,7 +206,8 @@ func _disconnect_signals() -> void:
 		[NetworkManager.partner_disconnected, _on_host_disconnected],
 		[NetworkManager.partner_connected, _on_partner_connected],
 		[NetworkManager.connection_established, _on_connection_established],
-		[NetworkManager.connection_state_changed, _on_connection_state_changed]
+		[NetworkManager.connection_state_changed, _on_connection_state_changed],
+		[NetworkManager.rejoin_game_requested, _on_rejoin_game_requested]
 	]
 	
 	for sig_data in signals:
@@ -530,6 +533,29 @@ func _on_game_started(_checkpoint: String = "") -> void:
 	if settings_panel:
 		settings_panel.visible = false
 	
+	var tween := create_tween()
+	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
+	await tween.finished
+	
+	_change_to_game()
+
+
+func _on_rejoin_game_requested(_world_state: Dictionary) -> void:
+	"""Called when sidekick needs to rejoin an active game session."""
+	print("[SidekickWaiting] Rejoining active game session, going directly to forest...")
+	
+	if not is_inside_tree():
+		return
+	
+	_is_leaving = true
+	
+	# Hide settings button and panel during transition
+	if settings_control:
+		settings_control.hide_button()
+	if settings_panel:
+		settings_panel.visible = false
+	
+	# Same fade transition as regular game start
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
 	await tween.finished
