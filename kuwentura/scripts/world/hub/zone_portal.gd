@@ -502,14 +502,14 @@ func rpc_enter_zone_with_positions(path: String, detective_pos: Vector2, sidekic
 ## Sync spawn position from server to client
 # This ensures the client has their return position saved locally for when they exit the zone
 @rpc("authority", "reliable")
-func _sync_spawn_position_to_client(peer_id: int, position: Vector2, zone: String):
+func _sync_spawn_position_to_client(peer_id: int, spawn_position: Vector2, zone: String):
 	if not is_inside_tree():
 		return
 	
 	# Only save if this is for us (safety check)
 	if peer_id == multiplayer.get_unique_id():
-		GameState.save_spawn_position(peer_id, position, zone)
-		print("[ZonePortal] ← Client received spawn position sync: ", position, " for zone: ", zone)
+		GameState.save_spawn_position(peer_id, spawn_position, zone)
+		print("[ZonePortal] ← Client received spawn position sync: ", spawn_position, " for zone: ", zone)
 
 
 # Legacy methods for backward compatibility
