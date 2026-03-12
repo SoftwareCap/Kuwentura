@@ -7,6 +7,10 @@ enum MusicTrack {
 	MAIN_MENU,      # Menu + Lobby music
 	FOREST_HUB,     # Forest hub exploration
 	PINAS_HOUSE,    # Pina's House zone
+	OLD_WELL,
+	BACKYARD_PATH,
+	STORAGE_HUT,
+	ABANDONED_HOUSE,
 	GAMEPLAY,       # In-game exploration
 	CLUE_FOUND,     # Short jingle (non-looping)
 	PUZZLE,         # Puzzle solving tension
@@ -134,6 +138,20 @@ func stop_music(fade_duration: float = 0.5) -> void:
 		tween.tween_callback(_player.stop)
 	else:
 		_player.stop()
+
+
+func pause_music() -> void:
+	"""Pause the current music playback."""
+	if not _player:
+		return
+	_player.stream_paused = true
+
+
+func resume_music() -> void:
+	"""Resume the paused music playback."""
+	if not _player:
+		return
+	_player.stream_paused = false
 
 
 func set_volume(volume: float) -> void:

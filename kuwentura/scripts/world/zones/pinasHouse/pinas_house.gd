@@ -266,7 +266,13 @@ func _on_clue_collected(zone_id: String, _clue_data: Dictionary) -> void:
 
 
 func _return_to_forest() -> void:
+	# Ensure pause is fully reset before leaving
 	get_tree().paused = false
+	
+	# Resume all zone systems
+	if pause_controller:
+		pause_controller._resume_zone_systems()
+	
 	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 
 
