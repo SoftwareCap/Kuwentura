@@ -86,6 +86,8 @@ func _ready():
 		NetworkManager.room_code_generated.connect(_on_room_code_generated)
 	if not NetworkManager.game_started.is_connected(_on_game_started):
 		NetworkManager.game_started.connect(_on_game_started)
+	if not NetworkManager.rejoin_game_requested.is_connected(_on_rejoin_game_requested):
+		NetworkManager.rejoin_game_requested.connect(_on_rejoin_game_requested)
 
 
 # NEW: Setup visual pressed feedback for buttons
@@ -291,6 +293,19 @@ func _process_direct_ip(host_ip: String) -> void:
 		_show_status("Failed to connect to " + host_ip + ":\n" + result.get("error", "Unknown error"))
 		return
 	
+	# Wait a moment to check if host is already playing (rejoin scenario)
+	await get_tree().create_timer(0.5).timeout
+	
+	# Check if we're still in the main menu (not already transitioned by rejoin signal)
+	if not is_inside_tree():
+		return  # Already transitioned to another scene
+	
+	# Check if this is a rejoin scenario (host already playing)
+	if NetworkManager.is_rejoining():
+		print("[MainMenu] Detected active game session, going directly to forest...")
+		get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
+		return
+	
 	_show_status("Connected! Waiting for game to start...")
 	get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 
@@ -298,21 +313,7 @@ func _process_direct_ip(host_ip: String) -> void:
 func _process_join_code(code: String) -> void:
 	print("[MainMenu] Code entered: ", code)
 	
-	# DEBUG: Special "LOCAL" code for same-PC testing
-	if code == "LOCAL":
-		print("[MainMenu] DEBUG MODE: Connecting to localhost")
-		_show_status("Debug: Connecting to localhost...")
-		
-		var local_result = await NetworkManager.join_game_with_ip("127.0.0.1", "LOCAL")
-		
-		if not local_result.success:
-			_show_status("Failed to join localhost: " + local_result.get("error", "Unknown"))
-			return
-		
-		get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
-		return
-	
-	_show_status("Step 1/2: Searching for host...\nCode: " + code + "\n\nConnection Options:\n• Same Wi-Fi (no internet needed)\n• Hotspot: Host enables mobile hotspot")
+	_show_status("Searching for host...\nCode: " + code + "\n\n• Ensure host is in lobby\n• Same Wi-Fi or Hotspot mode")
 	print("[MainMenu] Starting discovery for code: ", code)
 	
 	var result = await NetworkManager.join_game_with_code(code)
@@ -321,12 +322,25 @@ func _process_join_code(code: String) -> void:
 	
 	if not result.success:
 		print("[MainMenu] Join failed: ", result.get("error", "Unknown"))
-		_show_status("Failed to join:\n" + result.get("error", "Unknown error") + "\n\nTroubleshooting:\n1. Check Windows Firewall\n2. Disable VPN\n3. Try 'LOCAL' for same-PC test")
+		_show_status("Failed to join:\n" + result.get("error", "Unknown error"))
 		return
 	
 	print("[MainMenu] Connected to host!")
-	_show_status("Step 2/2: Connected!\nWaiting for Detective to start...")
 	
+	# Wait a moment to check if host is already playing (rejoin scenario)
+	await get_tree().create_timer(0.5).timeout
+	
+	# Check if we're still in the main menu (not already transitioned by rejoin signal)
+	if not is_inside_tree():
+		return
+	
+	# Check if this is a rejoin scenario (host already playing)
+	if NetworkManager.is_rejoining():
+		print("[MainMenu] Detected active game session, going directly to forest...")
+		get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
+		return
+	
+	_show_status("Connected!\nWaiting for Detective to start...")
 	get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 
 
@@ -360,6 +374,15 @@ func _on_role_assigned(role):
 
 func _on_game_started(checkpoint: String):
 	print("Game started at: ", checkpoint)
+	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
+
+
+func _on_rejoin_game_requested(world_state: Dictionary) -> void:
+	"""Called when sidekick joins an active game session."""
+	print("[MainMenu] Rejoining active game session, skipping lobby...")
+	print("[MainMenu] World state: ", world_state)
+	
+	# The sidekick should go directly to the forest without lobby or cutscene
 	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 
 
