@@ -1,4 +1,4 @@
-[gd_scene load_steps=72 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=76 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
@@ -201,6 +201,50 @@ thickness = 20
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_ra7mo"]
 color = Color(0.6509804, 0.4392157, 0.26666668, 1)
 thickness = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0s51p"]
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cfl6u"]
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cm1dj"]
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_yg1st"]
 
 [node name="PinasHouse" type="Node2D"]
 process_mode = 1
@@ -555,7 +599,10 @@ offset_left = 448.0
 offset_top = 445.0
 offset_right = 774.0
 offset_bottom = 507.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_u6sy3")
@@ -684,7 +731,10 @@ offset_left = 442.0
 offset_top = 445.0
 offset_right = 772.0
 offset_bottom = 508.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_j1qle")
@@ -1061,10 +1111,16 @@ offset_left = 483.0
 offset_top = 401.0
 offset_right = 701.0
 offset_bottom = 454.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 30
-theme_override_styles/normal = SubResource("StyleBoxFlat_j1qle")
+theme_override_styles/normal = SubResource("StyleBoxFlat_0s51p")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_cfl6u")
+theme_override_styles/hover = SubResource("StyleBoxFlat_cm1dj")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_yg1st")
 text = "Collect Clue"
 
 [connection signal="input_event" from="InteractiveLayer/Objects/WrongClickZone" to="." method="_on_wrong_object_input"]
