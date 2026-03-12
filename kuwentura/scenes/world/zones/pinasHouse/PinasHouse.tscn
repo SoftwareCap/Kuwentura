@@ -434,9 +434,9 @@ text = "← Back to Forest"
 [node name="Control" type="Control" parent="RoleLayer"]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 6.0
+offset_left = 7.0
 offset_top = -7.0
-offset_right = 1238.0
+offset_right = 1239.0
 offset_bottom = 648.0
 mouse_filter = 2
 
