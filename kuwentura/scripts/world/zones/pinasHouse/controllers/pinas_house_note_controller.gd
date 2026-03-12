@@ -28,16 +28,23 @@ func setup(owner) -> void:
 		if not zone.sidekick_board.solved.is_connected(zone._on_sidekick_solved):
 			zone.sidekick_board.solved.connect(zone._on_sidekick_solved)
 
-	if GameState.is_puzzle_solved("pinas_house"):
+	# IMPORTANT: Puzzle 1 state must use zone._note_solved, NOT GameState
+	if zone._note_solved:
 		apply_solved_text()
 
 		if is_instance_valid(zone.sidekick_board) and zone.sidekick_board.has_method("apply_solved_view"):
 			zone.sidekick_board.apply_solved_view()
 
 		zone.tool_hunt_controller.set_tools_unlocked_local(true)
+
 	else:
 		apply_unsolved_text()
 		zone.tool_hunt_controller.set_tools_unlocked_local(false)
+
+		# Ensure sidekick board starts in puzzle mode
+		if is_instance_valid(zone.sidekick_board):
+			if zone.sidekick_board.has_method("apply_puzzle_view"):
+				zone.sidekick_board.apply_puzzle_view()
 
 	apply_close_button_visibility()
 	apply_note_interaction_gate()
@@ -65,17 +72,23 @@ func on_note_interacted() -> void:
 
 		mark_detective_note_seen()
 
-		if GameState.is_puzzle_solved("pinas_house"):
+		if zone._note_solved:
 			apply_solved_text()
 		else:
 			apply_unsolved_text()
 
 	elif GameState.local_role == GameState.Role.SIDEKICK:
+
 		if is_instance_valid(zone.sidekick_board):
 			zone.sidekick_board.visible = true
 
-		if zone.sidekick_board.has_method("open_board"):
-			zone.sidekick_board.open_board()
+			if zone.sidekick_board.has_method("open_board"):
+				zone.sidekick_board.open_board()
+
+			# Force puzzle mode if puzzle not solved
+			if not zone._note_solved:
+				if zone.sidekick_board.has_method("apply_puzzle_view"):
+					zone.sidekick_board.apply_puzzle_view()
 
 		if zone.sidekick_board.has_method("set_inputs_enabled"):
 			zone.sidekick_board.set_inputs_enabled(zone._detective_note_seen)
@@ -96,7 +109,6 @@ func on_note_interacted() -> void:
 				zone.sidekick_board.set_puzzle_inputs_visible(true)
 
 	apply_close_button_visibility()
-
 
 func mark_detective_note_seen() -> void:
 	if zone._detective_note_seen:
@@ -167,21 +179,19 @@ func apply_solved_text() -> void:
 
 
 func on_sidekick_solved() -> void:
-	zone.rpc_pinas_house_solved.rpc()
+	# Mark puzzle 1 solved locally
+	zone._note_solved = true
 
-	if zone.multiplayer.is_server():
-		GameState.collect_clue("pinas_house")
-	else:
-		NetworkManager.trigger_clue_collection.rpc("pinas_house", {})
+	zone.rpc_pinas_house_solved.rpc()
 
 
 func after_puzzle1_solved() -> void:
-	GameState.set_puzzle_solved("pinas_house", true)
 	apply_solved_text()
 
 	if is_instance_valid(zone.sidekick_board) and zone.sidekick_board.has_method("apply_solved_view"):
 		zone.sidekick_board.apply_solved_view()
 
+	# Unlock tool hunt
 	zone.tool_hunt_controller.set_tools_unlocked_local(true)
 
 	if is_instance_valid(zone.search_btn_detective):
@@ -196,6 +206,7 @@ func after_puzzle1_solved() -> void:
 	)
 
 	await DialogueSystems.wait_finished("pinas_house_after_puzzle1")
+
 	zone.tool_hunt_controller.setup_search_room_buttons()
 
 

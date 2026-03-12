@@ -147,6 +147,7 @@ var note_controller
 var tool_hunt_controller
 var consequence_controller
 
+var _note_solved := false
 
 func _ready() -> void:
 	print("[PinasHouse] Scene loaded!")
@@ -266,7 +267,13 @@ func _on_clue_collected(zone_id: String, _clue_data: Dictionary) -> void:
 
 
 func _return_to_forest() -> void:
+	# Ensure pause is fully reset before leaving
 	get_tree().paused = false
+	
+	# Resume all zone systems
+	if pause_controller:
+		pause_controller._resume_zone_systems()
+	
 	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 
 
@@ -366,6 +373,7 @@ func _on_sidekick_solved() -> void:
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_pinas_house_solved() -> void:
+	_note_solved = true
 	await note_controller.after_puzzle1_solved()
 
 
@@ -661,17 +669,27 @@ func rpc_show_pinas_house_reward() -> void:
 
 func _on_collect_clue_pressed() -> void:
 
+	if multiplayer.is_server():
+		return
+
 	var reward_data = PuzzleManager.PUZZLE_DATA["pinas_house"]["reward"]
 	var clue_name = reward_data["clue"]
 
-	# Record clue collection using the authoritative GameState system
-	GameState.collect_clue("pinas_house")
+	var clue_data = {
+		"zone": "pinas_house",
+		"name": clue_name
+	}
+
+	ClueManager.add_clue("pinas_house", clue_data)
+
+	# Mark the entire zone as completed
+	GameState.set_puzzle_solved("pinas_house")
 
 	print("Collected clue:", clue_name)
+	print("Total clues:", ClueManager.get_clue_count())
 
 	get_tree().paused = false
 
-	# Exit for both players
 	rpc_exit_pinas_house.rpc()
 	
 @rpc("any_peer", "call_local", "reliable")

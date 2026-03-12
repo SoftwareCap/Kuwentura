@@ -25,7 +25,6 @@ func start_server() -> void:
 	zone._tick_timer = Timer.new()
 	zone._tick_timer.wait_time = 1.0
 	zone._tick_timer.one_shot = false
-	zone._tick_timer.process_mode = Node.PROCESS_MODE_ALWAYS
 	zone.add_child(zone._tick_timer)
 	zone._tick_timer.timeout.connect(zone._on_tick_server)
 	zone._tick_timer.start()
@@ -33,7 +32,6 @@ func start_server() -> void:
 	zone._first_attack_timer = Timer.new()
 	zone._first_attack_timer.wait_time = float(zone.FIRST_ATTACK_DELAY_SEC)
 	zone._first_attack_timer.one_shot = true
-	zone._first_attack_timer.process_mode = Node.PROCESS_MODE_ALWAYS
 	zone.add_child(zone._first_attack_timer)
 	zone._first_attack_timer.timeout.connect(zone._on_first_attack_server)
 	zone._first_attack_timer.start()
@@ -41,7 +39,6 @@ func start_server() -> void:
 	zone._attack_timer = Timer.new()
 	zone._attack_timer.wait_time = float(zone.ATTACK_INTERVAL_SEC)
 	zone._attack_timer.one_shot = false
-	zone._attack_timer.process_mode = Node.PROCESS_MODE_ALWAYS
 	zone.add_child(zone._attack_timer)
 	zone._attack_timer.timeout.connect(zone._on_scheduled_attack_server)
 
@@ -255,7 +252,7 @@ func start_shake(duration: float, amplitude: float, interval: float) -> void:
 	if zone._shake_timer == null:
 		zone._shake_timer = Timer.new()
 		zone._shake_timer.one_shot = false
-		zone._shake_timer.process_mode = Node.PROCESS_MODE_ALWAYS
+		zone._shake_timer.process_mode = Node.PROCESS_MODE_INHERIT
 		zone.add_child(zone._shake_timer)
 		zone._shake_timer.timeout.connect(zone._on_final_shake_tick)
 
