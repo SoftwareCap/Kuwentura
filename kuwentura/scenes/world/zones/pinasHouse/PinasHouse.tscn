@@ -39,25 +39,25 @@
 [ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/zoneObjects/LadleClue.png" id="37_dcipd"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_btbyq"]
-size = Vector2(271.49985, 321.00024)
+size = Vector2(305.75015, 356.50024)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g5sbh"]
-size = Vector2(267.99988, 177.49994)
+size = Vector2(318, 209)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vt60f"]
 size = Vector2(130.50029, 89.75011)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_eedqa"]
-size = Vector2(92.00006, 76.99986)
+size = Vector2(99.00007, 73.4999)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cd1wg"]
-size = Vector2(80.66386, 279.46497)
+size = Vector2(92.61415, 296.65152)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_egl2a"]
-size = Vector2(95.99988, 59.999878)
+size = Vector2(95.99988, 77.99997)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c70e8"]
-size = Vector2(259.5002, 319.00015)
+size = Vector2(300.50027, 319.00015)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dcipd"]
 size = Vector2(80.749985, 208.25003)
@@ -66,34 +66,46 @@ size = Vector2(80.749985, 208.25003)
 size = Vector2(73.499985, 118.49996)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ra7mo"]
-size = Vector2(870.0006, 235.50015)
+size = Vector2(796.0005, 235.50015)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fvin0"]
-size = Vector2(1059.7506, 93.50005)
+size = Vector2(1209.7509, 93.50005)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0s51p"]
 size = Vector2(129.00009, 40.999878)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cyexm"]
-size = Vector2(378.0002, 38.99975)
+size = Vector2(335.99994, 38.99975)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_m2a4r"]
 size = Vector2(71.99985, 65.49991)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wjw6o"]
-size = Vector2(95.37503, 641.50024)
+size = Vector2(110.687515, 666.7503)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cfl6u"]
-size = Vector2(277.7502, 227.25003)
+size = Vector2(326.75064, 210.24983)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ignus"]
-size = Vector2(455.75024, 110.74993)
+size = Vector2(399.87537, 87.3748)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_anqci"]
-size = Vector2(299.0006, 89.00024)
+size = Vector2(331.50043, 99.50012)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cm1dj"]
-size = Vector2(90.00023, 75.000145)
+size = Vector2(134.00018, 74.500046)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yg1st"]
+size = Vector2(175.49997, 196.00003)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0htqc"]
+size = Vector2(39.99997, 137.50008)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qii5a"]
+size = Vector2(132.99997, 29.49997)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tdjei"]
+size = Vector2(85.49997, 93.50006)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u6sy3"]
 bg_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
@@ -266,34 +278,34 @@ scale = Vector2(0.99999994, 0.99999994)
 [node name="Aswang Window" type="Area2D" parent="InteractiveLayer"]
 
 [node name="Aswang" type="CollisionShape2D" parent="InteractiveLayer/Aswang Window"]
-position = Vector2(1004.24994, 160.99992)
-scale = Vector2(0.99999946, 0.99999946)
+position = Vector2(1137.125, 159.24991)
+scale = Vector2(0.99999934, 0.99999934)
 shape = SubResource("RectangleShape2D_btbyq")
 
 [node name="AswangSprite" type="Sprite2D" parent="InteractiveLayer/Aswang Window"]
 z_index = 10
-position = Vector2(1012, 189.49997)
-scale = Vector2(0.28027347, 0.24658206)
+position = Vector2(1144.9998, 193.99994)
+scale = Vector2(0.31640664, 0.27636722)
 
 [node name="Cabinet" type="Area2D" parent="InteractiveLayer"]
 position = Vector2(888.5, 514)
 
 [node name="Cabinet" type="CollisionShape2D" parent="InteractiveLayer/Cabinet"]
-position = Vector2(-741.50006, -423.00003)
-scale = Vector2(0.99999976, 0.99999976)
+position = Vector2(-730.4999, -434.49994)
+scale = Vector2(0.99999964, 0.99999964)
 shape = SubResource("RectangleShape2D_g5sbh")
 
 [node name="Notes" type="Area2D" parent="InteractiveLayer"]
 
 [node name="NotesSprite" type="Sprite2D" parent="InteractiveLayer/Notes"]
 z_index = 6
-position = Vector2(775, 272)
+position = Vector2(873, 241)
 scale = Vector2(0.07291012, 0.07538084)
 texture = ExtResource("3_k0xpg")
 
 [node name="NotesCollision" type="CollisionShape2D" parent="InteractiveLayer/Notes"]
 z_index = 7
-position = Vector2(772.9999, 273.8749)
+position = Vector2(869, 243)
 scale = Vector2(0.9999988, 0.9999988)
 shape = SubResource("RectangleShape2D_vt60f")
 
@@ -301,14 +313,14 @@ shape = SubResource("RectangleShape2D_vt60f")
 
 [node name="Pan" type="Sprite2D" parent="InteractiveLayer/PanProp"]
 z_index = 1
-position = Vector2(46.33588, 456.23438)
-scale = Vector2(0.091335945, 0.09376562)
+position = Vector2(59.999947, 489.23438)
+scale = Vector2(0.093, 0.0977656)
 texture = ExtResource("4_d1egf")
 
 [node name="PanCollision" type="CollisionShape2D" parent="InteractiveLayer/PanProp"]
 z_index = 1
-position = Vector2(41.999928, 484.49976)
-scale = Vector2(0.99999946, 0.99999946)
+position = Vector2(48.499924, 513.7498)
+scale = Vector2(0.99999934, 0.99999934)
 shape = SubResource("RectangleShape2D_eedqa")
 
 [node name="LadleProp" type="Area2D" parent="InteractiveLayer"]
@@ -316,12 +328,12 @@ position = Vector2(963.00006, 543.00006)
 scale = Vector2(0.66944444, 0.66913587)
 
 [node name="Sprite2D" type="Sprite2D" parent="InteractiveLayer/LadleProp"]
-position = Vector2(-858.91943, -307.86035)
-scale = Vector2(0.3145488, 0.3369465)
+position = Vector2(-779.7512, -284.69568)
+scale = Vector2(0.33983403, 0.35977855)
 texture = ExtResource("5_j1qle")
 
 [node name="LadleCollision" type="CollisionShape2D" parent="InteractiveLayer/LadleProp"]
-position = Vector2(-879.8341, -316.8267)
+position = Vector2(-802.15796, -291.79443)
 scale = Vector2(1, 0.9999999)
 shape = SubResource("RectangleShape2D_cd1wg")
 
@@ -329,79 +341,79 @@ shape = SubResource("RectangleShape2D_cd1wg")
 
 [node name="Pot" type="Sprite2D" parent="InteractiveLayer/PotProp"]
 z_index = 2
-position = Vector2(1099.5817, 475.97263)
+position = Vector2(1243.5817, 488.9726)
 scale = Vector2(0.1668359, 0.18394537)
 texture = ExtResource("6_qiked")
 
 [node name="PotCollision" type="CollisionShape2D" parent="InteractiveLayer/PotProp"]
 z_index = 2
-position = Vector2(1095, 459.99997)
-scale = Vector2(0.99999946, 0.99999946)
+position = Vector2(1246, 485.99988)
+scale = Vector2(0.9999994, 0.9999994)
 shape = SubResource("RectangleShape2D_egl2a")
 
 [node name="Objects" type="Node2D" parent="InteractiveLayer"]
 
 [node name="Object1" type="Sprite2D" parent="InteractiveLayer/Objects"]
 z_index = 1
-position = Vector2(35.49994, 397.99994)
-scale = Vector2(0.13550942, 0.121673025)
+position = Vector2(37.99994, 429.49997)
+scale = Vector2(0.14045502, 0.14353617)
 texture = ExtResource("7_p8qr5")
 
 [node name="Object2" type="Sprite2D" parent="InteractiveLayer/Objects"]
-position = Vector2(87.74995, 448.6718)
+position = Vector2(109.99994, 476)
 scale = Vector2(0.084573776, 0.08846008)
 texture = ExtResource("8_btbyq")
 
 [node name="Object4" type="Sprite2D" parent="InteractiveLayer/Objects"]
 z_index = 1
-position = Vector2(34.999947, 517.1188)
-scale = Vector2(0.10224949, 0.083708376)
+position = Vector2(40.499943, 563.1188)
+scale = Vector2(0.11349694, 0.09112948)
 texture = ExtResource("9_g5sbh")
 
 [node name="Object5" type="Sprite2D" parent="InteractiveLayer/Objects"]
-position = Vector2(149.99995, 275.99997)
-scale = Vector2(0.06905372, 0.058159743)
+position = Vector2(167.49994, 292.74997)
+scale = Vector2(0.095907934, 0.0716146)
 texture = ExtResource("10_vt60f")
 
 [node name="Object7" type="Sprite2D" parent="InteractiveLayer/Objects"]
 z_index = 5
-position = Vector2(546.49994, 446.99994)
-scale = Vector2(0.21041669, 0.19111113)
+position = Vector2(619.5, 474.99994)
+scale = Vector2(0.23208335, 0.2162963)
 texture = ExtResource("11_eedqa")
 
 [node name="Object8" type="Sprite2D" parent="InteractiveLayer/Objects"]
-position = Vector2(554.875, 501.99997)
-scale = Vector2(0.097604185, 0.08888887)
+position = Vector2(622.5, 544.5)
+scale = Vector2(0.12374998, 0.11037036)
 texture = ExtResource("12_cd1wg")
 
 [node name="Object9" type="Sprite2D" parent="InteractiveLayer/Objects"]
 z_index = 4
-position = Vector2(753.5, 429.99997)
-scale = Vector2(0.090416685, 0.100740746)
+position = Vector2(851, 459.99997)
+scale = Vector2(0.10687502, 0.122222275)
 texture = ExtResource("13_egl2a")
 
 [node name="Object10" type="Sprite2D" parent="InteractiveLayer/Objects"]
 z_index = 3
-position = Vector2(882.75006, 473.49994)
-scale = Vector2(0.20895839, 0.18000005)
+position = Vector2(999.62494, 495.49997)
+scale = Vector2(0.2269792, 0.22000001)
 texture = ExtResource("14_c70e8")
 
 [node name="Object11" type="Sprite2D" parent="InteractiveLayer/Objects"]
-position = Vector2(1089.9996, 439.49997)
-scale = Vector2(0.09833336, 0.09259264)
+position = Vector2(1233.0001, 451.99994)
+scale = Vector2(0.110000014, 0.10370372)
 texture = ExtResource("15_dcipd")
 
 [node name="Object13" type="Sprite2D" parent="InteractiveLayer/Objects"]
 z_index = 2
-position = Vector2(1065, 494)
-scale = Vector2(0.18250003, 0.19259264)
+position = Vector2(1212, 517.5)
+scale = Vector2(0.2041667, 0.21851854)
 texture = ExtResource("16_u6sy3")
 
 [node name="WrongClickZone" type="Area2D" parent="InteractiveLayer/Objects"]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
-position = Vector2(211.24988, 389.49982)
-scale = Vector2(0.99999946, 0.99999946)
+position = Vector2(231.74986, 389.49976)
+scale = Vector2(0.9999994, 0.9999994)
 shape = SubResource("RectangleShape2D_c70e8")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
@@ -417,13 +429,13 @@ scale = Vector2(0.9999995, 0.9999995)
 shape = SubResource("RectangleShape2D_u6sy3")
 
 [node name="CollisionShape2D4" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
-position = Vector2(431.9998, 109.24991)
-scale = Vector2(0.99999946, 0.99999946)
+position = Vector2(399.9999, 105.99993)
+scale = Vector2(0.9999994, 0.9999994)
 shape = SubResource("RectangleShape2D_ra7mo")
 
 [node name="CollisionShape2D5" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
-position = Vector2(609.12476, 600.2496)
-scale = Vector2(0.9999995, 0.9999995)
+position = Vector2(684.1247, 600.24945)
+scale = Vector2(0.99999946, 0.99999946)
 shape = SubResource("RectangleShape2D_fvin0")
 
 [node name="CollisionShape2D6" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
@@ -434,8 +446,8 @@ shape = SubResource("RectangleShape2D_0s51p")
 
 [node name="CollisionShape2D7" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
 z_index = 6
-position = Vector2(535.9998, 529.49963)
-scale = Vector2(0.99999917, 0.99999917)
+position = Vector2(556.9997, 529.4994)
+scale = Vector2(0.99999905, 0.99999905)
 shape = SubResource("RectangleShape2D_cyexm")
 
 [node name="CollisionShape2D8" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
@@ -446,33 +458,53 @@ shape = SubResource("RectangleShape2D_m2a4r")
 
 [node name="CollisionShape2D9" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
 z_index = 2
-position = Vector2(1191.3125, 321.24988)
-scale = Vector2(0.9999994, 0.9999994)
+position = Vector2(1344.6563, 312.62494)
+scale = Vector2(0.99999934, 0.99999934)
 shape = SubResource("RectangleShape2D_wjw6o")
 
 [node name="CollisionShape2D10" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
 z_index = 6
-position = Vector2(1003.1248, 434.62476)
-scale = Vector2(0.99999946, 0.99999946)
+position = Vector2(1027.6248, 443.12466)
+scale = Vector2(0.9999993, 0.9999993)
 shape = SubResource("RectangleShape2D_cfl6u")
 
 [node name="CollisionShape2D11" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
 z_index = 5
-position = Vector2(633.1248, 376.62482)
-scale = Vector2(0.9999996, 0.9999996)
+position = Vector2(655.0622, 379.68732)
+scale = Vector2(0.9999994, 0.9999994)
 shape = SubResource("RectangleShape2D_ignus")
 
 [node name="CollisionShape2D12" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
 z_index = 6
-position = Vector2(554.49976, 274.4998)
-scale = Vector2(0.9999991, 0.9999991)
+position = Vector2(629.24963, 279.7499)
+scale = Vector2(0.999999, 0.999999)
 shape = SubResource("RectangleShape2D_anqci")
 
 [node name="CollisionShape2D13" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
 z_index = 7
-position = Vector2(390.99982, 468.49982)
-scale = Vector2(0.9999992, 0.9999992)
+position = Vector2(458.9999, 467.2499)
+scale = Vector2(0.9999991, 0.9999991)
 shape = SubResource("RectangleShape2D_cm1dj")
+
+[node name="CollisionShape2D14" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
+position = Vector2(889.2497, 87.99995)
+scale = Vector2(0.9999997, 0.9999997)
+shape = SubResource("RectangleShape2D_yg1st")
+
+[node name="CollisionShape2D15" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
+position = Vector2(960.9998, 260.24988)
+scale = Vector2(0.99999976, 0.99999976)
+shape = SubResource("RectangleShape2D_0htqc")
+
+[node name="CollisionShape2D16" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
+position = Vector2(866.49994, 311.24994)
+scale = Vector2(0.9999998, 0.9999998)
+shape = SubResource("RectangleShape2D_qii5a")
+
+[node name="CollisionShape2D17" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
+position = Vector2(1239.25, 389.24988)
+scale = Vector2(0.9999998, 0.9999998)
+shape = SubResource("RectangleShape2D_tdjei")
 
 [node name="Background" type="Sprite2D" parent="."]
 visible = false
@@ -518,9 +550,9 @@ text = "← Back to Forest"
 [node name="Control" type="Control" parent="RoleLayer"]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 6.0
+offset_left = 7.0
 offset_top = -7.0
-offset_right = 1238.0
+offset_right = 1239.0
 offset_bottom = 648.0
 mouse_filter = 2
 
@@ -532,37 +564,37 @@ mouse_filter = 2
 
 [node name="XTag" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
 layout_mode = 0
-offset_left = 473.0
-offset_top = 43.0
-offset_right = 553.0
-offset_bottom = 112.0
+offset_left = 542.0
+offset_top = 36.0
+offset_right = 622.0
+offset_bottom = 105.0
 texture = ExtResource("19_vt60f")
 expand_mode = 1
 
 [node name="YTag" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
 layout_mode = 0
-offset_left = 598.0
-offset_top = 44.0
-offset_right = 675.0
-offset_bottom = 112.0
+offset_left = 682.0
+offset_top = 35.0
+offset_right = 759.0
+offset_bottom = 103.0
 texture = ExtResource("20_eedqa")
 expand_mode = 1
 
 [node name="ZTag" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
 layout_mode = 0
-offset_left = 717.0
-offset_top = 44.0
-offset_right = 792.0
-offset_bottom = 111.0
+offset_left = 818.0
+offset_top = 37.0
+offset_right = 893.0
+offset_bottom = 104.0
 texture = ExtResource("21_cd1wg")
 expand_mode = 1
 
 [node name="NoteBoardDetective" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
 layout_mode = 0
-offset_left = 178.0
-offset_top = -202.0
-offset_right = 1088.0
-offset_bottom = 797.0
+offset_left = 240.0
+offset_top = -204.0
+offset_right = 1150.0
+offset_bottom = 795.0
 mouse_filter = 0
 texture = ExtResource("3_k0xpg")
 expand_mode = 1
@@ -595,14 +627,11 @@ vertical_alignment = 1
 [node name="SearchRoomButton" type="Button" parent="RoleLayer/Control/DetectiveOverlays"]
 visible = false
 layout_mode = 0
-offset_left = 448.0
-offset_top = 445.0
-offset_right = 774.0
-offset_bottom = 507.0
-theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+offset_left = 510.0
+offset_top = 443.0
+offset_right = 836.0
+offset_bottom = 505.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_u6sy3")
@@ -625,10 +654,10 @@ script = ExtResource("14_p8qr5")
 
 [node name="SidekickNote" type="TextureRect" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick"]
 layout_mode = 0
-offset_left = 178.0
-offset_top = -200.0
-offset_right = 1087.0
-offset_bottom = 797.0
+offset_left = 241.0
+offset_top = -203.0
+offset_right = 1150.0
+offset_bottom = 794.0
 texture = ExtResource("3_k0xpg")
 expand_mode = 1
 
@@ -727,14 +756,11 @@ offset_bottom = -134.0
 [node name="SearchRoomButton" type="Button" parent="RoleLayer/Control/SidekickOverlays"]
 visible = false
 layout_mode = 0
-offset_left = 442.0
-offset_top = 445.0
-offset_right = 772.0
-offset_bottom = 508.0
-theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+offset_left = 505.0
+offset_top = 442.0
+offset_right = 835.0
+offset_bottom = 505.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_j1qle")
@@ -746,10 +772,10 @@ text = "Search Room"
 [node name="NoteTapButton" type="TextureButton" parent="RoleLayer/Control"]
 z_index = 8
 layout_mode = 0
-offset_left = 645.0
-offset_top = 237.0
-offset_right = 778.0
-offset_bottom = 324.0
+offset_left = 794.0
+offset_top = 202.0
+offset_right = 932.0
+offset_bottom = 300.0
 
 [node name="ConsequenceUI" type="CanvasLayer" parent="."]
 visible = false
@@ -758,20 +784,20 @@ visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 167.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.0142752165, 0.014275218, 0.014275218, 1)
 
 [node name="FinalAswang" type="Sprite2D" parent="ConsequenceUI"]
-position = Vector2(1020.5, 205.00005)
-scale = Vector2(0.2778321, 0.26074222)
+position = Vector2(1144.5, 194.50002)
+scale = Vector2(0.31201175, 0.27783206)
 texture = ExtResource("33_eedqa")
 
 [node name="SearchRoomUI" type="CanvasLayer" parent="."]
 visible = false
 
 [node name="Root" type="Control" parent="SearchRoomUI"]
-visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -780,8 +806,8 @@ offset_bottom = 40.0
 [node name="Banner" type="TextureRect" parent="SearchRoomUI/Root"]
 layout_mode = 0
 offset_top = 510.0
-offset_right = 1240.0
-offset_bottom = 670.0
+offset_right = 1403.0
+offset_bottom = 716.0
 texture = ExtResource("24_vt60f")
 expand_mode = 2
 
@@ -795,10 +821,10 @@ offset_bottom = -297.0
 [node name="Frame_Ladle" type="TextureRect" parent="SearchRoomUI/Root/Banner/FramesRow"]
 custom_minimum_size = Vector2(120, 120)
 layout_mode = 0
-offset_left = 693.0
-offset_top = 851.0
-offset_right = 959.0
-offset_bottom = 986.0
+offset_left = 805.0
+offset_top = 852.0
+offset_right = 1071.0
+offset_bottom = 987.0
 size_flags_horizontal = 3
 texture = ExtResource("25_eedqa")
 expand_mode = 1
@@ -806,28 +832,28 @@ stretch_mode = 5
 
 [node name="Frame_Pan" type="TextureRect" parent="SearchRoomUI/Root/Banner/FramesRow"]
 layout_mode = 0
-offset_left = 971.0
-offset_top = 845.0
-offset_right = 1147.0
-offset_bottom = 989.0
+offset_left = 1083.0
+offset_top = 846.0
+offset_right = 1259.0
+offset_bottom = 990.0
 texture = ExtResource("26_cd1wg")
 expand_mode = 1
 
 [node name="Frame_Pot" type="TextureRect" parent="SearchRoomUI/Root/Banner/FramesRow"]
 layout_mode = 0
-offset_left = 510.0
-offset_top = 847.0
-offset_right = 685.0
-offset_bottom = 986.0
+offset_left = 622.0
+offset_top = 848.0
+offset_right = 797.0
+offset_bottom = 987.0
 texture = ExtResource("27_egl2a")
 expand_mode = 1
 
 [node name="Label" type="Label" parent="SearchRoomUI/Root"]
 layout_mode = 0
-offset_left = 120.0
-offset_top = 567.0
-offset_right = 681.0
-offset_bottom = 623.0
+offset_left = 189.0
+offset_top = 576.0
+offset_right = 750.0
+offset_bottom = 632.0
 theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
 theme_override_constants/line_spacing = 3
 theme_override_fonts/font = ExtResource("3_font")
@@ -1068,30 +1094,31 @@ modulate = Color(1, 1, 1, 0)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 158.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.011087579, 0.011087578, 0.01108758, 1)
 
 [node name="RewardPanel" type="Sprite2D" parent="RewardLayer"]
-position = Vector2(622.25, 322.37506)
-scale = Vector2(0.57847226, 0.5425926)
+position = Vector2(699.24994, 322.37506)
+scale = Vector2(0.6497685, 0.5425926)
 texture = ExtResource("34_c70e8")
 
 [node name="Sparkle" type="Sprite2D" parent="RewardLayer"]
-position = Vector2(622.25006, 325.49997)
+position = Vector2(735.24994, 325.5)
 scale = Vector2(0.5719907, 0.5358025)
 texture = ExtResource("35_dcipd")
 
 [node name="RewardBanner" type="Sprite2D" parent="RewardLayer"]
-position = Vector2(617.0001, 325.5)
+position = Vector2(730, 325.50003)
 scale = Vector2(0.587963, 0.5390947)
 texture = ExtResource("36_u6sy3")
 
 [node name="RewardText" type="Label" parent="RewardLayer"]
-offset_left = 136.0
-offset_top = 496.0
-offset_right = 1044.0
+offset_left = 248.99988
+offset_top = 496.00003
+offset_right = 1156.9999
 offset_bottom = 558.0
 theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
 theme_override_fonts/font = ExtResource("3_font")
@@ -1101,20 +1128,17 @@ vertical_alignment = 1
 autowrap_mode = 2
 
 [node name="ClueSprite" type="Sprite2D" parent="RewardLayer"]
-position = Vector2(592.99994, 198)
+position = Vector2(705.9998, 198.00003)
 scale = Vector2(0.25199997, 0.2303333)
 texture = ExtResource("37_dcipd")
 
 [node name="CollectButton" type="Button" parent="RewardLayer"]
 process_mode = 3
-offset_left = 483.0
-offset_top = 401.0
-offset_right = 701.0
-offset_bottom = 454.0
-theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+offset_left = 595.9999
+offset_top = 401.00003
+offset_right = 813.9999
+offset_bottom = 454.00003
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_0s51p")

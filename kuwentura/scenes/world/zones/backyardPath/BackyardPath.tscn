@@ -1,13 +1,29 @@
-[gd_scene load_steps=9 format=3 uid="uid://backyardpath"]
+[gd_scene load_steps=11 format=3 uid="uid://backyardpath"]
 
 [ext_resource type="Script" uid="uid://dfs4agyqe4qk4" path="res://scripts/world/zones/backyardPath/backyard_path.gd" id="1_backyardpath"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
 [ext_resource type="Texture2D" uid="uid://p1tc8ablyx3s" path="res://assets/sprites/places/zone2.png" id="2_krb5t"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 [ext_resource type="Texture2D" uid="uid://c3sfa1s0d5uam" path="res://assets/sprites/zoneObjects/Pina.png" id="5_no1tq"]
+[ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/inventoryboard.png" id="6_2y8sp"]
 [ext_resource type="Texture2D" uid="uid://tthjtt0yqrf6" path="res://assets/sprites/zoneObjects/PineapplePlant.png" id="10_f85bs"]
 [ext_resource type="Texture2D" uid="uid://dmjne63nn4iut" path="res://assets/sprites/zoneObjects/PineappleFruit.png" id="11_ura6l"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="11_vm1ij"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h50sr"]
+bg_color = Color(0.5372549, 0.34901962, 0.2509804, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+border_blend = true
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
 
 [node name="BackyardPath" type="Node2D"]
 script = ExtResource("1_backyardpath")
@@ -79,6 +95,44 @@ offset_top = 158.0
 offset_right = 768.0
 offset_bottom = 520.0
 
+[node name="PuzzleBoard" type="CanvasLayer" parent="."]
+
+[node name="BoardSprite" type="Sprite2D" parent="PuzzleBoard"]
+position = Vector2(220, 463)
+scale = Vector2(0.2084961, 0.18139647)
+texture = ExtResource("6_2y8sp")
+
+[node name="HeightLabel" type="Label" parent="PuzzleBoard"]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="LineEdit" type="LineEdit" parent="PuzzleBoard"]
+offset_right = 68.5625
+offset_bottom = 31.0
+
+[node name="SubmitButton" type="Button" parent="PuzzleBoard"]
+offset_left = 151.0
+offset_top = 495.0
+offset_right = 274.0
+offset_bottom = 537.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 25
+theme_override_styles/normal = SubResource("StyleBoxFlat_h50sr")
+text = "Submit"
+
+[node name="FeedbackLabel" type="Label" parent="PuzzleBoard"]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="FogOverlay" type="ColorRect" parent="."]
+modulate = Color(1, 1, 1, 0)
+offset_right = 40.0
+offset_bottom = 40.0
+color = Color(0.008202022, 0.008202025, 0.008202025, 1)
+
+[node name="InsideZoneControl" parent="." instance=ExtResource("11_vm1ij")]
+
 [node name="Background" type="Sprite2D" parent="."]
 visible = false
 position = Vector2(960, 540)
@@ -116,7 +170,5 @@ offset_bottom = 120.0
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 32
 text = "← Back to Forest"
-
-[node name="InsideZoneControl" parent="." instance=ExtResource("11_vm1ij")]
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
