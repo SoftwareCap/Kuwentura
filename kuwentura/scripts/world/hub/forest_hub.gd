@@ -116,6 +116,10 @@ func _ready():
 		if volume_slider:
 			volume_slider.value = MusicController.get_volume() * 100
 			print("[ForestHub] Volume slider set to: ", volume_slider.value)
+			# Connect volume slider signal
+			if not volume_slider.value_changed.is_connected(_on_in_game_volume_changed):
+				volume_slider.value_changed.connect(_on_in_game_volume_changed)
+				print("[ForestHub] Volume slider signal connected")
 		if volume_value_label:
 			volume_value_label.text = str(int(MusicController.get_volume() * 100)) + "%"
 	else:
@@ -190,6 +194,9 @@ func _on_pause_button_pressed() -> void:
 		print("[ForestHub] In-game pause panel OPENED")
 		# Pause the game
 		get_tree().paused = true
+		# Pause background music
+		MusicController.pause_music()
+		print("[ForestHub] Background music PAUSED")
 	else:
 		push_error("[ForestHub] Cannot open pause - in_game_pause_panel is null!")
 
@@ -201,6 +208,9 @@ func _on_resume_play_button_pressed() -> void:
 		in_game_pause_panel.visible = false
 	if option_sub_panel:
 		option_sub_panel.visible = false
+	# Resume background music before unpausing game
+	MusicController.resume_music()
+	print("[ForestHub] Background music RESUMED")
 	get_tree().paused = false
 	print("[ForestHub] Game RESUMED")
 
@@ -255,6 +265,8 @@ func _on_in_game_volume_changed(value: float) -> void:
 	if volume_value_label:
 		volume_value_label.text = str(int(value)) + "%"
 	print("[ForestHub] Volume changed to: ", volume)
+	# Save settings immediately when volume changes
+	_save_pause()
 
 
 func _save_pause() -> void:
@@ -267,7 +279,7 @@ func _save_pause() -> void:
 	if file:
 		file.store_string(JSON.stringify(data))
 		file.close()
-		print("[ForestHub] Pause saved successfully")
+		print("[ForestHub] Settings saved successfully")
 
 
 func _on_spawn_player_requested(peer_id: int, is_detective: bool):
