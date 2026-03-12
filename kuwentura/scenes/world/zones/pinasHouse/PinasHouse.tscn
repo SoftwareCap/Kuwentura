@@ -612,6 +612,7 @@ offset_right = -585.0
 offset_bottom = -134.0
 
 [node name="SearchRoomButton" type="Button" parent="RoleLayer/Control/SidekickOverlays"]
+visible = false
 layout_mode = 0
 offset_left = 442.0
 offset_top = 445.0
@@ -906,6 +907,7 @@ vertical_alignment = 1
 visible = false
 
 [node name="DarkOverlay" type="ColorRect" parent="RewardLayer"]
+modulate = Color(1, 1, 1, 0)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
