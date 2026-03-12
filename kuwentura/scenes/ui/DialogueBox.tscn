@@ -22,18 +22,17 @@ grow_vertical = 0
 [node name="DetectiveDialogue" type="TextureRect" parent="Panel"]
 layout_mode = 0
 offset_left = -1.0
-offset_top = -250.0
-offset_right = 1152.0
+offset_top = -287.0
+offset_right = 1246.0
 offset_bottom = 399.0
 texture = ExtResource("1_ggoq5")
 expand_mode = 1
 
 [node name="SidekickDialogue" type="TextureRect" parent="Panel"]
-visible = false
 layout_mode = 0
 offset_left = 1.0
-offset_top = -250.0
-offset_right = 1152.0
+offset_top = -284.0
+offset_right = 1244.0
 offset_bottom = 399.0
 texture = ExtResource("2_nfm5p")
 expand_mode = 1
@@ -41,9 +40,9 @@ expand_mode = 1
 [node name="Text" type="Label" parent="Panel"]
 layout_mode = 0
 offset_left = 226.0
-offset_top = 279.0
-offset_right = 1018.0
-offset_bottom = 338.0
+offset_top = 275.0
+offset_right = 1103.0
+offset_bottom = 334.0
 theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
 theme_override_fonts/font = ExtResource("4_bjuha")
 theme_override_font_sizes/font_size = 20
@@ -58,6 +57,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = -245.0
+offset_right = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 flat = true

@@ -75,7 +75,8 @@ func server_collect_tool(tool_id: String, _sender_peer_id: int) -> void:
 	zone.rpc_set_tool_collected.rpc(tool_id)
 
 	if all_tools_collected():
-		zone.rpc_reveal_pinas_house_clue.rpc()
+		print("All tools collected!")
+		zone.rpc_show_pinas_house_reward.rpc()
 
 
 func set_tool_collected_local(tool_id: String) -> void:
