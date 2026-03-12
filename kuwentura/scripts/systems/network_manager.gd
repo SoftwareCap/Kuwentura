@@ -109,6 +109,12 @@ func is_partner_connected() -> bool:
 func get_partner_state(peer_id: int) -> Dictionary:
 	return _partner_states.get(str(peer_id), {})
 
+
+func clear_partner_state(peer_id: int) -> void:
+	"""Clear stored partner state to prevent interpolation from old position."""
+	_partner_states.erase(str(peer_id))
+
+
 func resume_game() -> bool:
 	if _state != ConnectionState.PLAYING:
 		push_warning("Cannot resume: game is not in PLAYING state")

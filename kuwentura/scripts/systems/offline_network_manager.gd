@@ -171,7 +171,7 @@ func _start_discovery_broadcast():
 
 
 func _broadcast_presence():
-	"""Send broadcast packet with room info"""
+	"""Send broadcast packet with room info to all network interfaces"""
 	if not _broadcast_socket or _invite_code.is_empty():
 		return
 	
@@ -186,12 +186,20 @@ func _broadcast_presence():
 	
 	var packet = JSON.stringify(broadcast_data).to_utf8_buffer()
 	
-	# Send to broadcast address
+	# Send to global broadcast address
 	_broadcast_socket.set_dest_address("255.255.255.255", DISCOVERY_PORT)
 	var err = _broadcast_socket.put_packet(packet)
 	
-	if err != OK:
+	if err == OK:
+		print("[OfflineNetwork] Broadcast sent (code: ", _invite_code, ")")
+	else:
 		print("[OfflineNetwork] Broadcast failed: ", err)
+	
+	# Also send to common subnet broadcast addresses for better reliability
+	var subnets = ["192.168.1.255", "192.168.0.255", "192.168.43.255", "172.20.10.255"]
+	for subnet in subnets:
+		_broadcast_socket.set_dest_address(subnet, DISCOVERY_PORT)
+		_broadcast_socket.put_packet(packet)
 
 
 func _start_discovery_listen(target_code: String) -> Dictionary:
@@ -202,14 +210,20 @@ func _start_discovery_listen(target_code: String) -> Dictionary:
 	_listen_socket.set_broadcast_enabled(true)
 	
 	# Must bind to DISCOVERY_PORT to receive broadcasts from host
-	var error = _listen_socket.bind(DISCOVERY_PORT)
+	# Try binding to any available address on the discovery port
+	var error = _listen_socket.bind(DISCOVERY_PORT, "0.0.0.0")
 	if error != OK:
 		push_warning("[OfflineNetwork] Failed to bind discovery socket: " + str(error))
-		_listen_socket = null
-		return {"success": false, "error": "Port in use"}
+		# Try with reuse enabled (if supported)
+		_listen_socket = PacketPeerUDP.new()
+		_listen_socket.set_broadcast_enabled(true)
+		error = _listen_socket.bind(DISCOVERY_PORT)
+		if error != OK:
+			_listen_socket = null
+			return {"success": false, "error": "Port in use"}
 	
 	_is_listening = true
-	print("[OfflineNetwork] Listening for discovery on port ", DISCOVERY_PORT)
+	print("[OfflineNetwork] Listening for discovery on port ", DISCOVERY_PORT, " for code: ", _target_code)
 	return {"success": true}
 
 
@@ -224,16 +238,23 @@ func _poll_discovery():
 		
 		var data = JSON.parse_string(packet.get_string_from_utf8())
 		if data == null or not data is Dictionary:
+			print("[OfflineNetwork] Received invalid packet from ", from_ip)
 			continue
 		
 		if data.get("game") != "kwentura":
+			print("[OfflineNetwork] Received packet from wrong game: ", data.get("game"))
 			continue
 		
 		var code = data.get("code", "")
-		var host_ip = data.get("host_ip", from_ip)
+		# Use the packet's source IP as the host IP (more reliable than broadcast data)
+		var host_ip = from_ip
+		if host_ip.is_empty():
+			host_ip = data.get("host_ip", "")
+		
+		print("[OfflineNetwork] Received broadcast from ", host_ip, " with code: ", code, " (looking for: ", _target_code, ")")
 		
 		if code == _target_code:
-			print("[OfflineNetwork] Discovered host: ", host_ip, " with code: ", code)
+			print("[OfflineNetwork] ✓ MATCH! Discovered host at: ", host_ip)
 			# Store discovery result
 			_last_discovered_host = {
 				"ip": host_ip,
@@ -331,6 +352,11 @@ func is_partner_connected() -> bool:
 
 func get_partner_state(peer_id: int) -> Dictionary:
 	return _partner_states.get(str(peer_id), {})
+
+
+func clear_partner_state(peer_id: int) -> void:
+	"""Clear stored partner state to prevent interpolation from old position."""
+	_partner_states.erase(str(peer_id))
 
 
 # ============================================================================

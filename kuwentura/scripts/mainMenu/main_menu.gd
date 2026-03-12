@@ -307,28 +307,7 @@ func _process_direct_ip(host_ip: String) -> void:
 func _process_join_code(code: String) -> void:
 	print("[MainMenu] Code entered: ", code)
 	
-	# DEBUG: Special "LOCAL" code for same-PC testing
-	if code == "LOCAL":
-		print("[MainMenu] DEBUG MODE: Connecting to localhost")
-		_show_status("Debug: Connecting to localhost...")
-		
-		var local_result = await NetworkManager.join_game_with_ip("127.0.0.1", "LOCAL")
-		
-		if not local_result.success:
-			_show_status("Failed to join localhost: " + local_result.get("error", "Unknown"))
-			return
-		
-		# Wait a moment to check if host is already playing (rejoin scenario)
-		await get_tree().create_timer(0.5).timeout
-		
-		# Check if we're still in the main menu (not already transitioned by rejoin signal)
-		if not is_inside_tree():
-			return  # Already transitioned to another scene
-		
-		get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
-		return
-	
-	_show_status("Step 1/2: Searching for host...\nCode: " + code + "\n\nConnection Options:\n• Same Wi-Fi (no internet needed)\n• Hotspot: Host enables mobile hotspot")
+	_show_status("Searching for host...\nCode: " + code + "\n\n• Ensure host is in lobby\n• Same Wi-Fi or Hotspot mode")
 	print("[MainMenu] Starting discovery for code: ", code)
 	
 	var result = await NetworkManager.join_game_with_code(code)
@@ -337,20 +316,19 @@ func _process_join_code(code: String) -> void:
 	
 	if not result.success:
 		print("[MainMenu] Join failed: ", result.get("error", "Unknown"))
-		_show_status("Failed to join:\n" + result.get("error", "Unknown error") + "\n\nTroubleshooting:\n1. Check Windows Firewall\n2. Disable VPN\n3. Try 'LOCAL' for same-PC test")
+		_show_status("Failed to join:\n" + result.get("error", "Unknown error"))
 		return
 	
 	print("[MainMenu] Connected to host!")
 	
 	# Wait a moment to check if host is already playing (rejoin scenario)
-	# The host will send a rejoin signal if game is already in progress
 	await get_tree().create_timer(0.5).timeout
 	
 	# Check if we're still in the main menu (not already transitioned by rejoin signal)
 	if not is_inside_tree():
-		return  # Already transitioned to another scene
+		return
 	
-	_show_status("Step 2/2: Connected!\nWaiting for Detective to start...")
+	_show_status("Connected!\nWaiting for Detective to start...")
 	get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 
 
