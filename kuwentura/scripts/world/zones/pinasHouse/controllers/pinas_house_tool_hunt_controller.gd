@@ -107,7 +107,10 @@ func setup_search_room_buttons() -> void:
 
 
 func on_search_room_pressed() -> void:
-	if not GameState.is_puzzle_solved("pinas_house"):
+	print("[ToolHunt] Search room button pressed!")
+
+	if not zone._note_solved:
+		print("[ToolHunt] Puzzle not solved yet, ignoring search button")
 		return
 
 	if is_instance_valid(zone.search_btn_detective):
