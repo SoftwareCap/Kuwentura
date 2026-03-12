@@ -19,7 +19,7 @@ func setup(owner) -> void:
 	if is_instance_valid(zone.pot_prop) and not zone.pot_prop.input_event.is_connected(zone._on_tool_input_event.bind("pot")):
 		zone.pot_prop.input_event.connect(zone._on_tool_input_event.bind("pot"))
 
-	set_tools_unlocked_local(GameState.is_puzzle_solved("pinas_house"))
+	set_tools_unlocked_local(false)
 
 	if is_instance_valid(zone.search_room_ui):
 		zone.search_room_ui.visible = false
@@ -91,15 +91,17 @@ func set_tools_unlocked_local(unlocked: bool) -> void:
 
 
 func setup_search_room_buttons() -> void:
-	var solved := GameState.is_puzzle_solved("pinas_house")
+	var solved: bool = zone._note_solved
 
 	if is_instance_valid(zone.search_btn_detective):
 		zone.search_btn_detective.visible = solved
+
 		if not zone.search_btn_detective.pressed.is_connected(zone._on_search_room_pressed):
 			zone.search_btn_detective.pressed.connect(zone._on_search_room_pressed)
 
 	if is_instance_valid(zone.search_btn_sidekick):
 		zone.search_btn_sidekick.visible = solved
+
 		if not zone.search_btn_sidekick.pressed.is_connected(zone._on_search_room_pressed):
 			zone.search_btn_sidekick.pressed.connect(zone._on_search_room_pressed)
 

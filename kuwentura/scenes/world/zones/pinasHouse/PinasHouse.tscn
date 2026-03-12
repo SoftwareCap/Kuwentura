@@ -1,4 +1,4 @@
-[gd_scene load_steps=62 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=61 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
@@ -110,7 +110,7 @@ corner_radius_bottom_left = 20
 shadow_size = 5
 shadow_offset = Vector2(0, 3)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pause"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dcipd"]
 bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
 border_width_left = 2
 border_width_top = 2
@@ -122,25 +122,13 @@ corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qj22k"]
-bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.65178686, 0.44065732, 0.2680916, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-
-[sub_resource type="StyleBoxLine" id="StyleBoxLine_k0xpg"]
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_u6sy3"]
 color = Color(1, 1, 1, 1)
-thickness = 6
+thickness = 20
 
-[sub_resource type="StyleBoxLine" id="StyleBoxLine_d1egf"]
-color = Color(0.48324937, 0.54248023, 1, 1)
-thickness = 8
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_ra7mo"]
+color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+thickness = 20
 
 [node name="PinasHouse" type="Node2D"]
 process_mode = 1
@@ -151,8 +139,8 @@ position = Vector2(6.1035156e-05, 6.1035156e-05)
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="KitchenSprite" type="Sprite2D" parent="BackgroundLayer"]
-position = Vector2(620, 326.4999)
-scale = Vector2(0.484375, 0.4548611)
+position = Vector2(701.5, 346.99997)
+scale = Vector2(0.5480469, 0.50924444)
 texture = ExtResource("2_vt60f")
 
 [node name="InteractiveLayer" type="Node2D" parent="."]
@@ -612,6 +600,7 @@ offset_right = -585.0
 offset_bottom = -134.0
 
 [node name="SearchRoomButton" type="Button" parent="RoleLayer/Control/SidekickOverlays"]
+visible = false
 layout_mode = 0
 offset_left = 442.0
 offset_top = 445.0
@@ -651,6 +640,7 @@ texture = ExtResource("33_eedqa")
 visible = false
 
 [node name="Root" type="Control" parent="SearchRoomUI"]
+visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -718,71 +708,74 @@ vertical_alignment = 2
 
 [node name="PauseCanvasLayer" type="CanvasLayer" parent="."]
 process_mode = 3
-layer = 100
-visible = false
+layer = 110
 
 [node name="InGamePausePanel" type="Panel" parent="PauseCanvasLayer"]
+visible = false
+top_level = true
+z_index = 10
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -342.0
-offset_top = -295.0
-offset_right = 329.25
-offset_bottom = 292.0
+offset_left = -442.25
+offset_top = -294.0
+offset_right = 442.25
+offset_bottom = 294.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_pause")
+theme_override_styles/panel = SubResource("StyleBoxFlat_dcipd")
 
 [node name="TitleLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel"]
 layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = -5.0
-offset_top = 8.0
-offset_right = -5.0
-offset_bottom = 117.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -241.0
+offset_top = 18.0
+offset_right = 240.0
+offset_bottom = 127.0
 grow_horizontal = 2
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 55
+theme_override_font_sizes/font_size = 70
 text = "Game Paused!"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PauseCanvasLayer/InGamePausePanel"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -259.5
-offset_top = -206.0
-offset_right = 311.5
-offset_bottom = 340.0
-grow_horizontal = 2
-grow_vertical = 2
-scale = Vector2(0.9, 0.9)
-theme_override_constants/separation = 10
+[node name="Separator" type="Line2D" parent="PauseCanvasLayer/InGamePausePanel"]
+position = Vector2(0.10900879, -58)
+scale = Vector2(0.73165876, 1)
+points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+width = 2.0
+default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
 
-[node name="Resume_PlayButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 0.3
-texture_normal = ExtResource("5_play")
-ignore_texture_size = true
-stretch_mode = 4
-
-[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/VBoxContainer/Resume_PlayButton"]
+[node name="Resume_PlayButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_left = 220.0
+offset_left = 57.25
+offset_top = -107.0
+offset_right = 502.25
+offset_bottom = 38.0
+grow_vertical = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("5_play")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/Resume_PlayButton"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -286.0
 offset_top = -20.0
-offset_right = 506.0
 offset_bottom = 20.0
+grow_horizontal = 0
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 40
@@ -790,23 +783,35 @@ text = "Resume Game"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="OptionButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel/VBoxContainer"]
-layout_mode = 2
+[node name="OptionButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -354.25
+offset_top = -107.0
+offset_right = -61.25
+offset_bottom = 38.0
+grow_horizontal = 0
+grow_vertical = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.3
 texture_normal = ExtResource("6_settings")
 ignore_texture_size = true
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/VBoxContainer/OptionButton"]
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionButton"]
 layout_mode = 1
-anchors_preset = 4
+anchors_preset = 6
+anchor_left = 1.0
 anchor_top = 0.5
+anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = 220.0
+offset_left = -128.0
 offset_top = -20.0
-offset_right = 348.0
 offset_bottom = 20.0
+grow_horizontal = 0
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 40
@@ -814,43 +819,58 @@ text = "Option"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ExitButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel/VBoxContainer"]
-layout_mode = 2
+[node name="ExitButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -247.5
+offset_top = -209.0
+offset_right = 247.5
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 0
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.3
 texture_normal = ExtResource("7_exit")
 ignore_texture_size = true
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/VBoxContainer/ExitButton"]
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/ExitButton"]
 layout_mode = 1
-anchors_preset = 4
+anchors_preset = 6
+anchor_left = 1.0
 anchor_top = 0.5
+anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = 188.33333
+offset_left = -336.0
 offset_top = -20.0
-offset_right = 490.3333
 offset_bottom = 20.0
+grow_horizontal = 0
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 40
-text = "Exit to Menu"
+text = "Exit to Main Menu"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OptionSubPanel" type="Panel" parent="PauseCanvasLayer/InGamePausePanel"]
 visible = false
 layout_mode = 0
-offset_right = 868.0
-offset_bottom = 759.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_qj22k")
+offset_right = 884.5
+offset_bottom = 588.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_dcipd")
 
 [node name="OptionLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
 layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 35.0
-offset_bottom = 144.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -94.5
+offset_top = 18.0
+offset_right = 94.5
+offset_bottom = 127.0
 grow_horizontal = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 55
@@ -863,22 +883,29 @@ position = Vector2(20, 10)
 scale = Vector2(0.3, 0.3)
 texture_normal = ExtResource("8_back")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+[node name="Separator2" type="Line2D" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+position = Vector2(0.10900879, -58)
+scale = Vector2(0.73165876, 1)
+points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+width = 2.0
+default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+
+[node name="VolumeSliderControl" type="HBoxContainer" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -345.6875
-offset_top = -124.5
-offset_right = 345.6875
-offset_bottom = -82.5
+offset_left = -388.40625
+offset_top = -103.0
+offset_right = 388.40625
+offset_bottom = 40.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 35
+theme_override_constants/separation = 30
 
-[node name="VolumeLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer"]
+[node name="VolumeLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 40
@@ -886,16 +913,16 @@ text = "Music Volume:"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="VolumeSlider" type="HSlider" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer"]
+[node name="VolumeSlider" type="HSlider" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
-theme_override_styles/slider = SubResource("StyleBoxLine_k0xpg")
-theme_override_styles/grabber_area = SubResource("StyleBoxLine_d1egf")
-theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_d1egf")
+theme_override_styles/slider = SubResource("StyleBoxLine_u6sy3")
+theme_override_styles/grabber_area = SubResource("StyleBoxLine_ra7mo")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_ra7mo")
 value = 80.0
 
-[node name="VolumeValue" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer"]
+[node name="VolumeValue" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "80%"
@@ -906,6 +933,7 @@ vertical_alignment = 1
 visible = false
 
 [node name="DarkOverlay" type="ColorRect" parent="RewardLayer"]
+modulate = Color(1, 1, 1, 0)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -960,7 +988,3 @@ text = "Collect Clue"
 
 [connection signal="input_event" from="InteractiveLayer/Objects/WrongClickZone" to="." method="_on_wrong_object_input"]
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/VBoxContainer/Resume_PlayButton" to="." method="_on_resume_play_button_pressed"]
-[connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/VBoxContainer/OptionButton" to="." method="_on_option_button_pressed"]
-[connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/VBoxContainer/ExitButton" to="." method="_on_exit_to_main_menu_button_pressed"]
-[connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/BackToPrevious" to="." method="_on_in_game_option_back_pressed"]
