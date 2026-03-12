@@ -65,6 +65,9 @@ var _partner_states: Dictionary = {}
 # Track if game has been started (for rejoin detection)
 var _has_game_started: bool = false
 
+# Track if sidekick is rejoining an active game session
+var _is_rejoining: bool = false
+
 # Store current player positions for rejoin sync
 var _last_known_positions: Dictionary = {}  # peer_id -> {"position": Vector2, "timestamp": int}
 
@@ -298,6 +301,11 @@ func is_host() -> bool:
 
 func is_playing() -> bool:
 	return _state == ConnectionState.PLAYING
+
+
+func is_rejoining() -> bool:
+	"""Check if sidekick is rejoining an active game session."""
+	return _is_rejoining
 
 
 func get_state() -> ConnectionState:
@@ -762,6 +770,7 @@ func _notify_host_leaving():
 func _rejoin_game_rpc(rejoin_data: Dictionary):
 	"""Called on sidekick when joining an active game session."""
 	print("[OfflineNetwork] Rejoining active game session")
+	_is_rejoining = true
 	
 	var world_state = rejoin_data.get("world_progress", {})
 	var player_positions = rejoin_data.get("player_positions", {})
@@ -895,6 +904,7 @@ func _cleanup():
 	_invite_code = ""
 	_world_progress.clear()
 	_partner_states.clear()
+	_is_rejoining = false
 	
 	# Ensure multiplayer peer is fully cleaned up
 	if multiplayer.multiplayer_peer:

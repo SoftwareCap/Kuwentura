@@ -300,6 +300,12 @@ func _process_direct_ip(host_ip: String) -> void:
 	if not is_inside_tree():
 		return  # Already transitioned to another scene
 	
+	# Check if this is a rejoin scenario (host already playing)
+	if NetworkManager.is_rejoining():
+		print("[MainMenu] Detected active game session, going directly to forest...")
+		get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
+		return
+	
 	_show_status("Connected! Waiting for game to start...")
 	get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 
@@ -326,6 +332,12 @@ func _process_join_code(code: String) -> void:
 	
 	# Check if we're still in the main menu (not already transitioned by rejoin signal)
 	if not is_inside_tree():
+		return
+	
+	# Check if this is a rejoin scenario (host already playing)
+	if NetworkManager.is_rejoining():
+		print("[MainMenu] Detected active game session, going directly to forest...")
+		get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 		return
 	
 	_show_status("Connected!\nWaiting for Detective to start...")
