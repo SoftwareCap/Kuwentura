@@ -51,6 +51,15 @@ const ConsequenceControllerScript = preload("res://scripts/world/zones/pinasHous
 @onready var blackout: ColorRect = $ConsequenceUI/Blackout
 @onready var final_aswang: Sprite2D = $ConsequenceUI/FinalAswang
 
+#Reward System
+@onready var reward_layer = $RewardLayer
+@onready var reward_banner = $RewardLayer/RewardBanner
+@onready var reward_text = $RewardLayer/RewardText
+@onready var clue_sprite = $RewardLayer/ClueSprite
+@onready var sparkle = $RewardLayer/Sparkle
+@onready var collect_button = $RewardLayer/CollectButton
+@onready var dark_overlay = $RewardLayer/DarkOverlay
+
 const _SERVER_PEER_ID := 1
 const _TOOL_IDS := ["pan", "ladle", "pot"]
 
@@ -141,6 +150,14 @@ var consequence_controller
 
 func _ready() -> void:
 	print("[PinasHouse] Scene loaded!")
+	
+	reward_layer.visible = false
+
+	dark_overlay.modulate.a = 0
+	sparkle.visible = false
+	reward_banner.visible = false
+	clue_sprite.visible = false
+	collect_button.visible = false
 
 	_init_controllers()
 	_connect_global_signals()
@@ -149,6 +166,8 @@ func _ready() -> void:
 
 	_update_role_label()
 	update_role_visibility()
+	
+	collect_button.pressed.connect(_on_collect_clue_pressed)
 
 	pause_controller.setup(self)
 	consequence_controller.setup(self)
@@ -585,3 +604,82 @@ func rpc_fail_pre_shake() -> void:
 @rpc("any_peer", "reliable", "call_local")
 func rpc_fail_show_ui() -> void:
 	consequence_controller.fail_show_ui()
+
+#Reward System Function
+func show_reward() -> void:
+	print("Starting reward sequence")
+
+	get_tree().paused = true
+	reward_layer.visible = true
+
+	await reward_sequence()
+	
+func reward_sequence() -> void:
+
+	# Reset visuals
+	sparkle.visible = false
+	reward_banner.visible = false
+	clue_sprite.visible = false
+	collect_button.visible = false
+
+	# STEP 1 — darken screen
+	var tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(dark_overlay, "modulate:a", 0.7, 0.6)
+	await tween.finished
+
+	await get_tree().create_timer(0.4, true).timeout
+
+	# STEP 2 — sparkle appears
+	sparkle.visible = true
+
+	await get_tree().create_timer(0.6, true).timeout
+
+	# STEP 3 — banner appears
+	reward_banner.visible = true
+
+	var reward_data = PuzzleManager.PUZZLE_DATA["pinas_house"]["reward"]
+	reward_text.text = reward_data["note"]
+
+	await get_tree().create_timer(0.6, true).timeout
+
+	# STEP 4 — reveal clue
+	clue_sprite.visible = true
+
+	await get_tree().create_timer(0.6, true).timeout
+
+	# STEP 5 — show collect button only for sidekick (or always in offline play)
+	if multiplayer.has_multiplayer_peer():
+		collect_button.visible = GameState.local_role == GameState.Role.SIDEKICK
+	else:
+		# In offline/single-player, always allow collecting so the game can proceed
+		collect_button.visible = true
+	
+
+@rpc("any_peer", "call_local", "reliable")
+func rpc_show_pinas_house_reward() -> void:
+	show_reward()
+
+func _on_collect_clue_pressed() -> void:
+
+	var reward_data = PuzzleManager.PUZZLE_DATA["pinas_house"]["reward"]
+	var clue_name = reward_data["clue"]
+
+	# Record clue collection using the authoritative GameState system
+	GameState.collect_clue("pinas_house")
+
+	print("Collected clue:", clue_name)
+
+	get_tree().paused = false
+
+	# Exit for both players
+	rpc_exit_pinas_house.rpc()
+	
+@rpc("any_peer", "call_local", "reliable")
+func rpc_exit_pinas_house():
+	exit_zone()
+
+func exit_zone() -> void:
+
+	print("Exiting Pinas House")
+
+	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
