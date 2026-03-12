@@ -54,6 +54,12 @@ func _ready():
 		
 		# Force immediate floor check
 		force_update_transform()
+		
+		# CRITICAL FIX: Initialize sync tracking when spawned
+		# The actual sync will be triggered by forest_hub.gd after adding to tree
+		if multiplayer.has_multiplayer_peer() and is_multiplayer_authority():
+			_last_sent_position = global_position
+			_last_sent_animation = "idle"
 
 
 func _process(_delta):
@@ -92,10 +98,16 @@ func _update_from_network_state():
 	var target_pos = state.get("position", global_position)
 	var distance = global_position.distance_to(target_pos)
 	
+	# INSTANT TELEPORT: If distance is large, snap immediately (scene transition)
+	# This prevents sliding when returning from zones
+	if distance > 100.0:
+		global_position = target_pos
+		return
+	
 	# Use different lerp factors based on distance for smoother movement
 	var lerp_factor = 0.15  # Smoother default
 	if distance > 50.0:
-		lerp_factor = 0.5  # Snap faster if far away (teleport)
+		lerp_factor = 0.5  # Snap faster if far away
 	elif distance > 10.0:
 		lerp_factor = 0.3  # Medium speed for medium distances
 	
@@ -153,6 +165,8 @@ func _physics_process(delta):
 				"left" if sprite.flip_h else "right",
 				current_anim
 			)
+			# Also report position to host for rejoin sync
+			NetworkManager.report_position(multiplayer.get_unique_id(), global_position)
 	else:
 		# Remote player - don't run physics, just interpolate position
 		# Position is updated in _process via _update_from_network_state
@@ -168,6 +182,22 @@ func _force_grounded() -> void:
 		velocity.y = 100  # Small downward velocity to trigger floor detection
 		move_and_slide()
 	velocity = Vector2.ZERO
+
+
+## Force initial position sync when spawned - prevents invisible player bug
+func _force_initial_sync() -> void:
+	if not multiplayer.has_multiplayer_peer() or not is_multiplayer_authority():
+		return
+	
+	# Send position immediately so other players can see us
+	NetworkManager.sync_player_state.rpc(
+		global_position,
+		velocity,
+		"left" if sprite.flip_h else "right",
+		"idle"
+	)
+	NetworkManager.report_position(multiplayer.get_unique_id(), global_position)
+	print("[PlayerHost] Initial position synced: ", global_position)
 
 
 func _process_local_movement(delta):

@@ -130,6 +130,11 @@ func get_partner_state(peer_id: int) -> Dictionary:
 	return OfflineNetworkManager.get_partner_state(peer_id) if OfflineNetworkManager else {}
 
 
+func clear_partner_state(peer_id: int) -> void:
+	if OfflineNetworkManager:
+		OfflineNetworkManager.clear_partner_state(peer_id)
+
+
 func resume_game() -> bool:
 	return OfflineNetworkManager.resume_game() if OfflineNetworkManager else false
 

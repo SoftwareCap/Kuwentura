@@ -43,10 +43,7 @@ signal game_resumed
 signal host_info_updated(info: Dictionary)
 signal role_assignment_received(role: Role)
 signal room_code_generated(code: String)
-signal session_started(world_data: Dictionary)
-signal discovery_started
-signal discovery_stopped
-signal host_discovered(host_info: Dictionary)
+signal rejoin_game_requested(world_state: Dictionary)
 signal spawn_player_requested(peer_id: int, is_detective: bool)
 signal despawn_player_requested(peer_id: int)
 
@@ -64,6 +61,15 @@ var _session_seed: int = 0
 var _host_ip: String = ""
 var _world_progress: Dictionary = {}
 var _partner_states: Dictionary = {}
+
+# Track if game has been started (for rejoin detection)
+var _has_game_started: bool = false
+
+# Track if sidekick is rejoining an active game session
+var _is_rejoining: bool = false
+
+# Store current player positions for rejoin sync
+var _last_known_positions: Dictionary = {}  # peer_id -> {"position": Vector2, "timestamp": int}
 
 # Discovery (UDP Broadcast for room code joining)
 var _broadcast_socket: PacketPeerUDP = null
@@ -88,6 +94,11 @@ func _ready():
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
+	# Connect to GameState signals to keep world_progress in sync
+	if GameState:
+		GameState.clue_collected.connect(_on_clue_collected)
+		GameState.zone_completed.connect(_on_zone_completed)
+	
 	print("[OfflineNetwork] Initialized")
 
 
@@ -95,9 +106,51 @@ func _exit_tree():
 	disconnect_network()
 
 
+func _on_clue_collected(_zone_id: String, _clue_data: Dictionary) -> void:
+	"""Update world progress when a clue is collected."""
+	if _is_host:
+		sync_world_progress_from_gamestate()
+
+
+func _on_zone_completed(_zone_id: String) -> void:
+	"""Update world progress when a zone is completed."""
+	if _is_host:
+		sync_world_progress_from_gamestate()
+
+
+## Report position to host (called by local player)
+func report_position(peer_id: int, position: Vector2) -> void:
+	"""Clients report their position to host, host stores it for rejoin sync."""
+	if not _is_host:
+		# Client sends position to host via RPC
+		_report_position_to_host_rpc.rpc_id(1, peer_id, position)
+	else:
+		# Host stores its own position directly
+		_store_position(peer_id, position)
+
+
+func _store_position(peer_id: int, position: Vector2) -> void:
+	"""Store position for a player (host only)."""
+	if not _is_host:
+		return
+	_last_known_positions[str(peer_id)] = {
+		"position": {"x": position.x, "y": position.y},
+		"timestamp": Time.get_unix_time_from_system()
+	}
+
+
+@rpc("any_peer", "unreliable")
+func _report_position_to_host_rpc(peer_id: int, position: Vector2) -> void:
+	"""RPC for clients to report their position to host."""
+	if not multiplayer.is_server():
+		return
+	_store_position(peer_id, position)
+
+
 func _process(delta: float):
 	# Handle discovery broadcasting (host)
-	if _is_host and _state == ConnectionState.HOSTING:
+	# Broadcast in both HOSTING and PLAYING states so reconnecting sidekicks can find us
+	if _is_host and (_state == ConnectionState.HOSTING or _state == ConnectionState.PLAYING):
 		_discovery_timer += delta
 		if _discovery_timer >= DISCOVERY_BROADCAST_INTERVAL:
 			_discovery_timer = 0.0
@@ -121,7 +174,7 @@ func _start_discovery_broadcast():
 
 
 func _broadcast_presence():
-	"""Send broadcast packet with room info"""
+	"""Send broadcast packet with room info to all network interfaces"""
 	if not _broadcast_socket or _invite_code.is_empty():
 		return
 	
@@ -136,12 +189,20 @@ func _broadcast_presence():
 	
 	var packet = JSON.stringify(broadcast_data).to_utf8_buffer()
 	
-	# Send to broadcast address
+	# Send to global broadcast address
 	_broadcast_socket.set_dest_address("255.255.255.255", DISCOVERY_PORT)
 	var err = _broadcast_socket.put_packet(packet)
 	
-	if err != OK:
+	if err == OK:
+		print("[OfflineNetwork] Broadcast sent (code: ", _invite_code, ")")
+	else:
 		print("[OfflineNetwork] Broadcast failed: ", err)
+	
+	# Also send to common subnet broadcast addresses for better reliability
+	var subnets = ["192.168.1.255", "192.168.0.255", "192.168.43.255", "172.20.10.255"]
+	for subnet in subnets:
+		_broadcast_socket.set_dest_address(subnet, DISCOVERY_PORT)
+		_broadcast_socket.put_packet(packet)
 
 
 func _start_discovery_listen(target_code: String) -> Dictionary:
@@ -151,13 +212,21 @@ func _start_discovery_listen(target_code: String) -> Dictionary:
 	_listen_socket = PacketPeerUDP.new()
 	_listen_socket.set_broadcast_enabled(true)
 	
-	var error = _listen_socket.bind(DISCOVERY_PORT)
+	# Must bind to DISCOVERY_PORT to receive broadcasts from host
+	# Try binding to any available address on the discovery port
+	var error = _listen_socket.bind(DISCOVERY_PORT, "0.0.0.0")
 	if error != OK:
 		push_warning("[OfflineNetwork] Failed to bind discovery socket: " + str(error))
-		return {"success": false, "error": "Port in use"}
+		# Try with reuse enabled (if supported)
+		_listen_socket = PacketPeerUDP.new()
+		_listen_socket.set_broadcast_enabled(true)
+		error = _listen_socket.bind(DISCOVERY_PORT)
+		if error != OK:
+			_listen_socket = null
+			return {"success": false, "error": "Port in use"}
 	
 	_is_listening = true
-	print("[OfflineNetwork] Listening for discovery on port ", DISCOVERY_PORT)
+	print("[OfflineNetwork] Listening for discovery on port ", DISCOVERY_PORT, " for code: ", _target_code)
 	return {"success": true}
 
 
@@ -172,16 +241,23 @@ func _poll_discovery():
 		
 		var data = JSON.parse_string(packet.get_string_from_utf8())
 		if data == null or not data is Dictionary:
+			print("[OfflineNetwork] Received invalid packet from ", from_ip)
 			continue
 		
 		if data.get("game") != "kwentura":
+			print("[OfflineNetwork] Received packet from wrong game: ", data.get("game"))
 			continue
 		
 		var code = data.get("code", "")
-		var host_ip = data.get("host_ip", from_ip)
+		# Use the packet's source IP as the host IP (more reliable than broadcast data)
+		var host_ip = from_ip
+		if host_ip.is_empty():
+			host_ip = data.get("host_ip", "")
+		
+		print("[OfflineNetwork] Received broadcast from ", host_ip, " with code: ", code, " (looking for: ", _target_code, ")")
 		
 		if code == _target_code:
-			print("[OfflineNetwork] Discovered host: ", host_ip, " with code: ", code)
+			print("[OfflineNetwork] ✓ MATCH! Discovered host at: ", host_ip)
 			# Store discovery result
 			_last_discovered_host = {
 				"ip": host_ip,
@@ -225,6 +301,11 @@ func is_host() -> bool:
 
 func is_playing() -> bool:
 	return _state == ConnectionState.PLAYING
+
+
+func is_rejoining() -> bool:
+	"""Check if sidekick is rejoining an active game session."""
+	return _is_rejoining
 
 
 func get_state() -> ConnectionState:
@@ -281,6 +362,11 @@ func get_partner_state(peer_id: int) -> Dictionary:
 	return _partner_states.get(str(peer_id), {})
 
 
+func clear_partner_state(peer_id: int) -> void:
+	"""Clear stored partner state to prevent interpolation from old position."""
+	_partner_states.erase(str(peer_id))
+
+
 # ============================================================================
 # HOSTING - Create a game (Detective)
 # ============================================================================
@@ -321,6 +407,9 @@ func host_game() -> Dictionary:
 		"current_zone": "forest_hub",
 		"session_seed": _session_seed
 	}
+	
+	# Reset game started flag for new session
+	_has_game_started = false
 	
 	GameState.set_session_seed(_session_seed)
 	
@@ -365,8 +454,9 @@ func get_host_connection_info() -> Dictionary:
 ## Join a game using direct IP address
 ## This is the primary connection method - works across any network
 func join_with_ip(host_ip: String, code: String = "") -> Dictionary:
+	# Force cleanup if in any state other than DISCONNECTED
 	if _state != ConnectionState.DISCONNECTED:
-		return {"success": false, "error": "Already connected"}
+		force_reset_for_reconnection()
 	
 	if host_ip.is_empty():
 		return {"success": false, "error": "IP address is required"}
@@ -426,8 +516,9 @@ func join_with_qr(qr_string: String) -> Dictionary:
 func join_game_with_code(invite_code: String) -> Dictionary:
 	print("[OfflineNetwork] Starting discovery for code: ", invite_code)
 	
+	# Force cleanup if in any state other than DISCONNECTED
 	if _state != ConnectionState.DISCONNECTED:
-		return {"success": false, "error": "Already connected"}
+		force_reset_for_reconnection()
 	
 	var target_code = invite_code.to_upper()
 	var discovery = _start_discovery_listen(target_code)
@@ -515,10 +606,14 @@ func start_game() -> bool:
 		push_warning("[OfflineNetwork] No partner connected")
 		return false
 	
+	# Update world progress before starting
+	sync_world_progress_from_gamestate()
+	
 	# Sync world state to client
 	_rpc_sync_world_state.rpc(_world_progress)
 	
 	_change_state(ConnectionState.PLAYING)
+	_has_game_started = true
 	
 	# Notify all clients
 	_game_started_rpc.rpc("forest_hub")
@@ -544,6 +639,19 @@ func resume_game() -> bool:
 	return true
 
 
+## Sync world progress from GameState (call this when game state changes)
+func sync_world_progress_from_gamestate() -> void:
+	"""Update _world_progress with current GameState data."""
+	_world_progress = {
+		"collected_clues": GameState.collected_clues.duplicate(true),
+		"zones_status": GameState.zones_status.duplicate(true),
+		"current_zone": GameState.current_zone,
+		"session_seed": _session_seed,
+		"climax_triggered": GameState.climax_triggered,
+		"game_completed": GameState.game_completed
+	}
+
+
 ## Disconnect from current session
 func disconnect_network():
 	if _state == ConnectionState.DISCONNECTED:
@@ -563,6 +671,17 @@ func disconnect_network():
 	_change_state(ConnectionState.DISCONNECTED)
 	
 	print("[OfflineNetwork] Disconnected")
+
+
+## Force reset network state for reconnection
+func force_reset_for_reconnection():
+	"""Force cleanup all network state to ensure clean reconnection."""
+	if multiplayer.multiplayer_peer:
+		multiplayer.multiplayer_peer.close()
+		multiplayer.multiplayer_peer = null
+	_cleanup()
+	_state = ConnectionState.DISCONNECTED
+	print("[OfflineNetwork] Force reset for reconnection")
 
 
 func disconnect_from_session():
@@ -647,6 +766,40 @@ func _notify_host_leaving():
 	emit_signal("game_paused", "host_leaving")
 
 
+@rpc("authority", "reliable")
+func _rejoin_game_rpc(rejoin_data: Dictionary):
+	"""Called on sidekick when joining an active game session."""
+	print("[OfflineNetwork] Rejoining active game session")
+	_is_rejoining = true
+	
+	var world_state = rejoin_data.get("world_progress", {})
+	var player_positions = rejoin_data.get("player_positions", {})
+	
+	_world_progress = world_state
+	
+	# Update GameState with host's world progress
+	if world_state.has("collected_clues"):
+		GameState.collected_clues = world_state.collected_clues.duplicate(true)
+	if world_state.has("zones_status"):
+		GameState.zones_status = world_state.zones_status.duplicate(true)
+	if world_state.has("current_zone"):
+		GameState.current_zone = world_state.current_zone
+	
+	# Store ONLY the detective (host) position for spawning on sidekick's screen
+	# Sidekick should spawn fresh at spawn point, not at their last known position
+	for peer_id_str in player_positions.keys():
+		var peer_id = int(peer_id_str)
+		# Only store position for host (peer_id == 1) - this is the detective's position
+		if peer_id == 1:
+			var pos_data = player_positions[peer_id_str]
+			if pos_data is Dictionary and pos_data.has("position"):
+				var pos = Vector2(pos_data.position.x, pos_data.position.y)
+				GameState.save_spawn_position(peer_id, pos, "forest_hub")
+				print("[OfflineNetwork] Stored detective rejoin position: ", pos)
+	
+	emit_signal("rejoin_game_requested", rejoin_data)
+
+
 # ============================================================================
 # MULTIPLAYER EVENT HANDLERS
 # ============================================================================
@@ -666,9 +819,20 @@ func _on_multiplayer_peer_connected(peer_id: int):
 		})
 		emit_signal("player_joined", peer_id, Role.SIDEKICK)
 		
-		# If host is already playing, sync immediately
-		if _state == ConnectionState.PLAYING:
-			_game_started_rpc.rpc_id(peer_id, "forest_hub")
+		# If host has already started a game (or is currently playing), notify sidekick to rejoin directly
+		if _state == ConnectionState.PLAYING or _has_game_started:
+			print("[OfflineNetwork] Game already started - sending rejoin signal to sidekick")
+			# Ensure we have the latest world state before sending
+			sync_world_progress_from_gamestate()
+			# Include current player positions for proper sync
+			var rejoin_data = {
+				"world_progress": _world_progress,
+				"player_positions": _last_known_positions.duplicate(true)
+			}
+			# Wait a moment for sidekick to load their scene before sending rejoin signal
+			await get_tree().create_timer(0.5).timeout
+			if multiplayer.get_peers().has(peer_id):
+				_rejoin_game_rpc.rpc_id(peer_id, rejoin_data)
 	else:
 		emit_signal("player_joined", peer_id, Role.DETECTIVE)
 
@@ -740,16 +904,26 @@ func _cleanup():
 	_invite_code = ""
 	_world_progress.clear()
 	_partner_states.clear()
+	_is_rejoining = false
 	
+	# Ensure multiplayer peer is fully cleaned up
 	if multiplayer.multiplayer_peer:
 		multiplayer.multiplayer_peer.close()
 		multiplayer.multiplayer_peer = null
+	
+	# Force clear multiplayer peer reference
+	multiplayer.multiplayer_peer = null
+	_multiplayer_peer = null
 	
 	# Clean up discovery sockets
 	if _broadcast_socket:
 		_broadcast_socket.close()
 		_broadcast_socket = null
 	_stop_discovery_listen()
+	
+	# Reset discovery target
+	_target_code = ""
+	_last_discovered_host = {}
 
 
 func _wait_for_connection() -> Dictionary:
@@ -962,7 +1136,7 @@ func is_likely_hotspot() -> bool:
 # ============================================================================
 
 ## DEPRECATED: Discovery is no longer supported
-func start_discovery_for_code(_target_code: String) -> bool:
+func start_discovery_for_code(target_code: String) -> bool:
 	push_warning("[OfflineNetwork] Discovery is deprecated. Use direct IP connection.")
 	return false
 

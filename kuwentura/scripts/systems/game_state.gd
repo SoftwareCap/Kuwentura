@@ -398,24 +398,33 @@ func get_zone_lock_remaining(zone_id: String) -> int:
 
 func save_spawn_position(peer_id: int, position: Vector2, zone: String = "forest_hub"):
 	"""Save a player's position before entering a zone."""
+	print("[GameState] → SAVING spawn position for peer ", peer_id, " at ", position, " (zone: ", zone, ")")
 	saved_spawn_positions[peer_id] = {
 		"position": position,
 		"zone": zone,
 		"timestamp": Time.get_unix_time_from_system()
 	}
+	print("[GameState] Current saved positions: ", saved_spawn_positions.keys())
 
 
 func get_spawn_position(peer_id: int) -> Vector2:
 	"""Get saved spawn position for a player, or Vector2.ZERO if none saved."""
 	if saved_spawn_positions.has(peer_id):
-		return saved_spawn_positions[peer_id].position
+		var pos = saved_spawn_positions[peer_id].position
+		print("[GameState] ← RETRIEVING spawn position for peer ", peer_id, ": ", pos)
+		return pos
+	print("[GameState] ○ No spawn position found for peer ", peer_id, " (saved keys: ", saved_spawn_positions.keys(), ")")
 	return Vector2.ZERO
 
 
 func clear_spawn_position(peer_id: int):
 	"""Clear saved spawn position after using it."""
 	if saved_spawn_positions.has(peer_id):
+		print("[GameState] ✗ CLEARING spawn position for peer ", peer_id)
 		saved_spawn_positions.erase(peer_id)
+		print("[GameState] Remaining saved positions: ", saved_spawn_positions.keys())
+	else:
+		print("[GameState] ○ No position to clear for peer ", peer_id)
 
 
 func has_spawn_position(peer_id: int) -> bool:
