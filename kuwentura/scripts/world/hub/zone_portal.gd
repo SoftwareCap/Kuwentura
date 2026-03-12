@@ -399,34 +399,69 @@ func _enter_zone():
 	# Safety check
 	if not is_inside_tree() or multiplayer == null or multiplayer.multiplayer_peer == null:
 		return
-	_save_positions()
-	rpc_enter_zone.rpc(scene_path)
-
-
-func _save_positions():
-	# Safety check
-	if not is_inside_tree():
-		return
 	
-	# Save individual player positions where they entered the portal
-	# This ensures they return to the exact spot they left
-	if _detective_present:
-		var detective_pos = _detective_entry_position
-		# If position wasn't recorded (shouldn't happen), fall back to ReturnMarker
-		if detective_pos == Vector2.ZERO:
-			var return_marker = get_node_or_null("ReturnMarker")
-			detective_pos = return_marker.global_position if return_marker else global_position + Vector2(0, 100)
+	# Clear any previously saved spawn positions before saving new ones
+	# This ensures we're starting fresh and prevents stale position data
+	if multiplayer.is_server():
+		print("[ZonePortal] Clearing old positions before entering ", zone_name)
+		GameState.clear_spawn_position(1)  # Clear detective
+		for peer_id in multiplayer.get_peers():
+			GameState.clear_spawn_position(peer_id)  # Clear all sidekicks
+	
+	# Capture positions BEFORE any RPC calls (they get cleared on scene change)
+	var detective_pos = _detective_entry_position
+	var sidekick_pos = _sidekick_entry_position
+	var sidekick_pid = _sidekick_peer_id
+	
+	print("[ZonePortal] Captured positions for zone entry - Detective: ", detective_pos, " Sidekick: ", sidekick_pos)
+	
+	# Save positions immediately on server
+	_save_positions_direct(detective_pos, sidekick_pos, sidekick_pid)
+	
+	# RPC with captured positions to ensure clients get correct data
+	rpc_enter_zone_with_positions.rpc(scene_path, detective_pos, sidekick_pos, sidekick_pid)
+
+
+## Save positions using captured values (not instance variables that may be cleared)
+func _save_positions_direct(detective_pos: Vector2, sidekick_pos: Vector2, sidekick_pid: int):
+	print("[ZonePortal] _save_positions_direct() called for zone: ", zone_name)
+	print("[ZonePortal] Detective pos: ", detective_pos, " Sidekick pos: ", sidekick_pos, " sidekick_pid: ", sidekick_pid)
+	
+	# Save detective position
+	if detective_pos != Vector2.ZERO:
 		GameState.save_spawn_position(1, detective_pos, "forest_hub")
-		print("[ZonePortal] Saved detective return position: ", detective_pos)
+		print("[ZonePortal] ✓ Saved detective (peer 1) return position: ", detective_pos)
+	else:
+		# Fallback to ReturnMarker if position wasn't recorded
+		var return_marker = get_node_or_null("ReturnMarker")
+		var fallback_pos = return_marker.global_position if return_marker else global_position + Vector2(0, 100)
+		GameState.save_spawn_position(1, fallback_pos, "forest_hub")
+		push_warning("[ZonePortal] Detective entry position was ZERO, using fallback: " + str(fallback_pos))
 	
-	if _sidekick_present:
-		var sidekick_pos = _sidekick_entry_position
-		# If position wasn't recorded (shouldn't happen), fall back to ReturnMarker
-		if sidekick_pos == Vector2.ZERO:
+	# Save sidekick position
+	if sidekick_pid > 0:
+		if sidekick_pos != Vector2.ZERO:
+			GameState.save_spawn_position(sidekick_pid, sidekick_pos, "forest_hub")
+			print("[ZonePortal] ✓ Saved sidekick (peer ", sidekick_pid, ") return position: ", sidekick_pos)
+			
+			# SYNC TO CLIENT: Send the sidekick's position to their client so they can save it locally
+			# This ensures they spawn at the correct position when returning from the zone
+			_sync_spawn_position_to_client.rpc_id(sidekick_pid, sidekick_pid, sidekick_pos, "forest_hub")
+			print("[ZonePortal] → Synced sidekick position to client peer ", sidekick_pid)
+		else:
+			# Fallback to ReturnMarker
 			var return_marker = get_node_or_null("ReturnMarker")
-			sidekick_pos = return_marker.global_position if return_marker else global_position + Vector2(-50, 100)
-		GameState.save_spawn_position(_sidekick_peer_id, sidekick_pos, "forest_hub")
-		print("[ZonePortal] Saved sidekick return position: ", sidekick_pos)
+			var fallback_pos = return_marker.global_position if return_marker else global_position + Vector2(-50, 100)
+			GameState.save_spawn_position(sidekick_pid, fallback_pos, "forest_hub")
+			push_warning("[ZonePortal] Sidekick entry position was ZERO, using fallback: " + str(fallback_pos))
+			
+			# Still need to sync to client
+			_sync_spawn_position_to_client.rpc_id(sidekick_pid, sidekick_pid, fallback_pos, "forest_hub")
+
+
+# Legacy _save_positions() for backward compatibility
+func _save_positions():
+	_save_positions_direct(_detective_entry_position, _sidekick_entry_position, _sidekick_peer_id)
 
 
 @rpc("any_peer", "reliable", "call_local")
@@ -436,6 +471,45 @@ func rpc_enter_zone(path: String):
 		return
 	print("[ZonePortal] Changing scene to: ", path)
 	get_tree().change_scene_to_file(path)
+
+
+## RPC to enter zone with explicit positions (fixes position loss during scene change)
+@rpc("authority", "reliable", "call_local")
+func rpc_enter_zone_with_positions(path: String, detective_pos: Vector2, sidekick_pos: Vector2, sidekick_pid: int):
+	print("[ZonePortal] rpc_enter_zone_with_positions called - path: ", path, " my_id=", multiplayer.get_unique_id())
+	
+	var my_id = multiplayer.get_unique_id()
+	
+	# Save positions on ALL clients BEFORE scene change
+	# This ensures both players have their positions saved locally for when they return
+	
+	# Always save detective position on all clients
+	if detective_pos != Vector2.ZERO:
+		GameState.save_spawn_position(1, detective_pos, "forest_hub")
+		print("[ZonePortal] Saved detective (peer 1) position: ", detective_pos)
+	
+	# Save sidekick position on all clients (each client saves their own if they're the sidekick)
+	if sidekick_pid > 0 and sidekick_pos != Vector2.ZERO:
+		GameState.save_spawn_position(sidekick_pid, sidekick_pos, "forest_hub")
+		print("[ZonePortal] Saved sidekick (peer ", sidekick_pid, ") position: ", sidekick_pos, " my_id=", my_id)
+	
+	# Now change scene
+	if is_inside_tree():
+		print("[ZonePortal] Changing scene to: ", path)
+		get_tree().change_scene_to_file(path)
+
+
+## Sync spawn position from server to client
+# This ensures the client has their return position saved locally for when they exit the zone
+@rpc("authority", "reliable")
+func _sync_spawn_position_to_client(peer_id: int, position: Vector2, zone: String):
+	if not is_inside_tree():
+		return
+	
+	# Only save if this is for us (safety check)
+	if peer_id == multiplayer.get_unique_id():
+		GameState.save_spawn_position(peer_id, position, zone)
+		print("[ZonePortal] ← Client received spawn position sync: ", position, " for zone: ", zone)
 
 
 # Legacy methods for backward compatibility

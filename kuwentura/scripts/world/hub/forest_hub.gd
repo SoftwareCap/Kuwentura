@@ -136,24 +136,27 @@ func _ready():
 	# Server tells all clients about existing players
 	if multiplayer.is_server():
 		await get_tree().process_frame
+		# Get saved positions for all peers
+		var host_pos = GameState.get_spawn_position(1)
+		
 		# Tell each peer to spawn all other players (including the host)
 		for peer_id in multiplayer.get_peers():
 			if peer_id != multiplayer.get_unique_id():
-				# Tell this peer to spawn the host (ID 1)
-				print("[ForestHub] Telling peer ", peer_id, " to spawn host")
-				NetworkManager.request_spawn_player(peer_id, 1, true)
-				# Tell all other peers to spawn this peer
+				# Tell this peer to spawn the host (ID 1) with position
+				print("[ForestHub] Telling peer ", peer_id, " to spawn host at ", host_pos)
+				_rpc_spawn_player_with_pos.rpc_id(peer_id, 1, true, host_pos)
+				
+				# Tell all other peers to spawn this peer with position
+				var peer_pos = GameState.get_spawn_position(peer_id)
 				for other_peer in multiplayer.get_peers():
 					if other_peer != peer_id and other_peer != multiplayer.get_unique_id():
-						print("[ForestHub] Telling peer ", other_peer, " to spawn peer ", peer_id)
-						NetworkManager.request_spawn_player(other_peer, peer_id, false)
+						print("[ForestHub] Telling peer ", other_peer, " to spawn peer ", peer_id, " at ", peer_pos)
+						_rpc_spawn_player_with_pos.rpc_id(other_peer, peer_id, false, peer_pos)
 		
-		# Clear saved spawn positions after all players have been spawned
-		# This prevents positions from being used for lobby/rejoin spawns
-		await get_tree().create_timer(0.5).timeout
-		GameState.clear_spawn_position(1)
-		for peer_id in multiplayer.get_peers():
-			GameState.clear_spawn_position(peer_id)
+		# NOTE: We no longer clear positions here automatically.
+		# Positions are now cleared when entering a zone (before saving new positions).
+		# This ensures both players spawn at their correct return positions even if
+		# there are network delays. Positions will be overwritten when entering the next zone.
 
 
 ## Setup room code label - only visible to host
@@ -269,7 +272,9 @@ func _save_pause() -> void:
 
 func _on_spawn_player_requested(peer_id: int, is_detective: bool):
 	print("[ForestHub] Spawn requested via NetworkManager: peer_id=", peer_id, " is_detective=", is_detective)
-	_rpc_spawn_player(peer_id, is_detective)
+	# Get saved position to pass to RPC so all clients spawn at correct position
+	var saved_pos = GameState.get_spawn_position(peer_id)
+	_rpc_spawn_player(peer_id, is_detective, saved_pos)
 
 
 func _on_despawn_player_requested(peer_id: int):
@@ -315,11 +320,12 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 	var saved_pos = GameState.get_spawn_position(peer_id)
 	var has_saved_pos = saved_pos != Vector2.ZERO
 	
+	print("[ForestHub] Spawn check for peer ", peer_id, " (", "Detective" if is_detective else "Sidekick", "): saved_pos=", saved_pos, ", has_saved=", has_saved_pos)
+	
 	if has_saved_pos:
 		# Player is returning from a zone - use their saved position
 		spawn_pos = saved_pos
-		# Don't clear here - clear after all players are spawned to avoid race conditions
-		print("[ForestHub] Using saved return position for ", "Detective" if is_detective else "Sidekick", ": ", spawn_pos)
+		print("[ForestHub] ✓ Using SAVED RETURN position for ", "Detective" if is_detective else "Sidekick", " at: ", spawn_pos)
 	else:
 		# First time spawn or rejoin - use initial spawn markers
 		if is_detective:
@@ -329,13 +335,19 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 		
 		if spawn_marker:
 			spawn_pos = spawn_marker.global_position
-			print("[ForestHub] Using spawn marker for ", "Detective" if is_detective else "Sidekick", " at: ", spawn_pos)
+			print("[ForestHub] ○ Using SPAWN MARKER for ", "Detective" if is_detective else "Sidekick", " at: ", spawn_pos, " (first time spawn or rejoin)")
 		else:
 			# FIXED: Detective on LEFT (200), Sidekick on RIGHT (600) to match spawn marker layout
 			spawn_pos = Vector2(200 if is_detective else 600, ground_y)
 			push_warning("[ForestHub] Spawn marker not found for " + ("Detective" if is_detective else "Sidekick") + ", using default position: " + str(spawn_pos))
 	
+	# INSTANT SPAWN: Set position before adding to tree to prevent any interpolation
 	player.global_position = spawn_pos
+	
+	# Clear any stale network state for this peer to prevent interpolation from old position
+	# This ensures instant spawn without sliding
+	if NetworkManager.has_method("clear_partner_state"):
+		NetworkManager.clear_partner_state(peer_id)
 	
 	# Stabilize physics immediately to prevent sliding
 	_stabilize_player_physics(player)
@@ -347,9 +359,24 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 	_spawned_players[peer_id] = player
 	add_child(player, true)
 	
+	# Clear the used spawn position for the local player only
+	# This prevents stale data on next zone entry; position will be re-saved when entering
+	if peer_id == multiplayer.get_unique_id():
+		GameState.clear_spawn_position(peer_id)
+	
 	# Force visibility and re-stabilize after adding to tree
 	_force_visibility_recursive(player)
 	_call_stabilize_after_frame(player)
+	
+	# IMMEDIATE SYNC: If this is the local player, force immediate position broadcast
+	# This fixes the "invisible until moving" bug for BOTH host and sidekick
+	if peer_id == multiplayer.get_unique_id():
+		await get_tree().process_frame
+		if is_instance_valid(player) and player.has_method("_force_initial_sync"):
+			print("[ForestHub] Forcing immediate position sync for local ", player.role)
+			player._force_initial_sync()
+			# Also explicitly sync to ensure all peers get the position
+			_sync_player_position_to_all.rpc(peer_id, spawn_pos)
 	
 	# Deferred visibility check to ensure it sticks
 	_call_deferred_visibility_check(player)
@@ -384,15 +411,17 @@ func _on_player_connected(peer_id: int, _role: int = 0) -> void:
 			# Ensure the player is visible after spawning
 			_ensure_player_visible(peer_id)
 		
-		# Tell the new peer to spawn the host (ID 1)
-		print("[ForestHub] Telling peer ", peer_id, " to spawn host (ID 1)")
-		NetworkManager.request_spawn_player(peer_id, 1, true)
+		# Tell the new peer to spawn the host (ID 1) - include host's position
+		var host_pos = GameState.get_spawn_position(1)
+		print("[ForestHub] Telling peer ", peer_id, " to spawn host (ID 1) at pos: ", host_pos)
+		_rpc_spawn_player_with_pos.rpc_id(peer_id, 1, true, host_pos)
 		
-		# Tell all existing peers (including server) about the new player
+		# Tell all existing peers (including server) about the new player - include new player's position
 		for other_peer in multiplayer.get_peers():
 			if other_peer != peer_id:
-				print("[ForestHub] Telling peer ", other_peer, " to spawn new player ", peer_id)
-				NetworkManager.request_spawn_player(other_peer, peer_id, false)
+				var new_player_pos = GameState.get_spawn_position(peer_id)
+				print("[ForestHub] Telling peer ", other_peer, " to spawn new player ", peer_id, " at pos: ", new_player_pos)
+				_rpc_spawn_player_with_pos.rpc_id(other_peer, peer_id, false, new_player_pos)
 				# Ensure visibility on the remote peer's side as well
 				_ensure_player_visible_on_peer.rpc_id(other_peer, peer_id)
 
@@ -461,8 +490,8 @@ func _cleanup_orphaned_players() -> void:
 
 
 ## Spawn player via NetworkManager signal (not direct RPC)
-func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
-	print("[ForestHub] === RPC SPAWN peer_id=", peer_id, " is_detective=", is_detective_role, " my_id=", multiplayer.get_unique_id())
+func _rpc_spawn_player(peer_id: int, is_detective_role: bool, forced_pos: Vector2 = Vector2.ZERO) -> void:
+	print("[ForestHub] === RPC SPAWN peer_id=", peer_id, " is_detective=", is_detective_role, " my_id=", multiplayer.get_unique_id(), " forced_pos=", forced_pos)
 	
 	if _spawned_players.has(peer_id):
 		print("[ForestHub] Player ", peer_id, " already exists, skipping")
@@ -482,6 +511,34 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 	var spawn_marker: Marker2D
 	var spawn_pos: Vector2
 	
+	# PRIORITY: Use forced position from host if provided (fixes sidekick not seeing host's return position)
+	if forced_pos != Vector2.ZERO:
+		spawn_pos = forced_pos
+		print("[ForestHub] RPC: ✓ Using FORCED position from host for ", "Detective" if is_detective_role else "Sidekick", " at: ", spawn_pos)
+	else:
+		# Check for saved position (from returning from a zone)
+		var saved_pos = GameState.get_spawn_position(peer_id)
+		var has_saved_pos = saved_pos != Vector2.ZERO
+		
+		if has_saved_pos:
+			# Player is returning from a zone - use their saved position
+			spawn_pos = saved_pos
+			print("[ForestHub] RPC: ✓ Using SAVED RETURN position for ", "Detective" if is_detective_role else "Sidekick", " at: ", spawn_pos)
+		else:
+			# Use initial spawn markers
+			if is_detective_role:
+				spawn_marker = spawn_points.get_node_or_null("DetectiveSpawn")
+			else:
+				spawn_marker = spawn_points.get_node_or_null("SidekickSpawn")
+			
+			if spawn_marker:
+				spawn_pos = spawn_marker.global_position
+				print("[ForestHub] RPC: ○ Using SPAWN MARKER for ", "Detective" if is_detective_role else "Sidekick", " at: ", spawn_pos, " (first time spawn or rejoin)")
+			else:
+				# FIXED: Detective on LEFT (200), Sidekick on RIGHT (600) to match spawn marker layout
+				spawn_pos = Vector2(200 if is_detective_role else 600, ground_y)
+				push_warning("[ForestHub] RPC: Spawn marker not found for " + ("Detective" if is_detective_role else "Sidekick") + ", using default position: " + str(spawn_pos))
+	
 	if is_detective_role:
 		player = player_host_scene.instantiate()
 		player.role = "Detective"
@@ -495,31 +552,12 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 	
 	player.name = str(peer_id)
 	
-	# Check for saved position (from returning from a zone)
-	var saved_pos = GameState.get_spawn_position(peer_id)
-	var has_saved_pos = saved_pos != Vector2.ZERO
-	
-	if has_saved_pos:
-		# Player is returning from a zone - use their saved position
-		spawn_pos = saved_pos
-		# Don't clear here - server clears after all players are spawned
-		print("[ForestHub] RPC: Using saved return position for ", "Detective" if is_detective_role else "Sidekick", ": ", spawn_pos)
-	else:
-		# Use initial spawn markers
-		if is_detective_role:
-			spawn_marker = spawn_points.get_node_or_null("DetectiveSpawn")
-		else:
-			spawn_marker = spawn_points.get_node_or_null("SidekickSpawn")
-		
-		if spawn_marker:
-			spawn_pos = spawn_marker.global_position
-			print("[ForestHub] RPC: Using spawn marker for ", "Detective" if is_detective_role else "Sidekick", " at: ", spawn_pos)
-		else:
-			# FIXED: Detective on LEFT (200), Sidekick on RIGHT (600) to match spawn marker layout
-			spawn_pos = Vector2(200 if is_detective_role else 600, ground_y)
-			push_warning("[ForestHub] RPC: Spawn marker not found for " + ("Detective" if is_detective_role else "Sidekick") + ", using default position: " + str(spawn_pos))
-	
+	# INSTANT SPAWN: Set position before adding to tree to prevent any interpolation
 	player.global_position = spawn_pos
+	
+	# Clear any stale network state for this peer to prevent interpolation from old position
+	if NetworkManager.has_method("clear_partner_state"):
+		NetworkManager.clear_partner_state(peer_id)
 	
 	# Stabilize physics to prevent sliding
 	_stabilize_player_physics(player)
@@ -531,6 +569,15 @@ func _rpc_spawn_player(peer_id: int, is_detective_role: bool) -> void:
 	
 	# Stabilize after adding to tree
 	_call_stabilize_after_frame(player)
+	
+	# IMMEDIATE SYNC: If this is the local player, force immediate position broadcast
+	if peer_id == multiplayer.get_unique_id():
+		await get_tree().process_frame
+		if is_instance_valid(player) and player.has_method("_force_initial_sync"):
+			print("[ForestHub] Forcing immediate position sync for local ", player.role, " (RPC spawn)")
+			player._force_initial_sync()
+			# Also explicitly sync to ensure all peers get the position
+			_sync_player_position_to_all.rpc(peer_id, spawn_pos)
 	
 	# Deferred visibility check
 	_call_deferred_visibility_check(player)
@@ -657,12 +704,45 @@ func _on_rejoin_game_requested(rejoin_data: Dictionary) -> void:
 		var peer_id = int(peer_id_str)
 		if peer_id != multiplayer.get_unique_id() and not _spawned_players.has(peer_id):
 			print("[ForestHub] Spawning missing player from rejoin: ", peer_id)
+			# Get position from rejoin data
+			var pos_data = player_positions.get(peer_id_str, {})
+			var spawn_pos = Vector2.ZERO
+			if pos_data is Dictionary and pos_data.has("position"):
+				spawn_pos = Vector2(pos_data.position.x, pos_data.position.y)
 			if peer_id == 1:
-				_rpc_spawn_player(peer_id, true)  # Detective
+				_rpc_spawn_player(peer_id, true, spawn_pos)  # Detective
 			else:
-				_rpc_spawn_player(peer_id, false)  # Sidekick
+				_rpc_spawn_player(peer_id, false, spawn_pos)  # Sidekick
 			# Ensure visibility after spawn
 			_ensure_player_visible(peer_id)
+
+
+## RPC to spawn a player with explicit position
+# Called by host to tell clients where to spawn a player (fixes position sync issues)
+@rpc("authority", "reliable", "call_local")
+func _rpc_spawn_player_with_pos(peer_id: int, is_detective: bool, pos: Vector2):
+	print("[ForestHub] RPC _rpc_spawn_player_with_pos: peer_id=", peer_id, " is_detective=", is_detective, " pos=", pos)
+	_rpc_spawn_player(peer_id, is_detective, pos)
+
+
+## RPC to sync player spawn position to all clients
+# This ensures the sidekick sees the host immediately when returning from zones
+@rpc("authority", "reliable", "call_local")
+func _sync_player_position_to_all(peer_id: int, pos: Vector2):
+	print("[ForestHub] Received position sync for player ", peer_id, " at ", pos)
+	
+	# Update network manager state so other players see the correct position
+	if multiplayer.is_server() and NetworkManager.has_method("_store_position"):
+		NetworkManager._store_position(peer_id, pos)
+	
+	# If we have the player node locally, snap it to position immediately
+	var player_node = get_node_or_null(str(peer_id))
+	if is_instance_valid(player_node):
+		player_node.global_position = pos
+		player_node.velocity = Vector2.ZERO
+		print("[ForestHub] ✓ Synced player ", peer_id, " to position ", pos)
+	else:
+		print("[ForestHub] ⚠ Player node ", peer_id, " not found yet, will sync when spawned")
 
 
 func _process(_delta):
