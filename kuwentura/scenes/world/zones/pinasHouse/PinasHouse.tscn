@@ -1,4 +1,4 @@
-[gd_scene load_steps=61 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=72 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
@@ -95,20 +95,92 @@ size = Vector2(299.0006, 89.00024)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cm1dj"]
 size = Vector2(90.00023, 75.000145)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j1qle"]
-bg_color = Color(0.5372549, 0.34901962, 0.2509804, 1)
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
-border_blend = true
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u6sy3"]
+bg_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
 corner_radius_top_left = 20
 corner_radius_top_right = 20
 corner_radius_bottom_right = 20
 corner_radius_bottom_left = 20
 shadow_size = 5
 shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ra7mo"]
+bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fvin0"]
+bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0s51p"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cyexm"]
+bg_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m2a4r"]
+bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wjw6o"]
+bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cfl6u"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j1qle"]
+bg_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ignus"]
+bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_anqci"]
+bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cm1dj"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dcipd"]
 bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
@@ -486,7 +558,10 @@ offset_bottom = 507.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 30
-theme_override_styles/normal = SubResource("StyleBoxFlat_j1qle")
+theme_override_styles/normal = SubResource("StyleBoxFlat_u6sy3")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ra7mo")
+theme_override_styles/hover = SubResource("StyleBoxFlat_fvin0")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_0s51p")
 text = "Search Room"
 
 [node name="SidekickOverlays" type="Control" parent="RoleLayer/Control"]
@@ -589,7 +664,10 @@ offset_bottom = 735.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 27
-theme_override_styles/normal = SubResource("StyleBoxFlat_j1qle")
+theme_override_styles/normal = SubResource("StyleBoxFlat_cyexm")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_m2a4r")
+theme_override_styles/hover = SubResource("StyleBoxFlat_wjw6o")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_cfl6u")
 text = "Submit"
 
 [node name="Feedback" type="Label" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
@@ -610,6 +688,9 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_j1qle")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ignus")
+theme_override_styles/hover = SubResource("StyleBoxFlat_anqci")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_cm1dj")
 text = "Search Room"
 
 [node name="NoteTapButton" type="TextureButton" parent="RoleLayer/Control"]
