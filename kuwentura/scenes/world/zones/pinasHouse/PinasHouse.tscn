@@ -1,4 +1,4 @@
-[gd_scene load_steps=76 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=80 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
