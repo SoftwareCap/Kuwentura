@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b4ff13vwedej7"
-path="res://.godot/imported/ledgerbutton.png-02ec0b6122f16e05fb07e43f10acee7b.ctex"
+path="res://.godot/imported/ledgerButton.png-6a41a865c31af35d9fbefffd9fcb0354.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/buttons/players/ledgerbutton.png"
-dest_files=["res://.godot/imported/ledgerbutton.png-02ec0b6122f16e05fb07e43f10acee7b.ctex"]
+source_file="res://assets/buttons/players/ledgerButton.png"
+dest_files=["res://.godot/imported/ledgerButton.png-6a41a865c31af35d9fbefffd9fcb0354.ctex"]
 
 [params]
 
