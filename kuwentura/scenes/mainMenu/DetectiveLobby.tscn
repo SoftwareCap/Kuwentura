@@ -464,7 +464,10 @@ text = "Select Costume"
 [node name="SettingsControl" parent="." instance=ExtResource("10_vwhyu")]
 script = ExtResource("11_8x8i8")
 
-[node name="SettingsPanel" type="Panel" parent="."]
+[node name="SettingsLayer" type="CanvasLayer" parent="."]
+layer = 100
+
+[node name="SettingsPanel" type="Panel" parent="SettingsLayer"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -480,7 +483,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_2b6dv")
 
-[node name="Label" type="Label" parent="SettingsPanel"]
+[node name="Label" type="Label" parent="SettingsLayer/SettingsPanel"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -496,19 +499,19 @@ text = "Settings"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Back" type="TouchScreenButton" parent="SettingsPanel"]
+[node name="Back" type="TouchScreenButton" parent="SettingsLayer/SettingsPanel"]
 position = Vector2(767.25, -3)
 scale = Vector2(0.5, 0.5)
 texture_normal = ExtResource("12_28lu3")
 
-[node name="Separator" type="Line2D" parent="SettingsPanel"]
+[node name="Separator" type="Line2D" parent="SettingsLayer/SettingsPanel"]
 position = Vector2(0.109012604, -58)
 scale = Vector2(0.73165876, 1)
 points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
 width = 2.0
 default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
 
-[node name="ViewUserProfile" type="Button" parent="SettingsPanel"]
+[node name="ViewUserProfile" type="Button" parent="SettingsLayer/SettingsPanel"]
 custom_minimum_size = Vector2(200, 40)
 layout_mode = 1
 anchors_preset = 8
@@ -536,7 +539,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_oh2lh")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_t5cgj")
 text = "View User Profile"
 
-[node name="VolumeSliderControl" type="HBoxContainer" parent="SettingsPanel"]
+[node name="VolumeSliderControl" type="HBoxContainer" parent="SettingsLayer/SettingsPanel"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -551,7 +554,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 30
 
-[node name="VolumeLabel" type="Label" parent="SettingsPanel/VolumeSliderControl"]
+[node name="VolumeLabel" type="Label" parent="SettingsLayer/SettingsPanel/VolumeSliderControl"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_4bddd")
 theme_override_font_sizes/font_size = 40
@@ -559,7 +562,7 @@ text = "Music Volume:"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="VolumeSlider" type="HSlider" parent="SettingsPanel/VolumeSliderControl"]
+[node name="VolumeSlider" type="HSlider" parent="SettingsLayer/SettingsPanel/VolumeSliderControl"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
@@ -568,14 +571,14 @@ theme_override_styles/grabber_area = SubResource("StyleBoxLine_2oqfw")
 theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_2oqfw")
 value = 80.0
 
-[node name="VolumeValue" type="Label" parent="SettingsPanel/VolumeSliderControl"]
+[node name="VolumeValue" type="Label" parent="SettingsLayer/SettingsPanel/VolumeSliderControl"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "80%"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="UserSection" type="Panel" parent="SettingsPanel"]
+[node name="UserSection" type="Panel" parent="SettingsLayer/SettingsPanel"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -591,7 +594,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_2b6dv")
 
-[node name="Label" type="Label" parent="SettingsPanel/UserSection"]
+[node name="Label" type="Label" parent="SettingsLayer/SettingsPanel/UserSection"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -607,19 +610,19 @@ text = "User Profile"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Back" type="TouchScreenButton" parent="SettingsPanel/UserSection"]
+[node name="Back" type="TouchScreenButton" parent="SettingsLayer/SettingsPanel/UserSection"]
 position = Vector2(6.2500005, 9.536743e-07)
 scale = Vector2(0.3, 0.3)
 texture_normal = ExtResource("7_arrow_left")
 
-[node name="Separator" type="Line2D" parent="SettingsPanel/UserSection"]
+[node name="Separator" type="Line2D" parent="SettingsLayer/SettingsPanel/UserSection"]
 position = Vector2(0.109012604, -58)
 scale = Vector2(0.73165876, 1)
 points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
 width = 2.0
 default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
 
-[node name="UserContent" type="HBoxContainer" parent="SettingsPanel/UserSection"]
+[node name="UserContent" type="HBoxContainer" parent="SettingsLayer/SettingsPanel/UserSection"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -636,33 +639,33 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/separation = -16
 
-[node name="AvatarTexture" type="TextureRect" parent="SettingsPanel/UserSection/UserContent"]
+[node name="AvatarTexture" type="TextureRect" parent="SettingsLayer/SettingsPanel/UserSection/UserContent"]
 layout_mode = 2
 size_flags_horizontal = 4
 texture = ExtResource("13_rk1wc")
 expand_mode = 3
 
-[node name="UserInfo" type="VBoxContainer" parent="SettingsPanel/UserSection/UserContent"]
+[node name="UserInfo" type="VBoxContainer" parent="SettingsLayer/SettingsPanel/UserSection/UserContent"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 30
 alignment = 1
 
-[node name="DisplayName" type="Label" parent="SettingsPanel/UserSection/UserContent/UserInfo"]
+[node name="DisplayName" type="Label" parent="SettingsLayer/SettingsPanel/UserSection/UserContent/UserInfo"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 25
 text = "\"Player Name\""
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ProviderLabel" type="Label" parent="SettingsPanel/UserSection/UserContent/UserInfo"]
+[node name="ProviderLabel" type="Label" parent="SettingsLayer/SettingsPanel/UserSection/UserContent/UserInfo"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 25
 text = "\"Guest\""
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="AuthButtons" type="HBoxContainer" parent="SettingsPanel/UserSection"]
+[node name="AuthButtons" type="HBoxContainer" parent="SettingsLayer/SettingsPanel/UserSection"]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -679,7 +682,7 @@ size_flags_vertical = 6
 theme_override_constants/separation = 25
 alignment = 1
 
-[node name="SignInButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+[node name="SignInButton" type="Button" parent="SettingsLayer/SettingsPanel/UserSection/AuthButtons"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
@@ -694,7 +697,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_175ve")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_hbymj")
 text = "Sign in"
 
-[node name="GuestButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+[node name="GuestButton" type="Button" parent="SettingsLayer/SettingsPanel/UserSection/AuthButtons"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
@@ -709,7 +712,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_175ve")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_hbymj")
 text = "Guest"
 
-[node name="LinkGoogleButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+[node name="LinkGoogleButton" type="Button" parent="SettingsLayer/SettingsPanel/UserSection/AuthButtons"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
@@ -732,7 +735,7 @@ text = "Link Google"
 [connection signal="pressed" from="SidekickArea/SidekickLeftBtn" to="." method="_on_sidekick_left_pressed"]
 [connection signal="pressed" from="SidekickArea/SidekickRightBtn" to="." method="_on_sidekick_right_pressed"]
 [connection signal="pressed" from="SidekickArea/SidekickSelectBtn" to="." method="_on_sidekick_select_pressed"]
-[connection signal="pressed" from="SettingsPanel/Back" to="." method="_on_back_settings_pressed"]
-[connection signal="pressed" from="SettingsPanel/ViewUserProfile" to="." method="_on_view_user_profile_pressed"]
-[connection signal="value_changed" from="SettingsPanel/VolumeSliderControl/VolumeSlider" to="." method="_on_volume_changed"]
-[connection signal="pressed" from="SettingsPanel/UserSection/Back" to="." method="_on_back_from_profile_pressed"]
+[connection signal="pressed" from="SettingsLayer/SettingsPanel/Back" to="." method="_on_back_settings_pressed"]
+[connection signal="pressed" from="SettingsLayer/SettingsPanel/ViewUserProfile" to="." method="_on_view_user_profile_pressed"]
+[connection signal="value_changed" from="SettingsLayer/SettingsPanel/VolumeSliderControl/VolumeSlider" to="." method="_on_volume_changed"]
+[connection signal="pressed" from="SettingsLayer/SettingsPanel/UserSection/Back" to="." method="_on_back_from_profile_pressed"]
