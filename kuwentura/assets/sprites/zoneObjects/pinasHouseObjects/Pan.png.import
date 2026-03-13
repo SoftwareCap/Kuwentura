@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cl4cuk5moe3op"
-path="res://.godot/imported/buttons.png-dc2047fab7e855d4ea7c7382ab668407.ctex"
+uid="uid://3boff2bjwjx5"
+path="res://.godot/imported/Pan.png-d787199b4e42b3e8c0214183f72ce75b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/buttons/buttons.png"
-dest_files=["res://.godot/imported/buttons.png-dc2047fab7e855d4ea7c7382ab668407.ctex"]
+source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/Pan.png"
+dest_files=["res://.godot/imported/Pan.png-d787199b4e42b3e8c0214183f72ce75b.ctex"]
 
 [params]
 

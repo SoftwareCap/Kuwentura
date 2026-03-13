@@ -1,5 +1,7 @@
 extends Area2D
 
+signal players_entering(zone_name: String)
+
 @export var zone_name : String
 @export var scene_path : String
 
@@ -391,6 +393,10 @@ func _check_and_enter():
 		return
 	
 	print("[ZonePortal] BOTH PLAYERS READY - ENTERING ", zone_name)
+	
+	# Emit signal for door animations before entering zone
+	players_entering.emit(zone_name)
+	
 	_enter_zone()
 
 

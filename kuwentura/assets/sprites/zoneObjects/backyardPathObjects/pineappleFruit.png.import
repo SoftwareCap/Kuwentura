@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cl4cuk5moe3op"
-path="res://.godot/imported/buttons.png-dc2047fab7e855d4ea7c7382ab668407.ctex"
+uid="uid://dmjne63nn4iut"
+path="res://.godot/imported/pineappleFruit.png-e839db78a43597e45984c0339953367c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/buttons/buttons.png"
-dest_files=["res://.godot/imported/buttons.png-dc2047fab7e855d4ea7c7382ab668407.ctex"]
+source_file="res://assets/sprites/zoneObjects/backyardPathObjects/pineappleFruit.png"
+dest_files=["res://.godot/imported/pineappleFruit.png-e839db78a43597e45984c0339953367c.ctex"]
 
 [params]
 
