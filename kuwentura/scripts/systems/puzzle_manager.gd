@@ -12,60 +12,91 @@ extends Node
 #------------------------------------------------------------------------------
 const PUZZLE_DATA = {
 	"pinas_house": {
-		"type": "algebra",
-		"name": "Pina's House",
-		"theme": "The Ladle",
-		"narrative": "Find the ladle that was the last item Pina looked for before vanishing.",
-		
-		"host_view": {
-			"title": "Cooking Tools Inventory",
-			"description": "You see a note with symbolic equations and hook tags mapping symbols to tools.",
-			"sees": ["Symbolic equations", "Hook tags: x=Ladle, y=Pan, z=Pot"],
-			"task": "Solve the algebra and guide your partner to find the tools"
-		},
-		
-		"sidekick_view": {
-			"title": "Messy Kitchen",
-			"description": "You see a physically messy kitchen with no visible math symbols.",
-			"sees": ["Scattered cooking tools", "Blank inventory slots", "Messy cabinets"],
-			"task": "Listen to your partner's guidance and arrange tools in the cabinet"
-		},
-		
-		"ledger": {
-			"title": "Algebra Basics",
-			"instruction": "To solve for unknown values, isolate the variable by performing the same operation on both sides of the equation.",
-			"example": "If z = 3 and y - z = 2, then y = 2 + 3 = 5"
-		},
-		
-		"variations": [
-			{
-				"id": 1,
-				"equations": ["x + y = 10", "y - z = 2", "z = 3"],
-				"symbol_map": {"x": "Ladle", "y": "Pan", "z": "Pot"},
-				"solution": {"x": 5, "y": 5, "z": 3},
-				"answer_format": "x=5, y=5, z=3"
-			},
-			{
-				"id": 2,
-				"equations": ["x + y = 9", "y - z = 1", "z = 4"],
-				"symbol_map": {"x": "Ladle", "y": "Pan", "z": "Pot"},
-				"solution": {"x": 4, "y": 5, "z": 4},
-				"answer_format": "x=4, y=5, z=4"
-			}
-		],
-		
-		"reward": {
-			"clue": "Ladle",
-			"note": "We use our eyes to find things, but Pina never used hers…"
-		},
-		
-		"consequence": {
-			"enemy": "Aswang",
-			"behavior": "Watches from outside, thumping on window",
-			"escalation": "Thumping grows stronger with delays/mistakes",
-			"failure": "Aswang shatters window and breaks in"
-		}
+	"type": "algebra",
+	"name": "Pina's House",
+	"theme": "The Ladle",
+	"narrative": "Clear the kitchen, uncover the Hidden Number Note, and solve for x to reveal the riddle that leads to the clue.",
+
+	"host_view": {
+		"title": "Hidden Number Note",
+		"description": "You see a note with a single algebra equation and a hidden riddle waiting to be revealed.",
+		"sees": ["One equation with x", "A hidden riddle after solving"],
+		"task": "Solve the equation and reveal the riddle"
 	},
+
+	"sidekick_view": {
+		"title": "Hidden Number Note",
+		"description": "You see the same note and must solve for the missing value of x.",
+		"sees": ["One equation with x", "One answer input"],
+		"task": "Solve for x and reveal the next clue"
+	},
+
+	"ledger": {
+		"title": "Finding the Missing Number",
+		"instruction": "Solve for x by undoing the operations one step at a time. If a number is added, subtract it. If a number is subtracted, add it. If x is multiplied, divide both sides by that number.",
+		"example": "Example: 2x - 8 = 2\nStep 1: Add 8 to both sides → 2x = 10\nStep 2: Divide both sides by 2 → x = 5"
+	},
+
+	"variations": [
+		{
+			"id": 1,
+			"difficulty": "Easy",
+			"title": "Hidden Number Note",
+			"equation": "x + 4 = 9",
+			"solution": 5,
+			"answer_format": "x=5",
+			"riddle": "Where pots and pans quietly stay, a hidden clue now waits your way."
+		},
+		{
+			"id": 2,
+			"difficulty": "Easy",
+			"title": "Hidden Number Note",
+			"equation": "x - 3 = 6",
+			"solution": 9,
+			"answer_format": "x=9",
+			"riddle": "Look where cooking tools are kept, the next secret there is left."
+		},
+		{
+			"id": 3,
+			"difficulty": "Medium",
+			"title": "Hidden Number Note",
+			"equation": "2x = 10",
+			"solution": 5,
+			"answer_format": "x=5",
+			"riddle": "Open the place where kitchen things rest, inside it hides the village’s test."
+		},
+		{
+			"id": 4,
+			"difficulty": "Medium",
+			"title": "Hidden Number Note",
+			"equation": "2x - 8 = 2",
+			"solution": 5,
+			"answer_format": "x=5",
+			"riddle": "Not on the floor and not by the door, search where kitchen tools sleep once more."
+		},
+		{
+			"id": 5,
+			"difficulty": "Hard",
+			"title": "Hidden Number Note",
+			"equation": "3x + 2 = 14",
+			"solution": 4,
+			"answer_format": "x=4",
+			"riddle": "A quiet cupboard holds the key, open it to learn Pina’s mystery."
+		}
+	],
+
+	"reward": {
+		"clue": "Ladle",
+		"note": "We use our eyes to find things, but Pina never used hers…"
+	},
+
+	"consequence": {
+		"enemy": "Aswang",
+		"behavior": "Watches from outside, thumping on window",
+		"escalation": "Thumping grows stronger with delays and mistakes",
+		"failure": "Aswang shatters window and breaks in"
+	}
+},
 	
 	"backyard_path": {
 		"type": "conversion",
@@ -327,39 +358,47 @@ func get_puzzle_for_zone(zone_id: String) -> Dictionary:
 	if not PUZZLE_DATA.has(zone_id):
 		push_warning("[PuzzleManager] Unknown zone: " + zone_id)
 		return {}
-	
-	var zone_data = PUZZLE_DATA[zone_id]
-	var variations = zone_data.variations
-	
+
+	var zone_data: Dictionary = PUZZLE_DATA[zone_id]
+	var variations: Array = zone_data.get("variations", [])
+
+	if variations.is_empty():
+		push_warning("[PuzzleManager] No variations found for zone: " + zone_id)
+		return {}
+
 	# Get seed from GameState (derived from session seed)
-	var puzzle_seed = GameState.get_puzzle_seed(zone_id)
-	
+	var puzzle_seed: int = GameState.get_puzzle_seed(zone_id)
+
 	# Select variation based on seed
-	var rng = RandomNumberGenerator.new()
+	var rng := RandomNumberGenerator.new()
 	rng.seed = puzzle_seed
-	var variation_index = rng.randi_range(0, variations.size() - 1)
-	var selected = variations[variation_index]
-	
-	# Extract solution values from selected variation
-	var solution = selected.solution
-	var x = solution.x
-	var y = solution.y
-	var base = solution.z
-	
-	# Calculate sum and diff from the equations (for reference)
-	var _sum = x + y
-	var _diff = y - base
-	
+	var variation_index: int = rng.randi_range(0, variations.size() - 1)
+	var selected: Dictionary = variations[variation_index]
+
+	var equation_text: String = str(selected.get("equation", "x = ?"))
+	var solution_x: int = int(selected.get("solution", 0))
+	var difficulty: String = str(selected.get("difficulty", "Easy"))
+	var answer_format: String = str(selected.get("answer_format", "x=0"))
+	var riddle_text: String = str(selected.get("riddle", ""))
+
 	return {
 		"zone_id": zone_id,
-		"type": zone_data.type,
-		"variables": {"x": x, "y": y, "z": base},
-		"equations": selected.equations,
-		"solution": solution,
-		"answer_format": selected.answer_format,
-		"symbol_map": selected.symbol_map,
-		"host_view": zone_data.host_view,
-		"sidekick_view": zone_data.sidekick_view
+		"type": zone_data.get("type", ""),
+		"name": zone_data.get("name", ""),
+		"theme": zone_data.get("theme", ""),
+		"narrative": zone_data.get("narrative", ""),
+		"host_view": zone_data.get("host_view", {}),
+		"sidekick_view": zone_data.get("sidekick_view", {}),
+		"ledger": zone_data.get("ledger", {}),
+		"reward": zone_data.get("reward", {}),
+		"consequence": zone_data.get("consequence", {}),
+		"variation_id": selected.get("id", 1),
+		"difficulty": difficulty,
+		"title": selected.get("title", "Hidden Number Note"),
+		"equation": equation_text,
+		"solution": solution_x,
+		"answer_format": answer_format,
+		"riddle": riddle_text
 	}
 
 
