@@ -45,6 +45,10 @@ const BRIEFCASE_CLOSED_SCALE: Vector2 = Vector2(1.0, 0.1)
 # Portal references
 @onready var portals: Node2D = $"Zone Portals"
 
+# Door animation references (for Pina's house)
+@onready var pinas_house_door: Sprite2D = $"Zone Portals/PortalPinasHouse/DoorOpen"
+const DOOR_ANIMATION_DURATION: float = 0.5
+
 # Room code label (only visible to host, follows camera via CanvasLayer)
 @onready var room_code_label: Label = $HUDLayer/RoomCode
 
@@ -130,6 +134,9 @@ func _ready():
 	
 	# Setup UI controls (Map, Ledger, Briefcase buttons)
 	_setup_ui_controls()
+	
+	# Connect to zone portal signals for door animations
+	_connect_portal_signals()
 	
 	# Spawn already connected peers (both server and client)
 	for peer_id in multiplayer.get_peers():
@@ -983,3 +990,50 @@ func _close_briefcase(animate: bool = true) -> void:
 	else:
 		briefcase_panel.visible = false
 		briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
+
+
+# ============================================================================
+# DOOR ANIMATION (Zone Entry)
+# ============================================================================
+func _connect_portal_signals() -> void:
+	"""Connect to zone portal signals for door animations."""
+	if not portals:
+		return
+	
+	for portal in portals.get_children():
+		if portal.has_signal("players_entering"):
+			if not portal.players_entering.is_connected(_on_players_entering_zone):
+				portal.players_entering.connect(_on_players_entering_zone)
+				print("[ForestHub] Connected to portal signal: ", portal.zone_name)
+
+
+func _on_players_entering_zone(zone_name: String) -> void:
+	"""Handle door animation when players are entering a zone."""
+	print("[ForestHub] Players entering zone: ", zone_name)
+	
+	# Animate Pina's house door
+	if zone_name == "pinas_house":
+		_animate_pinas_house_door()
+
+
+func _animate_pinas_house_door() -> void:
+	"""Animate the Pina's house door opening."""
+	if not pinas_house_door:
+		push_warning("[ForestHub] Pina's house door sprite not found!")
+		return
+	
+	print("[ForestHub] Animating Pina's house door opening")
+	
+	# Make door visible and animate it
+	pinas_house_door.visible = true
+	pinas_house_door.modulate = Color(1, 1, 1, 0)
+	pinas_house_door.scale = Vector2(0.1, 0.1)
+	
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(pinas_house_door, "modulate", Color(1, 1, 1, 1), DOOR_ANIMATION_DURATION)
+	tween.parallel().tween_property(pinas_house_door, "scale", Vector2(1, 1), DOOR_ANIMATION_DURATION)
+	
+	# Add a slight delay before scene transition to show the animation
+	await tween.finished
