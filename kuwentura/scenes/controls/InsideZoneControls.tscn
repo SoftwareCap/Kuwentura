@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://cpku7a4fredq7"]
 
 [ext_resource type="Script" uid="uid://cel4qa2mgkxtq" path="res://scripts/controls/inside_zone_control.gd" id="1_5l088"]
-[ext_resource type="Texture2D" uid="uid://chff8f3cdvqaf" path="res://assets/buttons/pause.png" id="2_6v7nm"]
+[ext_resource type="Texture2D" uid="uid://chff8f3cdvqaf" path="res://assets/buttons/pauseButton.png" id="2_6v7nm"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0aggx"]
 size = Vector2(200, 200)
