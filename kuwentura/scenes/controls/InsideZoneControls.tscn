@@ -1,10 +1,22 @@
-[gd_scene load_steps=4 format=3 uid="uid://cpku7a4fredq7"]
+[gd_scene load_steps=10 format=3 uid="uid://cpku7a4fredq7"]
 
 [ext_resource type="Script" uid="uid://cel4qa2mgkxtq" path="res://scripts/controls/inside_zone_control.gd" id="1_5l088"]
 [ext_resource type="Texture2D" uid="uid://chff8f3cdvqaf" path="res://assets/buttons/pause.png" id="2_6v7nm"]
+[ext_resource type="Texture2D" uid="uid://b4ff13vwedej7" path="res://assets/buttons/players/ledgerbutton.png" id="3_dfxfg"]
+[ext_resource type="Texture2D" uid="uid://lrijshq5upgf" path="res://assets/buttons/players/briefcasebutton.png" id="4_80khv"]
+[ext_resource type="Texture2D" uid="uid://dhs2e7weqqu13" path="res://assets/buttons/players/mapbutton.png" id="5_nynux"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0aggx"]
 size = Vector2(200, 200)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3mgdf"]
+size = Vector2(1000, 1000)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lg2p8"]
+size = Vector2(1000, 1000)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tdrpu"]
+size = Vector2(1500, 1250)
 
 [node name="InsideZoneControl" type="CanvasLayer"]
 script = ExtResource("1_5l088")
@@ -17,3 +29,24 @@ texture_normal = ExtResource("2_6v7nm")
 shape = SubResource("RectangleShape2D_0aggx")
 passby_press = true
 action = "game_pause"
+
+[node name="Ledger" type="TouchScreenButton" parent="."]
+position = Vector2(1240, 200)
+scale = Vector2(0.06, 0.06)
+texture_normal = ExtResource("3_dfxfg")
+shape = SubResource("RectangleShape2D_3mgdf")
+passby_press = true
+
+[node name="Briefcase" type="TouchScreenButton" parent="."]
+position = Vector2(1238.0001, 287)
+scale = Vector2(0.06, 0.06)
+texture_normal = ExtResource("4_80khv")
+shape = SubResource("RectangleShape2D_lg2p8")
+passby_press = true
+
+[node name="Map" type="TouchScreenButton" parent="."]
+position = Vector2(1259, 129)
+scale = Vector2(0.04, 0.04)
+texture_normal = ExtResource("5_nynux")
+shape = SubResource("RectangleShape2D_tdrpu")
+passby_press = true

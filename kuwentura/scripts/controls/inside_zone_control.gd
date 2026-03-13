@@ -1,14 +1,13 @@
 extends CanvasLayer
 
-## TouchControls handles visibility of on-screen touch controls
-## The TouchScreenButton nodes automatically trigger input actions when pressed
-
 signal pause_pressed
+signal ledger_pressed
+signal briefcase_pressed
 
 enum VisibilityMode {
-	AUTO,       ## Show on mobile/tablet, hide on desktop
-	ALWAYS_SHOW,## Always visible
-	ALWAYS_HIDE ## Always hidden
+	AUTO,
+	ALWAYS_SHOW,
+	ALWAYS_HIDE
 }
 
 @export var visibility_mode: VisibilityMode = VisibilityMode.ALWAYS_SHOW
@@ -16,37 +15,49 @@ enum VisibilityMode {
 @export var button_scale_pressed: float = 0.9
 
 @onready var pause_button: TouchScreenButton = $Pause
+@onready var ledger_button: TouchScreenButton = get_node_or_null("Ledger")
+@onready var briefcase_button: TouchScreenButton = get_node_or_null("Briefcase")
 
+var _is_visible: bool = true
+var _original_scales: Dictionary = {}
 
 func _notification(what: int):
-	# Handle node being removed from tree (scene change)
 	if what == NOTIFICATION_PREDELETE:
-		# Disconnect signals to prevent errors during cleanup
 		if pause_button and pause_button.pressed.is_connected(_on_pause_pressed):
 			pause_button.pressed.disconnect(_on_pause_pressed)
 			pause_button.released.disconnect(_on_pause_released)
 
-var _is_visible: bool = true
+		if ledger_button and ledger_button.pressed.is_connected(_on_ledger_pressed):
+			ledger_button.pressed.disconnect(_on_ledger_pressed)
+			ledger_button.released.disconnect(_on_ledger_released)
 
-# Button original scales for press animation
-var _original_scales: Dictionary = {}
-
+		if briefcase_button and briefcase_button.pressed.is_connected(_on_briefcase_pressed):
+			briefcase_button.pressed.disconnect(_on_briefcase_pressed)
+			briefcase_button.released.disconnect(_on_briefcase_released)
 
 func _ready():
-	# Store original scales for press animations (with null checks)
 	if pause_button:
 		_original_scales[pause_button] = pause_button.scale
-	
+	if ledger_button:
+		_original_scales[ledger_button] = ledger_button.scale
+	if briefcase_button:
+		_original_scales[briefcase_button] = briefcase_button.scale
+
 	_connect_button_signals()
 	_apply_visibility_mode()
 
-
 func _connect_button_signals():
-	# Connect signals programmatically to avoid editor setup (with null checks)
 	if pause_button:
 		pause_button.pressed.connect(_on_pause_pressed)
 		pause_button.released.connect(_on_pause_released)
 
+	if ledger_button:
+		ledger_button.pressed.connect(_on_ledger_pressed)
+		ledger_button.released.connect(_on_ledger_released)
+
+	if briefcase_button:
+		briefcase_button.pressed.connect(_on_briefcase_pressed)
+		briefcase_button.released.connect(_on_briefcase_released)
 
 func _apply_visibility_mode():
 	match visibility_mode:
@@ -56,70 +67,97 @@ func _apply_visibility_mode():
 			visible = true
 		VisibilityMode.ALWAYS_HIDE:
 			visible = false
+
 	_is_visible = visible
 
-
 func _should_show_on_this_device() -> bool:
-	## Show touch controls on mobile platforms and web
 	var platform = OS.get_name()
 	return platform in ["Android", "iOS", "Web"]
 
-
-## Animate button press
 func _animate_button_press(button: TouchScreenButton, pressed: bool):
+	if button == null:
+		return
+
 	var original_scale = _original_scales.get(button, Vector2.ONE)
 	var target_scale = original_scale * button_scale_pressed if pressed else original_scale
-	
+
 	var tween = create_tween()
 	tween.set_ease(Tween.EASE_OUT)
 	tween.set_trans(Tween.TRANS_QUAD)
 	tween.tween_property(button, "scale", target_scale, 0.05)
 
-
-## Show the touch controls
 func show_controls():
 	if _is_visible:
 		return
+
 	_is_visible = true
 	visible = true
-	self.modulate = Color(1, 1, 1, 0)
+
+	for child in get_children():
+		if child is CanvasItem:
+			child.modulate = Color(1, 1, 1, 0)
+
 	var tween = create_tween()
-	tween.tween_property(self, "modulate", Color(1, 1, 1, 1), fade_duration)
+	for child in get_children():
+		if child is CanvasItem:
+			tween.parallel().tween_property(child, "modulate", Color(1, 1, 1, 1), fade_duration)
 
-
-## Hide the touch controls
 func hide_controls():
 	if not _is_visible:
 		return
+
 	_is_visible = false
+
 	var tween = create_tween()
-	tween.tween_property(self, "modulate", Color(1, 1, 1, 0), fade_duration)
+	for child in get_children():
+		if child is CanvasItem:
+			tween.parallel().tween_property(child, "modulate", Color(1, 1, 1, 0), fade_duration)
 	tween.tween_callback(func(): visible = false)
-
-
-## Toggle visibility
+	
 func toggle_controls():
 	if _is_visible:
 		hide_controls()
 	else:
 		show_controls()
 
-
 func set_pause_enabled(enabled: bool):
 	if pause_button:
 		pause_button.visible = enabled
 
+func set_ledger_enabled(enabled: bool):
+	if ledger_button:
+		ledger_button.visible = enabled
 
-## Check if controls are currently visible
+func set_briefcase_enabled(enabled: bool):
+	if briefcase_button:
+		briefcase_button.visible = enabled
+
+func set_sidekick_ui_visible(is_sidekick: bool):
+	if ledger_button:
+		ledger_button.visible = is_sidekick
+	if briefcase_button:
+		briefcase_button.visible = is_sidekick
+
 func is_showing() -> bool:
 	return _is_visible
 
-
 func _on_pause_pressed() -> void:
 	_animate_button_press(pause_button, true)
-	print("[TouchControls] Pause button pressed, emitting signal")
 	pause_pressed.emit()
-
 
 func _on_pause_released() -> void:
 	_animate_button_press(pause_button, false)
+
+func _on_ledger_pressed() -> void:
+	_animate_button_press(ledger_button, true)
+	ledger_pressed.emit()
+
+func _on_ledger_released() -> void:
+	_animate_button_press(ledger_button, false)
+
+func _on_briefcase_pressed() -> void:
+	_animate_button_press(briefcase_button, true)
+	briefcase_pressed.emit()
+
+func _on_briefcase_released() -> void:
+	_animate_button_press(briefcase_button, false)

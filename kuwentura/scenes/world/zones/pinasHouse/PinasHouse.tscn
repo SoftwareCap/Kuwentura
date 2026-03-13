@@ -1,4 +1,4 @@
-[gd_scene load_steps=80 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=85 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
@@ -28,6 +28,7 @@
 [ext_resource type="Texture2D" uid="uid://ci6sa4iwt7x0l" path="res://assets/sprites/zoneObjects/y.png" id="20_eedqa"]
 [ext_resource type="Texture2D" uid="uid://bcwl2rqppjo6k" path="res://assets/sprites/zoneObjects/z.png" id="21_cd1wg"]
 [ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/Close.png" id="22_vt60f"]
+[ext_resource type="Texture2D" uid="uid://5hqcc5yhq64a" path="res://assets/buttons/rightBack2.png" id="24_fvin0"]
 [ext_resource type="Texture2D" uid="uid://d2b4d66dls22f" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Banner.png" id="24_vt60f"]
 [ext_resource type="Texture2D" uid="uid://b216jsk5hyag5" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Ladle.png" id="25_eedqa"]
 [ext_resource type="Texture2D" uid="uid://llr505ongc63" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pan.png" id="26_cd1wg"]
@@ -37,6 +38,8 @@
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/Sparkle.png" id="35_dcipd"]
 [ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="36_u6sy3"]
 [ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/zoneObjects/LadleClue.png" id="37_dcipd"]
+[ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="39_0s51p"]
+[ext_resource type="Texture2D" uid="uid://b2ryp42vnc38n" path="res://assets/sprites/players/briefcaseOpen.png" id="40_cyexm"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_btbyq"]
 size = Vector2(305.75015, 356.50024)
@@ -257,6 +260,12 @@ shadow_size = 5
 shadow_offset = Vector2(0, 3.41)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_yg1st"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_m2a4r"]
+texture = ExtResource("39_0s51p")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wjw6o"]
+texture = ExtResource("40_cyexm")
 
 [node name="PinasHouse" type="Node2D"]
 process_mode = 1
@@ -603,10 +612,10 @@ expand_mode = 1
 visible = false
 z_index = 8
 layout_mode = 0
-offset_left = 132.0
-offset_top = 382.0
-offset_right = 299.0
-offset_bottom = 558.0
+offset_left = 71.0
+offset_top = 250.0
+offset_right = 208.0
+offset_bottom = 399.0
 icon = ExtResource("22_vt60f")
 flat = true
 expand_icon = true
@@ -665,10 +674,10 @@ expand_mode = 1
 visible = false
 z_index = 8
 layout_mode = 0
-offset_left = 137.0
-offset_top = 394.0
-offset_right = 383.0
-offset_bottom = 560.0
+offset_left = 71.0
+offset_top = 254.0
+offset_right = 315.0
+offset_bottom = 392.0
 icon = ExtResource("22_vt60f")
 flat = true
 expand_icon = true
@@ -695,10 +704,10 @@ vertical_alignment = 1
 
 [node name="XInput" type="LineEdit" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
 layout_mode = 0
-offset_left = 467.0
-offset_top = 467.0
-offset_right = 625.0
-offset_bottom = 516.0
+offset_left = 402.0
+offset_top = 544.0
+offset_right = 538.0
+offset_bottom = 617.0
 theme_override_colors/font_color = Color(0.9650678, 0.9650869, 0.9614435, 1)
 theme_override_colors/font_selected_color = Color(0.04755766, 0.047557645, 0.047557645, 1)
 theme_override_colors/caret_color = Color(0.014275194, 0.014275219, 0.014275289, 1)
@@ -707,12 +716,13 @@ theme_override_colors/clear_button_color = Color(0.021434566, 0.021434668, 0.021
 theme_override_colors/clear_button_color_pressed = Color(0.017732391, 0.017732391, 0.01773239, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 35
-placeholder_text = "Enter X"
+placeholder_text = "Answer"
 alignment = 1
 expand_to_text_length = true
 flat = true
 
 [node name="YInput" type="LineEdit" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
+visible = false
 layout_mode = 0
 offset_left = 471.0
 offset_top = 516.0
@@ -776,6 +786,12 @@ offset_left = 794.0
 offset_top = 202.0
 offset_right = 932.0
 offset_bottom = 300.0
+
+[node name="GuidanceArrow" type="Sprite2D" parent="RoleLayer/Control"]
+visible = false
+position = Vector2(1186, 247)
+scale = Vector2(0.32, 0.27333334)
+texture = ExtResource("24_fvin0")
 
 [node name="ConsequenceUI" type="CanvasLayer" parent="."]
 visible = false
@@ -858,7 +874,7 @@ theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
 theme_override_constants/line_spacing = 3
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 30
-text = "Find missing objects:"
+text = "Find missing tools:"
 vertical_alignment = 2
 
 [node name="InsideZoneControl" parent="." instance=ExtResource("4_zonecontrols")]
@@ -1146,6 +1162,60 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_cfl6u")
 theme_override_styles/hover = SubResource("StyleBoxFlat_cm1dj")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_yg1st")
 text = "Collect Clue"
+
+[node name="NotificationUI" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="Panel" parent="NotificationUI"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -355.0
+offset_top = 17.0
+offset_right = 486.0
+offset_bottom = 57.0
+grow_horizontal = 2
+
+[node name="Label" type="Label" parent="NotificationUI/Panel"]
+layout_mode = 0
+offset_right = 823.0
+offset_bottom = 40.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="SidekickLayer" type="CanvasLayer" parent="."]
+
+[node name="Ledger" type="Panel" parent="SidekickLayer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -293.0
+offset_top = -269.0
+offset_right = 293.0
+offset_bottom = 317.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_m2a4r")
+
+[node name="Briefcase" type="Panel" parent="SidekickLayer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -247.0
+offset_top = -297.0
+offset_right = 247.0
+offset_bottom = 197.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_wjw6o")
 
 [connection signal="input_event" from="InteractiveLayer/Objects/WrongClickZone" to="." method="_on_wrong_object_input"]
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
