@@ -8,8 +8,8 @@
 [ext_resource type="PackedScene" uid="uid://cmsvb2etjodsk" path="res://scenes/controls/SettingsControl.tscn" id="5_2oq2w"]
 [ext_resource type="Script" uid="uid://b7hu8uq82xslq" path="res://scripts/controls/settings_control.gd" id="6_r2guf"]
 [ext_resource type="Texture2D" uid="uid://c2w32odtn3c80" path="res://assets/buttons/joinGame.png" id="8_join"]
-[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/Close.png" id="9_2oq2w"]
-[ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftBack2.png" id="10_r2guf"]
+[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/closeButton.png" id="9_2oq2w"]
+[ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="10_r2guf"]
 [ext_resource type="Texture2D" uid="uid://bbdlqfcqkbbwk" path="res://assets/sprites/userIcon.png" id="11_2oq2w"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_nlkkf"]
