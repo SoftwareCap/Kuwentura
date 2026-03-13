@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://p1tc8ablyx3s" path="res://assets/sprites/places/backyardBackground.png" id="2_krb5t"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 [ext_resource type="Texture2D" uid="uid://c3sfa1s0d5uam" path="res://assets/sprites/zoneObjects/backyardPathObjects/pinaGhost.png" id="5_no1tq"]
-[ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/InventoryBoard.png" id="6_2y8sp"]
+[ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/inventoryBoard.png" id="6_2y8sp"]
 [ext_resource type="Texture2D" uid="uid://tthjtt0yqrf6" path="res://assets/sprites/zoneObjects/backyardPathObjects/pineapplePlant.png" id="10_f85bs"]
 [ext_resource type="Texture2D" uid="uid://dmjne63nn4iut" path="res://assets/sprites/zoneObjects/backyardPathObjects/pineappleFruit.png" id="11_ura6l"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="11_vm1ij"]
