@@ -22,15 +22,15 @@ const SETTINGS_FILE = "user://settings.json"
 
 # Settings
 @onready var settings_control: CanvasLayer = $SettingsControl
-@onready var settings_panel: Panel = $SettingsPanel
-@onready var volume_slider: HSlider = $SettingsPanel/VolumeSliderControl/VolumeSlider
-@onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
-@onready var settings_back_button: TouchScreenButton = $SettingsPanel/Back
+@onready var settings_panel: Panel = $SettingsLayer/SettingsPanel
+@onready var volume_slider: HSlider = $SettingsLayer/SettingsPanel/VolumeSliderControl/VolumeSlider
+@onready var volume_value_label: Label = $SettingsLayer/SettingsPanel/VolumeSliderControl/VolumeValue
+@onready var settings_back_button: TouchScreenButton = $SettingsLayer/SettingsPanel/Back
 
 # User Profile
-@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
-@onready var user_section: Panel = $SettingsPanel/UserSection
-@onready var user_section_back_button: TouchScreenButton = $SettingsPanel/UserSection/Back
+@onready var view_user_profile_button: Button = $SettingsLayer/SettingsPanel/ViewUserProfile
+@onready var user_section: Panel = $SettingsLayer/SettingsPanel/UserSection
+@onready var user_section_back_button: TouchScreenButton = $SettingsLayer/SettingsPanel/UserSection/Back
 
 # Detective Area
 @onready var detective_area: Control = $DetectiveArea
