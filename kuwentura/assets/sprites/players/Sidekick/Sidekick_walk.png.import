@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cskqffd4p1vuw"
-path="res://.godot/imported/sidekick_walk.png-43320d838ac2a4d1ada4c023e5b53891.ctex"
+path="res://.godot/imported/sidekick_walk.png-374862be0a29c845978dae45b4b5f06a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/Sidekick/sidekick_walk.png"
-dest_files=["res://.godot/imported/sidekick_walk.png-43320d838ac2a4d1ada4c023e5b53891.ctex"]
+source_file="res://assets/sprites/players/sidekick/sidekick_walk.png"
+dest_files=["res://.godot/imported/sidekick_walk.png-374862be0a29c845978dae45b4b5f06a.ctex"]
 
 [params]
 
