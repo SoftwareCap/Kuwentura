@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://c3tjujm7q6nas"]
 
 [ext_resource type="Texture2D" uid="uid://deemtl33cho1y" path="res://assets/sprites/players/detectiveDialogueBox.png" id="1_ggoq5"]
-[ext_resource type="Script" path="res://scenes/ui/dialogue_box.gd" id="1_nfm5p"]
+[ext_resource type="Script" uid="uid://cgrhmpox3p676" path="res://scenes/ui/dialogue_box.gd" id="1_nfm5p"]
 [ext_resource type="Texture2D" uid="uid://5duvlotnm43p" path="res://assets/sprites/players/sidekickDialogueBox.png" id="2_nfm5p"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="4_bjuha"]
 
