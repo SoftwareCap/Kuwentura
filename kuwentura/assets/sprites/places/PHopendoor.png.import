@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dns0mjvxvyjw1"
-path="res://.godot/imported/Popup.png-ff330e15c0f8d94ef24f2a7620d89190.ctex"
+uid="uid://co67v77hnrb2d"
+path="res://.godot/imported/PHopendoor.png-029e3d47a4e1bcd3c23ca2c0a8e2e973.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/backgrounds/Popup.png"
-dest_files=["res://.godot/imported/Popup.png-ff330e15c0f8d94ef24f2a7620d89190.ctex"]
+source_file="res://assets/sprites/places/PHopendoor.png"
+dest_files=["res://.godot/imported/PHopendoor.png-029e3d47a4e1bcd3c23ca2c0a8e2e973.ctex"]
 
 [params]
 
