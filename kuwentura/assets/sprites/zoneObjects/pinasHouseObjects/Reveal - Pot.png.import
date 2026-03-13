@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cl4cuk5moe3op"
-path="res://.godot/imported/buttons.png-dc2047fab7e855d4ea7c7382ab668407.ctex"
+uid="uid://biv0fdxvxv0bq"
+path="res://.godot/imported/Reveal - Pot.png-096b262d0084be6897e3017296aaf888.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/buttons/buttons.png"
-dest_files=["res://.godot/imported/buttons.png-dc2047fab7e855d4ea7c7382ab668407.ctex"]
+source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal - Pot.png"
+dest_files=["res://.godot/imported/Reveal - Pot.png-096b262d0084be6897e3017296aaf888.ctex"]
 
 [params]
 

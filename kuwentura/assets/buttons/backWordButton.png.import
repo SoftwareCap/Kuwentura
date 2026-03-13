@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cl4cuk5moe3op"
-path="res://.godot/imported/buttons.png-dc2047fab7e855d4ea7c7382ab668407.ctex"
+uid="uid://baylpfjefdeqo"
+path="res://.godot/imported/backWordButton.png-86fe1d0f057bc1bec4d63c465e0b0bf5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/buttons/buttons.png"
-dest_files=["res://.godot/imported/buttons.png-dc2047fab7e855d4ea7c7382ab668407.ctex"]
+source_file="res://assets/buttons/backWordButton.png"
+dest_files=["res://.godot/imported/backWordButton.png-86fe1d0f057bc1bec4d63c465e0b0bf5.ctex"]
 
 [params]
 
