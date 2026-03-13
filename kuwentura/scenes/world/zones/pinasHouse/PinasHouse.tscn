@@ -595,7 +595,7 @@ offset_left = 240.0
 offset_top = -204.0
 offset_right = 1150.0
 offset_bottom = 795.0
-mouse_filter = 0
+mouse_filter = 2
 texture = ExtResource("3_k0xpg")
 expand_mode = 1
 
@@ -658,6 +658,7 @@ offset_left = 241.0
 offset_top = -203.0
 offset_right = 1150.0
 offset_bottom = 794.0
+mouse_filter = 2
 texture = ExtResource("3_k0xpg")
 expand_mode = 1
 
@@ -797,6 +798,15 @@ texture = ExtResource("33_eedqa")
 [node name="SearchRoomUI" type="CanvasLayer" parent="."]
 visible = false
 
+[node name="Overlay" type="ColorRect" parent="SearchRoomUI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.01)
+
 [node name="Root" type="Control" parent="SearchRoomUI"]
 layout_mode = 3
 anchors_preset = 0
@@ -867,6 +877,16 @@ vertical_alignment = 2
 process_mode = 3
 layer = 110
 
+[node name="PauseOverlay" type="ColorRect" parent="PauseCanvasLayer"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.01)
+
 [node name="InGamePausePanel" type="Panel" parent="PauseCanvasLayer"]
 visible = false
 top_level = true
@@ -882,6 +902,7 @@ offset_right = 442.25
 offset_bottom = 294.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_dcipd")
 
 [node name="TitleLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel"]

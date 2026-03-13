@@ -5,6 +5,7 @@ extends Control
 @onready var status_label = $StatusLabel
 @onready var settings_control: CanvasLayer = $SettingsControl
 @onready var settings_panel: Panel = $SettingsPanel
+@onready var settings_overlay: ColorRect = $SettingsOverlay
 @onready var volume_slider: HSlider = $SettingsPanel/VolumeSliderControl/VolumeSlider
 @onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
 @onready var back_button: TouchScreenButton = $SettingsPanel/Back
@@ -21,6 +22,7 @@ extends Control
 
 # Sidekick Join Popup nodes
 @onready var sidekick_popup: Panel = $SidekickPopup
+@onready var sidekick_popup_overlay: ColorRect = $SidekickPopupOverlay
 @onready var code_input: LineEdit = $SidekickPopup/VBoxContainer/LineEdit
 @onready var join_code_ok_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/JoinButton
 @onready var join_code_cancel_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/CancelButton
@@ -135,17 +137,19 @@ func _on_settings_pressed() -> void:
 	print("[MainMenu] Opening settings panel")
 	if settings_panel:
 		settings_panel.visible = true
+	if settings_overlay:
+		settings_overlay.visible = true
 		# Hide user section when opening settings
-		if user_section:
-			user_section.visible = false
+	if user_section:
+		user_section.visible = false
 		# Show view user profile button when opening settings
-		if view_user_profile_button:
-			view_user_profile_button.visible = true
+	if view_user_profile_button:
+		view_user_profile_button.visible = true
 		# Update slider to current volume
-		if volume_slider:
-			volume_slider.value = MusicController.get_volume() * 100
-		if volume_value_label:
-			volume_value_label.text = str(int(volume_slider.value)) + "%"
+	if volume_slider:
+		volume_slider.value = MusicController.get_volume() * 100
+	if volume_value_label:
+		volume_value_label.text = str(int(volume_slider.value)) + "%"
 	# Hide settings button
 	if settings_control:
 		settings_control.hide_button()
@@ -155,6 +159,8 @@ func _on_back_settings_pressed() -> void:
 	print("[MainMenu] Closing settings panel")
 	if settings_panel:
 		settings_panel.visible = false
+	if settings_overlay:
+		settings_overlay.visible = false
 	# Show settings button again
 	if settings_control:
 		settings_control.show_button()
@@ -242,9 +248,11 @@ func _on_join_pressed() -> void:
 	print("[MainMenu] Opening join popup")
 	if sidekick_popup:
 		sidekick_popup.visible = true
-		if code_input:
-			code_input.text = ""
-			code_input.grab_focus()
+	if sidekick_popup_overlay:
+		sidekick_popup_overlay.visible = true
+	if code_input:
+		code_input.text = ""
+		code_input.grab_focus()
 
 
 func _on_join_code_ok_pressed() -> void:
@@ -258,13 +266,19 @@ func _on_join_code_ok_pressed() -> void:
 		return
 	
 	# Hide popup and process the code
-	sidekick_popup.visible = false
+	if sidekick_popup:
+		sidekick_popup.visible = false
+	if sidekick_popup_overlay:
+		sidekick_popup_overlay.visible = false
 	_process_join_code(code)
 
 
 func _on_join_code_cancel_pressed() -> void:
 	print("[MainMenu] Join cancelled")
-	sidekick_popup.visible = false
+	if sidekick_popup:
+		sidekick_popup.visible = false
+	if sidekick_popup_overlay:
+		sidekick_popup_overlay.visible = false
 
 
 func _on_direct_ip_pressed() -> void:

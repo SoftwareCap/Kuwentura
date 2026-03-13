@@ -1224,6 +1224,16 @@ position = Vector2(0, 650)
 process_mode = 3
 layer = 110
 
+[node name="PauseOverlay" type="ColorRect" parent="PauseCanvasLayer"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.01)
+
 [node name="InGamePausePanel" type="Panel" parent="PauseCanvasLayer"]
 visible = false
 top_level = true
@@ -1239,6 +1249,7 @@ offset_right = 442.25
 offset_bottom = 294.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_4f0r4")
 
 [node name="TitleLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel"]

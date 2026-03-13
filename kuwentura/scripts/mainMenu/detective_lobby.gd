@@ -23,6 +23,7 @@ const SETTINGS_FILE = "user://settings.json"
 # Settings
 @onready var settings_control: CanvasLayer = $SettingsControl
 @onready var settings_panel: Panel = $SettingsLayer/SettingsPanel
+@onready var settings_overlay: ColorRect = $SettingsLayer/SettingsOverlay
 @onready var volume_slider: HSlider = $SettingsLayer/SettingsPanel/VolumeSliderControl/VolumeSlider
 @onready var volume_value_label: Label = $SettingsLayer/SettingsPanel/VolumeSliderControl/VolumeValue
 @onready var settings_back_button: TouchScreenButton = $SettingsLayer/SettingsPanel/Back
@@ -639,6 +640,8 @@ func _on_game_started(_checkpoint: String = "") -> void:
 		settings_control.hide_button()
 	if settings_panel:
 		settings_panel.visible = false
+	if settings_overlay:
+		settings_overlay.visible = false
 	
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
@@ -683,12 +686,14 @@ func _on_settings_pressed() -> void:
 	print("[DetectiveLobby] Opening settings panel")
 	if settings_panel:
 		settings_panel.visible = true
+	if settings_overlay:
+		settings_overlay.visible = true
 		# Hide user section when opening settings
-		if user_section:
-			user_section.visible = false
+	if user_section:
+		user_section.visible = false
 		# Show view user profile button when opening settings
-		if view_user_profile_button:
-			view_user_profile_button.visible = true
+	if view_user_profile_button:
+		view_user_profile_button.visible = true
 	# Hide settings button
 	if settings_control:
 		settings_control.hide_button()
@@ -698,6 +703,8 @@ func _on_back_settings_pressed() -> void:
 	print("[DetectiveLobby] Closing settings panel")
 	if settings_panel:
 		settings_panel.visible = false
+	if settings_overlay:
+		settings_overlay.visible = false
 	# Show settings button again
 	if settings_control:
 		settings_control.show_button()

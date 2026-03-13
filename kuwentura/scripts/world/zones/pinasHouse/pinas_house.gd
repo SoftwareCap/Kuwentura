@@ -11,6 +11,7 @@ const ConsequenceControllerScript = preload("res://scripts/world/zones/pinasHous
 # Pause / settings UI
 @onready var inside_zone_control: CanvasLayer = $InsideZoneControl
 @onready var pause_canvas_layer: CanvasLayer = $PauseCanvasLayer
+@onready var pause_overlay: ColorRect = $PauseCanvasLayer/PauseOverlay
 @onready var in_game_pause_panel: Panel = $PauseCanvasLayer/InGamePausePanel
 @onready var option_sub_panel: Panel = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel
 @onready var volume_slider: HSlider = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/HBoxContainer/VolumeSlider
@@ -114,16 +115,16 @@ var _shake_origin := Vector2.ZERO
 
 @warning_ignore("unused_private_class_variable")
 var _shadow_tex := {
-	"ladle": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Ladle.png"),
-	"pan": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pan.png"),
-	"pot": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pot.png"),
+	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Shadow - Ladle.png"),
+	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Shadow - Pan.png"),
+	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Shadow - Pot.png"),
 }
 
 @warning_ignore("unused_private_class_variable")
 var _reveal_tex := {
-	"ladle": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Reveal - Ladle.png"),
-	"pan": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Reveal - Pan.png"),
-	"pot": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Reveal - Pot.png"),
+	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal - Ladle.png"),
+	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal - Pan.png"),
+	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal - Pot.png"),
 }
 
 @warning_ignore("unused_private_class_variable")

@@ -403,6 +403,17 @@ text = "Select Costume"
 [node name="SettingsControl" parent="." instance=ExtResource("9_settings")]
 script = ExtResource("10_settings_script")
 
+[node name="SettingsOverlay" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.01)
+
 [node name="SettingsPanel" type="Panel" parent="."]
 visible = false
 layout_mode = 1
@@ -417,6 +428,7 @@ offset_right = 442.25
 offset_bottom = 294.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_settings")
 
 [node name="Label" type="Label" parent="SettingsPanel"]

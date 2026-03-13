@@ -14,6 +14,7 @@ extends Node2D
 @onready var spawn_points: Node2D = $SpawnPoints
 @onready var touch_controls: CanvasLayer = $TouchControls
 @onready var pause_canvas_layer: CanvasLayer = $PauseCanvasLayer
+@onready var pause_overlay: ColorRect = $PauseCanvasLayer/PauseOverlay
 @onready var in_game_pause_panel: Panel = $PauseCanvasLayer/InGamePausePanel
 @onready var option_sub_panel: Panel = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel
 @onready var volume_slider: HSlider = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeSlider
@@ -113,6 +114,8 @@ func _ready():
 	
 	# Initialize pause panel
 	print("[ForestHub] Initializing pause panel...")
+	if pause_overlay:
+		pause_overlay.visible = false
 	if in_game_pause_panel:
 		print("[ForestHub] Pause panel found, setting invisible")
 		in_game_pause_panel.visible = false
@@ -192,25 +195,27 @@ func _setup_room_code_label() -> void:
 ## Open the pause panel (called when touch controls option button is pressed)
 func _on_pause_button_pressed() -> void:
 	print("[ForestHub] ========== PAUSE BUTTON PRESSED ==========")
+	if pause_overlay:
+		pause_overlay.visible = true
 	if in_game_pause_panel:
 		in_game_pause_panel.visible = true
 		# Hide option sub-panel when opening pause
-		if option_sub_panel:
-			option_sub_panel.visible = false
-		print("[ForestHub] Pause panel visible: ", in_game_pause_panel.visible)
-		print("[ForestHub] In-game pause panel OPENED")
-		# Pause the game
-		get_tree().paused = true
-		# Pause background music
-		MusicController.pause_music()
-		print("[ForestHub] Background music PAUSED")
-	else:
-		push_error("[ForestHub] Cannot open pause - in_game_pause_panel is null!")
+	if option_sub_panel:
+		option_sub_panel.visible = false
+	print("[ForestHub] Pause panel visible: ", in_game_pause_panel.visible)
+	print("[ForestHub] In-game pause panel OPENED")
+	# Pause the game
+	get_tree().paused = true
+	# Pause background music
+	MusicController.pause_music()
+	print("[ForestHub] Background music PAUSED")
 
 
 ## Resume button pressed - closes pause panel and resumes game
 func _on_resume_play_button_pressed() -> void:
 	print("[ForestHub] Resume button pressed - resuming game")
+	if pause_overlay:
+		pause_overlay.visible = false
 	if in_game_pause_panel:
 		in_game_pause_panel.visible = false
 	if option_sub_panel:

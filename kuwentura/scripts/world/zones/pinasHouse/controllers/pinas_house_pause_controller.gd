@@ -12,6 +12,9 @@ func setup(owner) -> void:
 		if not zone.inside_zone_control.pause_pressed.is_connected(zone._on_pause_button_pressed):
 			zone.inside_zone_control.pause_pressed.connect(zone._on_pause_button_pressed)
 
+	if is_instance_valid(zone.pause_overlay):
+		zone.pause_overlay.visible = false
+
 	if is_instance_valid(zone.in_game_pause_panel):
 		zone.in_game_pause_panel.visible = false
 
@@ -29,6 +32,8 @@ func setup(owner) -> void:
 	# Ensure pause UI can process while game is paused
 	if is_instance_valid(zone.pause_canvas_layer):
 		zone.pause_canvas_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	if is_instance_valid(zone.pause_overlay):
+		zone.pause_overlay.process_mode = Node.PROCESS_MODE_ALWAYS
 	if is_instance_valid(zone.in_game_pause_panel):
 		zone.in_game_pause_panel.process_mode = Node.PROCESS_MODE_ALWAYS
 	if is_instance_valid(zone.option_sub_panel):
@@ -100,6 +105,9 @@ func on_pause_button_pressed() -> void:
 
 	_is_paused = true
 
+	if is_instance_valid(zone.pause_overlay):
+		zone.pause_overlay.visible = true
+
 	if is_instance_valid(zone.in_game_pause_panel):
 		zone.in_game_pause_panel.visible = true
 
@@ -123,6 +131,9 @@ func on_resume_play_button_pressed() -> void:
 	print("[PinasHouse] Resume button pressed")
 
 	_is_paused = false
+
+	if is_instance_valid(zone.pause_overlay):
+		zone.pause_overlay.visible = false
 
 	if is_instance_valid(zone.in_game_pause_panel):
 		zone.in_game_pause_panel.visible = false
