@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://lrijshq5upgf"
-path="res://.godot/imported/briefcaseButton.png-1058f0f23cf999c5d855b7873fab039a.ctex"
+path="res://.godot/imported/briefcasebutton.png-7358d13a1a6941239b1e36849d004006.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/buttons/players/briefcaseButton.png"
-dest_files=["res://.godot/imported/briefcaseButton.png-1058f0f23cf999c5d855b7873fab039a.ctex"]
+source_file="res://assets/buttons/players/briefcasebutton.png"
+dest_files=["res://.godot/imported/briefcasebutton.png-7358d13a1a6941239b1e36849d004006.ctex"]
 
 [params]
 
