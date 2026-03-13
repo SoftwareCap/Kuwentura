@@ -1,29 +1,19 @@
-<<<<<<< Updated upstream
-[gd_scene load_steps=11 format=3 uid="uid://backyardpath"]
-=======
 [gd_scene load_steps=20 format=3 uid="uid://backyardpath"]
->>>>>>> Stashed changes
 
 [ext_resource type="Script" uid="uid://dfs4agyqe4qk4" path="res://scripts/world/zones/backyardPath/backyard_path.gd" id="1_backyardpath"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
-[ext_resource type="Texture2D" uid="uid://p1tc8ablyx3s" path="res://assets/sprites/places/zone2.png" id="2_krb5t"]
+[ext_resource type="Texture2D" uid="uid://p1tc8ablyx3s" path="res://assets/sprites/places/backyardPathZone.png" id="2_krb5t"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
-<<<<<<< Updated upstream
-[ext_resource type="Texture2D" uid="uid://c3sfa1s0d5uam" path="res://assets/sprites/zoneObjects/Pina.png" id="5_no1tq"]
-[ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/inventoryboard.png" id="6_2y8sp"]
-[ext_resource type="Texture2D" uid="uid://tthjtt0yqrf6" path="res://assets/sprites/zoneObjects/PineapplePlant.png" id="10_f85bs"]
-[ext_resource type="Texture2D" uid="uid://dmjne63nn4iut" path="res://assets/sprites/zoneObjects/PineappleFruit.png" id="11_ura6l"]
-=======
 [ext_resource type="Texture2D" uid="uid://c3sfa1s0d5uam" path="res://assets/sprites/zoneObjects/backyardPathObjects/pinaGhost.png" id="5_no1tq"]
-[ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/InventoryBoard.png" id="6_2y8sp"]
+[ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/inventoryboard.png" id="6_2y8sp"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="9_no1tq"]
 [ext_resource type="Texture2D" uid="uid://tthjtt0yqrf6" path="res://assets/sprites/zoneObjects/backyardPathObjects/pineapplePlant.png" id="10_f85bs"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="10_xdq4n"]
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="11_l6qeh"]
 [ext_resource type="Texture2D" uid="uid://dmjne63nn4iut" path="res://assets/sprites/zoneObjects/backyardPathObjects/pineappleFruit.png" id="11_ura6l"]
->>>>>>> Stashed changes
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="11_vm1ij"]
-[ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="12_yt3gq"]
+[ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrowButton.png" id="12_yt3gq"]
+
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h50sr"]
 bg_color = Color(0.5372549, 0.34901962, 0.2509804, 1)
@@ -168,36 +158,6 @@ color = Color(0.008202022, 0.008202025, 0.008202025, 1)
 
 [node name="InsideZoneControl" parent="." instance=ExtResource("11_vm1ij")]
 
-<<<<<<< Updated upstream
-[node name="Background" type="Sprite2D" parent="."]
-visible = false
-position = Vector2(960, 540)
-scale = Vector2(1.25, 1.06)
-texture = ExtResource("2_bg")
-
-[node name="TestLabel" type="Label" parent="."]
-visible = false
-offset_left = 560.0
-offset_top = 200.0
-offset_right = 1360.0
-offset_bottom = 300.0
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 64
-text = "BACKYARD PATH TEST ZONE"
-horizontal_alignment = 1
-
-[node name="RoleLabel" type="Label" parent="."]
-unique_name_in_owner = true
-visible = false
-offset_left = 560.0
-offset_top = 320.0
-offset_right = 1360.0
-offset_bottom = 380.0
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 48
-text = "Waiting for role..."
-horizontal_alignment = 1
-=======
 [node name="PauseCanvasLayer" type="CanvasLayer" parent="."]
 process_mode = 3
 layer = 110
@@ -431,7 +391,6 @@ theme_override_font_sizes/font_size = 30
 text = "80%"
 horizontal_alignment = 1
 vertical_alignment = 1
->>>>>>> Stashed changes
 
 [node name="BackButton" type="Button" parent="."]
 offset_left = 50.0

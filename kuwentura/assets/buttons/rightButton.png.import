@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gmnsrknd8c7m"
-path="res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"
+uid="uid://q26ui1ynvv34"
+path="res://.godot/imported/rightButton.png-f09d82f46e91c262c4c494014de20b01.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/sparkle.png"
-dest_files=["res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"]
+source_file="res://assets/buttons/rightButton.png"
+dest_files=["res://.godot/imported/rightButton.png-f09d82f46e91c262c4c494014de20b01.ctex"]
 
 [params]
 

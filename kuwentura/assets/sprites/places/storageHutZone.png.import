@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gmnsrknd8c7m"
-path="res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"
+uid="uid://cvgl2uufuo2gg"
+path="res://.godot/imported/storageHutZone.png-4d4fe6ea0dc3b246f11238d9df7b791d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/sparkle.png"
-dest_files=["res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"]
+source_file="res://assets/sprites/places/storageHutZone.png"
+dest_files=["res://.godot/imported/storageHutZone.png-4d4fe6ea0dc3b246f11238d9df7b791d.ctex"]
 
 [params]
 

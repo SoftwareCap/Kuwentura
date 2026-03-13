@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gmnsrknd8c7m"
-path="res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"
+uid="uid://tthjtt0yqrf6"
+path="res://.godot/imported/pineapplePlant.png-ea3cc866c5a5df054bc43e5fda72db98.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/sparkle.png"
-dest_files=["res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"]
+source_file="res://assets/sprites/zoneObjects/backyardPathObjects/pineapplePlant.png"
+dest_files=["res://.godot/imported/pineapplePlant.png-ea3cc866c5a5df054bc43e5fda72db98.ctex"]
 
 [params]
 

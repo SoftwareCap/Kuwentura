@@ -9,7 +9,7 @@ var collected_clues: Array = []
 var clue_count: int = 0
 
 
-func add_clue(zone_name: String, clue_data: Dictionary) -> void:
+func add_clue(zone_name: String, _clue_data: Dictionary) -> void:
 	if zone_name in collected_clues:
 		return
 

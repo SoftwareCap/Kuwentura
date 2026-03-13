@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gmnsrknd8c7m"
-path="res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"
+uid="uid://c27biqcyrcmo8"
+path="res://.godot/imported/backyardZone.png-af2d9f5132c0a8417825798a96fd314b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/sparkle.png"
-dest_files=["res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"]
+source_file="res://assets/sprites/places/backyardZone.png"
+dest_files=["res://.godot/imported/backyardZone.png-af2d9f5132c0a8417825798a96fd314b.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gmnsrknd8c7m"
-path="res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"
+uid="uid://d087jtl6ffvb3"
+path="res://.godot/imported/leftArrowButton.png-b076e9adf9ed2cbbb6b221064f9c75e6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/sparkle.png"
-dest_files=["res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"]
+source_file="res://assets/buttons/leftArrowButton.png"
+dest_files=["res://.godot/imported/leftArrowButton.png-b076e9adf9ed2cbbb6b221064f9c75e6.ctex"]
 
 [params]
 

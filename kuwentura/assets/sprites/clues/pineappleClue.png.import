@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gmnsrknd8c7m"
-path="res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"
+uid="uid://cuhne1u8q0p3s"
+path="res://.godot/imported/pineappleClue.png-851d8d89d10a7cf36077338a66dbfd25.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/sparkle.png"
-dest_files=["res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"]
+source_file="res://assets/sprites/clues/pineappleClue.png"
+dest_files=["res://.godot/imported/pineappleClue.png-851d8d89d10a7cf36077338a66dbfd25.ctex"]
 
 [params]
 

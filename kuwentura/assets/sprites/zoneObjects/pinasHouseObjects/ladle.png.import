@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gmnsrknd8c7m"
-path="res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"
+uid="uid://c7ovr6oox2jvd"
+path="res://.godot/imported/ladle.png-af5e4dd40b270716b97a891de659bb98.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/sparkle.png"
-dest_files=["res://.godot/imported/sparkle.png-2fff73d3a2fab33735955b73d114985f.ctex"]
+source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/ladle.png"
+dest_files=["res://.godot/imported/ladle.png-af5e4dd40b270716b97a891de659bb98.ctex"]
 
 [params]
 
