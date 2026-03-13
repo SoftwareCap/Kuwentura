@@ -392,11 +392,16 @@ func _check_and_enter():
 		print("[ZonePortal] DENIED:", zid, " locked. Remaining=", rem, "s")
 		return
 	
-	print("[ZonePortal] BOTH PLAYERS READY - ENTERING ", zone_name)
+	print("[ZonePortal] BOTH PLAYERS READY - STARTING ENTRY FOR ", zone_name)
 	
 	# Emit signal for door animations before entering zone
+	# The scene change will be triggered by enter_zone_after_animation() after animation completes
 	players_entering.emit(zone_name)
-	
+
+
+## Perform the actual zone entry (called after door animation completes)
+func enter_zone_after_animation():
+	print("[ZonePortal] Entering zone after door animation: ", zone_name)
 	_enter_zone()
 
 

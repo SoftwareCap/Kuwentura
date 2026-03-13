@@ -1000,6 +1000,13 @@ func _close_briefcase(animate: bool = true) -> void:
 # ============================================================================
 # DOOR ANIMATION (Zone Entry)
 # ============================================================================
+# Door animation flow:
+# 1. Players click "Enter" button
+# 2. zone_portal.gd emits "players_entering" signal
+# 3. forest_hub.gd plays door animation
+# 4. After animation completes, forest_hub calls portal.enter_zone_after_animation()
+# 5. Scene changes to the zone
+# ============================================================================
 func _connect_portal_signals() -> void:
 	"""Connect to zone portal signals for door animations."""
 	if not portals:
@@ -1016,29 +1023,125 @@ func _on_players_entering_zone(zone_name: String) -> void:
 	"""Handle door animation when players are entering a zone."""
 	print("[ForestHub] Players entering zone: ", zone_name)
 	
-	# Animate Pina's house door
+	# Animate Pina's house door and enter zone after animation
 	if zone_name == "pinas_house":
-		_animate_pinas_house_door()
+		await _animate_pinas_house_door()
+		# After animation completes, trigger the actual zone entry
+		var portal = _find_portal_by_zone_name(zone_name)
+		if portal:
+			portal.enter_zone_after_animation()
+	else:
+		# For other zones without door animations, enter immediately
+		var portal = _find_portal_by_zone_name(zone_name)
+		if portal:
+			portal.enter_zone_after_animation()
 
 
 func _animate_pinas_house_door() -> void:
-	"""Animate the Pina's house door opening."""
+	"""Animate the Pina's house door opening with player movement. Returns after animation completes."""
 	if not pinas_house_door:
 		push_warning("[ForestHub] Pina's house door sprite not found!")
 		return
 	
-	print("[ForestHub] Animating Pina's house door opening")
+	print("[ForestHub] Starting Pina's house door animation sequence")
 	
-	# Make door visible and animate it
+	# Get the portal to find the door marker position
+	var portal = _find_portal_by_zone_name("pinas_house")
+	var door_marker: Marker2D = null
+	if portal:
+		door_marker = portal.get_node_or_null("Marker2D")
+	
+	# Move players toward the door before opening
+	if door_marker:
+		await _move_players_to_door(door_marker.global_position)
+	
+	# Hide the closed house sprite and show the open door
+	var closed_house_sprite = null
+	if portal:
+		closed_house_sprite = portal.get_node_or_null("Sprite2D")
+	
+	if closed_house_sprite:
+		closed_house_sprite.visible = false
+	
+	# Make door visible and animate it opening
 	pinas_house_door.visible = true
 	pinas_house_door.modulate = Color(1, 1, 1, 0)
-	pinas_house_door.scale = Vector2(0.1, 0.1)
+	pinas_house_door.scale = Vector2(0.8, 0.8)
 	
+	# Door opening animation with spring effect
 	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_trans(Tween.TRANS_ELASTIC)
 	tween.set_ease(Tween.EASE_OUT)
 	tween.tween_property(pinas_house_door, "modulate", Color(1, 1, 1, 1), DOOR_ANIMATION_DURATION)
-	tween.parallel().tween_property(pinas_house_door, "scale", Vector2(1, 1), DOOR_ANIMATION_DURATION)
+	tween.parallel().tween_property(pinas_house_door, "scale", Vector2(0.4, 0.4), DOOR_ANIMATION_DURATION)
 	
-	# Add a slight delay before scene transition to show the animation
+	# Wait for door to open
 	await tween.finished
+	
+	# Brief pause to show the open door
+	await get_tree().create_timer(0.5).timeout
+	
+	# Fade out players as they "enter" the house
+	await _fade_out_players()
+	
+	print("[ForestHub] Door animation sequence complete")
+
+
+## Find a portal by its zone name
+func _find_portal_by_zone_name(zone_name: String) -> Area2D:
+	if not portals:
+		return null
+	
+	for portal in portals.get_children():
+		if portal.zone_name == zone_name:
+			return portal
+	
+	return null
+
+
+## Move players toward the door before opening
+func _move_players_to_door(door_position: Vector2) -> void:
+	"""Move both players toward the door position."""
+	const MOVE_DURATION: float = 0.4
+	
+	for peer_id in _spawned_players.keys():
+		var player = _spawned_players[peer_id]
+		if is_instance_valid(player):
+			# Calculate position in front of the door
+			var target_pos = door_position + Vector2(0, 50)  # Slightly below the door
+			
+			# Create movement tween
+			var tween := create_tween()
+			tween.set_trans(Tween.TRANS_QUAD)
+			tween.set_ease(Tween.EASE_IN_OUT)
+			tween.tween_property(player, "global_position", target_pos, MOVE_DURATION)
+			
+			# Face the door (flip sprite if needed)
+			if player.has_method("set_facing_direction"):
+				player.set_facing_direction("up")
+			elif player.has_method("_play_animation"):
+				player._play_animation("walk_up")
+	
+	# Wait for movement to complete
+	await get_tree().create_timer(MOVE_DURATION).timeout
+
+
+## Fade out players as they enter the house
+func _fade_out_players() -> void:
+	"""Fade out player sprites as they enter the door."""
+	const FADE_DURATION: float = 0.3
+	
+	for peer_id in _spawned_players.keys():
+		var player = _spawned_players[peer_id]
+		if is_instance_valid(player):
+			# Find the AnimatedSprite2D or Sprite2D in the player
+			var sprite = player.get_node_or_null("AnimatedSprite2D")
+			if not sprite:
+				sprite = player.get_node_or_null("Sprite2D")
+			
+			if sprite:
+				var tween := create_tween()
+				tween.tween_property(sprite, "modulate", Color(1, 1, 1, 0), FADE_DURATION)
+	
+	# Wait for fade to complete
+	await get_tree().create_timer(FADE_DURATION).timeout

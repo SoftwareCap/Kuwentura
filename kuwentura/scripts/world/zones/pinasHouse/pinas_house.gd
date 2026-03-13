@@ -115,16 +115,16 @@ var _shake_origin := Vector2.ZERO
 
 @warning_ignore("unused_private_class_variable")
 var _shadow_tex := {
-	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Shadow - Ladle.png"),
-	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Shadow - Pan.png"),
-	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Shadow - Pot.png"),
+	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Ladle.png"),
+	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Pan.png"),
+	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Pot.png"),
 }
 
 @warning_ignore("unused_private_class_variable")
 var _reveal_tex := {
-	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal - Ladle.png"),
-	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal - Pan.png"),
-	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal - Pot.png"),
+	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/reveal_Ladle.png"),
+	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/reveal_Pan.png"),
+	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/reveal_Pot.png"),
 }
 
 @warning_ignore("unused_private_class_variable")
