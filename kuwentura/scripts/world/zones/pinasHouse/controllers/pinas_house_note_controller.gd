@@ -36,7 +36,7 @@ func setup(owner) -> void:
 
 func on_note_pressed() -> void:
 	on_note_interacted()
-
+	
 func on_note_interacted() -> void:
 	if not zone._note_phase_active and not zone._note_solved:
 		return
@@ -44,11 +44,11 @@ func on_note_interacted() -> void:
 	close_boards(true)
 
 	var will_play_note_dialogue := false
-	if not zone._note_dialogue_played:
+	if not zone._note_dialogue_played and not zone._note_solved:
 		zone._note_dialogue_played = true
 		will_play_note_dialogue = true
-		DialogueSystems.play("pinas_house_note_clicked", DialogueLibraries.PINAS_HOUSE_NOTE_CLICKED)
 
+	# Open note immediately
 	if GameState.local_role == GameState.Role.DETECTIVE:
 		if is_instance_valid(zone.detective_board):
 			zone.detective_board.visible = true
@@ -74,20 +74,32 @@ func on_note_interacted() -> void:
 				zone.sidekick_board.set_inputs_enabled(false)
 
 			if zone.sidekick_board.has_method("set_puzzle_inputs_visible"):
-				zone.sidekick_board.set_puzzle_inputs_visible(not will_play_note_dialogue)
+				zone.sidekick_board.set_puzzle_inputs_visible(true)
 
+	# Start dialogue after note is already open
 	if will_play_note_dialogue:
+		DialogueSystems.play("pinas_house_note_clicked", DialogueLibraries.PINAS_HOUSE_NOTE_CLICKED)
 		await DialogueSystems.wait_finished("pinas_house_note_clicked")
 
-	zone.show_notification("Hint: Open the Investigation Ledger to learn how to solve this puzzle.", 3.0)
-	zone.pulse_ledger_guidance(true)
+	# After dialogue ends: persistent notification + ledger guidance only if unsolved
+	if zone._note_phase_active and not zone._note_solved:
+		zone.show_notification("Use the ledger to solve the equation.", 0.0)
+		zone.pulse_ledger_guidance(true)
+	else:
+		zone.hide_notification()
+		zone.pulse_ledger_guidance(false)
 
+	# Re-enable sidekick input after dialogue
 	if GameState.local_role == GameState.Role.SIDEKICK and is_instance_valid(zone.sidekick_board):
 		if zone.sidekick_board.has_method("set_inputs_enabled"):
-			zone.sidekick_board.set_inputs_enabled(true)
+			var can_input: bool = zone._note_phase_active and zone._detective_note_seen and not zone._note_solved
+			zone.sidekick_board.set_inputs_enabled(can_input)
 
 		if zone.sidekick_board.has_method("set_puzzle_inputs_visible"):
-			zone.sidekick_board.set_puzzle_inputs_visible(true)
+			zone.sidekick_board.set_puzzle_inputs_visible(not zone._note_solved)
+
+		if zone._note_solved and zone.sidekick_board.has_method("apply_solved_view"):
+			zone.sidekick_board.apply_solved_view()
 
 	zone.apply_note_interaction_gate()
 	apply_close_button_visibility()
@@ -157,11 +169,15 @@ func apply_solved_text() -> void:
 
 func on_sidekick_solved() -> void:
 	zone._note_solved = true
+	zone._ledger_hint_shown = false
+	zone.hide_notification()
+	zone.pulse_ledger_guidance(false)
 	zone.broadcast_pinas_house_solved()
 
 func after_note_solved() -> void:
 	zone._note_phase_active = false
 	zone._cabinet_phase_active = true
+	zone._ledger_hint_shown = false
 
 	apply_solved_text()
 
@@ -178,13 +194,12 @@ func after_note_solved() -> void:
 	zone.pulse_ledger_guidance(false)
 	zone._enable_cabinet_interaction()
 
-	# force detective text refresh again after visibility change
 	apply_solved_text()
 
 	DialogueSystems.play("pinas_house_riddle_reveal", DialogueLibraries.PINAS_HOUSE_RIDDLE_REVEAL)
 	await DialogueSystems.wait_finished("pinas_house_riddle_reveal")
 
-	zone.show_notification("Riddle revealed! Search where the clue is hidden.", 2.0)
+	zone.show_notification("Search where the clue is hidden.", 10.0)
 
 func apply_note_interaction_gate() -> void:
 	var can_interact: bool = zone._note_phase_active or zone._note_solved
