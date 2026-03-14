@@ -80,11 +80,14 @@ const FIRST_ATTACK_DELAY_SEC := 60
 # Reward / clue reveal
 @onready var reward_layer: CanvasLayer = $RewardLayer
 @onready var reward_banner = $RewardLayer/RewardBanner
-@onready var reward_text = $RewardLayer/RewardText
+@onready var reward_text: Label = $RewardLayer/RewardPanel/RewardText
 @onready var clue_sprite = $RewardLayer/ClueSprite
 @onready var sparkle = $RewardLayer/Sparkle
 @onready var collect_button = $RewardLayer/CollectButton
 @onready var dark_overlay = $RewardLayer/DarkOverlay
+
+@onready var banner_label: Label = $RewardLayer/RewardBanner/BannerLabel
+@onready var tap_instruction_label: Label = $RewardLayer/TapInstruction
 
 #Ledger
 @onready var inside_zone_ledger_button: TouchScreenButton = get_node_or_null("InsideZoneControl/Ledger")
@@ -110,6 +113,8 @@ const FIRST_ATTACK_DELAY_SEC := 60
 var _cabinet_opened := false
 var _ladle_found := false
 var _waiting_reward_continue := false
+var _reward_stage := 0
+
 
 var pause_controller
 var note_controller
@@ -227,6 +232,15 @@ func _ready() -> void:
 	if is_instance_valid(collect_button) and not collect_button.pressed.is_connected(_on_collect_clue_pressed):
 		collect_button.pressed.connect(_on_collect_clue_pressed)
 
+	if is_instance_valid(reward_layer):
+		reward_layer.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+
+	if is_instance_valid(tap_catcher):
+		tap_catcher.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+
+	if is_instance_valid(collect_button):
+		collect_button.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	
 	_start_intro_dialogue_delayed()
 
 func _init_controllers() -> void:
@@ -935,6 +949,7 @@ func _reset_cabinet_clue_state() -> void:
 	_cabinet_opened = false
 	_ladle_found = false
 	_waiting_reward_continue = false
+	_reward_stage = 0
 
 	if is_instance_valid(cabinet_open_sprite):
 		cabinet_open_sprite.visible = false
@@ -954,20 +969,31 @@ func _reset_cabinet_clue_state() -> void:
 	if is_instance_valid(reward_panel):
 		reward_panel.visible = false
 
-	if is_instance_valid(sparkle):
-		sparkle.visible = false
-
 	if is_instance_valid(reward_banner):
 		reward_banner.visible = false
 
 	if is_instance_valid(clue_sprite):
 		clue_sprite.visible = false
 
+	if is_instance_valid(sparkle):
+		sparkle.visible = false
+
+	if is_instance_valid(reward_text):
+		reward_text.text = ""
+
+	if is_instance_valid(banner_label):
+		banner_label.text = ""
+
+	if is_instance_valid(tap_instruction_label):
+		tap_instruction_label.visible = false
+		tap_instruction_label.text = ""
+
 	if is_instance_valid(collect_button):
 		collect_button.visible = false
 
 	if is_instance_valid(tap_catcher):
 		tap_catcher.visible = false
+		tap_catcher.disabled = true
 
 func _on_cabinet_ladle_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if not _cabinet_opened or _ladle_found:
@@ -1012,6 +1038,7 @@ func rpc_start_ladle_found_sequence() -> void:
 	_ladle_found = true
 	_reward_active = true
 	_waiting_reward_continue = true
+	_reward_stage = 1
 
 	if is_instance_valid(cabinet_ladle_sprite):
 		cabinet_ladle_sprite.visible = false
@@ -1023,51 +1050,116 @@ func rpc_start_ladle_found_sequence() -> void:
 		cabinet_ladle_area.input_pickable = false
 
 	get_tree().paused = true
-	reward_layer.visible = true
+
+	if is_instance_valid(reward_layer):
+		reward_layer.visible = true
 
 	if is_instance_valid(dark_overlay):
-		dark_overlay.modulate.a = 0.7
-
-	if is_instance_valid(reward_panel):
-		reward_panel.visible = false
+		dark_overlay.modulate.a = 0.45
 
 	if is_instance_valid(sparkle):
 		sparkle.visible = true
 
-	if is_instance_valid(reward_banner):
-		reward_banner.visible = true
-
 	if is_instance_valid(clue_sprite):
 		clue_sprite.visible = true
 
+	if is_instance_valid(reward_banner):
+		reward_banner.visible = true
+
+	if is_instance_valid(banner_label):
+		banner_label.text = "CLUE FOUND!"
+
+	# Keep note panel hidden at first
+	if is_instance_valid(reward_panel):
+		reward_panel.visible = false
+
 	if is_instance_valid(reward_text):
-		reward_text.text = "CLUE FOUND!\n\nYou found the ladle.\n\nTap anywhere to continue."
+		reward_text.text = ""
+
+	if is_instance_valid(tap_instruction_label):
+		tap_instruction_label.visible = true
+		tap_instruction_label.text = "Tap anywhere to continue."
 
 	if is_instance_valid(collect_button):
 		collect_button.visible = false
 
 	if is_instance_valid(tap_catcher):
 		tap_catcher.visible = true
+		tap_catcher.disabled = false
 
 func _on_reward_tap_catcher_pressed() -> void:
 	if not _waiting_reward_continue:
 		return
 
-	_waiting_reward_continue = false
+	# Stage 1 -> first reward note line
+	if _reward_stage == 1:
+		_reward_stage = 2
+
+		if is_instance_valid(reward_panel):
+			reward_panel.visible = true
+
+		if is_instance_valid(reward_text):
+			reward_text.text = "The ladle was the last thing Pina looked for."
+
+		if is_instance_valid(tap_instruction_label):
+			tap_instruction_label.visible = true
+			tap_instruction_label.text = "Tap anywhere to continue."
+
+		return
+
+	# Stage 2 -> second reward note line
+	if _reward_stage == 2:
+		_reward_stage = 3
+
+		if is_instance_valid(reward_panel):
+			reward_panel.visible = true
+
+		if is_instance_valid(reward_text):
+			reward_text.text = "It was right in front of her, but she still could not see it."
+
+		if is_instance_valid(tap_instruction_label):
+			tap_instruction_label.visible = true
+			tap_instruction_label.text = "Tap anywhere to continue."
+
+		return
+
+	# Stage 3 -> third reward note line
+	if _reward_stage == 3:
+		_reward_stage = 4
+
+		if is_instance_valid(reward_panel):
+			reward_panel.visible = true
+
+		if is_instance_valid(reward_text):
+			reward_text.text = "\"We use our eyes to find things, but Pina never used hers...\""
+
+		if is_instance_valid(tap_instruction_label):
+			tap_instruction_label.visible = true
+			tap_instruction_label.text = "Tap anywhere to continue."
+
+		return
+
+	# Stage 4 -> hide reward panel/text, then show collect button
+	if _reward_stage == 4:
+		_reward_stage = 5
+		_waiting_reward_continue = false
+
+	if is_instance_valid(tap_instruction_label):
+		tap_instruction_label.visible = false
+		tap_instruction_label.text = ""
 
 	if is_instance_valid(tap_catcher):
 		tap_catcher.visible = false
+		tap_catcher.disabled = true
+
+	# Hide only the note panel and its text
+	if is_instance_valid(reward_text):
+		reward_text.text = ""
 
 	if is_instance_valid(reward_panel):
-		reward_panel.visible = true
+		reward_panel.visible = false
 
-	if is_instance_valid(reward_text):
-		reward_text.text = (
-			"The ladle was the last thing Pina looked for.\n"
-			+ "It was right in front of her, but she still could not see it.\n\n"
-			+ "\"We use our eyes to find things, but Pina never used hers...\""
-		)
-
+	# Now show collect button for sidekick
 	if is_instance_valid(collect_button):
 		if multiplayer.has_multiplayer_peer():
 			collect_button.visible = GameState.local_role == GameState.Role.SIDEKICK

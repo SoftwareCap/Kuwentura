@@ -1,4 +1,4 @@
-[gd_scene load_steps=87 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=86 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
@@ -35,7 +35,6 @@
 [ext_resource type="Texture2D" uid="uid://llr505ongc63" path="res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Pan.png" id="26_cd1wg"]
 [ext_resource type="Texture2D" uid="uid://cnu6aahk6prn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Pot.png" id="27_egl2a"]
 [ext_resource type="Texture2D" uid="uid://xav0rox1o7wd" path="res://assets/sprites/consequences/aswang/aswang10.png" id="33_eedqa"]
-[ext_resource type="Texture2D" uid="uid://mx5pteuiy8od" path="res://assets/sprites/zoneObjects/DarkPanel.png" id="34_c70e8"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="35_dcipd"]
 [ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="36_u6sy3"]
 [ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/clues/ladleClue.png" id="37_dcipd"]
@@ -1133,7 +1132,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="RewardLayer" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="DarkOverlay" type="ColorRect" parent="RewardLayer"]
 modulate = Color(1, 1, 1, 0)
@@ -1146,53 +1144,66 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.011087579, 0.011087578, 0.01108758, 1)
 
-[node name="TapCatcher" type="Button" parent="RewardLayer"]
-visible = false
-self_modulate = Color(1, 1, 1, 0)
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="RewardPanel" type="Sprite2D" parent="RewardLayer"]
-position = Vector2(699.24994, 322.37506)
-scale = Vector2(0.6497685, 0.5425926)
-texture = ExtResource("34_c70e8")
-
 [node name="Sparkle" type="Sprite2D" parent="RewardLayer"]
-position = Vector2(735.24994, 325.5)
+position = Vector2(744.75, 385.5)
 scale = Vector2(0.5719907, 0.5358025)
 texture = ExtResource("35_dcipd")
 
+[node name="ClueSprite" type="Sprite2D" parent="RewardLayer"]
+position = Vector2(715.4999, 258.00003)
+scale = Vector2(0.25199997, 0.2303333)
+texture = ExtResource("37_dcipd")
+
 [node name="RewardBanner" type="Sprite2D" parent="RewardLayer"]
+position = Vector2(739.00006, -56)
+scale = Vector2(0.34629634, 0.36954734)
+texture = ExtResource("36_u6sy3")
+
+[node name="BannerLabel" type="Label" parent="RewardLayer/RewardBanner"]
+offset_left = -768.12854
+offset_top = 325.50003
+offset_right = 646.8447
+offset_bottom = 419.43207
+theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 45
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="TapInstruction" type="Label" parent="RewardLayer"]
+offset_left = 483.0
+offset_top = 402.0
+offset_right = 918.0
+offset_bottom = 444.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RewardPanel" type="Sprite2D" parent="RewardLayer"]
 position = Vector2(730, 325.50003)
 scale = Vector2(0.587963, 0.5390947)
 texture = ExtResource("36_u6sy3")
 
-[node name="RewardText" type="Label" parent="RewardLayer"]
-offset_left = 248.99988
-offset_top = 496.00003
-offset_right = 1156.9999
-offset_bottom = 558.0
+[node name="RewardText" type="Label" parent="RewardLayer/RewardPanel"]
+offset_left = -818.07886
+offset_top = 316.271
+offset_right = 714.3307
+offset_bottom = 412.72888
 theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 35
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="ClueSprite" type="Sprite2D" parent="RewardLayer"]
-position = Vector2(705.9998, 198.00003)
-scale = Vector2(0.25199997, 0.2303333)
-texture = ExtResource("37_dcipd")
-
 [node name="CollectButton" type="Button" parent="RewardLayer"]
 process_mode = 3
 offset_left = 595.9999
-offset_top = 401.00003
+offset_top = 499.00003
 offset_right = 813.9999
-offset_bottom = 454.00003
+offset_bottom = 552.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 30
@@ -1201,6 +1212,19 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_cfl6u")
 theme_override_styles/hover = SubResource("StyleBoxFlat_cm1dj")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_yg1st")
 text = "Collect Clue"
+
+[node name="TapCatcher" type="Button" parent="RewardLayer"]
+self_modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 8.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+action_mode = 0
+flat = true
 
 [node name="NotificationUI" type="CanvasLayer" parent="."]
 
