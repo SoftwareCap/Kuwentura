@@ -85,6 +85,7 @@ const FIRST_ATTACK_DELAY_SEC := 60
 @onready var sparkle = $RewardLayer/Sparkle
 @onready var collect_button = $RewardLayer/CollectButton
 @onready var dark_overlay = $RewardLayer/DarkOverlay
+@onready var briefcase_reveal_sprite: TextureRect = $RewardLayer/BriefcaseRevealSprite
 
 @onready var banner_label: Label = $RewardLayer/RewardBanner/BannerLabel
 @onready var tap_instruction_label: Label = $RewardLayer/TapInstruction
@@ -114,6 +115,7 @@ var _cabinet_opened := false
 var _ladle_found := false
 var _waiting_reward_continue := false
 var _reward_stage := 0
+var _collect_sequence_started := false
 
 
 var pause_controller
@@ -218,6 +220,10 @@ func _ready() -> void:
 		notification_panel.visible = false
 	if guidance_arrow:
 		guidance_arrow.visible = false
+		
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.z_index = 100
 
 	pause_controller.setup(self)
 	consequence_controller.setup(self)
@@ -240,6 +246,9 @@ func _ready() -> void:
 
 	if is_instance_valid(collect_button):
 		collect_button.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	
 	_start_intro_dialogue_delayed()
 
@@ -661,12 +670,22 @@ func reward_sequence() -> void:
 		collect_button.visible = true
 
 func _on_collect_clue_pressed() -> void:
+	if _collect_sequence_started:
+		return
+
+	_collect_sequence_started = true
+
+	if is_instance_valid(collect_button):
+		collect_button.visible = false
+
 	if multiplayer.has_multiplayer_peer():
 		if multiplayer.is_server():
-			return
-		rpc_request_collect_clue.rpc_id(_SERVER_PEER_ID)
+			_collect_clue_server()
+		else:
+			rpc_request_collect_clue.rpc_id(_SERVER_PEER_ID)
 	else:
 		_collect_clue_server()
+
 
 @rpc("any_peer", "reliable")
 func rpc_request_collect_clue() -> void:
@@ -675,7 +694,14 @@ func rpc_request_collect_clue() -> void:
 	_collect_clue_server()
 
 func _collect_clue_server() -> void:
-	rpc_finalize_clue_collection.rpc()
+	if multiplayer.has_multiplayer_peer():
+		rpc_begin_briefcase_store_sequence.rpc()
+		await get_tree().create_timer(2.0, true).timeout
+		rpc_finalize_clue_collection.rpc()
+	else:
+		rpc_begin_briefcase_store_sequence()
+		await get_tree().create_timer(2.0, true).timeout
+		rpc_finalize_clue_collection()
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_finalize_clue_collection() -> void:
@@ -950,6 +976,7 @@ func _reset_cabinet_clue_state() -> void:
 	_ladle_found = false
 	_waiting_reward_continue = false
 	_reward_stage = 0
+	_collect_sequence_started = false
 
 	if is_instance_valid(cabinet_open_sprite):
 		cabinet_open_sprite.visible = false
@@ -994,6 +1021,12 @@ func _reset_cabinet_clue_state() -> void:
 	if is_instance_valid(tap_catcher):
 		tap_catcher.visible = false
 		tap_catcher.disabled = true
+
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+
+	if is_instance_valid(dark_overlay):
+		dark_overlay.modulate.a = 0.0
 
 func _on_cabinet_ladle_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if not _cabinet_opened or _ladle_found:
@@ -1069,7 +1102,6 @@ func rpc_start_ladle_found_sequence() -> void:
 	if is_instance_valid(banner_label):
 		banner_label.text = "CLUE FOUND!"
 
-	# Keep note panel hidden at first
 	if is_instance_valid(reward_panel):
 		reward_panel.visible = false
 
@@ -1087,9 +1119,17 @@ func rpc_start_ladle_found_sequence() -> void:
 		tap_catcher.visible = true
 		tap_catcher.disabled = false
 
+	# IMPORTANT: briefcase must stay hidden until collect is pressed
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+
 func _on_reward_tap_catcher_pressed() -> void:
 	if not _waiting_reward_continue:
 		return
+
+	# Keep briefcase hidden during all text stages
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
 
 	# Stage 1 -> first reward note line
 	if _reward_stage == 1:
@@ -1139,10 +1179,56 @@ func _on_reward_tap_catcher_pressed() -> void:
 
 		return
 
-	# Stage 4 -> hide reward panel/text, then show collect button
+	# Stage 4 -> hide panel/text, show collect button
 	if _reward_stage == 4:
 		_reward_stage = 5
 		_waiting_reward_continue = false
+
+		if is_instance_valid(tap_instruction_label):
+			tap_instruction_label.visible = false
+			tap_instruction_label.text = ""
+
+		if is_instance_valid(tap_catcher):
+			tap_catcher.visible = false
+			tap_catcher.disabled = true
+
+		if is_instance_valid(reward_text):
+			reward_text.text = ""
+
+		if is_instance_valid(reward_panel):
+			reward_panel.visible = false
+
+		if is_instance_valid(collect_button):
+			if multiplayer.has_multiplayer_peer():
+				collect_button.visible = GameState.local_role == GameState.Role.SIDEKICK
+			else:
+				collect_button.visible = true
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_begin_briefcase_store_sequence() -> void:
+	get_tree().paused = true
+
+	if is_instance_valid(reward_layer):
+		reward_layer.visible = true
+
+	# Hide current reward UI first
+	if is_instance_valid(reward_panel):
+		reward_panel.visible = false
+
+	if is_instance_valid(reward_text):
+		reward_text.text = ""
+
+	if is_instance_valid(reward_banner):
+		reward_banner.visible = false
+
+	if is_instance_valid(banner_label):
+		banner_label.text = ""
+
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = false
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = false
 
 	if is_instance_valid(tap_instruction_label):
 		tap_instruction_label.visible = false
@@ -1152,16 +1238,15 @@ func _on_reward_tap_catcher_pressed() -> void:
 		tap_catcher.visible = false
 		tap_catcher.disabled = true
 
-	# Hide only the note panel and its text
-	if is_instance_valid(reward_text):
-		reward_text.text = ""
-
-	if is_instance_valid(reward_panel):
-		reward_panel.visible = false
-
-	# Now show collect button for sidekick
 	if is_instance_valid(collect_button):
-		if multiplayer.has_multiplayer_peer():
-			collect_button.visible = GameState.local_role == GameState.Role.SIDEKICK
-		else:
-			collect_button.visible = true
+		collect_button.visible = false
+
+	# Keep overlay but make sure briefcase is visible above it
+	if is_instance_valid(dark_overlay):
+		dark_overlay.modulate.a = 0.45
+
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = true
+		briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
+		briefcase_reveal_sprite.z_index = 100
+		print("[Briefcase] Showing briefcase reveal sprite")
