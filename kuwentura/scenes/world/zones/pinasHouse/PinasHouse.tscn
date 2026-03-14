@@ -1,15 +1,16 @@
-[gd_scene load_steps=85 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=87 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
 [ext_resource type="Texture2D" uid="uid://miy70k8n04ul" path="res://assets/sprites/places/pinasHouseBackground.png" id="2_vt60f"]
+[ext_resource type="Texture2D" uid="uid://du4de733sad05" path="res://assets/sprites/zoneObjects/pinasHouseObjects/OpenCabinet.png" id="3_0s51p"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
-[ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/inventoryBoard.png" id="3_k0xpg"]
-[ext_resource type="Texture2D" uid="uid://3boff2bjwjx5" path="res://assets/sprites/zoneObjects/pinasHouseObjects/pan.png" id="4_d1egf"]
+[ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/InventoryBoard.png" id="3_k0xpg"]
+[ext_resource type="Texture2D" uid="uid://3boff2bjwjx5" path="res://assets/sprites/zoneObjects/pinasHouseObjects/Pan.png" id="4_d1egf"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="4_zonecontrols"]
 [ext_resource type="Texture2D" uid="uid://dorp3w7u7d4r6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/14.png" id="5_j1qle"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="5_play"]
-[ext_resource type="Texture2D" uid="uid://eq2djd03g5l" path="res://assets/sprites/zoneObjects/pinasHouseObjects/pot.png" id="6_qiked"]
+[ext_resource type="Texture2D" uid="uid://eq2djd03g5l" path="res://assets/sprites/zoneObjects/pinasHouseObjects/Pot.png" id="6_qiked"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="6_settings"]
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="7_exit"]
 [ext_resource type="Texture2D" uid="uid://bcx3kj7n3d7p6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/1.png" id="7_p8qr5"]
@@ -22,48 +23,33 @@
 [ext_resource type="Texture2D" uid="uid://ulco6gp1v5ih" path="res://assets/sprites/zoneObjects/pinasHouseObjects/9.png" id="13_egl2a"]
 [ext_resource type="Texture2D" uid="uid://mu4tgb7cpi32" path="res://assets/sprites/zoneObjects/pinasHouseObjects/10.png" id="14_c70e8"]
 [ext_resource type="Script" uid="uid://hufijointu80" path="res://scripts/puzzles/note_board_sidekick.gd" id="14_p8qr5"]
-<<<<<<< HEAD
-[ext_resource type="Texture2D" uid="uid://bp1p1fynalexm" path="res://assets/sprites/zoneObjects/Zone 1 Objects/11.png" id="15_dcipd"]
-[ext_resource type="Texture2D" uid="uid://bvjqibxpnaw5" path="res://assets/sprites/zoneObjects/Zone 1 Objects/13.png" id="16_u6sy3"]
-[ext_resource type="Texture2D" uid="uid://deqmdh6dbokyd" path="res://assets/sprites/zoneObjects/x.png" id="19_vt60f"]
-[ext_resource type="Texture2D" uid="uid://ci6sa4iwt7x0l" path="res://assets/sprites/zoneObjects/y.png" id="20_eedqa"]
-[ext_resource type="Texture2D" uid="uid://bcwl2rqppjo6k" path="res://assets/sprites/zoneObjects/z.png" id="21_cd1wg"]
-[ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/Close.png" id="22_vt60f"]
-[ext_resource type="Texture2D" uid="uid://5hqcc5yhq64a" path="res://assets/buttons/rightBack2.png" id="24_fvin0"]
-[ext_resource type="Texture2D" uid="uid://d2b4d66dls22f" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Banner.png" id="24_vt60f"]
-[ext_resource type="Texture2D" uid="uid://b216jsk5hyag5" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Ladle.png" id="25_eedqa"]
-[ext_resource type="Texture2D" uid="uid://llr505ongc63" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pan.png" id="26_cd1wg"]
-[ext_resource type="Texture2D" uid="uid://cnu6aahk6prn6" path="res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pot.png" id="27_egl2a"]
-[ext_resource type="Texture2D" uid="uid://xav0rox1o7wd" path="res://assets/sprites/consequences/aswang/aswang10.png" id="33_eedqa"]
-[ext_resource type="Texture2D" uid="uid://mx5pteuiy8od" path="res://assets/sprites/zoneObjects/DarkPanel.png" id="34_c70e8"]
-[ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/Sparkle.png" id="35_dcipd"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="36_u6sy3"]
-[ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/zoneObjects/LadleClue.png" id="37_dcipd"]
-[ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="39_0s51p"]
-[ext_resource type="Texture2D" uid="uid://b2ryp42vnc38n" path="res://assets/sprites/players/briefcaseOpen.png" id="40_cyexm"]
-=======
 [ext_resource type="Texture2D" uid="uid://bp1p1fynalexm" path="res://assets/sprites/zoneObjects/pinasHouseObjects/11.png" id="15_dcipd"]
 [ext_resource type="Texture2D" uid="uid://bvjqibxpnaw5" path="res://assets/sprites/zoneObjects/pinasHouseObjects/13.png" id="16_u6sy3"]
 [ext_resource type="Texture2D" uid="uid://deqmdh6dbokyd" path="res://assets/sprites/zoneObjects/pinasHouseObjects/x.png" id="19_vt60f"]
 [ext_resource type="Texture2D" uid="uid://ci6sa4iwt7x0l" path="res://assets/sprites/zoneObjects/pinasHouseObjects/y.png" id="20_eedqa"]
 [ext_resource type="Texture2D" uid="uid://bcwl2rqppjo6k" path="res://assets/sprites/zoneObjects/pinasHouseObjects/z.png" id="21_cd1wg"]
 [ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/closeButton.png" id="22_vt60f"]
-[ext_resource type="Texture2D" uid="uid://d2b4d66dls22f" path="res://assets/sprites/zoneObjects/pinasHouseObjects/banner.png" id="24_vt60f"]
+[ext_resource type="Texture2D" uid="uid://5hqcc5yhq64a" path="res://assets/buttons/rightArrow.png" id="24_fvin0"]
+[ext_resource type="Texture2D" uid="uid://d2b4d66dls22f" path="res://assets/sprites/zoneObjects/pinasHouseObjects/Banner.png" id="24_vt60f"]
 [ext_resource type="Texture2D" uid="uid://b216jsk5hyag5" path="res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Ladle.png" id="25_eedqa"]
 [ext_resource type="Texture2D" uid="uid://llr505ongc63" path="res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Pan.png" id="26_cd1wg"]
 [ext_resource type="Texture2D" uid="uid://cnu6aahk6prn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Pot.png" id="27_egl2a"]
 [ext_resource type="Texture2D" uid="uid://xav0rox1o7wd" path="res://assets/sprites/consequences/aswang/aswang10.png" id="33_eedqa"]
-[ext_resource type="Texture2D" uid="uid://mx5pteuiy8od" path="res://assets/sprites/zoneObjects/darkPanel.png" id="34_c70e8"]
+[ext_resource type="Texture2D" uid="uid://mx5pteuiy8od" path="res://assets/sprites/zoneObjects/DarkPanel.png" id="34_c70e8"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="35_dcipd"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="36_u6sy3"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="36_u6sy3"]
 [ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/clues/ladleClue.png" id="37_dcipd"]
->>>>>>> a4a423fd22baf4a6de69a61a18b8f2bc119c5283
+[ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="39_0s51p"]
+[ext_resource type="Texture2D" uid="uid://b2ryp42vnc38n" path="res://assets/sprites/players/briefcaseOpen.png" id="40_cyexm"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_btbyq"]
 size = Vector2(305.75015, 356.50024)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g5sbh"]
 size = Vector2(318, 209)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_oj2v5"]
+size = Vector2(111.5, 77.99997)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vt60f"]
 size = Vector2(130.50029, 89.75011)
@@ -321,6 +307,32 @@ position = Vector2(888.5, 514)
 position = Vector2(-730.4999, -434.49994)
 scale = Vector2(0.99999964, 0.99999964)
 shape = SubResource("RectangleShape2D_g5sbh")
+
+[node name="OpenCabinet" type="Sprite2D" parent="InteractiveLayer/Cabinet"]
+visible = false
+position = Vector2(-729, -418.5)
+scale = Vector2(0.30270717, 0.25810188)
+texture = ExtResource("3_0s51p")
+
+[node name="LadleInCabinet" type="Area2D" parent="InteractiveLayer/Cabinet"]
+
+[node name="Sprite2D" type="Sprite2D" parent="InteractiveLayer/Cabinet/LadleInCabinet"]
+visible = false
+position = Vector2(-648.00006, -352.50003)
+scale = Vector2(0.12916668, 0.120987654)
+texture = ExtResource("35_dcipd")
+
+[node name="LadleSprite" type="Sprite2D" parent="InteractiveLayer/Cabinet/LadleInCabinet"]
+visible = false
+position = Vector2(-651.06256, -381.5)
+scale = Vector2(0.07941667, 0.062000025)
+texture = ExtResource("37_dcipd")
+
+[node name="LadleCollision" type="CollisionShape2D" parent="InteractiveLayer/Cabinet/LadleInCabinet"]
+visible = false
+position = Vector2(-655.4999, -376.99997)
+scale = Vector2(0.9999998, 0.9999998)
+shape = SubResource("RectangleShape2D_oj2v5")
 
 [node name="Notes" type="Area2D" parent="InteractiveLayer"]
 
@@ -1134,6 +1146,15 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.011087579, 0.011087578, 0.01108758, 1)
 
+[node name="TapCatcher" type="Button" parent="RewardLayer"]
+visible = false
+self_modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
 [node name="RewardPanel" type="Sprite2D" parent="RewardLayer"]
 position = Vector2(699.24994, 322.37506)
 scale = Vector2(0.6497685, 0.5425926)
@@ -1212,13 +1233,84 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -293.0
-offset_top = -269.0
-offset_right = 293.0
-offset_bottom = 317.0
+offset_left = -393.0
+offset_top = -331.0
+offset_right = 519.0
+offset_bottom = 501.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_m2a4r")
+
+[node name="Control" type="Control" parent="SidekickLayer/Ledger"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LedgerTitle" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 200.0
+offset_right = 431.0
+offset_bottom = 251.0
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerLeftHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 173.0
+offset_top = 270.0
+offset_right = 433.0
+offset_bottom = 330.0
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerLeftBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 339.0
+offset_right = 446.0
+offset_bottom = 482.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="LedgerRightHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 478.0
+offset_top = 208.0
+offset_right = 753.0
+offset_bottom = 276.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerRightBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 478.0
+offset_top = 274.0
+offset_right = 739.0
+offset_bottom = 492.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
 
 [node name="Briefcase" type="Panel" parent="SidekickLayer"]
 visible = false
