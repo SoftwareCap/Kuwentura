@@ -1005,6 +1005,10 @@ func _connect_portal_signals() -> void:
 			if not portal.players_entering.is_connected(_on_players_entering_zone):
 				portal.players_entering.connect(_on_players_entering_zone)
 				print("[ForestHub] Connected to portal signal: ", portal.zone_name)
+		if portal.has_signal("players_entered"):
+			if not portal.players_entered.is_connected(_on_players_entered_zone):
+				portal.players_entered.connect(_on_players_entered_zone)
+				print("[ForestHub] Connected to portal entered signal: ", portal.zone_name)
 
 
 func _on_players_entering_zone(zone_name: String) -> void:
@@ -1016,24 +1020,53 @@ func _on_players_entering_zone(zone_name: String) -> void:
 		_animate_pinas_house_door()
 
 
+func _on_players_entered_zone(zone_name: String) -> void:
+	"""Handle scene change after door animation completes."""
+	print("[ForestHub] Players entered zone, proceeding to scene change: ", zone_name)
+	
+	# Find the portal that emitted this signal
+	var target_portal = null
+	for portal in portals.get_children():
+		if portal.zone_name == zone_name:
+			target_portal = portal
+			break
+	
+	if not target_portal:
+		push_warning("[ForestHub] Could not find portal for zone: " + zone_name)
+		return
+	
+	# Tell portal to complete the zone entry (change scene immediately)
+	target_portal.complete_zone_entry()
+
+
 func _animate_pinas_house_door() -> void:
-	"""Animate the Pina's house door opening."""
+	"""Animate the Pina's house door opening - keeps zone sprite visible."""
 	if not pinas_house_door:
 		push_warning("[ForestHub] Pina's house door sprite not found!")
 		return
 	
 	print("[ForestHub] Animating Pina's house door opening")
 	
-	# Make door visible and animate it
+	# Simply show the door open sprite with a fade-in effect
+	# The zone sprite (closed door) stays visible underneath
 	pinas_house_door.visible = true
-	pinas_house_door.modulate = Color(1, 1, 1, 0)
-	pinas_house_door.scale = Vector2(0.1, 0.1)
+	pinas_house_door.modulate.a = 0.0
 	
-	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_BACK)
+	var tween = create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_OUT)
-	tween.tween_property(pinas_house_door, "modulate", Color(1, 1, 1, 1), DOOR_ANIMATION_DURATION)
-	tween.parallel().tween_property(pinas_house_door, "scale", Vector2(1, 1), DOOR_ANIMATION_DURATION)
 	
-	# Add a slight delay before scene transition to show the animation
-	await tween.finished
+	# Fade in the open door sprite (0.5s)
+	tween.tween_property(pinas_house_door, "modulate:a", 1.0, 0.5)
+	
+	# Connect to tree_exiting to hide the door when scene changes
+	# This ensures the door is hidden when returning to forest hub
+	if not tree_exiting.is_connected(_on_tree_exiting_hide_door):
+		tree_exiting.connect(_on_tree_exiting_hide_door)
+
+
+## Hide door when leaving the scene
+func _on_tree_exiting_hide_door() -> void:
+	"""Hide the open door when leaving the forest hub."""
+	if pinas_house_door:
+		pinas_house_door.visible = false
