@@ -1,6 +1,7 @@
 extends Area2D
 
 signal players_entering(zone_name: String)
+signal players_entered(zone_name: String)  # Emitted after animation, before scene change
 
 @export var zone_name : String
 @export var scene_path : String
@@ -22,6 +23,10 @@ var _sidekick_confirming: bool = false
 # Store individual player positions when they entered the portal area
 var _detective_entry_position: Vector2 = Vector2.ZERO
 var _sidekick_entry_position: Vector2 = Vector2.ZERO
+
+# Animation state
+var _is_entering: bool = false
+const ENTRY_ANIMATION_DURATION: float = 1.5  # Total time for door open + walk in (must match forest_hub.gd)
 
 # Reference to the enter button (set via inspector or found dynamically)
 var _enter_button: Button = null
@@ -392,12 +397,28 @@ func _check_and_enter():
 		print("[ZonePortal] DENIED:", zid, " locked. Remaining=", rem, "s")
 		return
 	
-	print("[ZonePortal] BOTH PLAYERS READY - ENTERING ", zone_name)
+	# Prevent double-entry
+	if _is_entering:
+		return
+	_is_entering = true
+	
+	print("[ZonePortal] BOTH PLAYERS READY - STARTING ENTRY ANIMATION for ", zone_name)
 	
 	# Emit signal for door animations before entering zone
 	players_entering.emit(zone_name)
 	
-	_enter_zone()
+	# Sync animation start to all clients
+	_sync_entry_animation.rpc()
+	
+	# Hide button immediately on server
+	if _enter_button:
+		_enter_button.visible = false
+	
+	# Wait for door animation to complete before fade to black
+	await get_tree().create_timer(ENTRY_ANIMATION_DURATION).timeout
+	
+	# Emit signal for fade to black (ForestHub will handle fade and call complete_zone_entry)
+	players_entered.emit(zone_name)
 
 
 ## Perform the actual zone entry
@@ -516,6 +537,27 @@ func _sync_spawn_position_to_client(peer_id: int, spawn_position: Vector2, zone:
 	if peer_id == multiplayer.get_unique_id():
 		GameState.save_spawn_position(peer_id, spawn_position, zone)
 		print("[ZonePortal] ← Client received spawn position sync: ", spawn_position, " for zone: ", zone)
+
+
+## Called by ForestHub after fade to black to complete the scene change
+func complete_zone_entry() -> void:
+	"""Called by ForestHub after fade to black - performs actual scene change."""
+	_enter_zone()
+
+
+## Sync entry animation start to all clients
+@rpc("authority", "reliable")
+func _sync_entry_animation():
+	"""Client-side: Play door animation when host triggers entry."""
+	if not is_inside_tree():
+		return
+	
+	# Hide button on client too
+	if _enter_button:
+		_enter_button.visible = false
+	
+	# Emit signal for local door animation
+	players_entering.emit(zone_name)
 
 
 # Legacy methods for backward compatibility
