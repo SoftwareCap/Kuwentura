@@ -32,9 +32,9 @@ const PUZZLE_DATA = {
 	},
 
 	"ledger": {
-		"title": "Finding the Missing Number",
-		"instruction": "Solve for x by undoing the operations one step at a time. If a number is added, subtract it. If a number is subtracted, add it. If x is multiplied, divide both sides by that number.",
-		"example": "Example: 2x - 8 = 2\nStep 1: Add 8 to both sides → 2x = 10\nStep 2: Divide both sides by 2 → x = 5"
+	"title": "Finding the Missing Number",
+	"instruction": "Undo what was done to x.\nMove the number first.\nThen divide if needed.",
+	"example": "Example: 2x - 8 = 2\nStep 1: Add 8 to both sides.\nNow it becomes 2x = 10.\nStep 2: Divide both sides by 2.\nNow it becomes x = 5."
 	},
 
 	"variations": [
@@ -96,7 +96,7 @@ const PUZZLE_DATA = {
 		"escalation": "Thumping grows stronger with delays and mistakes",
 		"failure": "Aswang shatters window and breaks in"
 	}
-},
+	},
 	
 	"backyard_path": {
 		"type": "conversion",
