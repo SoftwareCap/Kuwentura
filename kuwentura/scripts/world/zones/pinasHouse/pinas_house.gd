@@ -86,6 +86,31 @@ const FIRST_ATTACK_DELAY_SEC := 60
 @onready var collect_button = $RewardLayer/CollectButton
 @onready var dark_overlay = $RewardLayer/DarkOverlay
 
+#Ledger
+@onready var inside_zone_ledger_button: TouchScreenButton = get_node_or_null("InsideZoneControl/Ledger")
+@onready var inside_zone_briefcase_button: TouchScreenButton = get_node_or_null("InsideZoneControl/Briefcase")
+
+@onready var ledger_title_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerTitle")
+@onready var ledger_left_header_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerLeftHeader")
+@onready var ledger_left_body_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerLeftBody")
+@onready var ledger_right_header_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerRightHeader")
+@onready var ledger_right_body_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerRightBody")
+
+#Rewards
+@onready var cabinet_open_sprite: Sprite2D = $InteractiveLayer/Cabinet/OpenCabinet
+@onready var cabinet_collision: CollisionShape2D = $InteractiveLayer/Cabinet/Cabinet
+
+@onready var cabinet_ladle_area: Area2D = $InteractiveLayer/Cabinet/LadleInCabinet
+@onready var cabinet_ladle_sprite: Sprite2D = $InteractiveLayer/Cabinet/LadleInCabinet/LadleSprite
+@onready var cabinet_ladle_collision: CollisionShape2D = $InteractiveLayer/Cabinet/LadleInCabinet/LadleCollision
+
+@onready var reward_panel: Sprite2D = $RewardLayer/RewardPanel
+@onready var tap_catcher: Button = $RewardLayer/TapCatcher
+
+var _cabinet_opened := false
+var _ladle_found := false
+var _waiting_reward_continue := false
+
 var pause_controller
 var note_controller
 var tool_hunt_controller
@@ -135,15 +160,15 @@ var _shake_origin := Vector2.ZERO
 var _intro_ready_peers: Dictionary = {}
 
 var _shadow_tex := {
-	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Shadow - Ladle.png"),
-	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Shadow - Pan.png"),
-	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Shadow - Pot.png"),
+	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Ladle.png"),
+	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Shadow_Pan.png"),
+	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Shadow_Pot.png"),
 }
 
 var _reveal_tex := {
-	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal - Ladle.png"),
-	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal - Pan.png"),
-	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal - Pot.png"),
+	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal_Ladle.png"),
+	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal_Pan.png"),
+	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal_Pot.png"),
 }
 
 var _aswang_window_frames: Array[Texture2D] = [
@@ -171,6 +196,9 @@ func _ready() -> void:
 
 	_update_role_label()
 	update_role_visibility()
+
+	_refresh_inside_zone_buttons()
+	_populate_ledger_content()
 
 	reward_layer.visible = false
 	dark_overlay.modulate.a = 0.0
@@ -239,6 +267,12 @@ func _connect_zone_interactions() -> void:
 
 		if inside_zone_control.has_signal("briefcase_pressed") and not inside_zone_control.briefcase_pressed.is_connected(_on_briefcase_button_pressed):
 			inside_zone_control.briefcase_pressed.connect(_on_briefcase_button_pressed)
+	
+	if is_instance_valid(cabinet_ladle_area) and not cabinet_ladle_area.input_event.is_connected(_on_cabinet_ladle_input_event):
+		cabinet_ladle_area.input_event.connect(_on_cabinet_ladle_input_event)
+
+	if is_instance_valid(tap_catcher) and not tap_catcher.pressed.is_connected(_on_reward_tap_catcher_pressed):
+		tap_catcher.pressed.connect(_on_reward_tap_catcher_pressed)
 
 func _prepare_initial_flow_state() -> void:
 	_zone_active = false
@@ -273,6 +307,8 @@ func _prepare_initial_flow_state() -> void:
 	note_controller.close_boards(true)
 	note_controller.apply_unsolved_text()
 	note_controller.apply_note_interaction_gate()
+	_refresh_inside_zone_buttons()
+	_reset_cabinet_clue_state()
 	
 func _hide_note() -> void:
 	if is_instance_valid(note_area):
@@ -297,13 +333,18 @@ func _show_note() -> void:
 		note_btn.disabled = false
 
 func _hide_cabinet_reward_state() -> void:
-	# Cabinet stays present visually in the world. We only gate interaction.
 	if is_instance_valid(cabinet_area):
 		cabinet_area.input_pickable = false
+
+	if is_instance_valid(cabinet_collision):
+		cabinet_collision.disabled = true
 
 func _enable_cabinet_interaction() -> void:
 	if is_instance_valid(cabinet_area):
 		cabinet_area.input_pickable = true
+
+	if is_instance_valid(cabinet_collision):
+		cabinet_collision.disabled = false
 
 func _start_intro_dialogue_delayed() -> void:
 	if _intro_dialogue_played:
@@ -383,6 +424,7 @@ func _on_role_assigned(role) -> void:
 	GameState.local_role = role
 	update_role_visibility()
 	_update_role_label()
+	_refresh_inside_zone_buttons()
 
 func _update_role_label() -> void:
 	var role_text := "Unknown"
@@ -408,47 +450,68 @@ func show_notification(text: String, duration: float = 2.0) -> void:
 	var current_id := Time.get_ticks_msec()
 	notification_panel.set_meta("msg_id", current_id)
 
+	# duration <= 0 means persistent notification
+	if duration <= 0.0:
+		return
+
 	await get_tree().create_timer(duration, true).timeout
 
 	if notification_panel and notification_panel.get_meta("msg_id", -1) == current_id:
 		notification_panel.visible = false
 
+
+func hide_notification() -> void:
+	if notification_panel:
+		notification_panel.visible = false
+
 func pulse_ledger_guidance(enable: bool) -> void:
-	var ledger_button: Control = null
+	if GameState.local_role != GameState.Role.SIDEKICK:
+		if is_instance_valid(guidance_arrow):
+			guidance_arrow.visible = false
+		return
 
-	if inside_zone_control and inside_zone_control.has_method("get"):
-		ledger_button = inside_zone_control.get("ledger_button")
+	if _note_solved:
+		enable = false
 
-	if ledger_button:
-		ledger_button.visible = true
+	if enable:
+		_ledger_hint_shown = true
 
+	_refresh_inside_zone_buttons()
+
+	if is_instance_valid(inside_zone_ledger_button):
 		if enable:
-			if not ledger_button.has_meta("pulse_tween"):
+			if not inside_zone_ledger_button.has_meta("pulse_tween"):
 				var tw := create_tween()
 				tw.set_loops()
-				tw.tween_property(ledger_button, "scale", Vector2(1.12, 1.12), 0.4)
-				tw.tween_property(ledger_button, "scale", Vector2.ONE, 0.4)
-				ledger_button.set_meta("pulse_tween", tw)
+				tw.tween_property(inside_zone_ledger_button, "scale", Vector2(0.07, 0.07), 0.4)
+				tw.tween_property(inside_zone_ledger_button, "scale", Vector2(0.06, 0.06), 0.4)
+				inside_zone_ledger_button.set_meta("pulse_tween", tw)
 		else:
-			if ledger_button.has_meta("pulse_tween"):
-				var old_tw = ledger_button.get_meta("pulse_tween")
+			if inside_zone_ledger_button.has_meta("pulse_tween"):
+				var old_tw: Tween = inside_zone_ledger_button.get_meta("pulse_tween")
 				if old_tw:
 					old_tw.kill()
-				ledger_button.remove_meta("pulse_tween")
-			ledger_button.scale = Vector2.ONE
+				inside_zone_ledger_button.remove_meta("pulse_tween")
 
-	if guidance_arrow:
+			inside_zone_ledger_button.scale = Vector2(0.06, 0.06)
+
+	if is_instance_valid(guidance_arrow):
 		guidance_arrow.visible = enable
 
 func _on_ledger_button_pressed() -> void:
+	if GameState.local_role != GameState.Role.SIDEKICK:
+		return
+
 	_ledger_opened_once = true
 	pulse_ledger_guidance(false)
+
+	_populate_ledger_content()
 
 	if ledger_panel:
 		ledger_panel.visible = not ledger_panel.visible
 
 	if _note_phase_active and not _note_solved:
-		show_notification("Solve the equation to reveal the clue.", 2.0)
+		show_notification("Use the ledger steps to solve the equation.", 2.0)
 
 func _on_briefcase_button_pressed() -> void:
 	if briefcase_panel:
@@ -519,7 +582,29 @@ func rpc_request_open_cabinet() -> void:
 func _open_cabinet_server() -> void:
 	if not _cabinet_phase_active or _reward_active:
 		return
-	rpc_show_pinas_house_reward.rpc()
+
+	if _cabinet_opened:
+		return
+
+	rpc_open_cabinet_visual.rpc()
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_open_cabinet_visual() -> void:
+	_cabinet_opened = true
+
+	if is_instance_valid(cabinet_open_sprite):
+		cabinet_open_sprite.visible = true
+
+	if is_instance_valid(cabinet_ladle_sprite):
+		cabinet_ladle_sprite.visible = not _ladle_found
+
+	if is_instance_valid(cabinet_ladle_collision):
+		cabinet_ladle_collision.disabled = _ladle_found
+
+	if is_instance_valid(cabinet_ladle_area):
+		cabinet_ladle_area.input_pickable = not _ladle_found
+
+	show_notification("The cabinet is open. Look inside.", 2.0)
 
 @rpc("any_peer", "call_local", "reliable")
 func rpc_show_pinas_house_reward() -> void:
@@ -799,6 +884,10 @@ func broadcast_pinas_house_solved() -> void:
 @rpc("any_peer", "reliable", "call_local")
 func rpc_pinas_house_solved() -> void:
 	_note_solved = true
+	_ledger_hint_shown = false
+	hide_notification()
+	pulse_ledger_guidance(false)
+	_refresh_inside_zone_buttons()
 	await note_controller.after_note_solved()
 
 @rpc("any_peer", "reliable", "call_local")
@@ -808,3 +897,179 @@ func rpc_set_search_mode(enable: bool) -> void:
 func _finish_tool_phase_server() -> void:
 	rpc_set_search_mode.rpc(false)
 	rpc_note_revealed.rpc()
+	
+#ledger functions
+func _populate_ledger_content() -> void:
+	if is_instance_valid(ledger_title_label):
+		ledger_title_label.text = "Finding the Missing Number"
+
+	if is_instance_valid(ledger_left_header_label):
+		ledger_left_header_label.text = "How to Solve"
+
+	if is_instance_valid(ledger_left_body_label):
+		ledger_left_body_label.text = "1. Move the number.\n2. Do the opposite.\n3. Divide if needed."
+
+	if is_instance_valid(ledger_right_header_label):
+		ledger_right_header_label.text = "Example"
+
+	if is_instance_valid(ledger_right_body_label):
+		ledger_right_body_label.text = "2x - 8 = 2\n\n1. Add 8 to both sides.\n   2x = 10\n\n2. Divide by 2.\n   x = 5"
+
+func _refresh_inside_zone_buttons() -> void:
+	var is_sidekick: bool = GameState.local_role == GameState.Role.SIDEKICK
+
+	if is_instance_valid(inside_zone_control):
+		if inside_zone_control.has_method("set_pause_enabled"):
+			inside_zone_control.set_pause_enabled(true)
+
+		if inside_zone_control.has_method("set_briefcase_enabled"):
+			inside_zone_control.set_briefcase_enabled(is_sidekick)
+
+		# Ledger button should be visible for the sidekick as soon as the zone starts.
+		# Arrow/pulse are handled separately by pulse_ledger_guidance().
+		if inside_zone_control.has_method("set_ledger_enabled"):
+			inside_zone_control.set_ledger_enabled(is_sidekick)			
+
+#Reward
+func _reset_cabinet_clue_state() -> void:
+	_cabinet_opened = false
+	_ladle_found = false
+	_waiting_reward_continue = false
+
+	if is_instance_valid(cabinet_open_sprite):
+		cabinet_open_sprite.visible = false
+
+	if is_instance_valid(cabinet_ladle_sprite):
+		cabinet_ladle_sprite.visible = false
+
+	if is_instance_valid(cabinet_ladle_collision):
+		cabinet_ladle_collision.disabled = true
+
+	if is_instance_valid(cabinet_ladle_area):
+		cabinet_ladle_area.input_pickable = false
+
+	if is_instance_valid(reward_layer):
+		reward_layer.visible = false
+
+	if is_instance_valid(reward_panel):
+		reward_panel.visible = false
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = false
+
+	if is_instance_valid(reward_banner):
+		reward_banner.visible = false
+
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = false
+
+	if is_instance_valid(collect_button):
+		collect_button.visible = false
+
+	if is_instance_valid(tap_catcher):
+		tap_catcher.visible = false
+
+func _on_cabinet_ladle_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+	if not _cabinet_opened or _ladle_found:
+		return
+
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			_request_pickup_cabinet_ladle()
+	elif event is InputEventScreenTouch:
+		var st := event as InputEventScreenTouch
+		if st.pressed:
+			_request_pickup_cabinet_ladle()
+
+func _request_pickup_cabinet_ladle() -> void:
+	if not _cabinet_opened or _ladle_found:
+		return
+
+	if not multiplayer.has_multiplayer_peer():
+		_pickup_cabinet_ladle_server()
+		return
+
+	if multiplayer.is_server():
+		_pickup_cabinet_ladle_server()
+	else:
+		rpc_request_pickup_cabinet_ladle.rpc_id(_SERVER_PEER_ID)
+
+@rpc("any_peer", "reliable")
+func rpc_request_pickup_cabinet_ladle() -> void:
+	if not multiplayer.is_server():
+		return
+	_pickup_cabinet_ladle_server()
+
+func _pickup_cabinet_ladle_server() -> void:
+	if not _cabinet_opened or _ladle_found:
+		return
+
+	rpc_start_ladle_found_sequence.rpc()
+	
+@rpc("any_peer", "reliable", "call_local")
+func rpc_start_ladle_found_sequence() -> void:
+	_ladle_found = true
+	_reward_active = true
+	_waiting_reward_continue = true
+
+	if is_instance_valid(cabinet_ladle_sprite):
+		cabinet_ladle_sprite.visible = false
+
+	if is_instance_valid(cabinet_ladle_collision):
+		cabinet_ladle_collision.disabled = true
+
+	if is_instance_valid(cabinet_ladle_area):
+		cabinet_ladle_area.input_pickable = false
+
+	get_tree().paused = true
+	reward_layer.visible = true
+
+	if is_instance_valid(dark_overlay):
+		dark_overlay.modulate.a = 0.7
+
+	if is_instance_valid(reward_panel):
+		reward_panel.visible = false
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = true
+
+	if is_instance_valid(reward_banner):
+		reward_banner.visible = true
+
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = true
+
+	if is_instance_valid(reward_text):
+		reward_text.text = "CLUE FOUND!\n\nYou found the ladle.\n\nTap anywhere to continue."
+
+	if is_instance_valid(collect_button):
+		collect_button.visible = false
+
+	if is_instance_valid(tap_catcher):
+		tap_catcher.visible = true
+
+func _on_reward_tap_catcher_pressed() -> void:
+	if not _waiting_reward_continue:
+		return
+
+	_waiting_reward_continue = false
+
+	if is_instance_valid(tap_catcher):
+		tap_catcher.visible = false
+
+	if is_instance_valid(reward_panel):
+		reward_panel.visible = true
+
+	if is_instance_valid(reward_text):
+		reward_text.text = (
+			"The ladle was the last thing Pina looked for.\n"
+			+ "It was right in front of her, but she still could not see it.\n\n"
+			+ "\"We use our eyes to find things, but Pina never used hers...\""
+		)
+
+	if is_instance_valid(collect_button):
+		if multiplayer.has_multiplayer_peer():
+			collect_button.visible = GameState.local_role == GameState.Role.SIDEKICK
+		else:
+			collect_button.visible = true
