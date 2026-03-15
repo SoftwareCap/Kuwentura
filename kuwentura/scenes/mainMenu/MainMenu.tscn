@@ -203,10 +203,11 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 9
 
-[node name="SidekickPopup" type="Panel" parent="."]
+[node name="PopupLayer" type="CanvasLayer" parent="."]
+layer = 60
+
+[node name="SidekickPopup" type="Panel" parent="PopupLayer"]
 visible = false
-z_index = 10
-layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -220,7 +221,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_r2guf")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="SidekickPopup"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PopupLayer/SidekickPopup"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -237,7 +238,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 0
 theme_override_constants/separation = 75
 
-[node name="Label" type="Label" parent="SidekickPopup/VBoxContainer"]
+[node name="Label" type="Label" parent="PopupLayer/SidekickPopup/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_constants/line_spacing = 7
@@ -247,7 +248,7 @@ text = "Enter Code:"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LineEdit" type="LineEdit" parent="SidekickPopup/VBoxContainer"]
+[node name="LineEdit" type="LineEdit" parent="PopupLayer/SidekickPopup/VBoxContainer"]
 custom_minimum_size = Vector2(600, 40)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -259,13 +260,13 @@ alignment = 1
 caret_blink = true
 caret_force_displayed = true
 
-[node name="HBoxContainer" type="HBoxContainer" parent="SidekickPopup/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PopupLayer/SidekickPopup/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/separation = 60
 
-[node name="CancelButton" type="Button" parent="SidekickPopup/VBoxContainer/HBoxContainer"]
+[node name="CancelButton" type="Button" parent="PopupLayer/SidekickPopup/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(200, 40)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -282,7 +283,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_2oq2w")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_r2guf")
 text = "Cancel"
 
-[node name="JoinButton" type="Button" parent="SidekickPopup/VBoxContainer/HBoxContainer"]
+[node name="JoinButton" type="Button" parent="PopupLayer/SidekickPopup/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(200, 40)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -299,12 +300,27 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_2oq2w")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_r2guf")
 text = "Join"
 
+[node name="InputBlockerLayer" type="CanvasLayer" parent="."]
+layer = 50
+
+[node name="InputBlocker" type="ColorRect" parent="InputBlockerLayer"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0)
+mouse_filter = 0
+
 [node name="SettingsControl" parent="." instance=ExtResource("5_2oq2w")]
 script = ExtResource("6_r2guf")
 
-[node name="SettingsPanel" type="Panel" parent="."]
+[node name="SettingsLayer" type="CanvasLayer" parent="."]
+layer = 60
+
+[node name="SettingsPanel" type="Panel" parent="SettingsLayer"]
 visible = false
-layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -318,7 +334,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bkukm")
 
-[node name="Label" type="Label" parent="SettingsPanel"]
+[node name="Label" type="Label" parent="SettingsLayer/SettingsPanel"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -334,19 +350,19 @@ text = "Settings"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Back" type="TouchScreenButton" parent="SettingsPanel"]
+[node name="Back" type="TouchScreenButton" parent="SettingsLayer/SettingsPanel"]
 position = Vector2(767.25, -3)
 scale = Vector2(0.5, 0.5)
 texture_normal = ExtResource("9_2oq2w")
 
-[node name="Separator" type="Line2D" parent="SettingsPanel"]
+[node name="Separator" type="Line2D" parent="SettingsLayer/SettingsPanel"]
 position = Vector2(0.109012604, -58)
 scale = Vector2(0.73165876, 1)
 points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
 width = 2.0
 default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
 
-[node name="ViewUserProfile" type="Button" parent="SettingsPanel"]
+[node name="ViewUserProfile" type="Button" parent="SettingsLayer/SettingsPanel"]
 custom_minimum_size = Vector2(200, 40)
 layout_mode = 1
 anchors_preset = 8
@@ -374,7 +390,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_2oq2w")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_r2guf")
 text = "View User Profile"
 
-[node name="VolumeSliderControl" type="HBoxContainer" parent="SettingsPanel"]
+[node name="VolumeSliderControl" type="HBoxContainer" parent="SettingsLayer/SettingsPanel"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -389,7 +405,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 30
 
-[node name="VolumeLabel" type="Label" parent="SettingsPanel/VolumeSliderControl"]
+[node name="VolumeLabel" type="Label" parent="SettingsLayer/SettingsPanel/VolumeSliderControl"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_w35ku")
 theme_override_font_sizes/font_size = 40
@@ -397,7 +413,7 @@ text = "Music Volume:"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="VolumeSlider" type="HSlider" parent="SettingsPanel/VolumeSliderControl"]
+[node name="VolumeSlider" type="HSlider" parent="SettingsLayer/SettingsPanel/VolumeSliderControl"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
@@ -406,14 +422,14 @@ theme_override_styles/grabber_area = SubResource("StyleBoxLine_8bsd5")
 theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_8bsd5")
 value = 80.0
 
-[node name="VolumeValue" type="Label" parent="SettingsPanel/VolumeSliderControl"]
+[node name="VolumeValue" type="Label" parent="SettingsLayer/SettingsPanel/VolumeSliderControl"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "80%"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="UserSection" type="Panel" parent="SettingsPanel"]
+[node name="UserSection" type="Panel" parent="SettingsLayer/SettingsPanel"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -429,7 +445,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bkukm")
 
-[node name="Label" type="Label" parent="SettingsPanel/UserSection"]
+[node name="Label" type="Label" parent="SettingsLayer/SettingsPanel/UserSection"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -445,19 +461,19 @@ text = "User Profile"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Back" type="TouchScreenButton" parent="SettingsPanel/UserSection"]
+[node name="Back" type="TouchScreenButton" parent="SettingsLayer/SettingsPanel/UserSection"]
 position = Vector2(6.2500005, 9.536743e-07)
 scale = Vector2(0.3, 0.3)
 texture_normal = ExtResource("10_r2guf")
 
-[node name="Separator" type="Line2D" parent="SettingsPanel/UserSection"]
+[node name="Separator" type="Line2D" parent="SettingsLayer/SettingsPanel/UserSection"]
 position = Vector2(0.109012604, -58)
 scale = Vector2(0.73165876, 1)
 points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
 width = 2.0
 default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
 
-[node name="UserContent" type="HBoxContainer" parent="SettingsPanel/UserSection"]
+[node name="UserContent" type="HBoxContainer" parent="SettingsLayer/SettingsPanel/UserSection"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -474,33 +490,33 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/separation = -16
 
-[node name="AvatarTexture" type="TextureRect" parent="SettingsPanel/UserSection/UserContent"]
+[node name="AvatarTexture" type="TextureRect" parent="SettingsLayer/SettingsPanel/UserSection/UserContent"]
 layout_mode = 2
 size_flags_horizontal = 4
 texture = ExtResource("11_2oq2w")
 expand_mode = 3
 
-[node name="UserInfo" type="VBoxContainer" parent="SettingsPanel/UserSection/UserContent"]
+[node name="UserInfo" type="VBoxContainer" parent="SettingsLayer/SettingsPanel/UserSection/UserContent"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 30
 alignment = 1
 
-[node name="DisplayName" type="Label" parent="SettingsPanel/UserSection/UserContent/UserInfo"]
+[node name="DisplayName" type="Label" parent="SettingsLayer/SettingsPanel/UserSection/UserContent/UserInfo"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 25
 text = "\"Player Name\""
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ProviderLabel" type="Label" parent="SettingsPanel/UserSection/UserContent/UserInfo"]
+[node name="ProviderLabel" type="Label" parent="SettingsLayer/SettingsPanel/UserSection/UserContent/UserInfo"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 25
 text = "\"Guest\""
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="AuthButtons" type="HBoxContainer" parent="SettingsPanel/UserSection"]
+[node name="AuthButtons" type="HBoxContainer" parent="SettingsLayer/SettingsPanel/UserSection"]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -517,7 +533,7 @@ size_flags_vertical = 6
 theme_override_constants/separation = 25
 alignment = 1
 
-[node name="SignInButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+[node name="SignInButton" type="Button" parent="SettingsLayer/SettingsPanel/UserSection/AuthButtons"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
@@ -532,7 +548,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_jix8l")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_fu7sn")
 text = "Sign in"
 
-[node name="GuestButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+[node name="GuestButton" type="Button" parent="SettingsLayer/SettingsPanel/UserSection/AuthButtons"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
@@ -547,7 +563,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_jix8l")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_fu7sn")
 text = "Guest"
 
-[node name="LinkGoogleButton" type="Button" parent="SettingsPanel/UserSection/AuthButtons"]
+[node name="LinkGoogleButton" type="Button" parent="SettingsLayer/SettingsPanel/UserSection/AuthButtons"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
@@ -564,9 +580,9 @@ text = "Link Google"
 
 [connection signal="pressed" from="HostButton" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="JoinButton" to="." method="_on_join_pressed"]
-[connection signal="text_changed" from="SidekickPopup/VBoxContainer/LineEdit" to="." method="_on_code_text_changed"]
-[connection signal="pressed" from="SidekickPopup/VBoxContainer/HBoxContainer/CancelButton" to="." method="_on_join_code_cancel_pressed"]
-[connection signal="pressed" from="SidekickPopup/VBoxContainer/HBoxContainer/JoinButton" to="." method="_on_join_code_ok_pressed"]
-[connection signal="pressed" from="SettingsPanel/Back" to="." method="_on_back_settings_pressed"]
-[connection signal="value_changed" from="SettingsPanel/VolumeSliderControl/VolumeSlider" to="." method="_on_volume_changed"]
-[connection signal="pressed" from="SettingsPanel/UserSection/Back" to="." method="_on_back_from_profile_pressed"]
+[connection signal="text_changed" from="PopupLayer/SidekickPopup/VBoxContainer/LineEdit" to="." method="_on_code_text_changed"]
+[connection signal="pressed" from="PopupLayer/SidekickPopup/VBoxContainer/HBoxContainer/CancelButton" to="." method="_on_join_code_cancel_pressed"]
+[connection signal="pressed" from="PopupLayer/SidekickPopup/VBoxContainer/HBoxContainer/JoinButton" to="." method="_on_join_code_ok_pressed"]
+[connection signal="pressed" from="SettingsLayer/SettingsPanel/Back" to="." method="_on_back_settings_pressed"]
+[connection signal="value_changed" from="SettingsLayer/SettingsPanel/VolumeSliderControl/VolumeSlider" to="." method="_on_volume_changed"]
+[connection signal="pressed" from="SettingsLayer/SettingsPanel/UserSection/Back" to="." method="_on_back_from_profile_pressed"]

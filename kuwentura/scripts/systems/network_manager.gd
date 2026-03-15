@@ -726,6 +726,25 @@ func _rpc_notify_host_leaving() -> void:
 	# Sidekick receives this - could emit a signal if needed
 	emit_signal("game_paused", "host_leaving")
 
+
+## Notify host that sidekick is leaving (called before disconnect)
+func notify_sidekick_leaving() -> void:
+	if multiplayer.has_multiplayer_peer() and multiplayer.get_peers().size() > 0:
+		_rpc_notify_sidekick_leaving.rpc_id(1)  # Send to host (peer ID 1)
+
+
+@rpc("any_peer", "reliable")
+func _rpc_notify_sidekick_leaving() -> void:
+	# Host receives this
+	var peer_id = multiplayer.get_remote_sender_id()
+	print("[Network] Sidekick ", peer_id, " is leaving")
+	if peer_id == _partner_peer_id:
+		_partner_peer_id = 0
+		emit_signal("partner_disconnected", {
+			"player_id": str(peer_id),
+			"reason": "left"
+		})
+
 #------------------------------------------------------------------------------
 # Helpers
 #------------------------------------------------------------------------------
