@@ -2,12 +2,9 @@ extends RefCounted
 
 var zone
 
+
 func setup(owner) -> void:
 	zone = owner
-
-	set_area_pickable(zone.pan_prop, false)
-	set_area_pickable(zone.ladle_prop, false)
-	set_area_pickable(zone.pot_prop, false)
 
 	if is_instance_valid(zone.pan_prop) and not zone.pan_prop.input_event.is_connected(zone._on_tool_input_event.bind("pan")):
 		zone.pan_prop.input_event.connect(zone._on_tool_input_event.bind("pan"))
@@ -24,18 +21,25 @@ func setup(owner) -> void:
 	apply_banner_frames()
 	apply_tool_nodes()
 
-func on_tool_input_event(_viewport: Node, event: InputEvent, _shape_idx: int, tool_id: String) -> void:
+
+func _is_press_event(event: InputEvent) -> bool:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			try_collect_tool(tool_id)
-			return
+		return mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
 
 	if event is InputEventScreenTouch:
 		var st := event as InputEventScreenTouch
-		if st.pressed:
-			try_collect_tool(tool_id)
-			return
+		return st.pressed
+
+	return false
+
+
+func on_tool_input_event(_viewport: Node, event: InputEvent, _shape_idx: int, tool_id: String) -> void:
+	if not _is_press_event(event):
+		return
+
+	try_collect_tool(tool_id)
+
 
 func try_collect_tool(tool_id: String) -> void:
 	if not zone._zone_active:
@@ -59,6 +63,7 @@ func try_collect_tool(tool_id: String) -> void:
 	else:
 		zone.rpc_request_collect_tool.rpc_id(zone._SERVER_PEER_ID, tool_id)
 
+
 func server_collect_tool(tool_id: String, _sender_peer_id: int) -> void:
 	if zone._failed:
 		return
@@ -76,10 +81,11 @@ func server_collect_tool(tool_id: String, _sender_peer_id: int) -> void:
 		return
 
 	zone.rpc_set_tool_collected.rpc(tool_id)
-	zone.rpc_show_tool_feedback.rpc("Tool Found!")
+	zone.rpc_show_tool_feedback.rpc("Tool found!")
 
 	if all_tools_collected():
-		await _finish_tool_phase_server()
+		_finish_tool_phase_server()
+
 
 func _finish_tool_phase_server() -> void:
 	zone._tool_phase_active = false
@@ -89,35 +95,48 @@ func _finish_tool_phase_server() -> void:
 	zone.rpc_set_tools_unlocked.rpc(false)
 	zone.rpc_note_revealed.rpc()
 
-	DialogueSystems.play("pinas_house_tools_done", DialogueLibraries.PINAS_HOUSE_TOOLS_DONE)
-	await DialogueSystems.wait_finished("pinas_house_tools_done")
+	# Play dialogue for BOTH players
+	zone.rpc_play_tools_done_dialogue.rpc()
 
 func set_tool_collected_local(tool_id: String) -> void:
 	zone._tools_collected[tool_id] = true
 	apply_tool_nodes()
 	apply_banner_frames()
 
+
 func set_tools_unlocked_local(unlocked: bool) -> void:
 	zone._tools_unlocked = unlocked
 	apply_tool_nodes()
+
+
+func set_search_mode_local(enable: bool) -> void:
+	if is_instance_valid(zone.search_room_ui):
+		zone.search_room_ui.visible = enable
+
+	zone._tool_phase_active = enable
+	zone._tools_unlocked = enable
+	apply_tool_nodes()
+
 
 func apply_tool_nodes() -> void:
 	apply_single_tool("pan", zone.pan_prop, zone.pan_collision)
 	apply_single_tool("ladle", zone.ladle_prop, zone.ladle_collision)
 	apply_single_tool("pot", zone.pot_prop, zone.pot_collision)
 
+
 func apply_single_tool(tool_id: String, area: Area2D, col: CollisionShape2D) -> void:
 	if not is_instance_valid(area):
 		return
 
 	var collected: bool = zone._tools_collected.get(tool_id, false)
-	var can_pick: bool = zone._tools_unlocked and not collected and zone._tool_phase_active
+	var can_pick: bool = zone._tool_phase_active and zone._tools_unlocked and not collected
 
 	area.visible = not collected
 	area.input_pickable = can_pick
 
 	if is_instance_valid(col):
 		col.disabled = not can_pick
+
 
 func apply_banner_frames() -> void:
 	if is_instance_valid(zone.frame_ladle):
@@ -129,10 +148,12 @@ func apply_banner_frames() -> void:
 	if is_instance_valid(zone.frame_pot):
 		zone.frame_pot.texture = zone._reveal_tex["pot"] if zone._tools_collected["pot"] else zone._shadow_tex["pot"]
 
+
 func set_area_pickable(area: Area2D, pickable: bool) -> void:
 	if not is_instance_valid(area):
 		return
 	area.input_pickable = pickable
+
 
 func all_tools_collected() -> bool:
 	for tool_id in zone._TOOL_IDS:
@@ -140,23 +161,15 @@ func all_tools_collected() -> bool:
 			return false
 	return true
 
+
 func on_wrong_object_input(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if not zone._tool_phase_active:
 		return
 
-	var clicked := false
-
-	if event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		clicked = mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
-	elif event is InputEventScreenTouch:
-		var st := event as InputEventScreenTouch
-		clicked = st.pressed
-
-	if not clicked:
+	if not _is_press_event(event):
 		return
 
-	zone.show_notification("This is not helpful.", 1.8)
+	zone.show_notification("This is not helpful.", 1.6)
 
 	if not zone.multiplayer.has_multiplayer_peer():
 		zone.rpc_request_penalty("wrong_object")
