@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=4 uid="uid://c65bu18udl64v"]
+[gd_scene load_steps=34 format=4 uid="uid://c65bu18udl64v"]
 
 [ext_resource type="Texture2D" uid="uid://k60h4yhhde0x" path="res://assets/backgrounds/forest.png" id="2_87r7r"]
 [ext_resource type="Texture2D" uid="uid://d06a48u2atl4o" path="res://assets/sprites/places/pinasHouseZone.png" id="2_anhpr"]
@@ -17,6 +17,8 @@
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="14_wp30c"]
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="15_cpdo7"]
 [ext_resource type="Texture2D" uid="uid://b2ryp42vnc38n" path="res://assets/sprites/players/briefcaseOpen.png" id="16_wp30c"]
+[ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="18_t6pvo"]
+[ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/clues/ladleClue.png" id="19_hdutc"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6nmbo"]
 size = Vector2(1.0549998, 9.77)
@@ -883,6 +885,8 @@ texture = ExtResource("15_cpdo7")
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_t6pvo"]
 texture = ExtResource("16_wp30c")
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rbch1"]
+
 [node name="ForestHub" type="Node2D"]
 script = ExtResource("6_forest_hub")
 ground_y = 650.0
@@ -1491,6 +1495,33 @@ offset_bottom = 197.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_t6pvo")
+
+[node name="FinishedZoneIndicator" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="Panel" type="Panel" parent="FinishedZoneIndicator"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 1070.0
+offset_top = -149.0
+offset_right = 1379.0
+offset_bottom = 131.75
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_rbch1")
+
+[node name="Sparkle" type="Sprite2D" parent="FinishedZoneIndicator/Panel"]
+position = Vector2(167.99988, 166)
+scale = Vector2(0.2066358, 0.20663582)
+texture = ExtResource("18_t6pvo")
+
+[node name="ClueSprite" type="Sprite2D" parent="FinishedZoneIndicator/Panel/Sparkle"]
+position = Vector2(-67.75098, -164.54065)
+scale = Vector2(0.30327117, 0.30327114)
+texture = ExtResource("19_hdutc")
 
 [connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/Resume_PlayButton" to="." method="_on_resume_play_button_pressed"]
 [connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/OptionButton" to="." method="_on_option_button_pressed"]

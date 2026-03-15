@@ -37,14 +37,15 @@ const SETTINGS_FILE = "user://settings.json"
 
 # Settings
 @onready var settings_control: CanvasLayer = $SettingsControl
-@onready var settings_panel: Panel = $SettingsPanel
-@onready var volume_slider: HSlider = $SettingsPanel/VolumeSliderControl/VolumeSlider
-@onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
+@onready var settings_panel: Panel = $SettingsLayer/SettingsPanel
+@onready var volume_slider: HSlider = $SettingsLayer/SettingsPanel/VolumeSliderControl/VolumeSlider
+@onready var volume_value_label: Label = $SettingsLayer/SettingsPanel/VolumeSliderControl/VolumeValue
+@onready var input_blocker: ColorRect = $InputBlockerLayer/InputBlocker
 
 # User Profile
-@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
-@onready var user_section: Panel = $SettingsPanel/UserSection
-@onready var user_section_back_button: TouchScreenButton = $SettingsPanel/UserSection/Back
+@onready var view_user_profile_button: Button = $SettingsLayer/SettingsPanel/ViewUserProfile
+@onready var user_section: Panel = $SettingsLayer/SettingsPanel/UserSection
+@onready var user_section_back_button: TouchScreenButton = $SettingsLayer/SettingsPanel/UserSection/Back
 
 # ============================================================================
 # STATE VARIABLES
@@ -527,11 +528,13 @@ func _on_game_started(_checkpoint: String = "") -> void:
 	_is_leaving = true
 	status_label.text = "Starting game..."
 	
-	# Hide settings button and panel during transition
+	# Hide settings button, panel, and input blocker during transition
 	if settings_control:
 		settings_control.hide_button()
 	if settings_panel:
 		settings_panel.visible = false
+	if input_blocker:
+		input_blocker.visible = false
 	
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
@@ -549,11 +552,13 @@ func _on_rejoin_game_requested(_world_state: Dictionary) -> void:
 	
 	_is_leaving = true
 	
-	# Hide settings button and panel during transition
+	# Hide settings button, panel, and input blocker during transition
 	if settings_control:
 		settings_control.hide_button()
 	if settings_panel:
 		settings_panel.visible = false
+	if input_blocker:
+		input_blocker.visible = false
 	
 	# Same fade transition as regular game start
 	var tween := create_tween()
@@ -610,7 +615,18 @@ func _on_connection_state_changed(new_state: int, _old_state: int) -> void:
 
 func _on_cancel_pressed() -> void:
 	_is_leaving = true
+	
+	# Notify host that we're leaving before disconnecting
+	NetworkManager.notify_sidekick_leaving()
+	
+	# Give time for the RPC to be sent
+	await get_tree().create_timer(0.1).timeout
+	
 	NetworkManager.disconnect_network()
+	
+	# Reset sidekick costume selection for next connection
+	GameState.set_selected_costume("sidekick", "default")
+	GameState.confirm_costume_selection("sidekick", false)
 	
 	# Wait for disconnect and any in-flight RPCs to be processed
 	await get_tree().create_timer(0.5).timeout
@@ -651,6 +667,9 @@ func _setup_settings() -> void:
 
 func _on_settings_pressed() -> void:
 	print("[SidekickWaiting] Opening settings panel")
+	# Block input to underlying elements
+	if input_blocker:
+		input_blocker.visible = true
 	if settings_panel:
 		settings_panel.visible = true
 		# Hide user section when opening settings
@@ -668,6 +687,9 @@ func _on_back_settings_pressed() -> void:
 	print("[SidekickWaiting] Closing settings panel")
 	if settings_panel:
 		settings_panel.visible = false
+	# Unblock input when settings is closed
+	if input_blocker:
+		input_blocker.visible = false
 	# Show settings button again
 	if settings_control:
 		settings_control.show_button()

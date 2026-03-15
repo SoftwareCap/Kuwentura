@@ -26,6 +26,7 @@ const SETTINGS_FILE = "user://settings.json"
 @onready var volume_slider: HSlider = $SettingsLayer/SettingsPanel/VolumeSliderControl/VolumeSlider
 @onready var volume_value_label: Label = $SettingsLayer/SettingsPanel/VolumeSliderControl/VolumeValue
 @onready var settings_back_button: TouchScreenButton = $SettingsLayer/SettingsPanel/Back
+@onready var input_blocker: ColorRect = $InputBlockerLayer/InputBlocker
 
 # User Profile
 @onready var view_user_profile_button: Button = $SettingsLayer/SettingsPanel/ViewUserProfile
@@ -565,7 +566,8 @@ func _send_costume_state_with_delay() -> void:
 		NetworkManager.send_costume_state_to_client(peers[0])
 
 
-func _on_partner_disconnected(_data: Dictionary) -> void:
+func _on_partner_disconnected(data: Dictionary) -> void:
+	print("[DetectiveLobby] Partner disconnected: ", data)
 	sidekick_connected = false
 	_update_connection_indicator()
 	
@@ -578,12 +580,23 @@ func _on_partner_disconnected(_data: Dictionary) -> void:
 			start_button.visible = false
 			start_button.disabled = true
 		
+		# Hide sidekick avatar and all related UI
 		if is_instance_valid(sidekick_sprite):
 			sidekick_sprite.visible = false
 		if is_instance_valid(sidekick_name_label):
 			sidekick_name_label.visible = false
 		if is_instance_valid(sidekick_costume_label):
 			sidekick_costume_label.visible = false
+		
+		# Reset sidekick costume controls visibility
+		_sidekick_set_controls_visible(false)
+		
+		# Reset sidekick costume for next connection
+		GameState.set_selected_costume("sidekick", "default")
+		GameState.confirm_costume_selection("sidekick", false)
+		_update_costume_display("sidekick")
+		
+		print("[DetectiveLobby] Sidekick UI hidden and costume reset")
 
 
 func _on_start_pressed() -> void:
@@ -634,11 +647,13 @@ func _on_back_pressed() -> void:
 func _on_game_started(_checkpoint: String = "") -> void:
 	_is_leaving = true
 	
-	# Hide settings button and panel during transition
+	# Hide settings button, panel, and input blocker during transition
 	if settings_control:
 		settings_control.hide_button()
 	if settings_panel:
 		settings_panel.visible = false
+	if input_blocker:
+		input_blocker.visible = false
 	
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
@@ -681,6 +696,9 @@ func _setup_settings() -> void:
 
 func _on_settings_pressed() -> void:
 	print("[DetectiveLobby] Opening settings panel")
+	# Block input to underlying elements
+	if input_blocker:
+		input_blocker.visible = true
 	if settings_panel:
 		settings_panel.visible = true
 		# Hide user section when opening settings
@@ -698,6 +716,9 @@ func _on_back_settings_pressed() -> void:
 	print("[DetectiveLobby] Closing settings panel")
 	if settings_panel:
 		settings_panel.visible = false
+	# Unblock input when settings is closed
+	if input_blocker:
+		input_blocker.visible = false
 	# Show settings button again
 	if settings_control:
 		settings_control.show_button()

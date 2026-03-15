@@ -4,31 +4,40 @@ extends Control
 @onready var join_button: TextureButton = $JoinButton
 @onready var status_label = $StatusLabel
 @onready var settings_control: CanvasLayer = $SettingsControl
-@onready var settings_panel: Panel = $SettingsPanel
-@onready var volume_slider: HSlider = $SettingsPanel/VolumeSliderControl/VolumeSlider
-@onready var volume_value_label: Label = $SettingsPanel/VolumeSliderControl/VolumeValue
-@onready var back_button: TouchScreenButton = $SettingsPanel/Back
+@onready var settings_panel: Panel = $SettingsLayer/SettingsPanel
+@onready var volume_slider: HSlider = $SettingsLayer/SettingsPanel/VolumeSliderControl/VolumeSlider
+@onready var volume_value_label: Label = $SettingsLayer/SettingsPanel/VolumeSliderControl/VolumeValue
+@onready var back_button: TouchScreenButton = $SettingsLayer/SettingsPanel/Back
 
 # User Profile
-@onready var view_user_profile_button: Button = $SettingsPanel/ViewUserProfile
-@onready var user_section: Panel = $SettingsPanel/UserSection
-@onready var user_section_back_button: TouchScreenButton = $SettingsPanel/UserSection/Back
+@onready var view_user_profile_button: Button = $SettingsLayer/SettingsPanel/ViewUserProfile
+@onready var user_section: Panel = $SettingsLayer/SettingsPanel/UserSection
+@onready var user_section_back_button: TouchScreenButton = $SettingsLayer/SettingsPanel/UserSection/Back
 
 # User Auth
-@onready var sign_in_button: Button = $SettingsPanel/UserSection/AuthButtons/SignInButton
-@onready var guest_button: Button = $SettingsPanel/UserSection/AuthButtons/GuestButton
-@onready var link_google_button: Button = $SettingsPanel/UserSection/AuthButtons/LinkGoogleButton
+@onready var sign_in_button: Button = $SettingsLayer/SettingsPanel/UserSection/AuthButtons/SignInButton
+@onready var guest_button: Button = $SettingsLayer/SettingsPanel/UserSection/AuthButtons/GuestButton
+@onready var link_google_button: Button = $SettingsLayer/SettingsPanel/UserSection/AuthButtons/LinkGoogleButton
 
 # Sidekick Join Popup nodes
-@onready var sidekick_popup: Panel = $SidekickPopup
-@onready var code_input: LineEdit = $SidekickPopup/VBoxContainer/LineEdit
-@onready var join_code_ok_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/JoinButton
-@onready var join_code_cancel_button: Button = $SidekickPopup/VBoxContainer/HBoxContainer/CancelButton
+@onready var sidekick_popup: Panel = $PopupLayer/SidekickPopup
+@onready var code_input: LineEdit = $PopupLayer/SidekickPopup/VBoxContainer/LineEdit
+@onready var join_code_ok_button: Button = $PopupLayer/SidekickPopup/VBoxContainer/HBoxContainer/JoinButton
+@onready var join_code_cancel_button: Button = $PopupLayer/SidekickPopup/VBoxContainer/HBoxContainer/CancelButton
+
+# Input blocker to prevent clicking through panels
+@onready var input_blocker: ColorRect = $InputBlockerLayer/InputBlocker
 
 var is_joining: bool = false
 
 # Settings keys
 const SETTINGS_FILE = "user://settings.json"
+
+
+## Toggle input blocker visibility to prevent clicking through panels
+func _set_input_blocked(blocked: bool) -> void:
+	if input_blocker:
+		input_blocker.visible = blocked
 
 
 func _ready():
@@ -133,6 +142,8 @@ func _connect_texture_button(button: TextureButton, callback: Callable):
 
 func _on_settings_pressed() -> void:
 	print("[MainMenu] Opening settings panel")
+	# Block input to underlying elements
+	_set_input_blocked(true)
 	if settings_panel:
 		settings_panel.visible = true
 		# Hide user section when opening settings
@@ -155,6 +166,8 @@ func _on_back_settings_pressed() -> void:
 	print("[MainMenu] Closing settings panel")
 	if settings_panel:
 		settings_panel.visible = false
+	# Unblock input when settings is closed
+	_set_input_blocked(false)
 	# Show settings button again
 	if settings_control:
 		settings_control.show_button()
@@ -240,6 +253,8 @@ func _on_host_pressed() -> void:
 
 func _on_join_pressed() -> void:
 	print("[MainMenu] Opening join popup")
+	# Block input to underlying elements
+	_set_input_blocked(true)
 	if sidekick_popup:
 		sidekick_popup.visible = true
 		if code_input:
@@ -257,14 +272,17 @@ func _on_join_code_ok_pressed() -> void:
 		_show_join_error("Please enter 6-character code!")
 		return
 	
-	# Hide popup and process the code
+	# Hide popup and unblock input
 	sidekick_popup.visible = false
+	_set_input_blocked(false)
 	_process_join_code(code)
 
 
 func _on_join_code_cancel_pressed() -> void:
 	print("[MainMenu] Join cancelled")
 	sidekick_popup.visible = false
+	# Unblock input when popup is closed
+	_set_input_blocked(false)
 
 
 func _on_direct_ip_pressed() -> void:
