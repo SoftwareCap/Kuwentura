@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://c3tjujm7q6nas"]
 
-[ext_resource type="Texture2D" uid="uid://deemtl33cho1y" path="res://assets/sprites/players/detectiveDialogueBox.png" id="1_ggoq5"]
+[ext_resource type="Texture2D" uid="uid://deemtl33cho1y" path="res://assets/sprites/players/DetectiveDialogueBox.png" id="1_ggoq5"]
 [ext_resource type="Script" uid="uid://cgrhmpox3p676" path="res://scenes/ui/dialogue_box.gd" id="1_nfm5p"]
-[ext_resource type="Texture2D" uid="uid://5duvlotnm43p" path="res://assets/sprites/players/sidekickDialogueBox.png" id="2_nfm5p"]
+[ext_resource type="Texture2D" uid="uid://5duvlotnm43p" path="res://assets/sprites/players/SidekickDialogueBox.png" id="2_nfm5p"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="4_bjuha"]
 
 [node name="DialogueBox" type="CanvasLayer"]
@@ -21,27 +21,27 @@ grow_vertical = 0
 
 [node name="DetectiveDialogue" type="TextureRect" parent="Panel"]
 layout_mode = 0
-offset_left = -1.0
+offset_left = 36.0
 offset_top = -287.0
-offset_right = 1246.0
+offset_right = 1304.0
 offset_bottom = 399.0
 texture = ExtResource("1_ggoq5")
 expand_mode = 1
 
 [node name="SidekickDialogue" type="TextureRect" parent="Panel"]
 layout_mode = 0
-offset_left = 1.0
+offset_left = 38.0
 offset_top = -284.0
-offset_right = 1244.0
+offset_right = 1306.0
 offset_bottom = 399.0
 texture = ExtResource("2_nfm5p")
 expand_mode = 1
 
 [node name="Text" type="Label" parent="Panel"]
 layout_mode = 0
-offset_left = 226.0
+offset_left = 260.0
 offset_top = 275.0
-offset_right = 1103.0
+offset_right = 1156.0
 offset_bottom = 334.0
 theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
 theme_override_fonts/font = ExtResource("4_bjuha")
