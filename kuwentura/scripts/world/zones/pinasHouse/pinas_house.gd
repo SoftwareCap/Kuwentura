@@ -173,9 +173,9 @@ var _shadow_tex := {
 }
 
 var _reveal_tex := {
-	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal_Ladle.png"),
-	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal_Pan.png"),
-	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/Reveal_Pot.png"),
+	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/reveal_Ladle.png"),
+	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/reveal_Pan.png"),
+	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/reveal_Pot.png"),
 }
 
 var _aswang_window_frames: Array[Texture2D] = [
@@ -1250,3 +1250,10 @@ func rpc_begin_briefcase_store_sequence() -> void:
 		briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
 		briefcase_reveal_sprite.z_index = 100
 		print("[Briefcase] Showing briefcase reveal sprite")
+
+@rpc("any_peer", "call_local", "reliable")
+func rpc_play_tools_done_dialogue() -> void:
+	_play_tools_done_dialogue_local()
+
+func _play_tools_done_dialogue_local() -> void:
+	DialogueSystems.play("pinas_house_tools_done", DialogueLibraries.PINAS_HOUSE_TOOLS_DONE)
