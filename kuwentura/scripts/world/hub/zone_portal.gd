@@ -47,7 +47,6 @@ func _ready() -> void:
 		_base_button_text = _enter_button.text
 		_enter_button.visible = false  # Start invisible
 		_enter_button.pressed.connect(_on_enter_button_pressed)
-		print("[ZonePortal] ", zone_name, " found button: ", _enter_button.name)
 	else:
 		push_warning("[ZonePortal] " + zone_name + " could not find enter button!")
 
@@ -186,6 +185,13 @@ func _report_exited(peer_id: int):
 func _update_button_visibility():
 	# Safety check - don't sync if scene is changing
 	if not is_inside_tree() or multiplayer == null or multiplayer.multiplayer_peer == null:
+		return
+	
+	# Check if zone is already completed - if so, don't show button
+	var is_completed = GameState.zones_status.get(zone_name, GameState.ZoneStatus.AVAILABLE) == GameState.ZoneStatus.COMPLETED
+	if is_completed:
+		if _enter_button:
+			_enter_button.visible = false
 		return
 	
 	var both_present = _detective_present and _sidekick_present
