@@ -1,13 +1,24 @@
-[gd_scene load_steps=13 format=3 uid="uid://backyardpath"]
+[gd_scene load_steps=33 format=3 uid="uid://backyardpath"]
 
 [ext_resource type="Script" uid="uid://dfs4agyqe4qk4" path="res://scripts/world/zones/backyardPath/backyard_path.gd" id="1_backyardpath"]
 [ext_resource type="Texture2D" uid="uid://p1tc8ablyx3s" path="res://assets/sprites/places/backyardBackground.png" id="2_krb5t"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 [ext_resource type="Texture2D" uid="uid://c3sfa1s0d5uam" path="res://assets/sprites/zoneObjects/backyardPathObjects/pinaGhost.png" id="5_no1tq"]
-[ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/inventoryBoard.png" id="6_2y8sp"]
+[ext_resource type="Texture2D" uid="uid://5hqcc5yhq64a" path="res://assets/buttons/rightArrow.png" id="6_u25mc"]
+[ext_resource type="Texture2D" uid="uid://bpq0k85yh5e0p" path="res://assets/sprites/zoneObjects/backyardPathObjects/deductionboard.png" id="6_ura6l"]
+[ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="9_s7hv4"]
+[ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="10_4xpvc"]
 [ext_resource type="Texture2D" uid="uid://tthjtt0yqrf6" path="res://assets/sprites/zoneObjects/backyardPathObjects/pineapplePlant.png" id="10_f85bs"]
+[ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="11_fmpb3"]
 [ext_resource type="Texture2D" uid="uid://dmjne63nn4iut" path="res://assets/sprites/zoneObjects/backyardPathObjects/pineappleFruit.png" id="11_ura6l"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="11_vm1ij"]
+[ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="12_fw11r"]
+[ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="13_y7aiq"]
+[ext_resource type="Texture2D" uid="uid://b2ryp42vnc38n" path="res://assets/sprites/players/briefcaseOpen.png" id="14_ul8jb"]
+[ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="15_0c5pu"]
+[ext_resource type="Texture2D" uid="uid://cuhne1u8q0p3s" path="res://assets/sprites/clues/pineappleClue.png" id="17_s7hv4"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="17_va6t2"]
+[ext_resource type="Texture2D" uid="uid://c7f1pyernjqux" path="res://assets/sprites/zoneObjects/pinasHouseObjects/PinasBriefcase.png" id="18_3ee1h"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_krb5t"]
 bg_color = Color(0.360784, 0.215686, 0.180392, 1)
@@ -41,6 +52,76 @@ shadow_offset = Vector2(0, 4)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vm1ij"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cslgv"]
+bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.65178686, 0.44065732, 0.2680916, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_sk177"]
+color = Color(1, 1, 1, 1)
+thickness = 20
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_k1mle"]
+color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+thickness = 20
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_6qa7e"]
+texture = ExtResource("13_y7aiq")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bb53s"]
+texture = ExtResource("14_ul8jb")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_on1j4"]
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3lfn3"]
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m8y0n"]
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lieey"]
+
 [node name="BackyardPath" type="Node2D"]
 script = ExtResource("1_backyardpath")
 
@@ -49,8 +130,8 @@ position = Vector2(6.1035156e-05, 6.1035156e-05)
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="BackyardBackground" type="Sprite2D" parent="BackgroundLayer"]
-position = Vector2(698.49994, 353.49997)
-scale = Vector2(0.7338542, 0.66759264)
+position = Vector2(732, 353.49997)
+scale = Vector2(0.7687501, 0.66759264)
 texture = ExtResource("2_krb5t")
 
 [node name="RoleLayer" type="CanvasLayer" parent="."]
@@ -73,7 +154,7 @@ mouse_filter = 2
 metadata/_edit_use_anchors_ = true
 
 [node name="Pina" type="TextureRect" parent="RoleLayer/Control/DetectiveOverlays"]
-modulate = Color(1, 1, 1, 0.56078434)
+modulate = Color(0.25490198, 0.38431373, 0.48235294, 0.9647059)
 layout_mode = 0
 offset_left = 452.0
 offset_top = 157.0
@@ -82,6 +163,17 @@ offset_bottom = 548.0
 texture = ExtResource("5_no1tq")
 expand_mode = 1
 metadata/_edit_use_anchors_ = true
+
+[node name="PinasHeight" type="Label" parent="RoleLayer/Control/DetectiveOverlays"]
+layout_mode = 0
+offset_left = 618.0
+offset_top = 130.0
+offset_right = 763.0
+offset_bottom = 162.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 25
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="SidekickOverlays" type="Control" parent="RoleLayer/Control"]
 anchors_preset = 0
@@ -110,52 +202,164 @@ texture = ExtResource("11_ura6l")
 expand_mode = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="BoardTapButton" type="TextureButton" parent="RoleLayer/Control"]
+[node name="PlantsHeight" type="Label" parent="RoleLayer/Control/SidekickOverlays"]
 layout_mode = 0
+offset_left = 473.0
+offset_top = 209.0
+offset_right = 618.0
+offset_bottom = 241.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 25
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BoardTapButton" type="TextureButton" parent="RoleLayer/Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.26682693
+anchor_top = 0.05421687
+anchor_right = 0.39182693
+anchor_bottom = 0.05421687
 offset_left = 421.0
 offset_top = 158.0
 offset_right = 768.0
 offset_bottom = 520.0
 metadata/_edit_use_anchors_ = true
 
-[node name="PuzzleBoard" type="CanvasLayer" parent="."]
+[node name="GuidanceArrow" type="Sprite2D" parent="RoleLayer/Control"]
+visible = false
+position = Vector2(1094, 79)
+scale = Vector2(0.27666667, 0.17333333)
+texture = ExtResource("6_u25mc")
 
-[node name="BoardSprite" type="Sprite2D" parent="PuzzleBoard"]
-position = Vector2(220, 463)
-scale = Vector2(0.2084961, 0.18139647)
-texture = ExtResource("6_2y8sp")
+[node name="FruitTapButton" type="TextureButton" parent="RoleLayer/Control"]
+visible = false
+layout_mode = 0
+offset_left = 437.0
+offset_top = 231.0
+offset_right = 655.0
+offset_bottom = 512.0
+disabled = true
 
-[node name="HeightLabel" type="Label" parent="PuzzleBoard"]
+[node name="PineapplePlant" type="TextureRect" parent="RoleLayer/Control"]
+visible = false
+layout_mode = 0
+offset_left = 414.0
+offset_top = 307.0
+offset_right = 727.0
+offset_bottom = 568.0
+mouse_filter = 2
+texture = ExtResource("10_f85bs")
+expand_mode = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Pineapple" type="Sprite2D" parent="RoleLayer/Control"]
+visible = false
+position = Vector2(546.5, 355.5)
+scale = Vector2(0.14697264, 0.13916017)
+texture = ExtResource("17_s7hv4")
+
+[node name="Deduction Board" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="Deduction Board"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1261.0
+offset_bottom = 655.0
+mouse_filter = 2
+
+[node name="BoardSprite" type="Sprite2D" parent="Deduction Board/Control"]
+position = Vector2(1037, 408.00003)
+scale = Vector2(0.32031247, 0.30639648)
+texture = ExtResource("6_ura6l")
+
+[node name="Pina" type="Label" parent="Deduction Board/Control"]
+layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -482.0
-offset_top = 93.0
-offset_right = -347.0
-offset_bottom = 118.5
+offset_left = 471.5
+offset_top = 50.25003
+offset_right = 559.5
+offset_bottom = 78.25003
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="LineEdit" type="LineEdit" parent="PuzzleBoard"]
-offset_left = 176.0
-offset_top = 440.0
-offset_right = 244.5625
-offset_bottom = 471.0
+theme_override_colors/font_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 28
+text = "PINA"
+horizontal_alignment = 1
+vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="SubmitButton" type="Button" parent="PuzzleBoard"]
-offset_left = 151.0
-offset_top = 495.0
-offset_right = 274.0
-offset_bottom = 537.0
+[node name="Plant" type="Label" parent="Deduction Board/Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 260.5
+offset_top = 40.25
+offset_right = 355.5
+offset_bottom = 68.25
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 28
+text = "PLANT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlantHeight" type="Label" parent="Deduction Board/Control"]
+layout_mode = 0
+offset_left = 839.0
+offset_top = 463.0
+offset_right = 1010.0
+offset_bottom = 522.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="XInput" type="LineEdit" parent="Deduction Board/Control"]
+layout_mode = 0
+offset_left = 1085.0
+offset_top = 469.0
+offset_right = 1265.0
+offset_bottom = 526.0
+theme_override_colors/font_color = Color(0.9650678, 0.9650869, 0.9614435, 1)
+theme_override_colors/font_selected_color = Color(0.04755766, 0.047557645, 0.047557645, 1)
+theme_override_colors/caret_color = Color(0.014275194, 0.014275219, 0.014275289, 1)
+theme_override_colors/selection_color = Color(0.96035105, 0.96035105, 0.96035093, 1)
+theme_override_colors/clear_button_color = Color(0.021434566, 0.021434668, 0.021434598, 1)
+theme_override_colors/clear_button_color_pressed = Color(0.017732391, 0.017732391, 0.01773239, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 35
+placeholder_text = "Answer"
+alignment = 1
+expand_to_text_length = true
+flat = true
+
+[node name="SubmitButton" type="Button" parent="Deduction Board/Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.05564516
+anchor_right = 0.07822581
+anchor_bottom = 0.024691358
+offset_left = 967.1686
+offset_top = 563.0
+offset_right = 1090.1686
+offset_bottom = 605.0
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_krb5t")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_2y8sp")
 theme_override_styles/hover = SubResource("StyleBoxFlat_h50sr")
@@ -163,16 +367,18 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_vm1ij")
 text = "Submit"
 metadata/_edit_use_anchors_ = true
 
-[node name="FeedbackLabel" type="Label" parent="PuzzleBoard"]
+[node name="FeedbackLabel" type="Label" parent="Deduction Board/Control"]
+layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -20.0
-offset_right = 20.0
+offset_left = -30.5
+offset_right = 9.5
 offset_bottom = 23.0
 grow_horizontal = 2
 
 [node name="FogOverlay" type="ColorRect" parent="."]
+visible = false
 modulate = Color(1, 1, 1, 0)
 anchors_preset = 8
 anchor_left = 0.5
@@ -185,11 +391,11 @@ offset_right = 1433.0
 offset_bottom = 740.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.008202022, 0.008202025, 0.008202025, 1)
 
-[node name="InsideZoneControl" parent="." instance=ExtResource("11_vm1ij")]
-
 [node name="BackButton" type="Button" parent="."]
+visible = false
 offset_left = 50.0
 offset_top = 50.0
 offset_right = 300.0
@@ -198,5 +404,476 @@ theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 32
 text = "← Back to Forest"
 metadata/_edit_use_anchors_ = true
+
+[node name="InsideZoneControl" parent="." instance=ExtResource("11_vm1ij")]
+
+[node name="PauseCanvasLayer" type="CanvasLayer" parent="."]
+process_mode = 3
+layer = 110
+
+[node name="InGamePausePanel" type="Panel" parent="PauseCanvasLayer"]
+visible = false
+top_level = true
+z_index = 10
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -442.25
+offset_top = -294.0
+offset_right = 442.25
+offset_bottom = 294.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_cslgv")
+
+[node name="TitleLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -241.0
+offset_top = 18.0
+offset_right = 240.0
+offset_bottom = 127.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 70
+text = "Game Paused!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Separator" type="Line2D" parent="PauseCanvasLayer/InGamePausePanel"]
+position = Vector2(0.10900879, -58)
+scale = Vector2(0.73165876, 1)
+points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+width = 2.0
+default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+
+[node name="Resume_PlayButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 57.25
+offset_top = -107.0
+offset_right = 502.25
+offset_bottom = 38.0
+grow_vertical = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("9_s7hv4")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/Resume_PlayButton"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -286.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 40
+text = "Resume Game"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OptionButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -354.25
+offset_top = -107.0
+offset_right = -61.25
+offset_bottom = 38.0
+grow_horizontal = 0
+grow_vertical = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("10_4xpvc")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionButton"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -128.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 40
+text = "Option"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ExitButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -247.5
+offset_top = -209.0
+offset_right = 247.5
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_vertical = 3
+texture_normal = ExtResource("11_fmpb3")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/ExitButton"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -336.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 40
+text = "Exit to Main Menu"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OptionSubPanel" type="Panel" parent="PauseCanvasLayer/InGamePausePanel"]
+visible = false
+layout_mode = 0
+offset_right = 884.5
+offset_bottom = 588.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_cslgv")
+
+[node name="OptionLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -94.5
+offset_top = 18.0
+offset_right = 94.5
+offset_bottom = 127.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 55
+text = "Option:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackToPrevious" type="TouchScreenButton" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+position = Vector2(20, 10)
+scale = Vector2(0.3, 0.3)
+texture_normal = ExtResource("12_fw11r")
+
+[node name="Separator2" type="Line2D" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+position = Vector2(0.10900879, -58)
+scale = Vector2(0.73165876, 1)
+points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+width = 2.0
+default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+
+[node name="VolumeSliderControl" type="HBoxContainer" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -388.40625
+offset_top = -103.0
+offset_right = 388.40625
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 30
+
+[node name="VolumeLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 40
+text = "Music Volume:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VolumeSlider" type="HSlider" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/slider = SubResource("StyleBoxLine_sk177")
+theme_override_styles/grabber_area = SubResource("StyleBoxLine_k1mle")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_k1mle")
+value = 80.0
+
+[node name="VolumeValue" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "80%"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SidekickLayer" type="CanvasLayer" parent="."]
+
+[node name="Ledger" type="Panel" parent="SidekickLayer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -393.0
+offset_top = -331.0
+offset_right = 519.0
+offset_bottom = 501.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_6qa7e")
+
+[node name="Control" type="Control" parent="SidekickLayer/Ledger"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LedgerTitle" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 200.0
+offset_right = 431.0
+offset_bottom = 251.0
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 23
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 284.0
+offset_right = 446.0
+offset_bottom = 482.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+
+[node name="LedgerLeftHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 173.0
+offset_top = 270.0
+offset_right = 433.0
+offset_bottom = 330.0
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerLeftBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 339.0
+offset_right = 446.0
+offset_bottom = 482.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="LedgerRightHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 478.0
+offset_top = 208.0
+offset_right = 753.0
+offset_bottom = 276.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerRightBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 478.0
+offset_top = 274.0
+offset_right = 739.0
+offset_bottom = 492.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="Briefcase" type="Panel" parent="SidekickLayer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -247.0
+offset_top = -297.0
+offset_right = 247.0
+offset_bottom = 197.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_bb53s")
+
+[node name="RewardLayer" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="DarkOverlay" type="ColorRect" parent="RewardLayer"]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 158.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.011087579, 0.011087578, 0.01108758, 1)
+
+[node name="Sparkle" type="Sprite2D" parent="RewardLayer"]
+position = Vector2(744.75, 385.5)
+scale = Vector2(0.5719907, 0.5358025)
+texture = ExtResource("15_0c5pu")
+
+[node name="ClueSprite" type="Sprite2D" parent="RewardLayer"]
+position = Vector2(707.2739, 291.4307)
+scale = Vector2(0.2160878, 0.16057684)
+texture = ExtResource("17_s7hv4")
+
+[node name="RewardBanner" type="Sprite2D" parent="RewardLayer"]
+position = Vector2(732.5, 41.750008)
+scale = Vector2(0.27175924, 0.20864198)
+texture = ExtResource("17_va6t2")
+
+[node name="BannerLabel" type="Label" parent="RewardLayer/RewardBanner"]
+offset_left = -768.12854
+offset_top = 325.50003
+offset_right = 646.8447
+offset_bottom = 419.43207
+theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 45
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="TapInstruction" type="Label" parent="RewardLayer"]
+offset_left = 483.0
+offset_top = 416.0
+offset_right = 937.0
+offset_bottom = 458.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+text = "Tap anywhere to continue."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RewardPanel" type="Sprite2D" parent="RewardLayer"]
+position = Vector2(730, 325.50003)
+scale = Vector2(0.587963, 0.5390947)
+texture = ExtResource("17_va6t2")
+
+[node name="RewardText" type="Label" parent="RewardLayer/RewardPanel"]
+offset_left = -818.07886
+offset_top = 316.271
+offset_right = 714.3307
+offset_bottom = 412.72888
+theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 35
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="CollectButton" type="Button" parent="RewardLayer"]
+process_mode = 3
+visible = false
+offset_left = 595.9999
+offset_top = 499.00003
+offset_right = 813.9999
+offset_bottom = 552.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_on1j4")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_3lfn3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_m8y0n")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_lieey")
+text = "Collect Clue"
+
+[node name="TapCatcher" type="Button" parent="RewardLayer"]
+self_modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 74.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+action_mode = 0
+flat = true
+
+[node name="BriefcaseRevealSprite" type="TextureRect" parent="RewardLayer"]
+visible = false
+offset_left = 326.0
+offset_top = 62.0
+offset_right = 2246.0
+offset_bottom = 1142.0
+scale = Vector2(0.3947917, 0.4273148)
+mouse_filter = 2
+texture = ExtResource("18_3ee1h")
+
+[node name="NotificationUI" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="Panel" parent="NotificationUI"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -339.0
+offset_top = 15.0
+offset_right = 502.0
+offset_bottom = 55.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="NotificationUI/Panel"]
+layout_mode = 0
+offset_right = 823.0
+offset_bottom = 40.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
