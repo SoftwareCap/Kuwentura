@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=4 uid="uid://c65bu18udl64v"]
+[gd_scene load_steps=37 format=4 uid="uid://c65bu18udl64v"]
 
 [ext_resource type="Texture2D" uid="uid://k60h4yhhde0x" path="res://assets/backgrounds/forest.png" id="2_87r7r"]
 [ext_resource type="Texture2D" uid="uid://d06a48u2atl4o" path="res://assets/sprites/places/pinasHouseZone.png" id="2_anhpr"]
@@ -10,9 +10,12 @@
 [ext_resource type="Script" uid="uid://dhq7o8y147g37" path="res://scripts/world/hub/forest_hub.gd" id="6_forest_hub"]
 [ext_resource type="PackedScene" uid="uid://i2gpufiq0ql0" path="res://scenes/controls/TouchControls.tscn" id="7_6nmbo"]
 [ext_resource type="Texture2D" uid="uid://c27biqcyrcmo8" path="res://assets/sprites/places/backyardPathZone.png" id="7_i1yoq"]
+[ext_resource type="Script" uid="uid://mmcj3rgi3q85" path="res://scripts/world/hub/finish_zone_indicator.gd" id="7_indicator"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="8_ggw0p"]
+[ext_resource type="Texture2D" uid="uid://vhtyew110bgu" path="res://assets/sprites/zoneObjects/woodenSignage.png" id="9_rbch1"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="11_i1yoq"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="12_aispg"]
+[ext_resource type="Texture2D" uid="uid://cuhne1u8q0p3s" path="res://assets/sprites/clues/pineappleClue.png" id="12_hdutc"]
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="13_cpdo7"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="14_wp30c"]
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="15_cpdo7"]
@@ -859,6 +862,8 @@ physics_layer_0/collision_layer = 1
 physics_layer_0/collision_mask = 2
 sources/0 = SubResource("TileSetAtlasSource_4f0r4")
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rbch1"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4f0r4"]
 bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
 border_width_left = 2
@@ -884,8 +889,6 @@ texture = ExtResource("15_cpdo7")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_t6pvo"]
 texture = ExtResource("16_wp30c")
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rbch1"]
 
 [node name="ForestHub" type="Node2D"]
 script = ExtResource("6_forest_hub")
@@ -1201,6 +1204,32 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_t6pvo")
 action_mode = 0
 text = "Enter Abandoned House"
 
+[node name="Signage" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Signage"]
+position = Vector2(4599.75, 473.75003)
+scale = Vector2(0.4383331, 0.4383331)
+texture = ExtResource("9_rbch1")
+
+[node name="Label" type="Label" parent="Signage"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 4544.0
+offset_top = 417.0
+offset_right = 4652.0
+offset_bottom = 474.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_constants/line_spacing = -1
+theme_override_font_sizes/font_size = 9
+text = "Gather all 5 clues\nfrom the zones…\nbut beware,\nthe story is not yet done."
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Terrain" type="TileMapLayer" parent="."]
 z_index = -1
 scale = Vector2(2, 2)
@@ -1221,6 +1250,126 @@ position = Vector2(201, 650)
 
 [node name="SidekickSpawnReturn" type="Marker2D" parent="SpawnPoints"]
 position = Vector2(0, 650)
+
+[node name="FinishZoneIndicator" type="Node2D" parent="."]
+script = ExtResource("7_indicator")
+
+[node name="PinasHouse" type="Panel" parent="FinishZoneIndicator"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 1689.0
+offset_top = 178.0
+offset_right = 1998.0
+offset_bottom = 458.75
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_rbch1")
+
+[node name="Sparkle" type="Sprite2D" parent="FinishZoneIndicator/PinasHouse"]
+position = Vector2(167.99988, 166)
+scale = Vector2(0.2066358, 0.20663582)
+texture = ExtResource("18_t6pvo")
+
+[node name="ClueSprite" type="Sprite2D" parent="FinishZoneIndicator/PinasHouse"]
+position = Vector2(154.00012, 132)
+scale = Vector2(0.062666684, 0.062666684)
+texture = ExtResource("19_hdutc")
+
+[node name="OldWell" type="Panel" parent="FinishZoneIndicator"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 2196.0
+offset_top = 178.0
+offset_right = 2505.0
+offset_bottom = 458.75
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_rbch1")
+
+[node name="Sparkle" type="Sprite2D" parent="FinishZoneIndicator/OldWell"]
+position = Vector2(167.99988, 166)
+scale = Vector2(0.2066358, 0.20663582)
+texture = ExtResource("18_t6pvo")
+
+[node name="ClueSprite" type="Sprite2D" parent="FinishZoneIndicator/OldWell"]
+position = Vector2(154.00012, 132)
+scale = Vector2(0.062666684, 0.062666684)
+
+[node name="Backyard" type="Panel" parent="FinishZoneIndicator"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 2640.0
+offset_top = 178.0
+offset_right = 2949.0
+offset_bottom = 458.75
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_rbch1")
+
+[node name="Sparkle" type="Sprite2D" parent="FinishZoneIndicator/Backyard"]
+position = Vector2(167.99988, 166)
+scale = Vector2(0.2066358, 0.20663582)
+texture = ExtResource("18_t6pvo")
+
+[node name="ClueSprite" type="Sprite2D" parent="FinishZoneIndicator/Backyard"]
+position = Vector2(154.00012, 132)
+scale = Vector2(0.062666684, 0.062666684)
+texture = ExtResource("12_hdutc")
+
+[node name="StorageHut" type="Panel" parent="FinishZoneIndicator"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 3352.0
+offset_top = 178.0
+offset_right = 3661.0
+offset_bottom = 458.75
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_rbch1")
+
+[node name="Sparkle" type="Sprite2D" parent="FinishZoneIndicator/StorageHut"]
+position = Vector2(167.99988, 166)
+scale = Vector2(0.2066358, 0.20663582)
+texture = ExtResource("18_t6pvo")
+
+[node name="ClueSprite" type="Sprite2D" parent="FinishZoneIndicator/StorageHut"]
+position = Vector2(154.00012, 132)
+scale = Vector2(0.062666684, 0.062666684)
+
+[node name="AbandonedHouse" type="Panel" parent="FinishZoneIndicator"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 4101.0
+offset_top = 178.0
+offset_right = 4410.0
+offset_bottom = 458.75
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_rbch1")
+
+[node name="Sparkle" type="Sprite2D" parent="FinishZoneIndicator/AbandonedHouse"]
+position = Vector2(167.99988, 166)
+scale = Vector2(0.2066358, 0.20663582)
+texture = ExtResource("18_t6pvo")
+
+[node name="ClueSprite" type="Sprite2D" parent="FinishZoneIndicator/AbandonedHouse"]
+position = Vector2(154.00012, 132)
+scale = Vector2(0.062666684, 0.062666684)
 
 [node name="TouchControls" parent="." instance=ExtResource("7_6nmbo")]
 
@@ -1495,33 +1644,6 @@ offset_bottom = 197.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_t6pvo")
-
-[node name="FinishedZoneIndicator" type="CanvasLayer" parent="."]
-visible = false
-
-[node name="Panel" type="Panel" parent="FinishedZoneIndicator"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 1070.0
-offset_top = -149.0
-offset_right = 1379.0
-offset_bottom = 131.75
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_rbch1")
-
-[node name="Sparkle" type="Sprite2D" parent="FinishedZoneIndicator/Panel"]
-position = Vector2(167.99988, 166)
-scale = Vector2(0.2066358, 0.20663582)
-texture = ExtResource("18_t6pvo")
-
-[node name="ClueSprite" type="Sprite2D" parent="FinishedZoneIndicator/Panel/Sparkle"]
-position = Vector2(-67.75098, -164.54065)
-scale = Vector2(0.30327117, 0.30327114)
-texture = ExtResource("19_hdutc")
 
 [connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/Resume_PlayButton" to="." method="_on_resume_play_button_pressed"]
 [connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/OptionButton" to="." method="_on_option_button_pressed"]

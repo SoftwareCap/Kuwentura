@@ -52,6 +52,18 @@ const DOOR_ANIMATION_DURATION: float = 0.5
 # Room code label (only visible to host, follows camera via CanvasLayer)
 @onready var room_code_label: Label = $HUDLayer/RoomCode
 
+# Finish zone indicator (shows completion status for each zone)
+@onready var finish_zone_indicator = $FinishZoneIndicator
+
+# Mapping of zone_name to indicator child node names
+const ZONE_INDICATOR_MAP: Dictionary = {
+	"pinas_house": "PinasHouse",
+	"old_well": "OldWell",
+	"backyard_path": "Backyard",
+	"storage_hut": "StorageHut",
+	"abandoned_house": "AbandonedHouse"
+}
+
 
 func _ready():
 	# Setup room code label - only visible to host
@@ -137,6 +149,13 @@ func _ready():
 	
 	# Connect to zone portal signals for door animations
 	_connect_portal_signals()
+	
+	# Setup zone completion indicators
+	_setup_zone_completion_indicators()
+	
+	# Connect to zone completion signal for dynamic updates
+	if not GameState.zone_completed.is_connected(_on_zone_completed):
+		GameState.zone_completed.connect(_on_zone_completed)
 	
 	# Spawn already connected peers (both server and client)
 	for peer_id in multiplayer.get_peers():
@@ -1070,3 +1089,77 @@ func _on_tree_exiting_hide_door() -> void:
 	"""Hide the open door when leaving the forest hub."""
 	if pinas_house_door:
 		pinas_house_door.visible = false
+
+
+# ============================================================================
+# ZONE COMPLETION INDICATORS
+# ============================================================================
+
+## Setup zone completion indicators - hide/show based on GameState
+func _setup_zone_completion_indicators() -> void:
+	if not finish_zone_indicator:
+		push_warning("[ForestHub] FinishZoneIndicator node not found!")
+		return
+	
+	print("[ForestHub] Setting up zone completion indicators...")
+	
+	# Set up portal positions for each indicator
+	for portal in portals.get_children():
+		var zone_name: String = portal.zone_name
+		
+		# Position indicator at portal location
+		if finish_zone_indicator.has_method("set_portal_position"):
+			finish_zone_indicator.set_portal_position(zone_name, portal.global_position)
+		
+		var indicator_child_name: String = ZONE_INDICATOR_MAP.get(zone_name, "")
+		if indicator_child_name.is_empty():
+			continue
+		
+		# Find the enter button for this portal
+		var enter_button = portal.get_node_or_null("EnterButton")
+		
+		# Check if zone is completed
+		var is_completed = GameState.zones_status.get(zone_name, GameState.ZoneStatus.AVAILABLE) == GameState.ZoneStatus.COMPLETED
+		
+		if is_completed:
+			# Zone completed: show indicator via script, disable enter button
+			if finish_zone_indicator.has_method("show_indicator"):
+				finish_zone_indicator.show_indicator(zone_name)
+			if enter_button:
+				enter_button.visible = false
+				enter_button.disabled = true
+			print("[ForestHub] Zone '", zone_name, "' is completed - indicator shown, enter disabled")
+		else:
+			# Zone not completed: hide indicator
+			if finish_zone_indicator.has_method("hide_indicator"):
+				finish_zone_indicator.hide_indicator(zone_name)
+			# Don't touch button - zone_portal.gd handles button visibility based on player presence
+
+
+## Called when a zone is completed (dynamic update)
+func _on_zone_completed(completed_zone: String) -> void:
+	print("[ForestHub] Zone completed signal received: ", completed_zone)
+	
+	var indicator_child_name: String = ZONE_INDICATOR_MAP.get(completed_zone, "")
+	if indicator_child_name.is_empty():
+		return
+	
+	# Find the portal and update it
+	for portal in portals.get_children():
+		if portal.zone_name == completed_zone:
+			# Position indicator at portal location if not already set
+			if finish_zone_indicator.has_method("set_portal_position"):
+				finish_zone_indicator.set_portal_position(completed_zone, portal.global_position)
+			
+			# Show the indicator via script
+			if finish_zone_indicator.has_method("show_indicator"):
+				finish_zone_indicator.show_indicator(completed_zone)
+			
+			# Disable the enter button
+			var enter_button = portal.get_node_or_null("EnterButton")
+			if enter_button:
+				enter_button.visible = false
+				enter_button.disabled = true
+			
+			print("[ForestHub] Updated completion indicator for: ", completed_zone)
+			break

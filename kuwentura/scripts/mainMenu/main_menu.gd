@@ -237,6 +237,10 @@ func _save_settings() -> void:
 func _on_host_pressed() -> void:
 	print("Hosting game...")
 	_show_status("Creating game...")
+	
+	# Reset all progress for new game session
+	print("[MainMenu] Resetting game progress for new session...")
+	GameState.reset_all_progress()
 
 	var result = NetworkManager.host_game()
 	
@@ -311,6 +315,10 @@ func _process_direct_ip(host_ip: String) -> void:
 		_show_status("Failed to connect to " + host_ip + ":\n" + result.get("error", "Unknown error"))
 		return
 	
+	# Reset all progress for new game session (fresh start)
+	print("[MainMenu] Resetting game progress for new session...")
+	GameState.reset_all_progress()
+	
 	# Wait a moment to check if host is already playing (rejoin scenario)
 	await get_tree().create_timer(0.5).timeout
 	
@@ -344,6 +352,10 @@ func _process_join_code(code: String) -> void:
 		return
 	
 	print("[MainMenu] Connected to host!")
+	
+	# Reset all progress for new game session (fresh start for sidekick)
+	print("[MainMenu] Resetting game progress for new session...")
+	GameState.reset_all_progress()
 	
 	# Wait a moment to check if host is already playing (rejoin scenario)
 	await get_tree().create_timer(0.5).timeout
