@@ -226,7 +226,6 @@ offset_bottom = 520.0
 metadata/_edit_use_anchors_ = true
 
 [node name="GuidanceArrow" type="Sprite2D" parent="RoleLayer/Control"]
-visible = false
 position = Vector2(1094, 79)
 scale = Vector2(0.27666667, 0.17333333)
 texture = ExtResource("6_u25mc")
@@ -750,7 +749,6 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_bb53s")
 
 [node name="RewardLayer" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="DarkOverlay" type="ColorRect" parent="RewardLayer"]
 modulate = Color(1, 1, 1, 0)
@@ -764,6 +762,7 @@ mouse_filter = 2
 color = Color(0.011087579, 0.011087578, 0.01108758, 1)
 
 [node name="Sparkle" type="Sprite2D" parent="RewardLayer"]
+visible = false
 position = Vector2(744.75, 385.5)
 scale = Vector2(0.5719907, 0.5358025)
 texture = ExtResource("15_0c5pu")
@@ -774,11 +773,13 @@ scale = Vector2(0.16943358, 0.14160155)
 texture = ExtResource("17_s7hv4")
 
 [node name="RewardBanner" type="Sprite2D" parent="RewardLayer"]
+visible = false
 position = Vector2(732.5, 41.750008)
 scale = Vector2(0.27175924, 0.20864198)
 texture = ExtResource("17_va6t2")
 
 [node name="BannerLabel" type="Label" parent="RewardLayer/RewardBanner"]
+visible = false
 offset_left = -768.12854
 offset_top = 325.50003
 offset_right = 646.8447
@@ -849,10 +850,10 @@ flat = true
 
 [node name="BriefcaseRevealSprite" type="TextureRect" parent="RewardLayer"]
 visible = false
-offset_left = 335.0
-offset_top = 117.0
-offset_right = 2260.066
-offset_bottom = 1172.428
+offset_left = 226.0
+offset_top = 35.0
+offset_right = 2510.7493
+offset_bottom = 1382.9524
 scale = Vector2(0.3947917, 0.4273148)
 mouse_filter = 2
 expand_mode = 1
@@ -871,7 +872,6 @@ grow_horizontal = 2
 mouse_filter = 2
 
 [node name="Label" type="Label" parent="NotificationUI/Panel"]
-visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 1.0

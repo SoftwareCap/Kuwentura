@@ -21,6 +21,13 @@ enum VisibilityMode {
 var _is_visible: bool = true
 var _original_scales: Dictionary = {}
 
+var _pause_enabled: bool = true
+var _ledger_enabled: bool = true
+var _briefcase_enabled: bool = true
+
+const NORMAL_COLOR := Color(1, 1, 1, 1)
+const DISABLED_COLOR := Color(0.65, 0.65, 0.65, 1.0)
+
 func _notification(what: int):
 	if what == NOTIFICATION_PREDELETE:
 		if pause_button and pause_button.pressed.is_connected(_on_pause_pressed):
@@ -121,16 +128,19 @@ func toggle_controls():
 		show_controls()
 
 func set_pause_enabled(enabled: bool):
+	_pause_enabled = enabled
 	if pause_button:
-		pause_button.visible = enabled
+		pause_button.modulate = NORMAL_COLOR
 
 func set_ledger_enabled(enabled: bool):
+	_ledger_enabled = enabled
 	if ledger_button:
-		ledger_button.visible = enabled
+		ledger_button.modulate = NORMAL_COLOR if enabled else DISABLED_COLOR
 
 func set_briefcase_enabled(enabled: bool):
+	_briefcase_enabled = enabled
 	if briefcase_button:
-		briefcase_button.visible = enabled
+		briefcase_button.modulate = NORMAL_COLOR if enabled else DISABLED_COLOR
 
 func set_sidekick_ui_visible(is_sidekick: bool):
 	if ledger_button:
@@ -142,22 +152,40 @@ func is_showing() -> bool:
 	return _is_visible
 
 func _on_pause_pressed() -> void:
+	if not _pause_enabled:
+		return
+
 	_animate_button_press(pause_button, true)
 	pause_pressed.emit()
 
 func _on_pause_released() -> void:
+	if not _pause_enabled:
+		return
+
 	_animate_button_press(pause_button, false)
 
 func _on_ledger_pressed() -> void:
+	if not _ledger_enabled:
+		return
+
 	_animate_button_press(ledger_button, true)
 	ledger_pressed.emit()
 
 func _on_ledger_released() -> void:
+	if not _ledger_enabled:
+		return
+
 	_animate_button_press(ledger_button, false)
 
 func _on_briefcase_pressed() -> void:
+	if not _briefcase_enabled:
+		return
+
 	_animate_button_press(briefcase_button, true)
 	briefcase_pressed.emit()
 
 func _on_briefcase_released() -> void:
+	if not _briefcase_enabled:
+		return
+
 	_animate_button_press(briefcase_button, false)
