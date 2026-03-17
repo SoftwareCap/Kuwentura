@@ -85,7 +85,7 @@ const FIRST_ATTACK_DELAY_SEC := 60
 @onready var sparkle = $RewardLayer/Sparkle
 @onready var collect_button = $RewardLayer/CollectButton
 @onready var dark_overlay = $RewardLayer/DarkOverlay
-@onready var briefcase_reveal_sprite: TextureRect = $RewardLayer/BriefcaseRevealSprite
+@onready var briefcase_reveal_sprite: TextureRect = get_node_or_null("RewardLayer/BriefcaseRevealSprite")
 
 @onready var banner_label: Label = $RewardLayer/RewardBanner/BannerLabel
 @onready var tap_instruction_label: Label = $RewardLayer/TapInstruction
@@ -249,6 +249,11 @@ func _ready() -> void:
 	
 	if is_instance_valid(briefcase_reveal_sprite):
 		briefcase_reveal_sprite.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+		
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.texture = null
+		briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
 	
 	_start_intro_dialogue_delayed()
 
@@ -677,21 +682,24 @@ func _on_collect_clue_pressed() -> void:
 
 	if is_instance_valid(collect_button):
 		collect_button.visible = false
+		collect_button.disabled = true
 
-	if multiplayer.has_multiplayer_peer():
-		if multiplayer.is_server():
-			_collect_clue_server()
-		else:
-			rpc_request_collect_clue.rpc_id(_SERVER_PEER_ID)
+	if not multiplayer.has_multiplayer_peer():
+		rpc_show_briefcase_reveal_then_finalize()
+		return
+
+	if multiplayer.is_server():
+		rpc_show_briefcase_reveal_then_finalize.rpc()
 	else:
-		_collect_clue_server()
+		rpc_request_collect_clue.rpc_id(_SERVER_PEER_ID)
 
 
 @rpc("any_peer", "reliable")
 func rpc_request_collect_clue() -> void:
 	if not multiplayer.is_server():
 		return
-	_collect_clue_server()
+
+	rpc_show_briefcase_reveal_then_finalize.rpc()
 
 func _collect_clue_server() -> void:
 	if multiplayer.has_multiplayer_peer():
@@ -1257,3 +1265,51 @@ func rpc_play_tools_done_dialogue() -> void:
 
 func _play_tools_done_dialogue_local() -> void:
 	DialogueSystems.play("pinas_house_tools_done", DialogueLibraries.PINAS_HOUSE_TOOLS_DONE)
+
+func _show_briefcase_reveal_local() -> void:
+	if not is_instance_valid(briefcase_reveal_sprite):
+		return
+
+	var reveal_texture: Texture2D = GameState.get_briefcase_texture("pinas_house_reveal")
+	briefcase_reveal_sprite.texture = reveal_texture
+	briefcase_reveal_sprite.visible = reveal_texture != null
+	briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_show_briefcase_reveal_then_finalize() -> void:
+	_show_briefcase_reveal_local()
+
+	if is_instance_valid(tap_instruction_label):
+		tap_instruction_label.visible = false
+		tap_instruction_label.text = ""
+
+	if is_instance_valid(tap_catcher):
+		tap_catcher.visible = false
+		tap_catcher.disabled = true
+
+	if is_instance_valid(reward_panel):
+		reward_panel.visible = false
+
+	if is_instance_valid(reward_text):
+		reward_text.text = ""
+
+	await get_tree().create_timer(1.5).timeout
+
+	if multiplayer.has_multiplayer_peer():
+		if multiplayer.is_server():
+			rpc_finalize_clue.rpc()
+	else:
+		rpc_finalize_clue()
+		
+@rpc("any_peer", "reliable", "call_local")
+func rpc_finalize_clue() -> void:
+	GameState.collect_clue("pinas_house")
+
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.texture = null
+
+	if is_instance_valid(reward_layer):
+		reward_layer.visible = false
+
+	_return_to_forest()
