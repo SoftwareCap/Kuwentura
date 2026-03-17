@@ -17,8 +17,8 @@
 [ext_resource type="Texture2D" uid="uid://b2ryp42vnc38n" path="res://assets/sprites/players/briefcaseOpen.png" id="14_ul8jb"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="15_0c5pu"]
 [ext_resource type="Texture2D" uid="uid://cuhne1u8q0p3s" path="res://assets/sprites/clues/pineappleClue.png" id="17_s7hv4"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="17_va6t2"]
-[ext_resource type="Texture2D" uid="uid://c7f1pyernjqux" path="res://assets/sprites/zoneObjects/pinasHouseObjects/PinasBriefcase.png" id="18_3ee1h"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="17_va6t2"]
+[ext_resource type="Texture2D" uid="uid://c7f1pyernjqux" path="res://assets/sprites/zoneObjects/pinasHouseObjects/pinasBriefcase.png" id="18_3ee1h"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_krb5t"]
 bg_color = Color(0.360784, 0.215686, 0.180392, 1)
@@ -275,17 +275,18 @@ texture = ExtResource("6_ura6l")
 
 [node name="Pina" type="Label" parent="Deduction Board/Control"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
+anchors_preset = -1
+anchor_left = 0.49762094
+anchor_top = 0.50038165
+anchor_right = 0.49762094
+anchor_bottom = 0.50038165
 offset_left = 471.5
 offset_top = 50.25003
 offset_right = 559.5
 offset_bottom = 78.25003
 grow_horizontal = 2
 grow_vertical = 2
+rotation = 0.05235988
 theme_override_colors/font_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 28
@@ -301,12 +302,13 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 260.5
-offset_top = 40.25
-offset_right = 355.5
-offset_bottom = 68.25
+offset_left = 258.49994
+offset_top = 40.49997
+offset_right = 353.49994
+offset_bottom = 68.49997
 grow_horizontal = 2
 grow_vertical = 2
+rotation = 0.05235988
 theme_override_colors/font_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 28
@@ -316,10 +318,11 @@ vertical_alignment = 1
 
 [node name="PlantHeight" type="Label" parent="Deduction Board/Control"]
 layout_mode = 0
-offset_left = 839.0
-offset_top = 463.0
-offset_right = 1010.0
-offset_bottom = 522.0
+offset_left = 838.0
+offset_top = 457.0
+offset_right = 1009.0
+offset_bottom = 516.0
+rotation = 0.05235988
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
@@ -327,10 +330,11 @@ vertical_alignment = 1
 
 [node name="XInput" type="LineEdit" parent="Deduction Board/Control"]
 layout_mode = 0
-offset_left = 1085.0
-offset_top = 469.0
-offset_right = 1265.0
-offset_bottom = 526.0
+offset_left = 1081.9999
+offset_top = 468.0
+offset_right = 1261.9999
+offset_bottom = 525.0
+rotation = 0.05235988
 theme_override_colors/font_color = Color(0.9650678, 0.9650869, 0.9614435, 1)
 theme_override_colors/font_selected_color = Color(0.04755766, 0.047557645, 0.047557645, 1)
 theme_override_colors/caret_color = Color(0.014275194, 0.014275219, 0.014275289, 1)
@@ -347,9 +351,10 @@ flat = true
 [node name="SubmitButton" type="Button" parent="Deduction Board/Control"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = -0.05564516
-anchor_right = 0.07822581
-anchor_bottom = 0.024691358
+anchor_left = -0.033440586
+anchor_top = -0.0122137405
+anchor_right = 0.040310405
+anchor_bottom = 0.00026389552
 offset_left = 967.1686
 offset_top = 563.0
 offset_right = 1090.1686
@@ -359,7 +364,7 @@ theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 
 theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 25
 theme_override_styles/normal = SubResource("StyleBoxFlat_krb5t")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_2y8sp")
 theme_override_styles/hover = SubResource("StyleBoxFlat_h50sr")
