@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bv2f8hf4rymwo"
-path="res://.godot/imported/Detective_idle.png-6b1c5eb2efa5184bce0867ad93ed7d80.ctex"
+uid="uid://by6kn8gmyhiou"
+path="res://.godot/imported/PineappleClue.png-faa227965cbbfd73cbe1c364930ecb49.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/Detective/Detective_idle.png"
-dest_files=["res://.godot/imported/Detective_idle.png-6b1c5eb2efa5184bce0867ad93ed7d80.ctex"]
+source_file="res://assets/sprites/zoneObjects/backyardPathObjects/PineappleClue.png"
+dest_files=["res://.godot/imported/PineappleClue.png-faa227965cbbfd73cbe1c364930ecb49.ctex"]
 
 [params]
 

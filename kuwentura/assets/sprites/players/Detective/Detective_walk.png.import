@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://3tw61wpai70"
-path="res://.godot/imported/detective_walk.png-8723304f6eb1ad511db1d4d8c2a9442c.ctex"
+path="res://.godot/imported/Detective_walk.png-f1e306d9f49b88daebfbac03a0f2917b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/detective/detective_walk.png"
-dest_files=["res://.godot/imported/detective_walk.png-8723304f6eb1ad511db1d4d8c2a9442c.ctex"]
+source_file="res://assets/sprites/players/Detective/Detective_walk.png"
+dest_files=["res://.godot/imported/Detective_walk.png-f1e306d9f49b88daebfbac03a0f2917b.ctex"]
 
 [params]
 

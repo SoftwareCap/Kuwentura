@@ -382,24 +382,30 @@ func get_puzzle_for_zone(zone_id: String) -> Dictionary:
 	var riddle_text: String = str(selected.get("riddle", ""))
 
 	return {
-		"zone_id": zone_id,
-		"type": zone_data.get("type", ""),
-		"name": zone_data.get("name", ""),
-		"theme": zone_data.get("theme", ""),
-		"narrative": zone_data.get("narrative", ""),
-		"host_view": zone_data.get("host_view", {}),
-		"sidekick_view": zone_data.get("sidekick_view", {}),
-		"ledger": zone_data.get("ledger", {}),
-		"reward": zone_data.get("reward", {}),
-		"consequence": zone_data.get("consequence", {}),
-		"variation_id": selected.get("id", 1),
-		"difficulty": difficulty,
-		"title": selected.get("title", "Hidden Number Note"),
-		"equation": equation_text,
-		"solution": solution_x,
-		"answer_format": answer_format,
-		"riddle": riddle_text
-	}
+	"zone_id": zone_id,
+	"type": zone_data.get("type", ""),
+	"name": zone_data.get("name", ""),
+	"theme": zone_data.get("theme", ""),
+	"narrative": zone_data.get("narrative", ""),
+	"host_view": zone_data.get("host_view", {}),
+	"sidekick_view": zone_data.get("sidekick_view", {}),
+	"ledger": zone_data.get("ledger", {}),
+	"reward": zone_data.get("reward", {}),
+	"consequence": zone_data.get("consequence", {}),
+
+	"variation_id": selected.get("id", 1),
+
+	# IMPORTANT — these are the values BackyardPath needs
+	"spirit_height_cm": selected.get("spirit_height_cm", 0),
+	"plant_height_dali": selected.get("plant_height_dali", 0),
+
+	"difficulty": difficulty,
+	"title": selected.get("title", "Hidden Number Note"),
+	"equation": equation_text,
+	"solution": solution_x,
+	"answer_format": answer_format,
+	"riddle": riddle_text
+}
 
 
 func _generate_conversion_puzzle(zone_id: String, _seed: int) -> Dictionary:

@@ -31,21 +31,21 @@ passby_press = true
 action = "game_pause"
 
 [node name="Ledger" type="TouchScreenButton" parent="."]
-position = Vector2(1266.9999, 189)
+position = Vector2(1157, -11.000001)
 scale = Vector2(0.06, 0.06)
 texture_normal = ExtResource("3_dfxfg")
 shape = SubResource("RectangleShape2D_3mgdf")
 passby_press = true
 
 [node name="Briefcase" type="TouchScreenButton" parent="."]
-position = Vector2(1265, 276)
+position = Vector2(1261, 87)
 scale = Vector2(0.06, 0.06)
 texture_normal = ExtResource("4_80khv")
 shape = SubResource("RectangleShape2D_lg2p8")
 passby_press = true
 
 [node name="Map" type="TouchScreenButton" parent="."]
-position = Vector2(1285.9999, 118)
+position = Vector2(10, 10)
 scale = Vector2(0.04, 0.04)
 texture_normal = ExtResource("5_nynux")
 shape = SubResource("RectangleShape2D_tdrpu")
