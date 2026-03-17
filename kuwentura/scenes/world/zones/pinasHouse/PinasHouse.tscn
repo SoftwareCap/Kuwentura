@@ -1,4 +1,4 @@
-[gd_scene load_steps=80 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=79 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://miy70k8n04ul" path="res://assets/sprites/places/pinasHouseBackground.png" id="2_vt60f"]
@@ -38,7 +38,6 @@
 [ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="36_u6sy3"]
 [ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/clues/ladleClue.png" id="37_dcipd"]
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="39_0s51p"]
-[ext_resource type="Texture2D" uid="uid://c7f1pyernjqux" path="res://assets/sprites/zoneObjects/pinasHouseObjects/PinasBriefcase.png" id="39_cyexm"]
 [ext_resource type="Texture2D" uid="uid://b2ryp42vnc38n" path="res://assets/sprites/players/briefcaseOpen.png" id="40_cyexm"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_btbyq"]
@@ -1178,13 +1177,12 @@ flat = true
 
 [node name="BriefcaseRevealSprite" type="TextureRect" parent="RewardLayer"]
 visible = false
-offset_left = 326.0
-offset_top = 62.0
-offset_right = 2246.0
-offset_bottom = 1142.0
+offset_left = 315.0
+offset_top = 87.0
+offset_right = 2257.7966
+offset_bottom = 1230.1853
 scale = Vector2(0.3947917, 0.4273148)
 mouse_filter = 2
-texture = ExtResource("39_cyexm")
 
 [node name="NotificationUI" type="CanvasLayer" parent="."]
 

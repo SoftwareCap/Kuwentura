@@ -20,6 +20,7 @@ signal data_synced
 signal costume_changed(role: String, costume_id: String)
 signal costume_confirmed(role: String, confirmed: bool)
 signal save_triggered(source: String)
+signal briefcase_updated
 
 enum Role { NONE, DETECTIVE, SIDEKICK }
 enum ZoneStatus { LOCKED, AVAILABLE, COMPLETED }
@@ -125,6 +126,24 @@ const COSTUMES: Dictionary = {
 	]
 }
 
+const CLUE_PINAS_HOUSE := "pinas_house"
+const CLUE_BACKYARD_PATH := "backyard_path"
+
+const BRIEFCASE_ASSETS := {
+	"no_clue": "res://assets/briefcase/NoClue.png",
+
+	"ladle_first_reveal": "res://assets/briefcase/LadleFirstReveal.png",
+	"ladle_first_global": "res://assets/briefcase/LadleFirstGlobal.png",
+
+	"pineapple_first_reveal": "res://assets/briefcase/PineappleFirstReveal.png",
+	"pineapple_first_global": "res://assets/briefcase/PineappleFirstGlobal.png",
+
+	"pineapple_with_ladle_reveal": "res://assets/briefcase/PineappleWithLadleReveal.png",
+	"ladle_with_pineapple_reveal": "res://assets/briefcase/LadleWithPineappleReveal.png",
+
+	"ladle_and_pineapple_global": "res://assets/briefcase/LadleAndPineappleGlobal.png"
+}
+
 # Current selections (persisted through game session)
 var selected_costumes: Dictionary = {
 	"detective": "default",
@@ -224,6 +243,7 @@ func collect_clue(zone_id: String) -> bool:
 	zones_status[zone_id] = ZoneStatus.COMPLETED
 	emit_signal("clue_collected", zone_id, clue_data)
 	emit_signal("zone_completed", zone_id)
+	emit_signal("briefcase_updated")
 	
 	# Check for all clues
 	if _check_all_clues_collected():
@@ -275,6 +295,47 @@ func reset_game_after_nightfall():
 	# Save the reset state
 	_save_progress("nightfall_reset")
 
+func has_clue(zone_id: String) -> bool:
+	if not collected_clues.has(zone_id):
+		return false
+	return bool(collected_clues[zone_id].get("collected", false))
+
+
+func get_briefcase_texture(context: String) -> Texture2D:
+	var path: String = get_briefcase_texture_path(context)
+	if path.is_empty():
+		return null
+	return load(path) as Texture2D
+
+
+func get_briefcase_texture_path(context: String) -> String:
+	var has_ladle: bool = has_clue(CLUE_PINAS_HOUSE)
+	var has_pineapple: bool = has_clue(CLUE_BACKYARD_PATH)
+
+	match context:
+		"forest":
+			if has_ladle and has_pineapple:
+				return BRIEFCASE_ASSETS["ladle_and_pineapple_global"]
+			elif has_ladle:
+				return BRIEFCASE_ASSETS["ladle_first_global"]
+			elif has_pineapple:
+				return BRIEFCASE_ASSETS["pineapple_first_global"]
+			else:
+				return BRIEFCASE_ASSETS["no_clue"]
+
+		"pinas_house_reveal":
+			if has_pineapple:
+				return BRIEFCASE_ASSETS["ladle_with_pineapple_reveal"]
+			else:
+				return BRIEFCASE_ASSETS["ladle_first_reveal"]
+
+		"backyard_path_reveal":
+			if has_ladle:
+				return BRIEFCASE_ASSETS["pineapple_with_ladle_reveal"]
+			else:
+				return BRIEFCASE_ASSETS["pineapple_first_reveal"]
+
+	return BRIEFCASE_ASSETS["no_clue"]
 
 # ============================================================================
 # PUBLIC API - Save Data Serialization

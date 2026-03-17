@@ -37,6 +37,7 @@ const BRIEFCASE_CLOSED_SCALE: Vector2 = Vector2(1.0, 0.1)
 @onready var sidekick_layer: CanvasLayer = $SidekickLayer
 @onready var ledger_panel: Panel = $SidekickLayer/Ledger
 @onready var briefcase_panel: Panel = $SidekickLayer/Briefcase
+@onready var briefcase_display: TextureRect = $SidekickLayer/Briefcase/BriefcaseDisplay
 
 # Map panel (accessible by both)
 @onready var map_layer: CanvasLayer = $MapLayer
@@ -153,9 +154,16 @@ func _ready():
 	# Setup zone completion indicators
 	_setup_zone_completion_indicators()
 	
-	# Connect to zone completion signal for dynamic updates
+		# Connect to zone completion signal for dynamic updates
 	if not GameState.zone_completed.is_connected(_on_zone_completed):
 		GameState.zone_completed.connect(_on_zone_completed)
+
+	# Connect to global briefcase updates
+	if not GameState.briefcase_updated.is_connected(_on_briefcase_updated):
+		GameState.briefcase_updated.connect(_on_briefcase_updated)
+
+	# Load the correct forest briefcase image immediately
+	_refresh_briefcase_display()
 	
 	# Spawn already connected peers (both server and client)
 	for peer_id in multiplayer.get_peers():
@@ -977,13 +985,14 @@ func _close_ledger(animate: bool = true) -> void:
 func _open_briefcase() -> void:
 	if not briefcase_panel:
 		return
-	
+
+	_refresh_briefcase_display()
+
 	_is_animating = true
 	briefcase_panel.visible = true
 	briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
-	briefcase_panel.pivot_offset = Vector2(briefcase_panel.size.x / 2, 0)  # Pivot at top
-	
-	# Briefcase opening animation (scale Y from 0.1 to 1.0)
+	briefcase_panel.pivot_offset = Vector2(briefcase_panel.size.x / 2, 0)
+
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_BOUNCE)
 	tween.set_ease(Tween.EASE_OUT)
@@ -1010,6 +1019,17 @@ func _close_briefcase(animate: bool = true) -> void:
 		briefcase_panel.visible = false
 		briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
 
+func _on_briefcase_updated() -> void:
+	_refresh_briefcase_display()
+
+
+func _refresh_briefcase_display() -> void:
+	if not is_instance_valid(briefcase_display):
+		return
+
+	var texture: Texture2D = GameState.get_briefcase_texture("forest")
+	briefcase_display.texture = texture
+	briefcase_display.visible = texture != null
 
 # ============================================================================
 # DOOR ANIMATION (Zone Entry)

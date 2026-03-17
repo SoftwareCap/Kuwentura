@@ -61,6 +61,7 @@ const _SERVER_PEER_ID := 1
 @onready var reward_panel: Sprite2D = get_node_or_null("RewardLayer/RewardPanel")
 @onready var tap_instruction_label: Label = get_node_or_null("RewardLayer/TapInstruction")
 @onready var tap_catcher: Button = get_node_or_null("RewardLayer/TapCatcher")
+@onready var briefcase_reveal_sprite: TextureRect = get_node_or_null("RewardLayer/BriefcaseRevealSprite")
 
 # Puzzle data
 var puzzle_data: Dictionary = {}
@@ -282,6 +283,11 @@ func _setup_initial_ui() -> void:
 
 	if is_instance_valid(sidekick_overlays):
 		sidekick_overlays.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.texture = null
+		briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
 
 	# Detective must never type or submit
 	if GameState.local_role == GameState.Role.DETECTIVE:
@@ -813,6 +819,10 @@ func rpc_show_reward() -> void:
 
 	if is_instance_valid(collect_button):
 		collect_button.visible = false
+		
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.texture = null
 
 func _on_collect_pressed() -> void:
 	if _collect_sequence_started:
@@ -822,13 +832,14 @@ func _on_collect_pressed() -> void:
 
 	if is_instance_valid(collect_button):
 		collect_button.visible = false
+		collect_button.disabled = true
 
 	if not multiplayer.has_multiplayer_peer():
-		rpc_finalize_clue.rpc()
+		rpc_show_briefcase_reveal_then_finalize()
 		return
 
 	if multiplayer.is_server():
-		rpc_finalize_clue.rpc()
+		rpc_show_briefcase_reveal_then_finalize.rpc()
 	else:
 		rpc_request_collect_clue.rpc_id(_SERVER_PEER_ID)
 
@@ -837,12 +848,16 @@ func rpc_request_collect_clue() -> void:
 	if not multiplayer.is_server():
 		return
 
-	rpc_finalize_clue.rpc()
+	rpc_show_briefcase_reveal_then_finalize.rpc()
 
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_finalize_clue() -> void:
 	GameState.collect_clue(ZONE_ID)
+
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.texture = null
 
 	if is_instance_valid(reward_layer):
 		reward_layer.visible = false
@@ -1063,3 +1078,38 @@ func _on_reward_tap_catcher_pressed() -> void:
 				collect_button.visible = GameState.local_role == GameState.Role.SIDEKICK
 			else:
 				collect_button.visible = true
+
+func _show_briefcase_reveal_local() -> void:
+	if not is_instance_valid(briefcase_reveal_sprite):
+		return
+
+	var reveal_texture: Texture2D = GameState.get_briefcase_texture("backyard_path_reveal")
+	briefcase_reveal_sprite.texture = reveal_texture
+	briefcase_reveal_sprite.visible = reveal_texture != null
+	briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_show_briefcase_reveal_then_finalize() -> void:
+	_show_briefcase_reveal_local()
+
+	if is_instance_valid(tap_instruction_label):
+		tap_instruction_label.visible = false
+		tap_instruction_label.text = ""
+
+	if is_instance_valid(tap_catcher):
+		tap_catcher.visible = false
+		tap_catcher.disabled = true
+
+	if is_instance_valid(reward_panel):
+		reward_panel.visible = false
+
+	if is_instance_valid(reward_text_label):
+		reward_text_label.text = ""
+
+	await get_tree().create_timer(1.5).timeout
+
+	if multiplayer.has_multiplayer_peer():
+		if multiplayer.is_server():
+			rpc_finalize_clue.rpc()
+	else:
+		rpc_finalize_clue()
