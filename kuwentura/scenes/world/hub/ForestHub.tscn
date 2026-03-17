@@ -63,6 +63,10 @@ shadow_offset = Vector2(0, 3)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8ci0b"]
 bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4f0r4"]
 texture = ExtResource("2_k5ulr")
