@@ -5,9 +5,9 @@
 [ext_resource type="Texture2D" uid="uid://q26ui1ynvv34" path="res://assets/buttons/rightButton.png" id="3_xwlpt"]
 [ext_resource type="Texture2D" uid="uid://bc40nmjniu431" path="res://assets/buttons/jumpButton.png" id="4_dlgvd"]
 [ext_resource type="Texture2D" uid="uid://chff8f3cdvqaf" path="res://assets/buttons/pauseButton.png" id="5_d6yqq"]
-[ext_resource type="Texture2D" uid="uid://dhs2e7weqqu13" path="res://assets/buttons/players/mapButton.png" id="6_vwhch"]
-[ext_resource type="Texture2D" uid="uid://b4ff13vwedej7" path="res://assets/buttons/players/ledgerButton.png" id="7_w2x6p"]
-[ext_resource type="Texture2D" uid="uid://lrijshq5upgf" path="res://assets/buttons/players/briefcaseButton.png" id="8_opfl2"]
+[ext_resource type="Texture2D" uid="uid://dhs2e7weqqu13" path="res://assets/buttons/players/mapbutton.png" id="6_vwhch"]
+[ext_resource type="Texture2D" uid="uid://b4ff13vwedej7" path="res://assets/buttons/players/ledgerbutton.png" id="7_w2x6p"]
+[ext_resource type="Texture2D" uid="uid://lrijshq5upgf" path="res://assets/buttons/players/briefcasebutton.png" id="8_opfl2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_left"]
 size = Vector2(250, 250)

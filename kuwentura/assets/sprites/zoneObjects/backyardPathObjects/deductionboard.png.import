@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bv2f8hf4rymwo"
-path="res://.godot/imported/Detective_idle.png-6b1c5eb2efa5184bce0867ad93ed7d80.ctex"
+uid="uid://bpq0k85yh5e0p"
+path="res://.godot/imported/deductionboard.png-52e71d3fb98722ea36ff23e9eb523967.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/Detective/Detective_idle.png"
-dest_files=["res://.godot/imported/Detective_idle.png-6b1c5eb2efa5184bce0867ad93ed7d80.ctex"]
+source_file="res://assets/sprites/zoneObjects/backyardPathObjects/deductionboard.png"
+dest_files=["res://.godot/imported/deductionboard.png-52e71d3fb98722ea36ff23e9eb523967.ctex"]
 
 [params]
 
