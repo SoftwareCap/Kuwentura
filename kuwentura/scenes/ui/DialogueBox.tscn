@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://c3tjujm7q6nas"]
+[gd_scene load_steps=6 format=3 uid="uid://c3tjujm7q6nas"]
 
-[ext_resource type="Texture2D" uid="uid://deemtl33cho1y" path="res://assets/sprites/players/detectiveDialogueBox.png" id="1_ggoq5"]
+[ext_resource type="Texture2D" uid="uid://deemtl33cho1y" path="res://assets/sprites/players/DetectiveDialogueBox.png" id="1_ggoq5"]
 [ext_resource type="Script" uid="uid://cgrhmpox3p676" path="res://scenes/ui/dialogue_box.gd" id="1_nfm5p"]
-[ext_resource type="Texture2D" uid="uid://5duvlotnm43p" path="res://assets/sprites/players/sidekickDialogueBox.png" id="2_nfm5p"]
+[ext_resource type="Texture2D" uid="uid://5duvlotnm43p" path="res://assets/sprites/players/SidekickDialogueBox.png" id="2_nfm5p"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="4_bjuha"]
+[ext_resource type="Texture2D" uid="uid://q26ui1ynvv34" path="res://assets/buttons/rightButton.png" id="5_rdkif"]
 
 [node name="DialogueBox" type="CanvasLayer"]
 process_mode = 3
@@ -51,13 +52,11 @@ vertical_alignment = 1
 autowrap_mode = 2
 
 [node name="Advance" type="Button" parent="Panel"]
-self_modulate = Color(1, 1, 1, 0)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -245.0
-offset_right = 4.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 0
+offset_left = 1129.0
+offset_top = 231.0
+offset_right = 1271.0
+offset_bottom = 370.0
+icon = ExtResource("5_rdkif")
 flat = true
+expand_icon = true

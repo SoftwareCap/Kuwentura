@@ -28,6 +28,9 @@ func _ready() -> void:
 
 	y_input.visible = false
 	y_input.editable = false
+	
+	if is_instance_valid(x_input):
+		x_input.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
 
 	if not submit.pressed.is_connected(_on_submit_pressed):
 		submit.pressed.connect(_on_submit_pressed)

@@ -12,6 +12,10 @@ const _TOOL_IDS := ["pan", "ladle", "pot"]
 const MAX_ATTACKS := 10
 const PENALTY_COOLDOWN_SEC := 0.75
 
+const SPARKLE_MIN_SCALE := 0.45
+const SPARKLE_MAX_SCALE := 0.55
+const SPARKLE_PULSE_SPEED := 4.0
+
 @onready var role_label: Label = %RoleLabel
 @onready var back_button: Button = $BackButton
 
@@ -76,16 +80,15 @@ const PENALTY_COOLDOWN_SEC := 0.75
 
 # Reward / clue reveal
 @onready var reward_layer: CanvasLayer = $RewardLayer
-@onready var reward_banner = $RewardLayer/RewardBanner
 @onready var reward_text: Label = $RewardLayer/RewardPanel/RewardText
-@onready var clue_sprite = $RewardLayer/ClueSprite
-@onready var sparkle = $RewardLayer/Sparkle
+@onready var banner_label: Label = $RewardLayer/BannerLabel
+@onready var clue_sprite: Sprite2D = $RewardLayer/ClueSprite
+@onready var sparkle: Sprite2D = $RewardLayer/Sparkle
 @onready var collect_button = $RewardLayer/CollectButton
 @onready var dark_overlay = $RewardLayer/DarkOverlay
-@onready var briefcase_reveal_sprite: TextureRect = get_node_or_null("RewardLayer/BriefcaseRevealSprite")
-
-@onready var banner_label: Label = $RewardLayer/RewardBanner/BannerLabel
 @onready var tap_instruction_label: Label = $RewardLayer/TapInstruction
+@onready var tap_catcher = $RewardLayer/TapCatcher
+@onready var briefcase_reveal_sprite: TextureRect = $RewardLayer/BriefcaseRevealSprite
 
 #Ledger
 @onready var inside_zone_ledger_button: TouchScreenButton = get_node_or_null("InsideZoneControl/Ledger")
@@ -106,7 +109,9 @@ const PENALTY_COOLDOWN_SEC := 0.75
 @onready var cabinet_ladle_collision: CollisionShape2D = $InteractiveLayer/Cabinet/LadleInCabinet/LadleCollision
 
 @onready var reward_panel: Sprite2D = $RewardLayer/RewardPanel
-@onready var tap_catcher: Button = $RewardLayer/TapCatcher
+
+var _animation_time: float = 0.0
+var _sparkle_animating: bool = false
 
 var _cabinet_opened := false
 var _ladle_found := false
@@ -201,24 +206,50 @@ func _ready() -> void:
 	_refresh_inside_zone_buttons()
 	_populate_ledger_content()
 
-	reward_layer.visible = false
-	dark_overlay.modulate.a = 0.0
-	sparkle.visible = false
-	reward_banner.visible = false
-	clue_sprite.visible = false
-	collect_button.visible = false
+	# Initial reward UI state
+	if is_instance_valid(reward_layer):
+		reward_layer.visible = false
+		reward_layer.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 
-	if notification_ui:
-		notification_ui.visible = true
-	if notification_panel:
-		notification_panel.visible = false
-	if guidance_arrow:
-		guidance_arrow.visible = false
-		
+	if is_instance_valid(dark_overlay):
+		dark_overlay.modulate.a = 0.0
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = false
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+
+	if is_instance_valid(banner_label):
+		banner_label.visible = false
+		banner_label.text = ""
+
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = false
+
+	if is_instance_valid(collect_button):
+		collect_button.visible = false
+		collect_button.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+
+	if is_instance_valid(tap_catcher):
+		tap_catcher.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+
 	if is_instance_valid(briefcase_reveal_sprite):
 		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.texture = null
+		briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
 		briefcase_reveal_sprite.z_index = 100
+		briefcase_reveal_sprite.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 
+	# Notification / guidance UI
+	if is_instance_valid(notification_ui):
+		notification_ui.visible = true
+
+	if is_instance_valid(notification_panel):
+		notification_panel.visible = false
+
+	if is_instance_valid(guidance_arrow):
+		guidance_arrow.visible = false
+
+	# Setup controllers
 	pause_controller.setup(self)
 	consequence_controller.setup(self)
 	tool_hunt_controller.setup(self)
@@ -226,30 +257,77 @@ func _ready() -> void:
 
 	_prepare_initial_flow_state()
 
+	# Connect buttons
 	if is_instance_valid(back_button) and not back_button.pressed.is_connected(_on_back_pressed):
 		back_button.pressed.connect(_on_back_pressed)
 
 	if is_instance_valid(collect_button) and not collect_button.pressed.is_connected(_on_collect_clue_pressed):
 		collect_button.pressed.connect(_on_collect_clue_pressed)
 
+	_start_intro_dialogue_delayed()
+
+func _apply_sparkle_animation(sparkle_node: Sprite2D) -> void:
+	var pulse := (sin(_animation_time * SPARKLE_PULSE_SPEED) + 1.0) / 2.0
+	var target_scale: float = lerp(SPARKLE_MIN_SCALE, SPARKLE_MAX_SCALE, pulse)
+	sparkle_node.scale = Vector2(target_scale, target_scale)
+	
+func _start_reward_visuals() -> void:
 	if is_instance_valid(reward_layer):
-		reward_layer.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+		reward_layer.visible = true
+
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = true
+
+	if is_instance_valid(banner_label):
+		banner_label.visible = true
+		banner_label.text = "CLUE FOUND!"
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = true
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+		_animation_time = 0.0
+		_sparkle_animating = true
+		
+func _hide_reward_visuals_for_briefcase() -> void:
+	_sparkle_animating = false
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = false
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = false
+
+	if is_instance_valid(banner_label):
+		banner_label.visible = false
+		banner_label.text = ""
+
+	if is_instance_valid(reward_panel):
+		reward_panel.visible = false
+
+	if is_instance_valid(reward_text):
+		reward_text.text = ""
+
+	if is_instance_valid(tap_instruction_label):
+		tap_instruction_label.visible = false
+		tap_instruction_label.text = ""
 
 	if is_instance_valid(tap_catcher):
-		tap_catcher.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+		tap_catcher.visible = false
+		tap_catcher.disabled = true
 
 	if is_instance_valid(collect_button):
-		collect_button.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-	
-	if is_instance_valid(briefcase_reveal_sprite):
-		briefcase_reveal_sprite.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-		
-	if is_instance_valid(briefcase_reveal_sprite):
-		briefcase_reveal_sprite.visible = false
-		briefcase_reveal_sprite.texture = null
-		briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
-	
-	_start_intro_dialogue_delayed()
+		collect_button.visible = false
+		collect_button.disabled = true
+
+func _process(delta: float) -> void:
+	if not _sparkle_animating:
+		return
+
+	_animation_time += delta
+
+	if is_instance_valid(sparkle) and sparkle.visible:
+		_apply_sparkle_animation(sparkle)
 
 func _init_controllers() -> void:
 	pause_controller = PauseControllerScript.new()
@@ -672,7 +750,7 @@ func show_reward() -> void:
 
 func reward_sequence() -> void:
 	sparkle.visible = false
-	reward_banner.visible = false
+	banner_label.visible = false
 	clue_sprite.visible = false
 	collect_button.visible = false
 
@@ -684,7 +762,7 @@ func reward_sequence() -> void:
 	sparkle.visible = true
 
 	await get_tree().create_timer(0.6, true).timeout
-	reward_banner.visible = true
+	banner_label.visible = true
 
 	reward_text.text = "CLUE FOUND!\n\nThe ladle matters because it represents the kitchen work Pina ignored.\n\n\"We use our eyes to find things, but Pina never used hers…\""
 	await get_tree().create_timer(0.6, true).timeout
@@ -1167,8 +1245,8 @@ func _reset_cabinet_clue_state() -> void:
 	if is_instance_valid(reward_panel):
 		reward_panel.visible = false
 
-	if is_instance_valid(reward_banner):
-		reward_banner.visible = false
+	if is_instance_valid(banner_label):
+		banner_label.visible = false
 
 	if is_instance_valid(clue_sprite):
 		clue_sprite.visible = false
@@ -1264,17 +1342,18 @@ func rpc_start_ladle_found_sequence() -> void:
 	if is_instance_valid(dark_overlay):
 		dark_overlay.modulate.a = 0.45
 
-	if is_instance_valid(sparkle):
-		sparkle.visible = true
-
 	if is_instance_valid(clue_sprite):
 		clue_sprite.visible = true
 
-	if is_instance_valid(reward_banner):
-		reward_banner.visible = true
-
 	if is_instance_valid(banner_label):
+		banner_label.visible = true
 		banner_label.text = "CLUE FOUND!"
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = true
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+		_animation_time = 0.0
+		_sparkle_animating = true
 
 	if is_instance_valid(reward_panel):
 		reward_panel.visible = false
@@ -1396,8 +1475,8 @@ func rpc_begin_briefcase_store_sequence() -> void:
 	if is_instance_valid(reward_text):
 		reward_text.text = ""
 
-	if is_instance_valid(reward_banner):
-		reward_banner.visible = false
+	if is_instance_valid(banner_label):
+		banner_label.visible = false
 
 	if is_instance_valid(banner_label):
 		banner_label.visible = false
@@ -1448,21 +1527,8 @@ func _show_briefcase_reveal_local() -> void:
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_show_briefcase_reveal_then_finalize() -> void:
+	_hide_reward_visuals_for_briefcase()
 	_show_briefcase_reveal_local()
-
-	if is_instance_valid(tap_instruction_label):
-		tap_instruction_label.visible = false
-		tap_instruction_label.text = ""
-
-	if is_instance_valid(tap_catcher):
-		tap_catcher.visible = false
-		tap_catcher.disabled = true
-
-	if is_instance_valid(reward_panel):
-		reward_panel.visible = false
-
-	if is_instance_valid(reward_text):
-		reward_text.text = ""
 
 	await get_tree().create_timer(1.5).timeout
 
@@ -1475,6 +1541,19 @@ func rpc_show_briefcase_reveal_then_finalize() -> void:
 @rpc("any_peer", "reliable", "call_local")
 func rpc_finalize_clue() -> void:
 	GameState.collect_clue("pinas_house")
+
+	_sparkle_animating = false
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = false
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = false
+
+	if is_instance_valid(banner_label):
+		banner_label.visible = false
+		banner_label.text = ""
 
 	if is_instance_valid(briefcase_reveal_sprite):
 		briefcase_reveal_sprite.visible = false
