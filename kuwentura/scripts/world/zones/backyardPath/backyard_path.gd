@@ -225,6 +225,7 @@ func _setup_initial_ui() -> void:
 		x_input.text = ""
 		x_input.editable = false
 		x_input.placeholder_text = "Answer"
+		x_input.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
 
 	if is_instance_valid(submit_button):
 		submit_button.visible = false

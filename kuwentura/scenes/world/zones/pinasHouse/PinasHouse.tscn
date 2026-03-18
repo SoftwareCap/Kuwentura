@@ -783,6 +783,7 @@ theme_override_font_sizes/font_size = 35
 placeholder_text = "Answer"
 alignment = 1
 expand_to_text_length = true
+virtual_keyboard_type = 2
 flat = true
 
 [node name="YInput" type="LineEdit" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
@@ -1083,7 +1084,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="RewardLayer" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="DarkOverlay" type="ColorRect" parent="RewardLayer"]
 modulate = Color(1, 1, 1, 0)
@@ -1106,22 +1106,26 @@ position = Vector2(715.4999, 258.00003)
 scale = Vector2(0.25199997, 0.2303333)
 texture = ExtResource("37_dcipd")
 
-[node name="RewardBanner" type="Sprite2D" parent="RewardLayer"]
-position = Vector2(739.00006, -56)
-scale = Vector2(0.34629634, 0.36954734)
-texture = ExtResource("36_u6sy3")
-
-[node name="BannerLabel" type="Label" parent="RewardLayer/RewardBanner"]
-offset_left = -768.12854
-offset_top = 325.50003
-offset_right = 646.8447
-offset_bottom = 419.43207
-theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+[node name="BannerLabel" type="Label" parent="RewardLayer"]
+anchors_preset = -1
+anchor_left = -0.029618787
+anchor_right = -0.029618787
+offset_left = 34.753967
+offset_top = 39.66298
+offset_right = 1449.7273
+offset_bottom = 133.59502
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 45
+text = "CLUE FOUND!"
 horizontal_alignment = 1
 vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
+
+[node name="RewardBanner" type="Sprite2D" parent="RewardLayer"]
+visible = false
+position = Vector2(739.00006, -56)
+scale = Vector2(0.34629634, 0.36954734)
+texture = ExtResource("36_u6sy3")
 
 [node name="TapInstruction" type="Label" parent="RewardLayer"]
 offset_left = 483.0

@@ -344,6 +344,7 @@ theme_override_font_sizes/font_size = 35
 placeholder_text = "Answer"
 alignment = 1
 expand_to_text_length = true
+virtual_keyboard_type = 2
 flat = true
 
 [node name="SubmitButton" type="Button" parent="Deduction Board/Control"]
@@ -775,7 +776,7 @@ texture = ExtResource("17_s7hv4")
 
 [node name="BannerLabel" type="Label" parent="RewardLayer"]
 anchors_preset = -1
-anchor_left = -0.028027393
+anchor_left = -0.029618787
 anchor_right = -0.029618787
 offset_left = 32.753967
 offset_top = 66.66298
