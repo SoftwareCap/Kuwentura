@@ -24,15 +24,12 @@ func setup(owner) -> void:
 
 func _is_press_event(event: InputEvent) -> bool:
 	if event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		return mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
+		return event.pressed
 
 	if event is InputEventScreenTouch:
-		var st := event as InputEventScreenTouch
-		return st.pressed
+		return event.pressed
 
 	return false
-
 
 func on_tool_input_event(_viewport: Node, event: InputEvent, _shape_idx: int, tool_id: String) -> void:
 	if not _is_press_event(event):
@@ -42,6 +39,9 @@ func on_tool_input_event(_viewport: Node, event: InputEvent, _shape_idx: int, to
 
 
 func try_collect_tool(tool_id: String) -> void:
+	if zone._dialogue_input_locked:
+		return
+		
 	if not zone._zone_active:
 		return
 
@@ -112,11 +112,29 @@ func set_tools_unlocked_local(unlocked: bool) -> void:
 func set_search_mode_local(enable: bool) -> void:
 	if is_instance_valid(zone.search_room_ui):
 		zone.search_room_ui.visible = enable
+		_set_search_ui_controls_ignore(zone.search_room_ui)
 
 	zone._tool_phase_active = enable
 	zone._tools_unlocked = enable
 	apply_tool_nodes()
+	set_wrong_click_zone_active(enable)
 
+func set_wrong_click_zone_active(enable: bool) -> void:
+	if not is_instance_valid(zone.wrong_click_zone):
+		return
+
+	zone.wrong_click_zone.input_pickable = enable
+
+	for child in zone.wrong_click_zone.get_children():
+		if child is CollisionShape2D:
+			child.disabled = not enable
+
+
+func _set_search_ui_controls_ignore(node: Node) -> void:
+	for child in node.get_children():
+		if child is Control:
+			child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_set_search_ui_controls_ignore(child)
 
 func apply_tool_nodes() -> void:
 	apply_single_tool("pan", zone.pan_prop, zone.pan_collision)
@@ -163,7 +181,7 @@ func all_tools_collected() -> bool:
 
 
 func on_wrong_object_input(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
-	if not zone._tool_phase_active:
+	if not (zone._tool_phase_active or zone._cabinet_phase_active):
 		return
 
 	if not _is_press_event(event):
@@ -178,3 +196,4 @@ func on_wrong_object_input(_viewport: Node, event: InputEvent, _shape_idx: int) 
 			zone.rpc_request_penalty("wrong_object")
 		else:
 			zone.rpc_request_penalty.rpc_id(zone._SERVER_PEER_ID, "wrong_object")
+			

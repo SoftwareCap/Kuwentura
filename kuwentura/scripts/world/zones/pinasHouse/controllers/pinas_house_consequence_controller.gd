@@ -14,87 +14,18 @@ func setup(owner) -> void:
 	if is_instance_valid(zone.final_aswang):
 		zone.final_aswang.visible = false
 
+
 func start_server() -> void:
-	if zone._timers_started:
-		return
-
-	zone._timers_started = true
-	zone._time_left = zone.TOTAL_TIME_SEC
-	zone._attack_index = 0
+	zone._consequence_active = true
 	zone._failed = false
-	zone._first_warning_played = false
+	zone._attack_index = 0
+	zone._strikes_left = zone.MAX_ATTACKS
+	zone._penalty_on_cooldown = false
 
-	zone._tick_timer = Timer.new()
-	zone._tick_timer.wait_time = 1.0
-	zone._tick_timer.one_shot = false
-	zone.add_child(zone._tick_timer)
-	zone._tick_timer.timeout.connect(zone._on_tick_server)
-	zone._tick_timer.start()
 
-	zone._first_attack_timer = Timer.new()
-	zone._first_attack_timer.wait_time = float(zone.FIRST_ATTACK_DELAY_SEC)
-	zone._first_attack_timer.one_shot = true
-	zone.add_child(zone._first_attack_timer)
-	zone._first_attack_timer.timeout.connect(zone._on_first_attack_server)
-	zone._first_attack_timer.start()
+func apply_penalty_server(reason: String) -> void:
+	zone._apply_strike_server(reason)
 
-	zone._attack_timer = Timer.new()
-	zone._attack_timer.wait_time = float(zone.ATTACK_INTERVAL_SEC)
-	zone._attack_timer.one_shot = false
-	zone.add_child(zone._attack_timer)
-	zone._attack_timer.timeout.connect(zone._on_scheduled_attack_server)
-
-func on_first_attack_server() -> void:
-	if zone._failed:
-		return
-
-	zone._attack_index = 1
-	zone.rpc_play_aswang_attack.rpc(zone._attack_index, false)
-
-	if not zone._first_warning_played:
-		zone._first_warning_played = true
-		zone.rpc_play_first_attack_warning.rpc()
-
-	if is_instance_valid(zone._attack_timer) and zone._attack_timer.is_stopped():
-		zone._attack_timer.start()
-
-func play_first_attack_warning() -> void:
-	zone.show_notification("The Aswang grows restless...", 2.0)
-
-func on_tick_server() -> void:
-	if zone._failed:
-		return
-
-	zone._time_left -= 1
-
-	if zone._time_left <= 0:
-		zone._time_left = 0
-		fail_zone_server()
-
-func on_scheduled_attack_server() -> void:
-	if zone._failed:
-		return
-
-	zone._attack_index += 1
-
-	if zone._attack_index >= zone.MAX_ATTACKS:
-		fail_zone_server()
-		return
-
-	zone.rpc_play_aswang_attack.rpc(zone._attack_index, false)
-
-func apply_penalty_server(_reason: String) -> void:
-	if zone._failed:
-		return
-
-	zone._attack_index = min(zone._attack_index + 1, zone.MAX_ATTACKS - 1)
-	zone._time_left = max(0, zone._time_left - zone.PENALTY_SEC)
-
-	zone.rpc_play_aswang_attack.rpc(zone._attack_index, true)
-	zone.rpc_play_validation_feedback.rpc("penalty")
-
-	if zone._time_left <= 0:
-		fail_zone_server()
 
 func play_aswang_attack(idx: int, from_penalty: bool) -> void:
 	if idx <= 0:
@@ -109,20 +40,14 @@ func play_aswang_attack(idx: int, from_penalty: bool) -> void:
 
 	screen_shake_attack_local(from_penalty)
 
+
 func fail_zone_server() -> void:
 	if zone._failed:
 		return
 
 	zone._failed = true
-
-	if is_instance_valid(zone._first_attack_timer):
-		zone._first_attack_timer.stop()
-
-	if is_instance_valid(zone._tick_timer):
-		zone._tick_timer.stop()
-
-	if is_instance_valid(zone._attack_timer):
-		zone._attack_timer.stop()
+	zone._consequence_active = false
+	zone._penalty_on_cooldown = false
 
 	zone.rpc_fail_pre_shake.rpc()
 	await zone.get_tree().create_timer(0.6, true).timeout
@@ -133,6 +58,7 @@ func fail_zone_server() -> void:
 
 	await zone.get_tree().create_timer(3.0, true).timeout
 	zone.rpc_kick_to_hub.rpc()
+
 
 func reset_pinas_house_progress_local() -> void:
 	GameState.set_puzzle_solved("pinas_house", false)
@@ -158,6 +84,13 @@ func reset_pinas_house_progress_local() -> void:
 	zone._ledger_hint_shown = false
 	zone._ledger_opened_once = false
 
+	# Reset strike-based consequence system
+	zone._consequence_active = false
+	zone._strikes_left = zone.MAX_ATTACKS
+	zone._attack_index = 0
+	zone._failed = false
+	zone._penalty_on_cooldown = false
+
 	if is_instance_valid(zone.search_room_ui):
 		zone.search_room_ui.visible = false
 
@@ -170,8 +103,10 @@ func reset_pinas_house_progress_local() -> void:
 	zone.note_controller.close_boards(true)
 	zone.note_controller.apply_unsolved_text()
 
+
 func lock_pinas_house_zone_local(duration_sec: int) -> void:
 	GameState.lock_zone_temp("pinas_house", duration_sec)
+
 
 func kick_to_hub_local() -> void:
 	if is_instance_valid(zone.consequence_ui):
@@ -185,9 +120,10 @@ func kick_to_hub_local() -> void:
 
 	zone.get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 
-func apply_consequence_state(attack_idx: int, time_left: int, failed: bool) -> void:
+
+func apply_consequence_state(attack_idx: int, strikes_left: int, failed: bool) -> void:
 	zone._attack_index = attack_idx
-	zone._time_left = time_left
+	zone._strikes_left = strikes_left
 	zone._failed = failed
 
 	if zone._failed:
@@ -197,12 +133,15 @@ func apply_consequence_state(attack_idx: int, time_left: int, failed: bool) -> v
 		zone.aswang_sprite.texture = zone._aswang_window_frames[zone._attack_index - 1]
 		zone.aswang_sprite.visible = true
 
+
 func play_validation_feedback(_dialogue_id: String) -> void:
 	screen_shake_extreme_local()
 	zone.show_notification("Every mistake makes the Aswang grow restless.", 2.2)
 
+
 func fail_pre_shake() -> void:
 	screen_shake_attack_local(true)
+
 
 func fail_show_ui() -> void:
 	if is_instance_valid(zone.consequence_ui):
@@ -221,6 +160,7 @@ func fail_show_ui() -> void:
 		zone.final_aswang.texture = zone._aswang_final_frame
 		zone.final_aswang.z_index = 1
 
+
 func start_shake(duration: float, amplitude: float, interval: float) -> void:
 	zone._shake_duration = duration
 	zone._shake_amplitude = amplitude
@@ -237,6 +177,7 @@ func start_shake(duration: float, amplitude: float, interval: float) -> void:
 	zone._shake_timer.wait_time = interval
 	zone._shake_timer.start()
 
+
 func on_final_shake_tick() -> void:
 	zone._shake_elapsed += zone._shake_timer.wait_time
 
@@ -249,6 +190,7 @@ func on_final_shake_tick() -> void:
 	var oy := randf_range(-zone._shake_amplitude, zone._shake_amplitude)
 	zone.position = zone._shake_origin + Vector2(ox, oy)
 
+
 func screen_shake_local(stronger: bool) -> void:
 	var target: Node2D = zone
 	var strength := 10.0 if stronger else 6.0
@@ -259,8 +201,10 @@ func screen_shake_local(stronger: bool) -> void:
 	var tw: Tween = zone.create_tween()
 	tw.tween_property(target, "position", original, 0.12)
 
+
 func screen_shake_extreme_local() -> void:
 	start_shake(0.6, 20.0, 0.02)
+
 
 func screen_shake_attack_local(from_penalty: bool) -> void:
 	var duration := 0.55 if not from_penalty else 0.75

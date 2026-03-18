@@ -141,41 +141,20 @@ func on_resume_play_button_pressed() -> void:
 
 	# Resume the zone's timers and systems
 	_resume_zone_systems()
-
-
+	
 func _pause_zone_systems() -> void:
 	print("[PinasHouse] Pausing zone systems")
 
-	# Pause consequence timers
-	if is_instance_valid(zone._tick_timer):
-		zone._tick_timer.paused = true
-
-	if is_instance_valid(zone._attack_timer):
-		zone._attack_timer.paused = true
-
-	if is_instance_valid(zone._first_attack_timer):
-		zone._first_attack_timer.paused = true
-
-	# Pause shake timer
-	if is_instance_valid(zone._shake_timer):
+	if "_shake_timer" in zone and is_instance_valid(zone._shake_timer):
 		zone._shake_timer.paused = true
 
 
 func _resume_zone_systems() -> void:
 	print("[PinasHouse] Resuming zone systems")
 
-	# Resume consequence timers (only if zone hasn't failed)
-	if not zone._failed:
-		if is_instance_valid(zone._tick_timer):
-			zone._tick_timer.paused = false
+	# Strike-based consequence system has no recurring timers now.
+	# Only resume timers that still actually exist.
 
-		if is_instance_valid(zone._attack_timer):
-			zone._attack_timer.paused = false
-
-		if is_instance_valid(zone._first_attack_timer):
-			zone._first_attack_timer.paused = false
-
-	# Resume shake timer
 	if is_instance_valid(zone._shake_timer):
 		zone._shake_timer.paused = false
 
