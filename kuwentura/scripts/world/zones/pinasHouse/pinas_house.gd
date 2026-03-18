@@ -939,19 +939,6 @@ func _apply_strike_server(reason: String) -> void:
 func _start_consequences_server() -> void:
 	consequence_controller.start_server()
 
-func _on_first_attack_server() -> void:
-	consequence_controller.on_first_attack_server()
-
-@rpc("any_peer", "reliable", "call_local")
-func rpc_play_first_attack_warning() -> void:
-	consequence_controller.play_first_attack_warning()
-
-func _on_tick_server() -> void:
-	consequence_controller.on_tick_server()
-
-func _on_scheduled_attack_server() -> void:
-	consequence_controller.on_scheduled_attack_server()
-
 @rpc("any_peer", "reliable")
 func rpc_request_penalty(reason: String) -> void:
 	if not multiplayer.is_server():

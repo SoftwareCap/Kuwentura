@@ -52,7 +52,8 @@ func open_board() -> void:
 
 
 func _on_submit_pressed() -> void:
-	if get_tree().current_scene._dialogue_input_locked:
+	var scene = get_tree().current_scene
+	if scene and "_dialogue_input_locked" in scene and scene._dialogue_input_locked:
 		return
 
 	_check_answer()
