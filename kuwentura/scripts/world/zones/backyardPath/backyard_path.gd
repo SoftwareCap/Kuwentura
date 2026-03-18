@@ -753,7 +753,7 @@ func _server_fail_zone(message: String) -> void:
 		return
 
 	_zone_failed = true
-	GameState.lock_zone_temp(ZONE_ID, 60)
+	GameState.lock_zone_temp(ZONE_ID, 30)
 	rpc_fail_zone.rpc(message)
 
 
