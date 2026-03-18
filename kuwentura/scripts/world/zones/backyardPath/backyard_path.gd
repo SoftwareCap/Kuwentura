@@ -54,8 +54,7 @@ const _SERVER_PEER_ID := 1
 # Reward
 @onready var reward_layer: CanvasLayer = get_node_or_null("RewardLayer")
 @onready var reward_dark_overlay: ColorRect = get_node_or_null("RewardLayer/DarkOverlay")
-@onready var reward_banner: Sprite2D = get_node_or_null("RewardLayer/RewardBanner")
-@onready var reward_banner_label: Label = get_node_or_null("RewardLayer/RewardBanner/BannerLabel")
+@onready var reward_banner_label: Label = get_node_or_null("RewardLayer/BannerLabel")
 @onready var reward_text_label: Label = get_node_or_null("RewardLayer/RewardPanel/RewardText")
 @onready var clue_sprite: Sprite2D = get_node_or_null("RewardLayer/ClueSprite")
 @onready var collect_button: Button = get_node_or_null("RewardLayer/CollectButton")
@@ -236,9 +235,6 @@ func _setup_initial_ui() -> void:
 		
 	if is_instance_valid(reward_layer):
 		reward_layer.visible = true
-
-	if is_instance_valid(reward_banner):
-		reward_banner.visible = true
 
 	if is_instance_valid(reward_banner_label):
 		reward_banner_label.visible = true
@@ -443,28 +439,30 @@ func _start_intro_dialogue_delayed() -> void:
 
 	_intro_dialogue_played = true
 	_run_intro_sequence()
+	
+func _get_backyard_intro_dialogue() -> Array:
+	var lines: Array = DialogueLibrary.BACKYARD_PATH_ENTER.duplicate(true)
+
+	lines.append(
+		{"speaker":"sidekick","text":"But the numbers here say " + str(plant_height_dali) + " Dali."}
+	)
+	lines.append(
+		{"speaker":"detective","text":"And Pina’s height says " + str(spirit_height_cm) + " centimeters."}
+	)
+	lines.append(
+		{"speaker":"sidekick","text":"How can we compare those if they’re not in the same unit?"}
+	)
+
+	return lines
 
 
 func _run_intro_sequence() -> void:
 	_set_dialogue_input_lock(true)
 
-	DialogueSystems.play("backyard_path_intro",
-	[
-		{"speaker":"sidekick","text":"Whoa… this backyard feels different. Wait… is that a plant?"},
-		{"speaker":"detective","text":"A plant? What do you mean plant?"},
-		{"speaker":"sidekick","text":"Right in front of me. It looks like some kind of strange pineapple plant."},
-		{"speaker":"detective","text":"…Hold on. I don’t see a plant."},
-		{"speaker":"detective","text":"I’m seeing… a spirit."},
-		{"speaker":"sidekick","text":"A spirit??"},
-		{"speaker":"detective","text":"Yes… it looks like Pina. Her spirit is standing right here."},
-		{"speaker":"detective","text":"And there are numbers floating above her… maybe that’s her height?"},
-		{"speaker":"sidekick","text":"Wait… there are numbers above the plant too."},
-		{"speaker":"sidekick","text":"But the numbers here say " + str(plant_height_dali) + " Dali."},
-		{"speaker":"detective","text":"And Pina’s height says " + str(spirit_height_cm) + " centimeters."},
-		{"speaker":"sidekick","text":"How can we compare those if they’re not in the same unit?"}
-	])
+	DialogueSystems.play("backyard_path_intro", _get_backyard_intro_dialogue())
 
 	await DialogueSystems.wait_finished("backyard_path_intro")
+	_set_dialogue_input_lock(false)
 	_report_intro_ready()
 
 
@@ -517,11 +515,7 @@ func rpc_unlock_board_phase() -> void:
 
 	_set_dialogue_input_lock(true)
 
-	DialogueSystems.play("backyard_ledger_hint",
-	[
-		{"speaker":"sidekick","text":"How exactly do we convert Dali into centimeters?"},
-		{"speaker":"detective","text":"Maybe the ledger has the answer."}
-	])
+	DialogueSystems.play("backyard_ledger_hint", DialogueLibrary.BACKYARD_PATH_LEDGER_HINT)
 
 	await DialogueSystems.wait_finished("backyard_ledger_hint")
 	_set_dialogue_input_lock(false)
@@ -778,10 +772,7 @@ func rpc_fail_zone(message: String) -> void:
 
 	_set_dialogue_input_lock(true)
 
-	DialogueSystems.play("backyard_fail",
-	[
-		{"speaker":"narrator","text":"The forest rejects your presence."}
-	])
+	DialogueSystems.play("backyard_fail", DialogueLibrary.BACKYARD_PATH_FAIL)
 
 	await DialogueSystems.wait_finished("backyard_fail")
 	_set_dialogue_input_lock(false)
@@ -806,7 +797,7 @@ func rpc_puzzle_solved() -> void:
 		x_input.editable = false
 
 	if is_instance_valid(feedback_label):
-		feedback_label.text = str(plant_height_dali) + " Dali = " + str(solution_cm) + " cm"
+		feedback_label.text = str(plant_height_dali) + " Dali = " + str(solution_cm) + " cm. The plant and Pina share the same height."
 
 	hide_notification()
 	pulse_ledger_guidance(false)
@@ -845,13 +836,7 @@ func rpc_puzzle_solved() -> void:
 
 	_set_dialogue_input_lock(true)
 
-	DialogueSystems.play("backyard_solved",
-	[
-		{"speaker":"sidekick","text":"Wait… the plant changed."},
-		{"speaker":"sidekick","text":"Is that… a pineapple?"},
-		{"speaker":"detective","text":"Yes."},
-		{"speaker":"detective","text":"That must be the clue hidden here."}
-	])
+	DialogueSystems.play("backyard_solved", DialogueLibrary.BACKYARD_PATH_SOLVED)
 
 	await DialogueSystems.wait_finished("backyard_solved")
 	_set_dialogue_input_lock(false)
@@ -922,6 +907,9 @@ func rpc_show_reward() -> void:
 
 	if is_instance_valid(reward_layer):
 		reward_layer.visible = true
+		
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = true
 
 	if is_instance_valid(sparkle):
 		sparkle.visible = true
@@ -933,6 +921,7 @@ func rpc_show_reward() -> void:
 		reward_dark_overlay.modulate.a = 0.45
 
 	if is_instance_valid(reward_banner_label):
+		reward_banner_label.visible = true
 		reward_banner_label.text = "CLUE FOUND!"
 
 	if is_instance_valid(reward_text_label):
@@ -992,9 +981,9 @@ func rpc_finalize_clue() -> void:
 	if is_instance_valid(sparkle):
 		sparkle.visible = false
 		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
-
-	if is_instance_valid(reward_banner):
-		reward_banner.visible = false
+		
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = false
 
 	if is_instance_valid(reward_banner_label):
 		reward_banner_label.visible = false
@@ -1259,19 +1248,35 @@ func _process(delta: float) -> void:
 		_apply_sparkle_animation(sparkle)
 		
 func _hide_reward_visuals_for_briefcase() -> void:
-	# Stop sparkle pulse
 	_sparkle_animating = false
 
 	if is_instance_valid(sparkle):
 		sparkle.visible = false
 		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
 
-	if is_instance_valid(reward_banner):
-		reward_banner.visible = false
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = false
 
 	if is_instance_valid(reward_banner_label):
 		reward_banner_label.visible = false
 		reward_banner_label.text = ""
+
+	if is_instance_valid(reward_panel):
+		reward_panel.visible = false
+
+	if is_instance_valid(reward_text_label):
+		reward_text_label.text = ""
+
+	if is_instance_valid(tap_instruction_label):
+		tap_instruction_label.visible = false
+		tap_instruction_label.text = ""
+
+	if is_instance_valid(tap_catcher):
+		tap_catcher.visible = false
+		tap_catcher.disabled = true
+
+	if is_instance_valid(collect_button):
+		collect_button.visible = false
 
 func _hide_revealed_clue_after_touch() -> void:
 	if is_instance_valid(revealed_plant):
