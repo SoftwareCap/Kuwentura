@@ -768,28 +768,31 @@ scale = Vector2(0.5719907, 0.5358025)
 texture = ExtResource("15_0c5pu")
 
 [node name="ClueSprite" type="Sprite2D" parent="RewardLayer"]
+visible = false
 position = Vector2(699.5, 289)
 scale = Vector2(0.16943358, 0.14160155)
 texture = ExtResource("17_s7hv4")
+
+[node name="BannerLabel" type="Label" parent="RewardLayer"]
+anchors_preset = -1
+anchor_left = -0.028027393
+anchor_right = -0.029618787
+offset_left = 32.753967
+offset_top = 66.66298
+offset_right = 1447.7273
+offset_bottom = 160.59502
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 45
+text = "CLUE FOUND!"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
 
 [node name="RewardBanner" type="Sprite2D" parent="RewardLayer"]
 visible = false
 position = Vector2(732.5, 41.750008)
 scale = Vector2(0.27175924, 0.20864198)
 texture = ExtResource("17_va6t2")
-
-[node name="BannerLabel" type="Label" parent="RewardLayer/RewardBanner"]
-visible = false
-offset_left = -768.12854
-offset_top = 325.50003
-offset_right = 646.8447
-offset_bottom = 419.43207
-theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 45
-horizontal_alignment = 1
-vertical_alignment = 1
-metadata/_edit_use_anchors_ = true
 
 [node name="TapInstruction" type="Label" parent="RewardLayer"]
 offset_left = 483.0
