@@ -54,7 +54,7 @@ func fail_zone_server() -> void:
 
 	zone.rpc_fail_show_ui.rpc()
 	zone.rpc_reset_pinas_house_progress.rpc()
-	zone.rpc_lock_pinas_house_zone.rpc(180)
+	zone.rpc_lock_pinas_house_zone.rpc(30)
 
 	await zone.get_tree().create_timer(3.0, true).timeout
 	zone.rpc_kick_to_hub.rpc()
