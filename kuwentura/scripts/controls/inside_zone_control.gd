@@ -135,11 +135,13 @@ func set_pause_enabled(enabled: bool):
 func set_ledger_enabled(enabled: bool):
 	_ledger_enabled = enabled
 	if ledger_button:
+		ledger_button.visible = GameState.local_role == GameState.Role.SIDEKICK
 		ledger_button.modulate = NORMAL_COLOR if enabled else DISABLED_COLOR
 
 func set_briefcase_enabled(enabled: bool):
 	_briefcase_enabled = enabled
 	if briefcase_button:
+		briefcase_button.visible = GameState.local_role == GameState.Role.SIDEKICK
 		briefcase_button.modulate = NORMAL_COLOR if enabled else DISABLED_COLOR
 
 func set_sidekick_ui_visible(is_sidekick: bool):

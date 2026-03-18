@@ -68,7 +68,7 @@ size = Vector2(365.00024, 198.00044)
 size = Vector2(210.75008, 109.25011)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ra7mo"]
-size = Vector2(772.00055, 235.50015)
+size = Vector2(410.00006, 235.50015)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fvin0"]
 size = Vector2(1340.0009, 84.99942)
@@ -448,8 +448,8 @@ scale = Vector2(0.9999994, 0.9999994)
 shape = SubResource("RectangleShape2D_u6sy3")
 
 [node name="CollisionShape2D4" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
-position = Vector2(387.99988, 105.999916)
-scale = Vector2(0.99999934, 0.99999934)
+position = Vector2(568.99976, 105.999886)
+scale = Vector2(0.9999992, 0.9999992)
 shape = SubResource("RectangleShape2D_ra7mo")
 
 [node name="CollisionShape2D5" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
@@ -562,6 +562,7 @@ offset_top = 852.0
 offset_right = 1071.0
 offset_bottom = 987.0
 size_flags_horizontal = 3
+mouse_filter = 2
 texture = ExtResource("25_eedqa")
 expand_mode = 1
 stretch_mode = 5
@@ -572,6 +573,7 @@ offset_left = 1083.0
 offset_top = 846.0
 offset_right = 1259.0
 offset_bottom = 990.0
+mouse_filter = 2
 texture = ExtResource("26_cd1wg")
 expand_mode = 1
 
@@ -581,6 +583,7 @@ offset_left = 622.0
 offset_top = 848.0
 offset_right = 797.0
 offset_bottom = 987.0
+mouse_filter = 2
 texture = ExtResource("27_egl2a")
 expand_mode = 1
 
