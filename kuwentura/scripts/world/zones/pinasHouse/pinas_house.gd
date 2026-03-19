@@ -16,6 +16,10 @@ const SPARKLE_MIN_SCALE := 0.45
 const SPARKLE_MAX_SCALE := 0.55
 const SPARKLE_PULSE_SPEED := 4.0
 
+const NOTE_REVEAL_SHAKE_OFFSET: float = 10.0
+const NOTE_REVEAL_SHAKE_STEP: float = 0.05
+const NOTE_REVEAL_SHAKE_COUNT: int = 4
+
 @onready var role_label: Label = %RoleLabel
 @onready var back_button: Button = $BackButton
 
@@ -47,6 +51,7 @@ const SPARKLE_PULSE_SPEED := 4.0
 # Role button panel hooks from touch controls
 @onready var ledger_panel: Panel = get_node_or_null("SidekickLayer/Ledger")
 @onready var briefcase_panel: Panel = get_node_or_null("SidekickLayer/Briefcase")
+@onready var briefcase_display: TextureRect = get_node_or_null("SidekickLayer/Briefcase/BriefcaseDisplay")
 
 # Interactive note/cabinet
 @onready var note_area: Area2D = $InteractiveLayer/Notes
@@ -205,6 +210,8 @@ func _ready() -> void:
 
 	_refresh_inside_zone_buttons()
 	_populate_ledger_content()
+	_ensure_briefcase_display()
+	_refresh_briefcase_display()
 
 	# Initial reward UI state
 	if is_instance_valid(reward_layer):
@@ -342,6 +349,9 @@ func _connect_global_signals() -> void:
 	if not GameState.player_role_assigned.is_connected(_on_role_assigned):
 		GameState.player_role_assigned.connect(_on_role_assigned)
 
+	if not GameState.briefcase_updated.is_connected(_on_briefcase_updated):
+		GameState.briefcase_updated.connect(_on_briefcase_updated)
+
 func _setup_music() -> void:
 	if Engine.has_singleton("MusicController") or MusicController:
 		MusicController.play_track(MusicController.MusicTrack.PINAS_HOUSE)
@@ -441,9 +451,51 @@ func _show_note() -> void:
 		note_collision.disabled = false
 	if is_instance_valid(note_sprite):
 		note_sprite.visible = true
+		_play_note_reveal_shake()
 	if is_instance_valid(note_btn):
 		note_btn.visible = true
 		note_btn.disabled = false
+
+func _play_note_reveal_shake() -> void:
+	if not is_instance_valid(note_sprite):
+		return
+
+	if note_sprite.has_meta("reveal_shake_tween"):
+		var old_tween: Tween = note_sprite.get_meta("reveal_shake_tween")
+		if is_instance_valid(old_tween):
+			old_tween.kill()
+		note_sprite.remove_meta("reveal_shake_tween")
+
+	var base_position: Vector2 = note_sprite.position
+
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+
+	for i in range(NOTE_REVEAL_SHAKE_COUNT):
+		tween.tween_property(
+			note_sprite,
+			"position",
+			base_position + Vector2(-NOTE_REVEAL_SHAKE_OFFSET, 0),
+			NOTE_REVEAL_SHAKE_STEP
+		)
+		tween.tween_property(
+			note_sprite,
+			"position",
+			base_position + Vector2(NOTE_REVEAL_SHAKE_OFFSET, 0),
+			NOTE_REVEAL_SHAKE_STEP
+		)
+
+	tween.tween_property(note_sprite, "position", base_position, NOTE_REVEAL_SHAKE_STEP)
+
+	note_sprite.set_meta("reveal_shake_tween", tween)
+
+	tween.finished.connect(func():
+		if is_instance_valid(note_sprite):
+			note_sprite.position = base_position
+			if note_sprite.has_meta("reveal_shake_tween"):
+				note_sprite.remove_meta("reveal_shake_tween")
+	)
 
 func _hide_cabinet_reward_state() -> void:
 	if is_instance_valid(cabinet_area):
@@ -629,12 +681,55 @@ func _on_ledger_button_pressed() -> void:
 func _on_briefcase_button_pressed() -> void:
 	if GameState.local_role != GameState.Role.SIDEKICK:
 		return
-	
+
 	if _dialogue_input_locked:
 		return
-		
-	if briefcase_panel:
-		briefcase_panel.visible = not briefcase_panel.visible
+
+	if not is_instance_valid(briefcase_panel):
+		return
+
+	_refresh_briefcase_display()
+
+	var should_open: bool = not briefcase_panel.visible
+
+	if should_open and is_instance_valid(ledger_panel):
+		ledger_panel.visible = false
+
+	briefcase_panel.visible = should_open
+
+func _ensure_briefcase_display() -> void:
+	if not is_instance_valid(briefcase_panel):
+		return
+
+	if is_instance_valid(briefcase_display):
+		return
+
+	briefcase_display = TextureRect.new()
+	briefcase_display.name = "BriefcaseDisplay"
+	briefcase_display.visible = false
+	briefcase_display.set_anchors_preset(Control.PRESET_FULL_RECT)
+	briefcase_display.offset_left = -152.0
+	briefcase_display.offset_top = 40.0
+	briefcase_display.offset_right = 185.0
+	briefcase_display.offset_bottom = 67.0
+	briefcase_display.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	briefcase_display.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	briefcase_display.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	briefcase_panel.add_child(briefcase_display)
+
+
+func _refresh_briefcase_display() -> void:
+	if not is_instance_valid(briefcase_display):
+		return
+
+	var texture: Texture2D = GameState.get_briefcase_texture("forest")
+	briefcase_display.texture = texture
+	briefcase_display.visible = texture != null
+
+
+func _on_briefcase_updated() -> void:
+	_refresh_briefcase_display()
 
 func _on_back_pressed() -> void:
 	if _dialogue_input_locked:

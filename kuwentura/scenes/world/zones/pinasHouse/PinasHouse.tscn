@@ -1,4 +1,4 @@
-[gd_scene load_steps=79 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=78 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://miy70k8n04ul" path="res://assets/sprites/places/pinasHouseBackground.png" id="2_vt60f"]
@@ -38,7 +38,6 @@
 [ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="36_u6sy3"]
 [ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/clues/ladleClue.png" id="37_dcipd"]
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="39_0s51p"]
-[ext_resource type="Texture2D" uid="uid://b2ryp42vnc38n" path="res://assets/sprites/players/briefcaseOpen.png" id="40_cyexm"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_btbyq"]
 size = Vector2(321.00024, 356.50024)
@@ -248,8 +247,7 @@ shadow_offset = Vector2(0, 3.41)
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_m2a4r"]
 texture = ExtResource("39_0s51p")
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wjw6o"]
-texture = ExtResource("40_cyexm")
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_u6sy3"]
 
 [node name="PinasHouse" type="Node2D"]
 process_mode = 1
@@ -852,7 +850,7 @@ offset_top = 202.0
 offset_right = 932.0
 offset_bottom = 300.0
 
-[node name="GuidanceArrow" type="Sprite2D" parent="RoleLayer/Control"]
+[node name="GuidancedArrow" type="Sprite2D" parent="RoleLayer/Control"]
 visible = false
 position = Vector2(1186, 247)
 scale = Vector2(0.32, 0.27333334)
@@ -1315,7 +1313,7 @@ offset_right = 247.0
 offset_bottom = 197.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_wjw6o")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_u6sy3")
 
 [connection signal="input_event" from="InteractiveLayer/Objects/WrongClickZone" to="." method="_on_wrong_object_input"]
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]

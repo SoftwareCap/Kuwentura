@@ -141,7 +141,7 @@ const BRIEFCASE_ASSETS := {
 	"pineapple_with_ladle_reveal": "res://assets/briefcase/PineappleWithLadleReveal.png",
 	"ladle_with_pineapple_reveal": "res://assets/briefcase/LadleWithPineappleReveal.png",
 
-	"ladle_and_pineapple_global": "res://assets/briefcase/LadleAndPineappleGlobal.png"
+	"ladle_and_pineapple_global": "res://assets/briefcase/LadleAndPineapple.png"
 }
 
 # Current selections (persisted through game session)
