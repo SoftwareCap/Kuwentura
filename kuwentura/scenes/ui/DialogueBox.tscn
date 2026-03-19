@@ -1,8 +1,8 @@
 [gd_scene load_steps=6 format=3 uid="uid://c3tjujm7q6nas"]
 
-[ext_resource type="Texture2D" uid="uid://deemtl33cho1y" path="res://assets/sprites/players/DetectiveDialogueBox.png" id="1_ggoq5"]
+[ext_resource type="Texture2D" uid="uid://deemtl33cho1y" path="res://assets/sprites/players/detectiveDialogueBox.png" id="1_ggoq5"]
 [ext_resource type="Script" uid="uid://cgrhmpox3p676" path="res://scenes/ui/dialogue_box.gd" id="1_nfm5p"]
-[ext_resource type="Texture2D" uid="uid://5duvlotnm43p" path="res://assets/sprites/players/SidekickDialogueBox.png" id="2_nfm5p"]
+[ext_resource type="Texture2D" uid="uid://5duvlotnm43p" path="res://assets/sprites/players/sidekickDialogueBox.png" id="2_nfm5p"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="4_bjuha"]
 [ext_resource type="Texture2D" uid="uid://q26ui1ynvv34" path="res://assets/buttons/rightButton.png" id="5_rdkif"]
 
@@ -51,12 +51,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="Advance" type="Button" parent="Panel"]
-layout_mode = 0
-offset_left = 1136.0
-offset_top = 219.0
-offset_right = 1294.0
-offset_bottom = 379.0
-icon = ExtResource("5_rdkif")
-flat = true
-expand_icon = true
+[node name="Advance" type="TouchScreenButton" parent="Panel"]
+position = Vector2(1129.0001, 241.99998)
+scale = Vector2(0.4, 0.4)
+texture_normal = ExtResource("5_rdkif")

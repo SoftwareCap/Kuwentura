@@ -76,6 +76,10 @@ const _SERVER_PEER_ID := 1
 @onready var briefcase_reveal_sprite: TextureRect = get_node_or_null("RewardLayer/BriefcaseRevealSprite")
 @onready var sparkle: Sprite2D = $RewardLayer/Sparkle
 
+# Audio
+var _sfx_player: AudioStreamPlayer
+var _zone_completion_sfx: AudioStream = preload("res://assets/audios/ZoneCompletionSFX.mp3")
+
 # Puzzle data
 var puzzle_data: Dictionary = {}
 
@@ -156,7 +160,17 @@ func _ready() -> void:
 	if not GameState.briefcase_updated.is_connected(_on_briefcase_updated):
 		GameState.briefcase_updated.connect(_on_briefcase_updated)
 
-	# 6 Start intro dialogue
+	# 6 Start backyard background music
+	if Engine.has_singleton("MusicController") or MusicController:
+		MusicController.play_track(MusicController.MusicTrack.BACKYARD_PATH)
+
+	# 7 Setup SFX player
+	_ensure_sfx_bus()
+	_sfx_player = AudioStreamPlayer.new()
+	_sfx_player.bus = "SFX"
+	add_child(_sfx_player)
+
+	# 8 Start intro dialogue
 	_start_intro_dialogue_delayed()
 
 func _create_timer() -> void:
@@ -167,6 +181,40 @@ func _create_timer() -> void:
 
 	if not _timer_node.timeout.is_connected(_on_board_timer_timeout):
 		_timer_node.timeout.connect(_on_board_timer_timeout)
+
+
+func _ensure_sfx_bus() -> void:
+	"""Create SFX audio bus if it doesn't exist."""
+	var sfx_bus_index := AudioServer.get_bus_index("SFX")
+	if sfx_bus_index == -1:
+		AudioServer.add_bus(AudioServer.bus_count)
+		AudioServer.set_bus_name(AudioServer.bus_count - 1, "SFX")
+		AudioServer.set_bus_volume_db(AudioServer.bus_count - 1, 0.0)
+
+
+func _play_zone_completion_sfx() -> void:
+	"""Play zone completion SFX and resume music when done (non-blocking)."""
+	if not is_instance_valid(_sfx_player) or not _zone_completion_sfx:
+		return
+	
+	# Pause background music
+	if Engine.has_singleton("MusicController") or MusicController:
+		MusicController.pause_music()
+	
+	# Play SFX
+	_sfx_player.stream = _zone_completion_sfx
+	_sfx_player.play()
+	
+	# Resume music when SFX finishes (using signal, not await)
+	if not _sfx_player.finished.is_connected(_on_sfx_finished_resume_music):
+		_sfx_player.finished.connect(_on_sfx_finished_resume_music, CONNECT_ONE_SHOT)
+
+
+func _on_sfx_finished_resume_music() -> void:
+	"""Callback to resume music after SFX finishes."""
+	if Engine.has_singleton("MusicController") or MusicController:
+		MusicController.resume_music()
+		print("[BackyardPath] SFX finished, music resumed")
 
 
 func _connect_signals() -> void:
@@ -571,7 +619,15 @@ func rpc_unlock_board_phase() -> void:
 		board_tap_button.disabled = false
 
 	if is_instance_valid(feedback_label):
-		feedback_label.text = "Tap the Deduction Board to convert the plant height."
+		if GameState.local_role == GameState.Role.SIDEKICK:
+			feedback_label.text = "Enter the plant height in centimeters."
+		else:
+			feedback_label.text = "Tap the Deduction Board to view the conversion."
+
+	# Hide the tap button for sidekick since board auto-opens
+	if GameState.local_role == GameState.Role.SIDEKICK:
+		if is_instance_valid(board_tap_button):
+			board_tap_button.visible = false
 
 	show_notification("Convert Dali to centimeters in the Deduction Board to uncover the clue.", 0.0)
 	pulse_ledger_guidance(true)
@@ -582,6 +638,11 @@ func rpc_unlock_board_phase() -> void:
 
 	await DialogueSystems.wait_finished("backyard_ledger_hint")
 	_set_dialogue_input_lock(false)
+
+	# Auto-open the board for sidekick - no need to tap first!
+	if GameState.local_role == GameState.Role.SIDEKICK:
+		_open_board_local()
+		_request_start_timer()
 
 
 func _on_board_tap_pressed() -> void:
@@ -598,28 +659,28 @@ func _on_board_tap_pressed() -> void:
 func _open_board_local() -> void:
 	_board_opened = true
 
+	# Only show input and submit button to SIDEKICK
+	var is_sidekick := GameState.local_role == GameState.Role.SIDEKICK
+
 	if is_instance_valid(x_input):
-		x_input.visible = true
+		x_input.visible = is_sidekick
+		x_input.editable = is_sidekick
+		if is_sidekick:
+			x_input.grab_focus()
 
 	if is_instance_valid(submit_button):
-		submit_button.visible = true
+		submit_button.visible = is_sidekick
+		submit_button.disabled = not is_sidekick
 
-	if GameState.local_role == GameState.Role.SIDEKICK:
-		if is_instance_valid(x_input):
-			x_input.editable = true
-			x_input.grab_focus()
-		if is_instance_valid(submit_button):
-			submit_button.disabled = false
-	else:
-		if is_instance_valid(x_input):
-			x_input.editable = false
-		if is_instance_valid(submit_button):
-			submit_button.disabled = true
-
+	# Update feedback text based on role
 	if is_instance_valid(feedback_label):
-		feedback_label.text = "Convert " + str(plant_height_dali) + " Dali into centimeters."
+		if is_sidekick:
+			feedback_label.text = "Convert " + str(plant_height_dali) + " Dali into centimeters."
+		else:
+			feedback_label.text = "The sidekick is solving the puzzle..."
 
-	if _board_unlocked and not _puzzle_solved:
+	# Only show notification to sidekick (they're the only ones who can enter)
+	if is_sidekick and _board_unlocked and not _puzzle_solved:
 		show_notification("Enter the plant height in centimeters.", 2.5)
 
 
@@ -1304,9 +1365,12 @@ func _on_reward_tap_catcher_pressed() -> void:
 	if not _waiting_reward_continue:
 		return
 
-	# Stage 1 -> first line
+	# Stage 1 -> first line (play SFX and pause music)
 	if _reward_stage == 1:
 		_reward_stage = 2
+
+		# Play SFX instantly and pause music during playback
+		_play_zone_completion_sfx()
 
 		if is_instance_valid(reward_panel):
 			reward_panel.visible = true
