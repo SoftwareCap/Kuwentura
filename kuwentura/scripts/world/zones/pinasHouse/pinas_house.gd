@@ -20,7 +20,7 @@ const NOTE_REVEAL_SHAKE_OFFSET: float = 10.0
 const NOTE_REVEAL_SHAKE_STEP: float = 0.05
 const NOTE_REVEAL_SHAKE_COUNT: int = 4
 
-@onready var role_label: Label = %RoleLabel
+@onready var role_label: Label = get_node_or_null("RoleLabel")
 @onready var back_button: Button = $BackButton
 
 # Pause / settings UI
@@ -594,6 +594,10 @@ func _update_role_label() -> void:
 			role_text = "SIDEKICK (Client)"
 		_:
 			role_text = "NO ROLE ASSIGNED"
+
+	if not is_instance_valid(role_label):
+		print("[PinasHouse] Role label removed. Current role: ", role_text, " | Peer: ", multiplayer.get_unique_id())
+		return
 
 	role_label.text = "Role: " + role_text
 	print("[PinasHouse] Role: ", role_text, " | Peer: ", multiplayer.get_unique_id())
