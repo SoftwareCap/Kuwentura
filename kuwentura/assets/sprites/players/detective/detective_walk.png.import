@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://3boff2bjwjx5"
-path="res://.godot/imported/pan.png-4a0a892846eac0110b471074aba82f2e.ctex"
+uid="uid://mttlik5nsegf"
+path="res://.godot/imported/detective_walk.png-8723304f6eb1ad511db1d4d8c2a9442c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/pan.png"
-dest_files=["res://.godot/imported/pan.png-4a0a892846eac0110b471074aba82f2e.ctex"]
+source_file="res://assets/sprites/players/detective/detective_walk.png"
+dest_files=["res://.godot/imported/detective_walk.png-8723304f6eb1ad511db1d4d8c2a9442c.ctex"]
 
 [params]
 
