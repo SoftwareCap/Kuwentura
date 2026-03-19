@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://backyardpath"]
+[gd_scene load_steps=31 format=3 uid="uid://backyardpath"]
 
 [ext_resource type="Script" uid="uid://dfs4agyqe4qk4" path="res://scripts/world/zones/backyardPath/backyard_path.gd" id="1_backyardpath"]
 [ext_resource type="Texture2D" uid="uid://p1tc8ablyx3s" path="res://assets/sprites/places/backyardBackground.png" id="2_krb5t"]
@@ -14,7 +14,6 @@
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="11_vm1ij"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="12_fw11r"]
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="13_y7aiq"]
-[ext_resource type="Texture2D" uid="uid://b2ryp42vnc38n" path="res://assets/sprites/players/briefcaseOpen.png" id="14_ul8jb"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="15_0c5pu"]
 [ext_resource type="Texture2D" uid="uid://cuhne1u8q0p3s" path="res://assets/sprites/clues/pineappleClue.png" id="17_s7hv4"]
 [ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="17_va6t2"]
@@ -51,6 +50,11 @@ shadow_offset = Vector2(0, 4)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vm1ij"]
 
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_6qa7e"]
+texture = ExtResource("13_y7aiq")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_f85bs"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cslgv"]
 bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
 border_width_left = 2
@@ -70,12 +74,6 @@ thickness = 20
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_k1mle"]
 color = Color(0.6509804, 0.4392157, 0.26666668, 1)
 thickness = 20
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_6qa7e"]
-texture = ExtResource("13_y7aiq")
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bb53s"]
-texture = ExtResource("14_ul8jb")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_on1j4"]
 content_margin_top = 10.0
@@ -225,7 +223,8 @@ offset_right = 768.0
 offset_bottom = 520.0
 metadata/_edit_use_anchors_ = true
 
-[node name="GuidanceArrow" type="Sprite2D" parent="RoleLayer/Control"]
+[node name="GuidancedArrow" type="Sprite2D" parent="RoleLayer/Control"]
+visible = false
 position = Vector2(1094, 79)
 scale = Vector2(0.27666667, 0.17333333)
 texture = ExtResource("6_u25mc")
@@ -410,6 +409,120 @@ text = "← Back to Forest"
 metadata/_edit_use_anchors_ = true
 
 [node name="InsideZoneControl" parent="." instance=ExtResource("11_vm1ij")]
+
+[node name="SidekickLayer" type="CanvasLayer" parent="."]
+
+[node name="Ledger" type="Panel" parent="SidekickLayer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -393.0
+offset_top = -331.0
+offset_right = 519.0
+offset_bottom = 501.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_6qa7e")
+
+[node name="Control" type="Control" parent="SidekickLayer/Ledger"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LedgerTitle" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 200.0
+offset_right = 431.0
+offset_bottom = 251.0
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 23
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 284.0
+offset_right = 446.0
+offset_bottom = 482.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+
+[node name="LedgerLeftHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 173.0
+offset_top = 270.0
+offset_right = 433.0
+offset_bottom = 330.0
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerLeftBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 339.0
+offset_right = 446.0
+offset_bottom = 482.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="LedgerRightHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 478.0
+offset_top = 208.0
+offset_right = 753.0
+offset_bottom = 276.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerRightBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 478.0
+offset_top = 274.0
+offset_right = 739.0
+offset_bottom = 492.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="Briefcase" type="Panel" parent="SidekickLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -247.0
+offset_top = -297.0
+offset_right = 247.0
+offset_bottom = 197.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_f85bs")
 
 [node name="PauseCanvasLayer" type="CanvasLayer" parent="."]
 process_mode = 3
@@ -633,121 +746,6 @@ theme_override_font_sizes/font_size = 30
 text = "80%"
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="SidekickLayer" type="CanvasLayer" parent="."]
-
-[node name="Ledger" type="Panel" parent="SidekickLayer"]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -393.0
-offset_top = -331.0
-offset_right = 519.0
-offset_bottom = 501.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_6qa7e")
-
-[node name="Control" type="Control" parent="SidekickLayer/Ledger"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="LedgerTitle" type="Label" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 160.0
-offset_top = 200.0
-offset_right = 431.0
-offset_bottom = 251.0
-size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 23
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="LedgerBody" type="Label" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 152.0
-offset_top = 284.0
-offset_right = 446.0
-offset_bottom = 482.0
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 21
-horizontal_alignment = 1
-
-[node name="LedgerLeftHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 173.0
-offset_top = 270.0
-offset_right = 433.0
-offset_bottom = 330.0
-size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 19
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="LedgerLeftBody" type="Label" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 152.0
-offset_top = 339.0
-offset_right = 446.0
-offset_bottom = 482.0
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 18
-horizontal_alignment = 1
-
-[node name="LedgerRightHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 478.0
-offset_top = 208.0
-offset_right = 753.0
-offset_bottom = 276.0
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 19
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="LedgerRightBody" type="Label" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 478.0
-offset_top = 274.0
-offset_right = 739.0
-offset_bottom = 492.0
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 18
-horizontal_alignment = 1
-
-[node name="Briefcase" type="Panel" parent="SidekickLayer"]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -247.0
-offset_top = -297.0
-offset_right = 247.0
-offset_bottom = 197.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_bb53s")
 
 [node name="RewardLayer" type="CanvasLayer" parent="."]
 
