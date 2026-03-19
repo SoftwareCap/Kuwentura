@@ -19,6 +19,24 @@ extends Node2D
 @onready var volume_slider: HSlider = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeSlider
 @onready var volume_value_label: Label = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeValue
 
+#Forest Ledger
+@onready var forest_ledger_title_label: Label = $SidekickLayer/Ledger/Control/LedgerTitle
+@onready var forest_ledger_left_header_label: Label = $SidekickLayer/Ledger/Control/LedgerLeftHeader
+@onready var forest_ledger_left_body_label: Label = $SidekickLayer/Ledger/Control/LedgerLeftBody
+@onready var forest_ledger_right_header_label: Label = $SidekickLayer/Ledger/Control/LedgerRightHeader
+@onready var forest_ledger_right_body_label: Label = $SidekickLayer/Ledger/Control/LedgerRightBody
+@onready var forest_prev_page_button: Button = $SidekickLayer/Ledger/Control/PrevPageButton
+@onready var forest_next_page_button: Button = $SidekickLayer/Ledger/Control/NextPageButton
+@onready var forest_page_indicator_label: Label = $SidekickLayer/Ledger/Control/PageIndicator
+@onready var forest_ledger_control: Control = $SidekickLayer/Ledger/Control
+
+var _ledger_pages: Array[Dictionary] = []
+var _current_ledger_page: int = 0
+var _ledger_page_animating: bool = false
+
+const LEDGER_PAGE_TURN_DURATION: float = 0.16
+const LEDGER_EMPTY_TEXT := "Solve a zone puzzle to unlock ledger notes in the forest."
+
 # Track spawned players
 var _spawned_players: Dictionary = {}
 
@@ -147,6 +165,8 @@ func _ready():
 	
 	# Setup UI controls (Map, Ledger, Briefcase buttons)
 	_setup_ui_controls()
+	_setup_forest_ledger_navigation()
+	_refresh_forest_ledger_pages()
 	
 	# Connect to zone portal signals for door animations
 	_connect_portal_signals()
@@ -945,13 +965,15 @@ func _close_map(animate: bool = true) -> void:
 func _open_ledger() -> void:
 	if not ledger_panel:
 		return
-	
+
+	_refresh_forest_ledger_pages()
+	_show_forest_ledger_page(_current_ledger_page, false)
+
 	_is_animating = true
 	ledger_panel.visible = true
 	ledger_panel.scale = LEDGER_CLOSED_SCALE
 	ledger_panel.pivot_offset = ledger_panel.size / 2
-	
-	# Book opening animation (scale X from 0.1 to 1.0)
+
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_ELASTIC)
 	tween.set_ease(Tween.EASE_OUT)
@@ -978,6 +1000,183 @@ func _close_ledger(animate: bool = true) -> void:
 		ledger_panel.visible = false
 		ledger_panel.scale = LEDGER_CLOSED_SCALE
 
+func _setup_forest_ledger_navigation() -> void:
+	if is_instance_valid(forest_prev_page_button) and not forest_prev_page_button.pressed.is_connected(_on_forest_prev_page_pressed):
+		forest_prev_page_button.pressed.connect(_on_forest_prev_page_pressed)
+
+	if is_instance_valid(forest_next_page_button) and not forest_next_page_button.pressed.is_connected(_on_forest_next_page_pressed):
+		forest_next_page_button.pressed.connect(_on_forest_next_page_pressed)
+
+
+func _refresh_forest_ledger_pages() -> void:
+	_ledger_pages.clear()
+
+	var entries: Array = PuzzleManager.get_unlocked_global_ledger_entries()
+
+	if entries.is_empty():
+		_ledger_pages.append({
+			"title": "Ledger",
+			"left_header": "Notes",
+			"left_body": LEDGER_EMPTY_TEXT,
+			"right_header": "",
+			"right_body": ""
+		})
+	else:
+		for entry in entries:
+			_ledger_pages.append(_convert_entry_to_book_page(entry))
+
+	if _ledger_pages.is_empty():
+		_current_ledger_page = 0
+	else:
+		_current_ledger_page = clamp(_current_ledger_page, 0, _ledger_pages.size() - 1)
+
+
+func _convert_entry_to_book_page(entry: Dictionary) -> Dictionary:
+	var layout: String = str(entry.get("layout", "single_body"))
+
+	if layout == "two_column":
+		return {
+			"title": str(entry.get("zone_name", entry.get("title", "Ledger"))),
+			"left_header": str(entry.get("left_header", "")),
+			"left_body": str(entry.get("left_body", "")),
+			"right_header": str(entry.get("right_header", "")),
+			"right_body": str(entry.get("right_body", ""))
+		}
+
+	var title_text: String = str(entry.get("zone_name", entry.get("title", "Ledger")))
+	var single_title: String = str(entry.get("title", "Notes"))
+	var body_text: String = str(entry.get("body", ""))
+
+	var split_pages: Dictionary = _split_body_into_book_pages(body_text)
+
+	return {
+		"title": title_text,
+		"left_header": single_title,
+		"left_body": str(split_pages.get("left", "")),
+		"right_header": "Example" if str(split_pages.get("right", "")) != "" else "",
+		"right_body": str(split_pages.get("right", ""))
+	}
+
+
+func _split_body_into_book_pages(body_text: String) -> Dictionary:
+	var sections: PackedStringArray = body_text.split("\n\n", false)
+
+	if sections.size() <= 1:
+		return {
+			"left": body_text,
+			"right": ""
+		}
+
+	var midpoint: int = int(ceil(float(sections.size()) / 2.0))
+	var left_parts: Array[String] = []
+	var right_parts: Array[String] = []
+
+	for i in range(sections.size()):
+		var part: String = sections[i]
+		if i < midpoint:
+			left_parts.append(part)
+		else:
+			right_parts.append(part)
+
+	return {
+		"left": "\n\n".join(left_parts),
+		"right": "\n\n".join(right_parts)
+	}
+
+
+func _show_forest_ledger_page(page_index: int, animate: bool = true) -> void:
+	if _ledger_pages.is_empty():
+		return
+
+	page_index = clamp(page_index, 0, _ledger_pages.size() - 1)
+
+	if animate and _ledger_page_animating:
+		return
+
+	if not animate:
+		_current_ledger_page = page_index
+		_apply_forest_ledger_page(_ledger_pages[_current_ledger_page])
+		_update_forest_ledger_navigation()
+		if is_instance_valid(forest_ledger_control):
+			forest_ledger_control.scale = Vector2.ONE
+		return
+
+	_ledger_page_animating = true
+	_current_ledger_page = page_index
+
+	if is_instance_valid(forest_ledger_control):
+		forest_ledger_control.pivot_offset = forest_ledger_control.size / 2
+
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+
+	if is_instance_valid(forest_ledger_control):
+		tween.tween_property(forest_ledger_control, "scale", Vector2(0.05, 1.0), LEDGER_PAGE_TURN_DURATION)
+
+	tween.tween_callback(func():
+		_apply_forest_ledger_page(_ledger_pages[_current_ledger_page])
+		_update_forest_ledger_navigation()
+	)
+
+	if is_instance_valid(forest_ledger_control):
+		tween.tween_property(forest_ledger_control, "scale", Vector2.ONE, LEDGER_PAGE_TURN_DURATION)
+
+	tween.tween_callback(func():
+		_ledger_page_animating = false
+	)
+
+
+func _apply_forest_ledger_page(page_data: Dictionary) -> void:
+	if is_instance_valid(forest_ledger_title_label):
+		forest_ledger_title_label.text = str(page_data.get("title", ""))
+
+	if is_instance_valid(forest_ledger_left_header_label):
+		forest_ledger_left_header_label.text = str(page_data.get("left_header", ""))
+
+	if is_instance_valid(forest_ledger_left_body_label):
+		forest_ledger_left_body_label.text = str(page_data.get("left_body", ""))
+
+	if is_instance_valid(forest_ledger_right_header_label):
+		forest_ledger_right_header_label.text = str(page_data.get("right_header", ""))
+
+	if is_instance_valid(forest_ledger_right_body_label):
+		forest_ledger_right_body_label.text = str(page_data.get("right_body", ""))
+
+
+func _update_forest_ledger_navigation() -> void:
+	var total_pages: int = _ledger_pages.size()
+
+	if is_instance_valid(forest_page_indicator_label):
+		forest_page_indicator_label.text = str(_current_ledger_page + 1) + " / " + str(max(total_pages, 1))
+
+	if is_instance_valid(forest_prev_page_button):
+		forest_prev_page_button.visible = total_pages > 1
+		forest_prev_page_button.disabled = _current_ledger_page <= 0
+
+	if is_instance_valid(forest_next_page_button):
+		forest_next_page_button.visible = total_pages > 1
+		forest_next_page_button.disabled = _current_ledger_page >= total_pages - 1
+
+
+func _on_forest_prev_page_pressed() -> void:
+	if _ledger_page_animating:
+		return
+
+	if _current_ledger_page <= 0:
+		return
+
+	_show_forest_ledger_page(_current_ledger_page - 1, true)
+
+
+func _on_forest_next_page_pressed() -> void:
+	if _ledger_page_animating:
+		return
+
+	if _current_ledger_page >= _ledger_pages.size() - 1:
+		return
+
+	_show_forest_ledger_page(_current_ledger_page + 1, true)
 
 # ============================================================================
 # BRIEFCASE PANEL (Case Opening Animation)
