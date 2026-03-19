@@ -53,15 +53,15 @@ extends Node2D
 var _search_mode := false
 
 var _shadow_tex := {
-	"ladle": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Ladle.png"),
-	"pan": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pan.png"),
-	"pot": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Shadow - Pot.png"),
+	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Ladle.png"),
+	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Pan.png"),
+	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Pot.png"),
 }
 
 var _reveal_tex := {
-	"ladle": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Reveal - Ladle.png"),
-	"pan": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Reveal - Pan.png"),
-	"pot": preload("res://assets/sprites/zoneObjects/Zone 1 Objects/Reveal - Pot.png"),
+	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/reveal_Ladle.png"),
+	"pan": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/reveal_Pan.png"),
+	"pot": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/reveal_Pot.png"),
 }
 
 const _SERVER_PEER_ID := 1

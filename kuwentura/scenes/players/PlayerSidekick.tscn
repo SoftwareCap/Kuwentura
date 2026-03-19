@@ -1,8 +1,8 @@
 [gd_scene load_steps=23 format=3 uid="uid://udt37i3bt31c"]
 
-[ext_resource type="Texture2D" uid="uid://cpcwvvoj4wtab" path="res://assets/sprites/players/sidekick/sidekick_idle.png" id="1_ig6if"]
+[ext_resource type="Texture2D" uid="uid://bxbkwkkjox3dh" path="res://assets/sprites/players/sidekick/sidekick_idle.png" id="1_ig6if"]
 [ext_resource type="Script" uid="uid://d5emekkjkv5l" path="res://scripts/players/player_sidekick.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://cskqffd4p1vuw" path="res://assets/sprites/players/sidekick/sidekick_walk.png" id="2_djqfg"]
+[ext_resource type="Texture2D" uid="uid://d35eqgjkkuyn7" path="res://assets/sprites/players/sidekick/sidekick_walk.png" id="2_djqfg"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_7461x"]
 atlas = ExtResource("1_ig6if")
