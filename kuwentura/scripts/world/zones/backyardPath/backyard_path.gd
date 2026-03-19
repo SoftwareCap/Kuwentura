@@ -51,6 +51,18 @@ const _SERVER_PEER_ID := 1
 # Consequence visuals
 @onready var fog_overlay: ColorRect = $FogOverlay
 
+#zone controls
+@onready var inside_zone_control: CanvasLayer = get_node_or_null("InsideZoneControl")
+
+@onready var pause_canvas_layer: CanvasLayer = get_node_or_null("PauseCanvasLayer")
+@onready var in_game_pause_panel: Panel = get_node_or_null("PauseCanvasLayer/InGamePausePanel")
+@onready var option_sub_panel: Panel = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel")
+@onready var volume_slider: HSlider = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeSlider")
+@onready var volume_value_label: Label = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeValue")
+
+@onready var briefcase_panel: Panel = get_node_or_null("SidekickLayer/Briefcase")
+@onready var briefcase_display: TextureRect = get_node_or_null("SidekickLayer/Briefcase/BriefcaseDisplay")
+
 # Reward
 @onready var reward_layer: CanvasLayer = get_node_or_null("RewardLayer")
 @onready var reward_dark_overlay: ColorRect = get_node_or_null("RewardLayer/DarkOverlay")
@@ -134,10 +146,15 @@ func _ready() -> void:
 	# 4 Apply puzzle values to UI
 	_populate_heights()
 	_populate_ledger_content()
+	_ensure_briefcase_display()
+	_refresh_briefcase_display()
 
 	# 5 Connect clue signal
 	if not GameState.clue_collected.is_connected(_on_clue_collected):
 		GameState.clue_collected.connect(_on_clue_collected)
+
+	if not GameState.briefcase_updated.is_connected(_on_briefcase_updated):
+		GameState.briefcase_updated.connect(_on_briefcase_updated)
 
 	# 6 Start intro dialogue
 	_start_intro_dialogue_delayed()
@@ -184,7 +201,34 @@ func _connect_signals() -> void:
 	if is_instance_valid(tap_catcher) and not tap_catcher.pressed.is_connected(_on_reward_tap_catcher_pressed):
 		tap_catcher.pressed.connect(_on_reward_tap_catcher_pressed)
 
+		if is_instance_valid(touch_controls):
+			if touch_controls.has_signal("pause_pressed"):
+				if not touch_controls.pause_pressed.is_connected(_on_pause_button_pressed):
+					touch_controls.pause_pressed.connect(_on_pause_button_pressed)
 
+			if touch_controls.has_signal("briefcase_pressed"):
+				if not touch_controls.briefcase_pressed.is_connected(_on_briefcase_button_pressed):
+					touch_controls.briefcase_pressed.connect(_on_briefcase_button_pressed)
+
+	var resume_button: BaseButton = get_node_or_null("PauseCanvasLayer/InGamePausePanel/Resume_PlayButton")
+	if is_instance_valid(resume_button) and not resume_button.pressed.is_connected(_on_resume_play_button_pressed):
+		resume_button.pressed.connect(_on_resume_play_button_pressed)
+
+	var option_button: BaseButton = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionButton")
+	if is_instance_valid(option_button) and not option_button.pressed.is_connected(_on_option_button_pressed):
+		option_button.pressed.connect(_on_option_button_pressed)
+
+	var exit_button: BaseButton = get_node_or_null("PauseCanvasLayer/InGamePausePanel/ExitButton")
+	if is_instance_valid(exit_button) and not exit_button.pressed.is_connected(_on_exit_to_main_menu_button_pressed):
+		exit_button.pressed.connect(_on_exit_to_main_menu_button_pressed)
+
+	var option_back_button: TouchScreenButton = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/BackToPrevious")
+	if is_instance_valid(option_back_button) and not option_back_button.pressed.is_connected(_on_in_game_option_back_pressed):
+		option_back_button.pressed.connect(_on_in_game_option_back_pressed)
+
+	if is_instance_valid(volume_slider) and not volume_slider.value_changed.is_connected(_on_in_game_volume_changed):
+		volume_slider.value_changed.connect(_on_in_game_volume_changed)
+		
 func _setup_role_label() -> void:
 	var role_text := "Unknown"
 	match GameState.local_role:
@@ -313,6 +357,26 @@ func _setup_initial_ui() -> void:
 		briefcase_reveal_sprite.visible = false
 		briefcase_reveal_sprite.texture = null
 		briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
+
+	if is_instance_valid(pause_canvas_layer):
+		pause_canvas_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	if is_instance_valid(in_game_pause_panel):
+		in_game_pause_panel.visible = false
+		in_game_pause_panel.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = false
+		option_sub_panel.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	if is_instance_valid(volume_slider):
+		volume_slider.value = MusicController.get_volume() * 100
+
+	if is_instance_valid(volume_value_label):
+		volume_value_label.text = str(int(MusicController.get_volume() * 100)) + "%"
+
+	if is_instance_valid(briefcase_panel):
+		briefcase_panel.visible = false
 
 	# Detective must never type or submit
 	if GameState.local_role == GameState.Role.DETECTIVE:
@@ -604,7 +668,6 @@ func _on_board_timer_timeout() -> void:
 
 	_server_fail_zone("The forest rejects your presence.\nReturn in 1 minute to try again.")
 
-
 func _on_ledger_pressed() -> void:
 	if _dialogue_input_locked:
 		return
@@ -615,7 +678,12 @@ func _on_ledger_pressed() -> void:
 	if not is_instance_valid(ledger_panel):
 		return
 
-	ledger_panel.visible = not ledger_panel.visible
+	var should_open: bool = not ledger_panel.visible
+
+	if should_open and is_instance_valid(briefcase_panel):
+		briefcase_panel.visible = false
+
+	ledger_panel.visible = should_open
 
 	if ledger_panel.visible:
 		hide_notification()
@@ -623,6 +691,124 @@ func _on_ledger_pressed() -> void:
 	else:
 		if _board_unlocked and not _puzzle_solved:
 			show_notification("Convert Dali to centimeters in the Deduction Board to uncover the clue.", 0.0)
+			
+func _on_briefcase_button_pressed() -> void:
+	if _dialogue_input_locked:
+		return
+
+	if GameState.local_role != GameState.Role.SIDEKICK:
+		return
+
+	if not is_instance_valid(briefcase_panel):
+		return
+
+	_refresh_briefcase_display()
+
+	var should_open: bool = not briefcase_panel.visible
+
+	if should_open and is_instance_valid(ledger_panel):
+		ledger_panel.visible = false
+
+	briefcase_panel.visible = should_open
+
+
+func _ensure_briefcase_display() -> void:
+	if not is_instance_valid(briefcase_panel):
+		return
+
+	if is_instance_valid(briefcase_display):
+		return
+
+	briefcase_display = TextureRect.new()
+	briefcase_display.name = "BriefcaseDisplay"
+	briefcase_display.visible = false
+	briefcase_display.set_anchors_preset(Control.PRESET_FULL_RECT)
+	briefcase_display.offset_left = -152.0
+	briefcase_display.offset_top = 40.0
+	briefcase_display.offset_right = 185.0
+	briefcase_display.offset_bottom = 67.0
+	briefcase_display.expand_mode = 1
+	briefcase_display.stretch_mode = 5
+	briefcase_display.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	briefcase_panel.add_child(briefcase_display)
+
+
+func _refresh_briefcase_display() -> void:
+	if not is_instance_valid(briefcase_display):
+		return
+
+	var texture: Texture2D = GameState.get_briefcase_texture("forest")
+	briefcase_display.texture = texture
+	briefcase_display.visible = texture != null
+
+
+func _on_briefcase_updated() -> void:
+	_refresh_briefcase_display()
+
+
+func _on_pause_button_pressed() -> void:
+	if is_instance_valid(in_game_pause_panel):
+		in_game_pause_panel.visible = true
+
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = false
+
+	if is_instance_valid(inside_zone_control):
+		inside_zone_control.visible = false
+
+	MusicController.pause_music()
+	get_tree().paused = true
+
+
+func _on_resume_play_button_pressed() -> void:
+	if is_instance_valid(in_game_pause_panel):
+		in_game_pause_panel.visible = false
+
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = false
+
+	get_tree().paused = false
+	MusicController.resume_music()
+
+	if is_instance_valid(inside_zone_control):
+		inside_zone_control.visible = true
+
+
+func _on_option_button_pressed() -> void:
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = true
+
+	if is_instance_valid(volume_slider):
+		volume_slider.value = MusicController.get_volume() * 100
+
+	if is_instance_valid(volume_value_label):
+		volume_value_label.text = str(int(MusicController.get_volume() * 100)) + "%"
+
+
+func _on_in_game_option_back_pressed() -> void:
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = false
+
+
+func _on_exit_to_main_menu_button_pressed() -> void:
+	get_tree().paused = false
+	MusicController.resume_music()
+
+	if NetworkManager.has_active_connection():
+		NetworkManager.disconnect_network()
+		await get_tree().create_timer(0.2).timeout
+
+	if is_inside_tree():
+		get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
+
+
+func _on_in_game_volume_changed(value: float) -> void:
+	var volume: float = value / 100.0
+	MusicController.set_volume(volume)
+
+	if is_instance_valid(volume_value_label):
+		volume_value_label.text = str(int(value)) + "%"
 
 
 func pulse_ledger_guidance(enable: bool) -> void:
@@ -1037,6 +1223,8 @@ func _on_back_pressed() -> void:
 
 
 func _return_to_forest() -> void:
+	get_tree().paused = false
+	MusicController.resume_music()
 	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 	
 func _refresh_inside_zone_buttons() -> void:
@@ -1060,11 +1248,14 @@ func _refresh_inside_zone_buttons() -> void:
 		if is_instance_valid(ledger_panel):
 			ledger_panel.visible = false
 
+		if is_instance_valid(briefcase_panel):
+			briefcase_panel.visible = false
+
 		if is_instance_valid(ledger_touch_button):
 			ledger_touch_button.visible = false
 
 		if is_instance_valid(briefcase_touch_button):
-			briefcase_touch_button.visible = false	
+			briefcase_touch_button.visible = false
 
 func _apply_solved_board_state() -> void:
 	if is_instance_valid(board_height_label):
