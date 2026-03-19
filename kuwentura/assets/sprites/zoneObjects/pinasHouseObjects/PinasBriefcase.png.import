@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c7f1pyernjqux"
-path="res://.godot/imported/PinasBriefcase.png-cf392afdd000092ed6d864a4129321ab.ctex"
+path="res://.godot/imported/pinasBriefcase.png-fa36d3d9163ca37f3fb9ad02152f3979.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/PinasBriefcase.png"
-dest_files=["res://.godot/imported/PinasBriefcase.png-cf392afdd000092ed6d864a4129321ab.ctex"]
+source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/pinasBriefcase.png"
+dest_files=["res://.godot/imported/pinasBriefcase.png-fa36d3d9163ca37f3fb9ad02152f3979.ctex"]
 
 [params]
 

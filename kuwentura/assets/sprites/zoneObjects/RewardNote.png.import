@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bx0hqyafkevfo"
-path="res://.godot/imported/RewardNote.png-876e40fccc80346fc76790947dc80118.ctex"
+path="res://.godot/imported/rewardNote.png-b93733382f447228cd52c111ef512950.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/RewardNote.png"
-dest_files=["res://.godot/imported/RewardNote.png-876e40fccc80346fc76790947dc80118.ctex"]
+source_file="res://assets/sprites/zoneObjects/rewardNote.png"
+dest_files=["res://.godot/imported/rewardNote.png-b93733382f447228cd52c111ef512950.ctex"]
 
 [params]
 
