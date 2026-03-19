@@ -375,7 +375,12 @@ func clear_partner_state(peer_id: int) -> void:
 ## Works in any network configuration - host just needs to share their IP
 func host_game() -> Dictionary:
 	if _state != ConnectionState.DISCONNECTED:
-		return {"success": false, "error": "Already connected"}
+		# Force cleanup if in unexpected state
+		if multiplayer.multiplayer_peer:
+			multiplayer.multiplayer_peer.close()
+			multiplayer.multiplayer_peer = null
+		_cleanup()
+		_state = ConnectionState.DISCONNECTED
 	
 	_change_state(ConnectionState.CONNECTING)
 	
