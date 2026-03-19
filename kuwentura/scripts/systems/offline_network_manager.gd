@@ -176,6 +176,7 @@ func _start_discovery_broadcast():
 func _broadcast_presence():
 	"""Send broadcast packet with room info to all network interfaces"""
 	if not _broadcast_socket or _invite_code.is_empty():
+		print("[OfflineNetwork] Cannot broadcast: socket=", _broadcast_socket != null, ", code=", _invite_code)
 		return
 	
 	var broadcast_data = {
@@ -189,25 +190,32 @@ func _broadcast_presence():
 	
 	var packet = JSON.stringify(broadcast_data).to_utf8_buffer()
 	
+	print("[OfflineNetwork] Broadcasting presence... Host IP: ", _host_ip, ", Code: ", _invite_code)
+	
 	# Send to global broadcast address
 	_broadcast_socket.set_dest_address("255.255.255.255", DISCOVERY_PORT)
 	var err = _broadcast_socket.put_packet(packet)
 	
 	if err == OK:
-		print("[OfflineNetwork] Broadcast sent (code: ", _invite_code, ")")
+		print("[OfflineNetwork] ✓ Broadcast sent to 255.255.255.255")
 	else:
-		print("[OfflineNetwork] Broadcast failed: ", err)
+		print("[OfflineNetwork] ✗ Broadcast to 255.255.255.255 failed: ", err)
 	
 	# Also send to common subnet broadcast addresses for better reliability
 	var subnets = ["192.168.1.255", "192.168.0.255", "192.168.43.255", "172.20.10.255"]
 	for subnet in subnets:
 		_broadcast_socket.set_dest_address(subnet, DISCOVERY_PORT)
-		_broadcast_socket.put_packet(packet)
+		var subnet_err = _broadcast_socket.put_packet(packet)
+		if subnet_err != OK:
+			print("[OfflineNetwork] ✗ Broadcast to ", subnet, " failed: ", subnet_err)
 
 
 func _start_discovery_listen(target_code: String) -> Dictionary:
 	"""Client starts listening for host broadcasts"""
 	_target_code = target_code.to_upper()
+	
+	print("[OfflineNetwork] Starting discovery listen for code: ", target_code)
+	print("[OfflineNetwork] Discovery port: ", DISCOVERY_PORT)
 	
 	_listen_socket = PacketPeerUDP.new()
 	_listen_socket.set_broadcast_enabled(true)
@@ -216,17 +224,18 @@ func _start_discovery_listen(target_code: String) -> Dictionary:
 	# Try binding to any available address on the discovery port
 	var error = _listen_socket.bind(DISCOVERY_PORT, "0.0.0.0")
 	if error != OK:
-		push_warning("[OfflineNetwork] Failed to bind discovery socket: " + str(error))
+		push_warning("[OfflineNetwork] Failed to bind discovery socket to 0.0.0.0: " + str(error))
 		# Try with reuse enabled (if supported)
 		_listen_socket = PacketPeerUDP.new()
 		_listen_socket.set_broadcast_enabled(true)
 		error = _listen_socket.bind(DISCOVERY_PORT)
 		if error != OK:
 			_listen_socket = null
-			return {"success": false, "error": "Port in use"}
+			print("[OfflineNetwork] CRITICAL: Failed to bind discovery socket: ", error)
+			return {"success": false, "error": "Cannot bind to port " + str(DISCOVERY_PORT) + " (code: " + str(error) + ")"}
 	
 	_is_listening = true
-	print("[OfflineNetwork] Listening for discovery on port ", DISCOVERY_PORT, " for code: ", _target_code)
+	print("[OfflineNetwork] ✓ Listening for discovery on port ", DISCOVERY_PORT, " for code: ", _target_code)
 	return {"success": true}
 
 
@@ -273,13 +282,21 @@ func _wait_for_discovery(target_code: String) -> Dictionary:
 	var elapsed: float = 0.0
 	_last_discovered_host = {}
 	
+	print("[OfflineNetwork] Waiting for discovery... timeout: ", DISCOVERY_TIMEOUT, "s")
+	
 	while elapsed < DISCOVERY_TIMEOUT:
 		await get_tree().create_timer(0.1).timeout
 		elapsed += 0.1
 		
+		# Log progress every 2 seconds
+		if int(elapsed * 10) % 20 == 0:
+			print("[OfflineNetwork] Still searching... (", int(elapsed), "s elapsed)")
+		
 		if not _last_discovered_host.is_empty() and _last_discovered_host.code == target_code:
+			print("[OfflineNetwork] Discovery successful! Found host at ", _last_discovered_host.ip)
 			return _last_discovered_host
 	
+	print("[OfflineNetwork] Discovery timeout - no host found with code ", target_code)
 	return {}
 
 
@@ -419,6 +436,13 @@ func host_game() -> Dictionary:
 	GameState.set_session_seed(_session_seed)
 	
 	_change_state(ConnectionState.HOSTING)
+	
+	print("[OfflineNetwork] ============================================")
+	print("[OfflineNetwork] HOST STARTED SUCCESSFULLY")
+	print("[OfflineNetwork] IP Address: ", _host_ip)
+	print("[OfflineNetwork] Room Code: ", _invite_code)
+	print("[OfflineNetwork] Port: ", DEFAULT_PORT)
+	print("[OfflineNetwork] ============================================")
 	
 	var host_info = {
 		"success": true,
