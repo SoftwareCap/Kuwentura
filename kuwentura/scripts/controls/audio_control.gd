@@ -25,6 +25,9 @@ var _tracks: Dictionary = {}
 var _current_track: MusicTrack = MusicTrack.MAIN_MENU
 var _is_initialized: bool = false
 
+# Track playback position for resuming forest music when returning from zones
+var _forest_hub_playback_position: float = 0.0
+
 
 func _ready() -> void:
 	# Ensure we have a dedicated "Music" audio bus
@@ -99,6 +102,11 @@ func play_track(track: MusicTrack, fade_duration: float = 0.5) -> void:
 	if _current_track == track and _player and _player.playing and _is_initialized:
 		return  # Already playing this track
 	
+	# Save current playback position before switching (for tracks that should resume)
+	if _player and _current_track == MusicTrack.FOREST_HUB:
+		_forest_hub_playback_position = _player.get_playback_position()
+		print("[AudioControl] Saved FOREST_HUB position: ", _forest_hub_playback_position)
+	
 	_current_track = track
 	
 	# Fade out current, then fade in new
@@ -128,7 +136,15 @@ func _switch_track(track: MusicTrack, fade_duration: float) -> void:
 	else:
 		_player.volume_db = 0.0
 	
-	_player.play()
+	# Resume from saved position if returning to forest hub
+	var from_position: float = 0.0
+	if track == MusicTrack.FOREST_HUB and _forest_hub_playback_position > 0:
+		from_position = _forest_hub_playback_position
+		print("[AudioControl] Resuming FOREST_HUB from position: ", from_position)
+		# Reset saved position after using it
+		_forest_hub_playback_position = 0.0
+	
+	_player.play(from_position)
 	
 	# Fade in
 	if fade_duration > 0:

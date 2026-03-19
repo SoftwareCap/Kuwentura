@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://k60h4yhhde0x" path="res://assets/backgrounds/forest.png" id="2_87r7r"]
 [ext_resource type="Texture2D" uid="uid://d06a48u2atl4o" path="res://assets/sprites/places/pinasHouseZone.png" id="2_anhpr"]
-[ext_resource type="Texture2D" uid="uid://fyaaxc6p5k04" path="res://assets/tiles/ForestPathTilemap.png" id="2_k5ulr"]
+[ext_resource type="Texture2D" uid="uid://fyaaxc6p5k04" path="res://assets/tiles/forestPathTilemap.png" id="2_k5ulr"]
 [ext_resource type="Script" uid="uid://b57klslahartq" path="res://scripts/world/hub/zone_portal.gd" id="3_dyw7g"]
 [ext_resource type="Texture2D" uid="uid://p18vin8nbajb" path="res://assets/sprites/places/oldWellZone.png" id="5_ggw0p"]
 [ext_resource type="Texture2D" uid="uid://co67v77hnrb2d" path="res://assets/sprites/places/pinasHouseOpenDoor.png" id="5_wp30c"]
@@ -10,7 +10,7 @@
 [ext_resource type="Script" uid="uid://dhq7o8y147g37" path="res://scripts/world/hub/forest_hub.gd" id="6_forest_hub"]
 [ext_resource type="PackedScene" uid="uid://i2gpufiq0ql0" path="res://scenes/controls/TouchControls.tscn" id="7_6nmbo"]
 [ext_resource type="Texture2D" uid="uid://c27biqcyrcmo8" path="res://assets/sprites/places/backyardPathZone.png" id="7_i1yoq"]
-[ext_resource type="Script" path="res://scripts/world/hub/finish_zone_indicator.gd" id="7_indicator"]
+[ext_resource type="Script" uid="uid://mmcj3rgi3q85" path="res://scripts/world/hub/finish_zone_indicator.gd" id="7_indicator"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="8_ggw0p"]
 [ext_resource type="Texture2D" uid="uid://vhtyew110bgu" path="res://assets/sprites/zoneObjects/woodenSignage.png" id="9_rbch1"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="11_i1yoq"]

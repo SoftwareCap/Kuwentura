@@ -35,7 +35,7 @@ var _current_ledger_page: int = 0
 var _ledger_page_animating: bool = false
 
 const LEDGER_PAGE_TURN_DURATION: float = 0.16
-const LEDGER_EMPTY_TEXT := "Solve a zone puzzle to unlock ledger notes in the forest."
+const LEDGER_EMPTY_TEXT := "Solve a zone puzzle to unlock \nledger notes in the forest."
 
 # Track spawned players
 var _spawned_players: Dictionary = {}
