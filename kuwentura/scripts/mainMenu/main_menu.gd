@@ -263,6 +263,7 @@ func _on_join_pressed() -> void:
 		sidekick_popup.visible = true
 		if code_input:
 			code_input.text = ""
+			code_input.placeholder_text = "Enter Room Code"
 			code_input.grab_focus()
 
 
@@ -289,51 +290,10 @@ func _on_join_code_cancel_pressed() -> void:
 	_set_input_blocked(false)
 
 
-func _on_direct_ip_pressed() -> void:
-	print("[MainMenu] Direct IP connection selected")
-	# Hide the code popup and show IP input
-	if code_input:
-		code_input.placeholder_text = "Enter IP (e.g., 192.168.1.5)"
-		code_input.text = ""
-		code_input.grab_focus()
-	_show_status("Enter the host's IP address directly\nAsk host to check their IP in the lobby")
-
-
 func _on_code_text_changed(new_text: String) -> void:
 	if code_input:
 		code_input.text = new_text.to_upper()
 		code_input.caret_column = code_input.text.length()
-
-
-func _process_direct_ip(host_ip: String) -> void:
-	print("[MainMenu] Connecting directly to IP: ", host_ip)
-	_show_status("Connecting to " + host_ip + "...")
-	
-	var result = await NetworkManager.join_game_with_ip(host_ip, "DIRECT")
-	
-	if not result.success:
-		_show_status("Failed to connect to " + host_ip + ":\n" + result.get("error", "Unknown error"))
-		return
-	
-	# Reset all progress for new game session (fresh start)
-	print("[MainMenu] Resetting game progress for new session...")
-	GameState.reset_all_progress()
-	
-	# Wait a moment to check if host is already playing (rejoin scenario)
-	await get_tree().create_timer(0.5).timeout
-	
-	# Check if we're still in the main menu (not already transitioned by rejoin signal)
-	if not is_inside_tree():
-		return  # Already transitioned to another scene
-	
-	# Check if this is a rejoin scenario (host already playing)
-	if NetworkManager.is_rejoining():
-		print("[MainMenu] Detected active game session, going directly to forest...")
-		get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
-		return
-	
-	_show_status("Connected! Waiting for game to start...")
-	get_tree().change_scene_to_file("res://scenes/mainMenu/SidekickWaiting.tscn")
 
 
 func _process_join_code(code: String) -> void:

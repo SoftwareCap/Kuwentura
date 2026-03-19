@@ -162,6 +162,10 @@ var _failed := false
 var _consequence_active := false
 var _penalty_on_cooldown := false
 
+# Audio
+var _sfx_player: AudioStreamPlayer
+var _zone_completion_sfx: AudioStream = preload("res://assets/audios/ZoneCompletionSFX.mp3")
+
 var _shake_timer: Timer
 var _shake_elapsed := 0.0
 var _shake_duration := 0.0
@@ -271,7 +275,60 @@ func _ready() -> void:
 	if is_instance_valid(collect_button) and not collect_button.pressed.is_connected(_on_collect_clue_pressed):
 		collect_button.pressed.connect(_on_collect_clue_pressed)
 
+	# Setup SFX player
+	_ensure_sfx_bus()
+	_sfx_player = AudioStreamPlayer.new()
+	_sfx_player.bus = "SFX"
+	_sfx_player.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(_sfx_player)
+
 	_start_intro_dialogue_delayed()
+
+
+func _ensure_sfx_bus() -> void:
+	"""Create SFX audio bus if it doesn't exist."""
+	var sfx_bus_index := AudioServer.get_bus_index("SFX")
+	if sfx_bus_index == -1:
+		AudioServer.add_bus(AudioServer.bus_count)
+		AudioServer.set_bus_name(AudioServer.bus_count - 1, "SFX")
+		AudioServer.set_bus_volume_db(AudioServer.bus_count - 1, 0.0)
+
+
+func _play_zone_completion_sfx() -> void:
+	"""Play zone completion SFX and resume music when done (non-blocking)."""
+	print("[PinasHouse] _play_zone_completion_sfx called")
+	
+	if not is_instance_valid(_sfx_player):
+		print("[PinasHouse] ERROR: SFX player not valid!")
+		return
+	
+	if not _zone_completion_sfx:
+		print("[PinasHouse] ERROR: SFX stream not loaded!")
+		return
+	
+	print("[PinasHouse] SFX valid, playing now...")
+	
+	# Pause background music
+	if Engine.has_singleton("MusicController") or MusicController:
+		MusicController.pause_music()
+		print("[PinasHouse] Music paused")
+	
+	# Play SFX
+	_sfx_player.stream = _zone_completion_sfx
+	_sfx_player.play()
+	print("[PinasHouse] SFX playing")
+	
+	# Resume music when SFX finishes (using signal, not await)
+	if not _sfx_player.finished.is_connected(_on_sfx_finished_resume_music):
+		_sfx_player.finished.connect(_on_sfx_finished_resume_music, CONNECT_ONE_SHOT)
+
+
+func _on_sfx_finished_resume_music() -> void:
+	"""Callback to resume music after SFX finishes."""
+	if Engine.has_singleton("MusicController") or MusicController:
+		MusicController.resume_music()
+		print("[PinasHouse] SFX finished, music resumed")
+
 
 func _apply_sparkle_animation(sparkle_node: Sprite2D) -> void:
 	var pulse := (sin(_animation_time * SPARKLE_PULSE_SPEED) + 1.0) / 2.0
@@ -1181,6 +1238,7 @@ func broadcast_pinas_house_solved() -> void:
 @rpc("any_peer", "reliable", "call_local")
 func rpc_pinas_house_solved() -> void:
 	_note_solved = true
+	_cabinet_phase_active = true
 	GameState.set_puzzle_solved("pinas_house", true)
 	_ledger_hint_shown = false
 	hide_notification()
@@ -1384,23 +1442,38 @@ func _reset_cabinet_clue_state() -> void:
 
 func _on_cabinet_ladle_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if _dialogue_input_locked:
+		print("[PinasHouse] Ladle input blocked - dialogue locked")
 		return
 	
-	if not _cabinet_opened or _ladle_found:
+	if not _cabinet_opened:
+		print("[PinasHouse] Ladle input blocked - cabinet not opened")
+		return
+		
+	if _ladle_found:
+		print("[PinasHouse] Ladle input blocked - already found")
 		return
 
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			print("[PinasHouse] Ladle clicked (mouse)")
 			_request_pickup_cabinet_ladle()
 	elif event is InputEventScreenTouch:
 		var st := event as InputEventScreenTouch
 		if st.pressed:
+			print("[PinasHouse] Ladle clicked (touch)")
 			_request_pickup_cabinet_ladle()
 
 func _request_pickup_cabinet_ladle() -> void:
+	print("[PinasHouse] _request_pickup_cabinet_ladle called, cabinet_opened=", _cabinet_opened, ", ladle_found=", _ladle_found)
+	
 	if not _cabinet_opened or _ladle_found:
+		print("[PinasHouse] Early return - cabinet not opened or ladle already found")
 		return
+
+	# Play SFX immediately when ladle is clicked (before any network delay)
+	print("[PinasHouse] Ladle clicked - playing SFX...")
+	_play_zone_completion_sfx()
 
 	if not multiplayer.has_multiplayer_peer():
 		_pickup_cabinet_ladle_server()
@@ -1429,6 +1502,8 @@ func rpc_start_ladle_found_sequence() -> void:
 	_reward_active = true
 	_waiting_reward_continue = true
 	_reward_stage = 1
+
+	# Note: SFX is already playing (started in _request_pickup_cabinet_ladle)
 
 	if is_instance_valid(cabinet_ladle_sprite):
 		cabinet_ladle_sprite.visible = false

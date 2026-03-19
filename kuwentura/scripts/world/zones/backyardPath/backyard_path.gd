@@ -1146,6 +1146,9 @@ func rpc_show_reward() -> void:
 	_reward_stage = 1
 	_collect_sequence_started = false
 
+	# Play SFX immediately when clue is found (separate from tap-to-continue logic)
+	_play_zone_completion_sfx()
+
 	_hide_revealed_clue_after_touch()
 
 	if is_instance_valid(fruit_tap_button):
@@ -1365,12 +1368,9 @@ func _on_reward_tap_catcher_pressed() -> void:
 	if not _waiting_reward_continue:
 		return
 
-	# Stage 1 -> first line (play SFX and pause music)
+	# Stage 1 -> first line
 	if _reward_stage == 1:
 		_reward_stage = 2
-
-		# Play SFX instantly and pause music during playback
-		_play_zone_completion_sfx()
 
 		if is_instance_valid(reward_panel):
 			reward_panel.visible = true
