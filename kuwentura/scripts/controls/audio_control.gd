@@ -83,6 +83,15 @@ func _load_tracks() -> void:
 		_tracks[MusicTrack.PINAS_HOUSE] = pinas_house_stream
 	else:
 		push_warning("[AudioControl] Failed to load PinasHouseBG.mp3")
+	
+	# Backyard Path BGM
+	var backyard_stream := load("res://assets/audios/BackyardBG.mp3")
+	if backyard_stream:
+		if backyard_stream is AudioStreamMP3 or backyard_stream is AudioStreamOggVorbis:
+			backyard_stream.loop = true
+		_tracks[MusicTrack.BACKYARD_PATH] = backyard_stream
+	else:
+		push_warning("[AudioControl] Failed to load BackyardBG.mp3")
 
 
 func play_track(track: MusicTrack, fade_duration: float = 0.5) -> void:

@@ -3,7 +3,7 @@ extends CanvasLayer
 @onready var detective_dialogue = $Panel/DetectiveDialogue
 @onready var sidekick_dialogue = $Panel/SidekickDialogue
 @onready var text_label: Label = $Panel/Text
-@onready var advance_btn: Button = $Panel/Advance
+@onready var advance_btn: TouchScreenButton = $Panel/Advance
 
 var _system: DialogueSystem
 

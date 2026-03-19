@@ -51,6 +51,7 @@ passby_press = true
 action = "game_right"
 
 [node name="Jump" type="TouchScreenButton" parent="."]
+visible = false
 position = Vector2(1240, 508)
 scale = Vector2(0.4, 0.4)
 texture_normal = ExtResource("4_dlgvd")
