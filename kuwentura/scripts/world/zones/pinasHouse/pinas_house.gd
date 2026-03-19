@@ -1082,6 +1082,7 @@ func broadcast_pinas_house_solved() -> void:
 @rpc("any_peer", "reliable", "call_local")
 func rpc_pinas_house_solved() -> void:
 	_note_solved = true
+	GameState.set_puzzle_solved("pinas_house", true)
 	_ledger_hint_shown = false
 	hide_notification()
 	pulse_ledger_guidance(false)
@@ -1098,20 +1099,25 @@ func _finish_tool_phase_server() -> void:
 	
 #ledger functions
 func _populate_ledger_content() -> void:
+	var ledger_view: Dictionary = PuzzleManager.get_zone_ledger_display("pinas_house")
+
+	if ledger_view.is_empty():
+		return
+
 	if is_instance_valid(ledger_title_label):
-		ledger_title_label.text = "Finding the Missing Number"
+		ledger_title_label.text = str(ledger_view.get("title", ""))
 
 	if is_instance_valid(ledger_left_header_label):
-		ledger_left_header_label.text = "How to Solve"
+		ledger_left_header_label.text = str(ledger_view.get("left_header", ""))
 
 	if is_instance_valid(ledger_left_body_label):
-		ledger_left_body_label.text = "1. Move the number.\n2. Do the opposite.\n3. Divide if needed."
+		ledger_left_body_label.text = str(ledger_view.get("left_body", ""))
 
 	if is_instance_valid(ledger_right_header_label):
-		ledger_right_header_label.text = "Example"
+		ledger_right_header_label.text = str(ledger_view.get("right_header", ""))
 
 	if is_instance_valid(ledger_right_body_label):
-		ledger_right_body_label.text = "2x - 8 = 2\n\n1. Add 8 to both sides.\n   2x = 10\n\n2. Divide by 2.\n   x = 5"
+		ledger_right_body_label.text = str(ledger_view.get("right_body", ""))
 
 func _refresh_inside_zone_buttons() -> void:
 	var is_sidekick: bool = GameState.local_role == GameState.Role.SIDEKICK

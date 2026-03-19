@@ -53,10 +53,10 @@ autowrap_mode = 2
 
 [node name="Advance" type="Button" parent="Panel"]
 layout_mode = 0
-offset_left = 1129.0
-offset_top = 231.0
-offset_right = 1271.0
-offset_bottom = 370.0
+offset_left = 1136.0
+offset_top = 219.0
+offset_right = 1294.0
+offset_bottom = 379.0
 icon = ExtResource("5_rdkif")
 flat = true
 expand_icon = true

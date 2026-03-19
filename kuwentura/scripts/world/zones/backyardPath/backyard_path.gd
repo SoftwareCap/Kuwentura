@@ -419,20 +419,18 @@ func _populate_heights() -> void:
 		board_height_label.text = str(plant_height_dali) + " Dali"
 		print("[BackyardPath] Board height label: ", board_height_label.text)
 
-
 func _populate_ledger_content() -> void:
+	var ledger_view: Dictionary = PuzzleManager.get_zone_ledger_display(ZONE_ID)
+
+	if ledger_view.is_empty():
+		return
+
 	if is_instance_valid(ledger_title_label):
-		ledger_title_label.text = "Measurement Conversion"
+		ledger_title_label.text = str(ledger_view.get("title", ""))
 
 	if is_instance_valid(ledger_body_label):
-		ledger_body_label.text = (
-			"1 Dali = 2 Centimeters\n\n"
-			+ "To convert Dali to cm:\n"
-			+ "Multiply the Dali value by 2.\n\n"
-			+ "Example:\n"
-			+ "40 Dali × 2 = 80 cm"
-		)
-
+		ledger_body_label.text = str(ledger_view.get("body", ""))
+		
 
 func _start_intro_dialogue_delayed() -> void:
 	if _intro_dialogue_played:
@@ -784,6 +782,7 @@ func rpc_fail_zone(message: String) -> void:
 @rpc("any_peer", "reliable", "call_local")
 func rpc_puzzle_solved() -> void:
 	_puzzle_solved = true
+	GameState.set_puzzle_solved(ZONE_ID, true)
 	_board_unlocked = false
 
 	if is_instance_valid(board_tap_button):
