@@ -453,13 +453,8 @@ func get_puzzle_for_zone(zone_id: String) -> Dictionary:
 		push_warning("[PuzzleManager] No variations found for zone: " + zone_id)
 		return {}
 
-	# Get seed from GameState (derived from session seed)
-	var puzzle_seed: int = GameState.get_puzzle_seed(zone_id)
-
-	# Select variation based on seed
-	var rng := RandomNumberGenerator.new()
-	rng.seed = puzzle_seed
-	var variation_index: int = rng.randi_range(0, variations.size() - 1)
+	# Select one stable variation for this zone for the whole session
+	var variation_index: int = GameState.get_puzzle_variation_index(zone_id, variations.size())
 	var selected: Dictionary = variations[variation_index]
 
 	var equation_text: String = str(selected.get("equation", "x = ?"))

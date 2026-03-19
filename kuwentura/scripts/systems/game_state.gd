@@ -78,10 +78,18 @@ var collected_clues: Dictionary = {
 	}
 }
 
-# Dynamic Puzzle Data - Resets on game over
-var puzzle_seeds: Dictionary = {}  # Stores random seeds for puzzle generation
-var attempt_count: int = 0  # Tracks failed attempts for difficulty scaling
-var _session_seed: int = 0  # Master seed from NetworkManager
+var puzzle_seeds: Dictionary = {} 
+var puzzle_variation_indices: Dictionary = {} 
+var attempt_count: int = 0 
+var _session_seed: int = 0 
+
+const PUZZLE_ZONE_ORDER := [
+	"pinas_house",
+	"backyard_path",
+	"old_well",
+	"storage_hut",
+	"abandoned_house"
+]
 
 # Story Ledger (Sidekick's Book)
 var ledger_entries: Array = []
@@ -401,11 +409,14 @@ func _initialize_puzzle_seeds():
 	"""Generate unique seeds for each zone's puzzles"""
 	if _session_seed == 0:
 		_session_seed = randi()
-	
-	# Derive zone seeds deterministically from session seed
+
 	puzzle_seeds.clear()
-	for zone in zones_status.keys():
-		puzzle_seeds[zone] = hash(_session_seed + zone.hash())
+	puzzle_variation_indices.clear()
+
+	for zone in PUZZLE_ZONE_ORDER:
+		var zone_index: int = PUZZLE_ZONE_ORDER.find(zone)
+		var stable_seed: int = int((_session_seed * 1009) + (zone_index * 7919))
+		puzzle_seeds[zone] = stable_seed
 
 
 func set_session_seed(session_seed: int):
@@ -423,6 +434,25 @@ func get_puzzle_seed(zone_id: String) -> int:
 		return hash(_session_seed + zone_id.hash())
 	return randi()
 
+func get_puzzle_variation_index(zone_id: String, variation_count: int) -> int:
+	"""Return one stable variation index per zone for the whole session."""
+	if variation_count <= 0:
+		return 0
+
+	if puzzle_variation_indices.has(zone_id):
+		var cached_index: int = int(puzzle_variation_indices[zone_id])
+		return clamp(cached_index, 0, variation_count - 1)
+
+	var zone_index: int = PUZZLE_ZONE_ORDER.find(zone_id)
+	if zone_index == -1:
+		zone_index = 0
+
+	var base_seed: int = get_puzzle_seed(zone_id)
+	var positive_seed: int = abs(base_seed)
+
+	var variation_index: int = positive_seed % variation_count
+	puzzle_variation_indices[zone_id] = variation_index
+	return variation_index
 
 func is_puzzle_solved(zone_id: String) -> bool:
 	return bool(solved_puzzles.get(zone_id, false))
