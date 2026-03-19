@@ -257,6 +257,7 @@ theme_override_constants/minimum_character_width = 4
 theme_override_font_sizes/font_size = 45
 placeholder_text = "enter code"
 alignment = 1
+max_length = 6
 caret_blink = true
 caret_force_displayed = true
 
@@ -311,7 +312,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0)
-mouse_filter = 0
 
 [node name="SettingsControl" parent="." instance=ExtResource("5_2oq2w")]
 script = ExtResource("6_r2guf")
