@@ -83,8 +83,7 @@ func on_note_interacted() -> void:
 					zone.sidekick_board.set_puzzle_inputs_visible(true)
 
 	if will_play_note_dialogue:
-		DialogueSystems.play("pinas_house_note_clicked", DialogueLibraries.PINAS_HOUSE_NOTE_CLICKED)
-		await DialogueSystems.wait_finished("pinas_house_note_clicked")
+		await zone._play_locked_dialogue("pinas_house_note_clicked", DialogueLibraries.PINAS_HOUSE_NOTE_CLICKED)
 
 	if zone._note_phase_active and not zone._note_solved:
 		zone.show_notification("Use the ledger to solve the equation.", 0.0)
@@ -204,8 +203,7 @@ func after_note_solved() -> void:
 	zone.pulse_ledger_guidance(false)
 	zone._enable_cabinet_interaction()
 
-	DialogueSystems.play("pinas_house_riddle_reveal", DialogueLibraries.PINAS_HOUSE_RIDDLE_REVEAL)
-	await DialogueSystems.wait_finished("pinas_house_riddle_reveal")
+	await zone._play_locked_dialogue("pinas_house_riddle_reveal", DialogueLibraries.PINAS_HOUSE_RIDDLE_REVEAL)
 
 	zone.show_notification("Search where the clue is hidden.", 8.0)
 

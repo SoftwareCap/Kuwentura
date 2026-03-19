@@ -25,6 +25,7 @@ enum VisibilityMode {
 @onready var map_button: TouchScreenButton = $Map
 @onready var ledger_button: TouchScreenButton = $Ledger
 @onready var briefcase_button: TouchScreenButton = $Briefcase
+@onready var briefcase_panel: Panel = $SidekickLayer/Briefcase
 
 
 func _notification(what: int):

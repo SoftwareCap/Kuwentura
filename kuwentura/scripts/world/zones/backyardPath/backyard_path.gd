@@ -51,16 +51,30 @@ const _SERVER_PEER_ID := 1
 # Consequence visuals
 @onready var fog_overlay: ColorRect = $FogOverlay
 
+#zone controls
+@onready var inside_zone_control: CanvasLayer = get_node_or_null("InsideZoneControl")
+
+@onready var pause_canvas_layer: CanvasLayer = get_node_or_null("PauseCanvasLayer")
+@onready var in_game_pause_panel: Panel = get_node_or_null("PauseCanvasLayer/InGamePausePanel")
+@onready var option_sub_panel: Panel = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel")
+@onready var volume_slider: HSlider = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeSlider")
+@onready var volume_value_label: Label = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeValue")
+
+@onready var briefcase_panel: Panel = get_node_or_null("SidekickLayer/Briefcase")
+@onready var briefcase_display: TextureRect = get_node_or_null("SidekickLayer/Briefcase/BriefcaseDisplay")
+
 # Reward
 @onready var reward_layer: CanvasLayer = get_node_or_null("RewardLayer")
 @onready var reward_dark_overlay: ColorRect = get_node_or_null("RewardLayer/DarkOverlay")
-@onready var reward_banner_label: Label = get_node_or_null("RewardLayer/RewardBanner/BannerLabel")
+@onready var reward_banner_label: Label = get_node_or_null("RewardLayer/BannerLabel")
 @onready var reward_text_label: Label = get_node_or_null("RewardLayer/RewardPanel/RewardText")
 @onready var clue_sprite: Sprite2D = get_node_or_null("RewardLayer/ClueSprite")
 @onready var collect_button: Button = get_node_or_null("RewardLayer/CollectButton")
 @onready var reward_panel: Sprite2D = get_node_or_null("RewardLayer/RewardPanel")
 @onready var tap_instruction_label: Label = get_node_or_null("RewardLayer/TapInstruction")
 @onready var tap_catcher: Button = get_node_or_null("RewardLayer/TapCatcher")
+@onready var briefcase_reveal_sprite: TextureRect = get_node_or_null("RewardLayer/BriefcaseRevealSprite")
+@onready var sparkle: Sprite2D = $RewardLayer/Sparkle
 
 # Puzzle data
 var puzzle_data: Dictionary = {}
@@ -85,10 +99,17 @@ var _puzzle_solved := false
 var _reward_active := false
 var _zone_failed := false
 var _strikes := 0
-var _clue_collected := false
 
 var _timer_node: Timer
 var _ledger_hint_shown := false
+var _dialogue_input_locked := false
+
+const SPARKLE_MIN_SCALE := 0.45
+const SPARKLE_MAX_SCALE := 0.55
+const SPARKLE_PULSE_SPEED := 4.0
+
+var _animation_time: float = 0.0
+var _sparkle_animating: bool = false
 
 func _load_puzzle_data() -> void:
 	puzzle_data = PuzzleManager.get_puzzle_for_zone(ZONE_ID)
@@ -125,10 +146,15 @@ func _ready() -> void:
 	# 4 Apply puzzle values to UI
 	_populate_heights()
 	_populate_ledger_content()
+	_ensure_briefcase_display()
+	_refresh_briefcase_display()
 
 	# 5 Connect clue signal
 	if not GameState.clue_collected.is_connected(_on_clue_collected):
 		GameState.clue_collected.connect(_on_clue_collected)
+
+	if not GameState.briefcase_updated.is_connected(_on_briefcase_updated):
+		GameState.briefcase_updated.connect(_on_briefcase_updated)
 
 	# 6 Start intro dialogue
 	_start_intro_dialogue_delayed()
@@ -175,7 +201,34 @@ func _connect_signals() -> void:
 	if is_instance_valid(tap_catcher) and not tap_catcher.pressed.is_connected(_on_reward_tap_catcher_pressed):
 		tap_catcher.pressed.connect(_on_reward_tap_catcher_pressed)
 
+		if is_instance_valid(touch_controls):
+			if touch_controls.has_signal("pause_pressed"):
+				if not touch_controls.pause_pressed.is_connected(_on_pause_button_pressed):
+					touch_controls.pause_pressed.connect(_on_pause_button_pressed)
 
+			if touch_controls.has_signal("briefcase_pressed"):
+				if not touch_controls.briefcase_pressed.is_connected(_on_briefcase_button_pressed):
+					touch_controls.briefcase_pressed.connect(_on_briefcase_button_pressed)
+
+	var resume_button: BaseButton = get_node_or_null("PauseCanvasLayer/InGamePausePanel/Resume_PlayButton")
+	if is_instance_valid(resume_button) and not resume_button.pressed.is_connected(_on_resume_play_button_pressed):
+		resume_button.pressed.connect(_on_resume_play_button_pressed)
+
+	var option_button: BaseButton = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionButton")
+	if is_instance_valid(option_button) and not option_button.pressed.is_connected(_on_option_button_pressed):
+		option_button.pressed.connect(_on_option_button_pressed)
+
+	var exit_button: BaseButton = get_node_or_null("PauseCanvasLayer/InGamePausePanel/ExitButton")
+	if is_instance_valid(exit_button) and not exit_button.pressed.is_connected(_on_exit_to_main_menu_button_pressed):
+		exit_button.pressed.connect(_on_exit_to_main_menu_button_pressed)
+
+	var option_back_button: TouchScreenButton = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/BackToPrevious")
+	if is_instance_valid(option_back_button) and not option_back_button.pressed.is_connected(_on_in_game_option_back_pressed):
+		option_back_button.pressed.connect(_on_in_game_option_back_pressed)
+
+	if is_instance_valid(volume_slider) and not volume_slider.value_changed.is_connected(_on_in_game_volume_changed):
+		volume_slider.value_changed.connect(_on_in_game_volume_changed)
+		
 func _setup_role_label() -> void:
 	var role_text := "Unknown"
 	match GameState.local_role:
@@ -216,13 +269,30 @@ func _setup_initial_ui() -> void:
 		x_input.text = ""
 		x_input.editable = false
 		x_input.placeholder_text = "Answer"
+		x_input.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
 
 	if is_instance_valid(submit_button):
 		submit_button.visible = false
 		submit_button.disabled = true
 
-	if is_instance_valid(feedback_label):
-		feedback_label.text = "Deduction Board locked."
+	#if is_instance_valid(feedback_label):
+		#feedback_label.text = "Deduction Board locked."
+		
+	if is_instance_valid(reward_layer):
+		reward_layer.visible = true
+
+	if is_instance_valid(reward_banner_label):
+		reward_banner_label.visible = true
+
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.texture = null
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = true
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+		_animation_time = 0.0
+		_sparkle_animating = true
 
 	if is_instance_valid(notification_ui):
 		notification_ui.visible = true
@@ -282,6 +352,31 @@ func _setup_initial_ui() -> void:
 
 	if is_instance_valid(sidekick_overlays):
 		sidekick_overlays.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.texture = null
+		briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
+
+	if is_instance_valid(pause_canvas_layer):
+		pause_canvas_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	if is_instance_valid(in_game_pause_panel):
+		in_game_pause_panel.visible = false
+		in_game_pause_panel.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = false
+		option_sub_panel.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	if is_instance_valid(volume_slider):
+		volume_slider.value = MusicController.get_volume() * 100
+
+	if is_instance_valid(volume_value_label):
+		volume_value_label.text = str(int(MusicController.get_volume() * 100)) + "%"
+
+	if is_instance_valid(briefcase_panel):
+		briefcase_panel.visible = false
 
 	# Detective must never type or submit
 	if GameState.local_role == GameState.Role.DETECTIVE:
@@ -290,6 +385,75 @@ func _setup_initial_ui() -> void:
 		if is_instance_valid(submit_button):
 			submit_button.disabled = true
 
+func _set_dialogue_input_lock(locked: bool) -> void:
+	_dialogue_input_locked = locked
+
+	var is_sidekick: bool = GameState.local_role == GameState.Role.SIDEKICK
+	var dim_color := Color(0.65, 0.65, 0.65, 1.0)
+	var normal_color := Color(1, 1, 1, 1)
+
+	# Pause must stay enabled
+	if is_instance_valid(touch_controls) and touch_controls.has_method("set_pause_enabled"):
+		touch_controls.set_pause_enabled(true)
+
+	# World interactions should not work during dialogue
+	# TouchScreenButton has no "disabled", so only gray it out here.
+	# Actual blocking is handled by _dialogue_input_locked checks in the pressed handlers.
+	if is_instance_valid(board_tap_button):
+		board_tap_button.modulate = dim_color if locked else normal_color
+
+	if is_instance_valid(fruit_tap_button):
+		fruit_tap_button.modulate = dim_color if locked else normal_color
+
+	# Board input
+	if is_instance_valid(x_input):
+		if locked:
+			x_input.editable = false
+			x_input.release_focus()
+			x_input.modulate = dim_color
+		else:
+			if GameState.local_role == GameState.Role.SIDEKICK and _board_opened and _board_unlocked and not _puzzle_solved and not _zone_failed:
+				x_input.editable = true
+			else:
+				x_input.editable = false
+			x_input.modulate = normal_color
+
+	if is_instance_valid(submit_button):
+		if locked:
+			submit_button.disabled = true
+		else:
+			if GameState.local_role == GameState.Role.SIDEKICK and _board_opened and _board_unlocked and not _puzzle_solved and not _zone_failed:
+				submit_button.disabled = false
+			else:
+				submit_button.disabled = true
+
+		submit_button.modulate = dim_color if submit_button.disabled else normal_color
+
+	# Only ledger / briefcase in inside_zone_control should turn gray during dialogue
+	if is_instance_valid(touch_controls):
+		if touch_controls.has_method("set_ledger_enabled"):
+			touch_controls.set_ledger_enabled(is_sidekick and not locked)
+
+		if touch_controls.has_method("set_briefcase_enabled"):
+			touch_controls.set_briefcase_enabled(is_sidekick and not locked and _reward_active)
+
+	# Direct TouchScreenButton nodes for ledger / briefcase:
+	# keep visible, gray them out, but do NOT use .disabled
+	if is_instance_valid(ledger_touch_button):
+		ledger_touch_button.visible = is_sidekick
+		ledger_touch_button.modulate = dim_color if locked else normal_color
+
+	if is_instance_valid(briefcase_touch_button):
+		briefcase_touch_button.visible = is_sidekick
+		briefcase_touch_button.modulate = dim_color if locked else normal_color
+
+	# Reward tap catcher should not work during dialogue
+	if is_instance_valid(tap_catcher):
+		tap_catcher.disabled = locked or not tap_catcher.visible
+
+	# Restore normal zone state after dialogue ends
+	if not locked:
+		_refresh_inside_zone_buttons()
 
 func _setup_role_visibility() -> void:
 	match GameState.local_role:
@@ -319,20 +483,18 @@ func _populate_heights() -> void:
 		board_height_label.text = str(plant_height_dali) + " Dali"
 		print("[BackyardPath] Board height label: ", board_height_label.text)
 
-
 func _populate_ledger_content() -> void:
+	var ledger_view: Dictionary = PuzzleManager.get_zone_ledger_display(ZONE_ID)
+
+	if ledger_view.is_empty():
+		return
+
 	if is_instance_valid(ledger_title_label):
-		ledger_title_label.text = "Measurement Conversion"
+		ledger_title_label.text = str(ledger_view.get("title", ""))
 
 	if is_instance_valid(ledger_body_label):
-		ledger_body_label.text = (
-			"1 Dali = 2 Centimeters\n\n"
-			+ "To convert Dali to cm:\n"
-			+ "Multiply the Dali value by 2.\n\n"
-			+ "Example:\n"
-			+ "40 Dali × 2 = 80 cm"
-		)
-
+		ledger_body_label.text = str(ledger_view.get("body", ""))
+		
 
 func _start_intro_dialogue_delayed() -> void:
 	if _intro_dialogue_played:
@@ -340,26 +502,30 @@ func _start_intro_dialogue_delayed() -> void:
 
 	_intro_dialogue_played = true
 	_run_intro_sequence()
+	
+func _get_backyard_intro_dialogue() -> Array:
+	var lines: Array = DialogueLibrary.BACKYARD_PATH_ENTER.duplicate(true)
+
+	lines.append(
+		{"speaker":"sidekick","text":"But the numbers here say " + str(plant_height_dali) + " Dali."}
+	)
+	lines.append(
+		{"speaker":"detective","text":"And Pina’s height says " + str(spirit_height_cm) + " centimeters."}
+	)
+	lines.append(
+		{"speaker":"sidekick","text":"How can we compare those if they’re not in the same unit?"}
+	)
+
+	return lines
 
 
 func _run_intro_sequence() -> void:
-	DialogueSystems.play("backyard_path_intro",
-	[
-		{"speaker":"sidekick","text":"Whoa… this backyard feels different. Wait… is that a plant?"},
-		{"speaker":"detective","text":"A plant? What do you mean plant?"},
-		{"speaker":"sidekick","text":"Right in front of me. It looks like some kind of strange pineapple plant."},
-		{"speaker":"detective","text":"…Hold on. I don’t see a plant."},
-		{"speaker":"detective","text":"I’m seeing… a spirit."},
-		{"speaker":"sidekick","text":"A spirit??"},
-		{"speaker":"detective","text":"Yes… it looks like Pina. Her spirit is standing right here."},
-		{"speaker":"detective","text":"And there are numbers floating above her… maybe that’s her height?"},
-		{"speaker":"sidekick","text":"Wait… there are numbers above the plant too."},
-		{"speaker":"sidekick","text":"But the numbers here say " + str(plant_height_dali) + " Dali."},
-		{"speaker":"detective","text":"And Pina’s height says " + str(spirit_height_cm) + " centimeters."},
-		{"speaker":"sidekick","text":"How can we compare those if they’re not in the same unit?"}
-	])
+	_set_dialogue_input_lock(true)
+
+	DialogueSystems.play("backyard_path_intro", _get_backyard_intro_dialogue())
 
 	await DialogueSystems.wait_finished("backyard_path_intro")
+	_set_dialogue_input_lock(false)
 	_report_intro_ready()
 
 
@@ -410,14 +576,18 @@ func rpc_unlock_board_phase() -> void:
 	show_notification("Convert Dali to centimeters in the Deduction Board to uncover the clue.", 0.0)
 	pulse_ledger_guidance(true)
 
-	DialogueSystems.play("backyard_ledger_hint",
-	[
-		{"speaker":"sidekick","text":"How exactly do we convert Dali into centimeters?"},
-		{"speaker":"detective","text":"Maybe the ledger has the answer."}
-	])
+	_set_dialogue_input_lock(true)
+
+	DialogueSystems.play("backyard_ledger_hint", DialogueLibrary.BACKYARD_PATH_LEDGER_HINT)
+
+	await DialogueSystems.wait_finished("backyard_ledger_hint")
+	_set_dialogue_input_lock(false)
 
 
 func _on_board_tap_pressed() -> void:
+	if _dialogue_input_locked:
+		return
+
 	if not _board_unlocked or _zone_failed or _puzzle_solved:
 		return
 
@@ -498,15 +668,22 @@ func _on_board_timer_timeout() -> void:
 
 	_server_fail_zone("The forest rejects your presence.\nReturn in 1 minute to try again.")
 
-
 func _on_ledger_pressed() -> void:
+	if _dialogue_input_locked:
+		return
+
 	if GameState.local_role != GameState.Role.SIDEKICK:
 		return
 
 	if not is_instance_valid(ledger_panel):
 		return
 
-	ledger_panel.visible = not ledger_panel.visible
+	var should_open: bool = not ledger_panel.visible
+
+	if should_open and is_instance_valid(briefcase_panel):
+		briefcase_panel.visible = false
+
+	ledger_panel.visible = should_open
 
 	if ledger_panel.visible:
 		hide_notification()
@@ -514,6 +691,124 @@ func _on_ledger_pressed() -> void:
 	else:
 		if _board_unlocked and not _puzzle_solved:
 			show_notification("Convert Dali to centimeters in the Deduction Board to uncover the clue.", 0.0)
+			
+func _on_briefcase_button_pressed() -> void:
+	if _dialogue_input_locked:
+		return
+
+	if GameState.local_role != GameState.Role.SIDEKICK:
+		return
+
+	if not is_instance_valid(briefcase_panel):
+		return
+
+	_refresh_briefcase_display()
+
+	var should_open: bool = not briefcase_panel.visible
+
+	if should_open and is_instance_valid(ledger_panel):
+		ledger_panel.visible = false
+
+	briefcase_panel.visible = should_open
+
+
+func _ensure_briefcase_display() -> void:
+	if not is_instance_valid(briefcase_panel):
+		return
+
+	if is_instance_valid(briefcase_display):
+		return
+
+	briefcase_display = TextureRect.new()
+	briefcase_display.name = "BriefcaseDisplay"
+	briefcase_display.visible = false
+	briefcase_display.set_anchors_preset(Control.PRESET_FULL_RECT)
+	briefcase_display.offset_left = -152.0
+	briefcase_display.offset_top = 40.0
+	briefcase_display.offset_right = 185.0
+	briefcase_display.offset_bottom = 67.0
+	briefcase_display.expand_mode = 1
+	briefcase_display.stretch_mode = 5
+	briefcase_display.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	briefcase_panel.add_child(briefcase_display)
+
+
+func _refresh_briefcase_display() -> void:
+	if not is_instance_valid(briefcase_display):
+		return
+
+	var texture: Texture2D = GameState.get_briefcase_texture("forest")
+	briefcase_display.texture = texture
+	briefcase_display.visible = texture != null
+
+
+func _on_briefcase_updated() -> void:
+	_refresh_briefcase_display()
+
+
+func _on_pause_button_pressed() -> void:
+	if is_instance_valid(in_game_pause_panel):
+		in_game_pause_panel.visible = true
+
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = false
+
+	if is_instance_valid(inside_zone_control):
+		inside_zone_control.visible = false
+
+	MusicController.pause_music()
+	get_tree().paused = true
+
+
+func _on_resume_play_button_pressed() -> void:
+	if is_instance_valid(in_game_pause_panel):
+		in_game_pause_panel.visible = false
+
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = false
+
+	get_tree().paused = false
+	MusicController.resume_music()
+
+	if is_instance_valid(inside_zone_control):
+		inside_zone_control.visible = true
+
+
+func _on_option_button_pressed() -> void:
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = true
+
+	if is_instance_valid(volume_slider):
+		volume_slider.value = MusicController.get_volume() * 100
+
+	if is_instance_valid(volume_value_label):
+		volume_value_label.text = str(int(MusicController.get_volume() * 100)) + "%"
+
+
+func _on_in_game_option_back_pressed() -> void:
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = false
+
+
+func _on_exit_to_main_menu_button_pressed() -> void:
+	get_tree().paused = false
+	MusicController.resume_music()
+
+	if NetworkManager.has_active_connection():
+		NetworkManager.disconnect_network()
+		await get_tree().create_timer(0.2).timeout
+
+	if is_inside_tree():
+		get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
+
+
+func _on_in_game_volume_changed(value: float) -> void:
+	var volume: float = value / 100.0
+	MusicController.set_volume(volume)
+
+	if is_instance_valid(volume_value_label):
+		volume_value_label.text = str(int(value)) + "%"
 
 
 func pulse_ledger_guidance(enable: bool) -> void:
@@ -549,6 +844,9 @@ func pulse_ledger_guidance(enable: bool) -> void:
 
 
 func _on_submit_pressed() -> void:
+	if _dialogue_input_locked:
+		return
+		
 	if GameState.local_role != GameState.Role.SIDEKICK:
 		return
 
@@ -640,7 +938,7 @@ func _server_fail_zone(message: String) -> void:
 		return
 
 	_zone_failed = true
-	GameState.lock_zone_temp(ZONE_ID, 60)
+	GameState.lock_zone_temp(ZONE_ID, 30)
 	rpc_fail_zone.rpc(message)
 
 
@@ -657,10 +955,12 @@ func rpc_fail_zone(message: String) -> void:
 
 	show_notification(message, 2.5)
 
-	DialogueSystems.play("backyard_fail",
-	[
-		{"speaker":"narrator","text":"The forest rejects your presence."}
-	])
+	_set_dialogue_input_lock(true)
+
+	DialogueSystems.play("backyard_fail", DialogueLibrary.BACKYARD_PATH_FAIL)
+
+	await DialogueSystems.wait_finished("backyard_fail")
+	_set_dialogue_input_lock(false)
 
 	await get_tree().create_timer(2.5).timeout
 	_return_to_forest()
@@ -668,6 +968,7 @@ func rpc_fail_zone(message: String) -> void:
 @rpc("any_peer", "reliable", "call_local")
 func rpc_puzzle_solved() -> void:
 	_puzzle_solved = true
+	GameState.set_puzzle_solved(ZONE_ID, true)
 	_board_unlocked = false
 
 	if is_instance_valid(board_tap_button):
@@ -682,7 +983,7 @@ func rpc_puzzle_solved() -> void:
 		x_input.editable = false
 
 	if is_instance_valid(feedback_label):
-		feedback_label.text = str(plant_height_dali) + " Dali = " + str(solution_cm) + " cm"
+		feedback_label.text = str(plant_height_dali) + " Dali = " + str(solution_cm) + " cm. The plant and Pina share the same height."
 
 	hide_notification()
 	pulse_ledger_guidance(false)
@@ -719,13 +1020,12 @@ func rpc_puzzle_solved() -> void:
 		fruit_tap_button.visible = true
 		fruit_tap_button.disabled = false
 
-	DialogueSystems.play("backyard_solved",
-	[
-		{"speaker":"sidekick","text":"Wait… the plant changed."},
-		{"speaker":"sidekick","text":"Is that… a pineapple?"},
-		{"speaker":"detective","text":"Yes."},
-		{"speaker":"detective","text":"That must be the clue hidden here."}
-	])
+	_set_dialogue_input_lock(true)
+
+	DialogueSystems.play("backyard_solved", DialogueLibrary.BACKYARD_PATH_SOLVED)
+
+	await DialogueSystems.wait_finished("backyard_solved")
+	_set_dialogue_input_lock(false)
 	
 func _sync_fruit_tap_button_to_revealed_pineapple() -> void:
 	if not is_instance_valid(fruit_tap_button):
@@ -750,6 +1050,9 @@ func _blink_board() -> void:
 
 
 func _on_fruit_tap_pressed() -> void:
+	if _dialogue_input_locked:
+		return
+
 	if not _puzzle_solved or _reward_active or _zone_failed:
 		return
 
@@ -782,19 +1085,29 @@ func rpc_show_reward() -> void:
 	_reward_stage = 1
 	_collect_sequence_started = false
 
+	_hide_revealed_clue_after_touch()
+
 	if is_instance_valid(fruit_tap_button):
 		fruit_tap_button.disabled = true
 		fruit_tap_button.visible = false
 
-	await _play_pineapple_reward_transition()
-
 	if is_instance_valid(reward_layer):
 		reward_layer.visible = true
+		
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = true
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = true
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+		_animation_time = 0.0
+		_sparkle_animating = true
 
 	if is_instance_valid(reward_dark_overlay):
 		reward_dark_overlay.modulate.a = 0.45
 
 	if is_instance_valid(reward_banner_label):
+		reward_banner_label.visible = true
 		reward_banner_label.text = "CLUE FOUND!"
 
 	if is_instance_valid(reward_text_label):
@@ -813,6 +1126,10 @@ func rpc_show_reward() -> void:
 
 	if is_instance_valid(collect_button):
 		collect_button.visible = false
+		
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.texture = null
 
 func _on_collect_pressed() -> void:
 	if _collect_sequence_started:
@@ -822,13 +1139,14 @@ func _on_collect_pressed() -> void:
 
 	if is_instance_valid(collect_button):
 		collect_button.visible = false
+		collect_button.disabled = true
 
 	if not multiplayer.has_multiplayer_peer():
-		rpc_finalize_clue.rpc()
+		rpc_show_briefcase_reveal_then_finalize()
 		return
 
 	if multiplayer.is_server():
-		rpc_finalize_clue.rpc()
+		rpc_show_briefcase_reveal_then_finalize.rpc()
 	else:
 		rpc_request_collect_clue.rpc_id(_SERVER_PEER_ID)
 
@@ -837,12 +1155,29 @@ func rpc_request_collect_clue() -> void:
 	if not multiplayer.is_server():
 		return
 
-	rpc_finalize_clue.rpc()
+	rpc_show_briefcase_reveal_then_finalize.rpc()
 
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_finalize_clue() -> void:
 	GameState.collect_clue(ZONE_ID)
+
+	_sparkle_animating = false
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = false
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+		
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = false
+
+	if is_instance_valid(reward_banner_label):
+		reward_banner_label.visible = false
+		reward_banner_label.text = ""
+
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.texture = null
 
 	if is_instance_valid(reward_layer):
 		reward_layer.visible = false
@@ -881,10 +1216,15 @@ func _on_clue_collected(zone_id: String, _clue_data: Dictionary) -> void:
 
 
 func _on_back_pressed() -> void:
+	if _dialogue_input_locked:
+		return
+		
 	_return_to_forest()
 
 
 func _return_to_forest() -> void:
+	get_tree().paused = false
+	MusicController.resume_music()
 	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 	
 func _refresh_inside_zone_buttons() -> void:
@@ -908,28 +1248,14 @@ func _refresh_inside_zone_buttons() -> void:
 		if is_instance_valid(ledger_panel):
 			ledger_panel.visible = false
 
+		if is_instance_valid(briefcase_panel):
+			briefcase_panel.visible = false
+
 		if is_instance_valid(ledger_touch_button):
 			ledger_touch_button.visible = false
 
 		if is_instance_valid(briefcase_touch_button):
-			briefcase_touch_button.visible = false	
-
-func _play_pineapple_reward_transition() -> void:
-	if is_instance_valid(revealed_pineapple):
-		revealed_pineapple.visible = false
-
-	if not is_instance_valid(revealed_plant):
-		return
-
-	var original_scale: Vector2 = revealed_plant.scale
-
-	var tw := create_tween()
-	tw.set_trans(Tween.TRANS_QUAD)
-	tw.set_ease(Tween.EASE_OUT)
-	tw.tween_property(revealed_plant, "scale", Vector2(1.3, 1.3), 0.35)
-	await tw.finished
-
-	revealed_plant.scale = original_scale
+			briefcase_touch_button.visible = false
 
 func _apply_solved_board_state() -> void:
 	if is_instance_valid(board_height_label):
@@ -972,6 +1298,9 @@ func _apply_solved_world_state() -> void:
 		revealed_pineapple.modulate = Color(1, 1, 1, 1)
 		
 func _on_reward_tap_catcher_pressed() -> void:
+	if _dialogue_input_locked:
+		return
+	
 	if not _waiting_reward_continue:
 		return
 
@@ -1063,3 +1392,89 @@ func _on_reward_tap_catcher_pressed() -> void:
 				collect_button.visible = GameState.local_role == GameState.Role.SIDEKICK
 			else:
 				collect_button.visible = true
+
+func _show_briefcase_reveal_local() -> void:
+	if not is_instance_valid(briefcase_reveal_sprite):
+		return
+
+	var reveal_texture: Texture2D = GameState.get_briefcase_texture("backyard_path_reveal")
+	briefcase_reveal_sprite.texture = reveal_texture
+	briefcase_reveal_sprite.visible = reveal_texture != null
+	briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_show_briefcase_reveal_then_finalize() -> void:
+	_hide_reward_visuals_for_briefcase()
+	_show_briefcase_reveal_local()
+
+	if is_instance_valid(tap_instruction_label):
+		tap_instruction_label.visible = false
+		tap_instruction_label.text = ""
+
+	if is_instance_valid(tap_catcher):
+		tap_catcher.visible = false
+		tap_catcher.disabled = true
+
+	await get_tree().create_timer(1.5).timeout
+
+	if multiplayer.has_multiplayer_peer():
+		if multiplayer.is_server():
+			rpc_finalize_clue.rpc()
+	else:
+		rpc_finalize_clue()
+
+#Sparkle Animation
+func _apply_sparkle_animation(sparkle_node: Sprite2D) -> void:
+	var pulse := (sin(_animation_time * SPARKLE_PULSE_SPEED) + 1.0) / 2.0
+	var target_scale: float = lerp(SPARKLE_MIN_SCALE, SPARKLE_MAX_SCALE, pulse)
+	sparkle_node.scale = Vector2(target_scale, target_scale)
+	
+func _process(delta: float) -> void:
+	if not _sparkle_animating:
+		return
+
+	_animation_time += delta
+
+	if is_instance_valid(sparkle) and sparkle.visible:
+		_apply_sparkle_animation(sparkle)
+		
+func _hide_reward_visuals_for_briefcase() -> void:
+	_sparkle_animating = false
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = false
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = false
+
+	if is_instance_valid(reward_banner_label):
+		reward_banner_label.visible = false
+		reward_banner_label.text = ""
+
+	if is_instance_valid(reward_panel):
+		reward_panel.visible = false
+
+	if is_instance_valid(reward_text_label):
+		reward_text_label.text = ""
+
+	if is_instance_valid(tap_instruction_label):
+		tap_instruction_label.visible = false
+		tap_instruction_label.text = ""
+
+	if is_instance_valid(tap_catcher):
+		tap_catcher.visible = false
+		tap_catcher.disabled = true
+
+	if is_instance_valid(collect_button):
+		collect_button.visible = false
+
+func _hide_revealed_clue_after_touch() -> void:
+	if is_instance_valid(revealed_plant):
+		revealed_plant.visible = false
+
+	if is_instance_valid(revealed_pineapple):
+		revealed_pineapple.visible = false
+
+	if is_instance_valid(fruit_tap_button):
+		fruit_tap_button.visible = false

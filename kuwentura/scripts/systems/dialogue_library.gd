@@ -49,3 +49,31 @@ const PINAS_HOUSE_RIDDLE_REVEAL := [
 	{"speaker":"detective", "text":"Good. The equation is solved."},
 	{"speaker":"sidekick",  "text":"A riddle appeared... it must be pointing us somewhere in the kitchen."}
 ]
+
+const BACKYARD_PATH_ENTER := [
+	{"speaker":"sidekick","text":"Whoa… this backyard feels different. Wait… is that a plant?"},
+	{"speaker":"detective","text":"A plant? What do you mean plant?"},
+	{"speaker":"sidekick","text":"Right in front of me. It looks like some kind of strange pineapple plant."},
+	{"speaker":"detective","text":"…Hold on. I don’t see a plant."},
+	{"speaker":"detective","text":"I’m seeing… a spirit."},
+	{"speaker":"sidekick","text":"A spirit??"},
+	{"speaker":"detective","text":"Yes… it looks like Pina. Her spirit is standing right here."},
+	{"speaker":"detective","text":"And there are numbers floating above her… maybe that’s her height?"},
+	{"speaker":"sidekick","text":"Wait… there are numbers above the plant too."}
+]
+
+const BACKYARD_PATH_LEDGER_HINT := [
+	{"speaker":"sidekick","text":"How exactly do we convert Dali into centimeters?"},
+	{"speaker":"detective","text":"Maybe the ledger has the answer."}
+]
+
+const BACKYARD_PATH_SOLVED := [
+	{"speaker":"sidekick","text":"Wait… the plant changed."},
+	{"speaker":"sidekick","text":"Is that… a pineapple?"},
+	{"speaker":"detective","text":"Yes."},
+	{"speaker":"detective","text":"That must be the clue hidden here."}
+]
+
+const BACKYARD_PATH_FAIL := [
+	{"speaker":"narrator","text":"The forest rejects your presence."}
+]

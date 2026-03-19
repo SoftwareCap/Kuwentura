@@ -8,12 +8,17 @@ const ConsequenceControllerScript = preload("res://scripts/world/zones/pinasHous
 const _SERVER_PEER_ID := 1
 const _TOOL_IDS := ["pan", "ladle", "pot"]
 
-# Updated timing for the new design
-const TOTAL_TIME_SEC := 600
-const ATTACK_INTERVAL_SEC := 60
-const PENALTY_SEC := 15
+# Updated consequence
 const MAX_ATTACKS := 10
-const FIRST_ATTACK_DELAY_SEC := 60
+const PENALTY_COOLDOWN_SEC := 0.75
+
+const SPARKLE_MIN_SCALE := 0.45
+const SPARKLE_MAX_SCALE := 0.55
+const SPARKLE_PULSE_SPEED := 4.0
+
+const NOTE_REVEAL_SHAKE_OFFSET: float = 10.0
+const NOTE_REVEAL_SHAKE_STEP: float = 0.05
+const NOTE_REVEAL_SHAKE_COUNT: int = 4
 
 @onready var role_label: Label = %RoleLabel
 @onready var back_button: Button = $BackButton
@@ -46,6 +51,7 @@ const FIRST_ATTACK_DELAY_SEC := 60
 # Role button panel hooks from touch controls
 @onready var ledger_panel: Panel = get_node_or_null("SidekickLayer/Ledger")
 @onready var briefcase_panel: Panel = get_node_or_null("SidekickLayer/Briefcase")
+@onready var briefcase_display: TextureRect = get_node_or_null("SidekickLayer/Briefcase/BriefcaseDisplay")
 
 # Interactive note/cabinet
 @onready var note_area: Area2D = $InteractiveLayer/Notes
@@ -79,16 +85,15 @@ const FIRST_ATTACK_DELAY_SEC := 60
 
 # Reward / clue reveal
 @onready var reward_layer: CanvasLayer = $RewardLayer
-@onready var reward_banner = $RewardLayer/RewardBanner
 @onready var reward_text: Label = $RewardLayer/RewardPanel/RewardText
-@onready var clue_sprite = $RewardLayer/ClueSprite
-@onready var sparkle = $RewardLayer/Sparkle
+@onready var banner_label: Label = $RewardLayer/BannerLabel
+@onready var clue_sprite: Sprite2D = $RewardLayer/ClueSprite
+@onready var sparkle: Sprite2D = $RewardLayer/Sparkle
 @onready var collect_button = $RewardLayer/CollectButton
 @onready var dark_overlay = $RewardLayer/DarkOverlay
-@onready var briefcase_reveal_sprite: TextureRect = $RewardLayer/BriefcaseRevealSprite
-
-@onready var banner_label: Label = $RewardLayer/RewardBanner/BannerLabel
 @onready var tap_instruction_label: Label = $RewardLayer/TapInstruction
+@onready var tap_catcher = $RewardLayer/TapCatcher
+@onready var briefcase_reveal_sprite: TextureRect = $RewardLayer/BriefcaseRevealSprite
 
 #Ledger
 @onready var inside_zone_ledger_button: TouchScreenButton = get_node_or_null("InsideZoneControl/Ledger")
@@ -109,7 +114,9 @@ const FIRST_ATTACK_DELAY_SEC := 60
 @onready var cabinet_ladle_collision: CollisionShape2D = $InteractiveLayer/Cabinet/LadleInCabinet/LadleCollision
 
 @onready var reward_panel: Sprite2D = $RewardLayer/RewardPanel
-@onready var tap_catcher: Button = $RewardLayer/TapCatcher
+
+var _animation_time: float = 0.0
+var _sparkle_animating: bool = false
 
 var _cabinet_opened := false
 var _ladle_found := false
@@ -140,6 +147,8 @@ var _note_dialogue_played := false
 var _ledger_hint_shown := false
 var _ledger_opened_once := false
 
+var _dialogue_input_locked := false
+
 var _tools_unlocked := false
 var _tools_collected := {
 	"pan": false,
@@ -147,16 +156,11 @@ var _tools_collected := {
 	"pot": false,
 }
 
-var _time_left := TOTAL_TIME_SEC
+var _strikes_left := MAX_ATTACKS
 var _attack_index := 0
 var _failed := false
-var _timers_started := false
-
-var _tick_timer: Timer
-var _attack_timer: Timer
-var _first_attack_timer: Timer
-
-var _first_warning_played := false
+var _consequence_active := false
+var _penalty_on_cooldown := false
 
 var _shake_timer: Timer
 var _shake_elapsed := 0.0
@@ -206,25 +210,53 @@ func _ready() -> void:
 
 	_refresh_inside_zone_buttons()
 	_populate_ledger_content()
+	_ensure_briefcase_display()
+	_refresh_briefcase_display()
 
-	reward_layer.visible = false
-	dark_overlay.modulate.a = 0.0
-	sparkle.visible = false
-	reward_banner.visible = false
-	clue_sprite.visible = false
-	collect_button.visible = false
+	# Initial reward UI state
+	if is_instance_valid(reward_layer):
+		reward_layer.visible = false
+		reward_layer.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 
-	if notification_ui:
-		notification_ui.visible = true
-	if notification_panel:
-		notification_panel.visible = false
-	if guidance_arrow:
-		guidance_arrow.visible = false
-		
+	if is_instance_valid(dark_overlay):
+		dark_overlay.modulate.a = 0.0
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = false
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+
+	if is_instance_valid(banner_label):
+		banner_label.visible = false
+		banner_label.text = ""
+
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = false
+
+	if is_instance_valid(collect_button):
+		collect_button.visible = false
+		collect_button.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+
+	if is_instance_valid(tap_catcher):
+		tap_catcher.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+
 	if is_instance_valid(briefcase_reveal_sprite):
 		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.texture = null
+		briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
 		briefcase_reveal_sprite.z_index = 100
+		briefcase_reveal_sprite.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 
+	# Notification / guidance UI
+	if is_instance_valid(notification_ui):
+		notification_ui.visible = true
+
+	if is_instance_valid(notification_panel):
+		notification_panel.visible = false
+
+	if is_instance_valid(guidance_arrow):
+		guidance_arrow.visible = false
+
+	# Setup controllers
 	pause_controller.setup(self)
 	consequence_controller.setup(self)
 	tool_hunt_controller.setup(self)
@@ -232,25 +264,77 @@ func _ready() -> void:
 
 	_prepare_initial_flow_state()
 
+	# Connect buttons
 	if is_instance_valid(back_button) and not back_button.pressed.is_connected(_on_back_pressed):
 		back_button.pressed.connect(_on_back_pressed)
 
 	if is_instance_valid(collect_button) and not collect_button.pressed.is_connected(_on_collect_clue_pressed):
 		collect_button.pressed.connect(_on_collect_clue_pressed)
 
+	_start_intro_dialogue_delayed()
+
+func _apply_sparkle_animation(sparkle_node: Sprite2D) -> void:
+	var pulse := (sin(_animation_time * SPARKLE_PULSE_SPEED) + 1.0) / 2.0
+	var target_scale: float = lerp(SPARKLE_MIN_SCALE, SPARKLE_MAX_SCALE, pulse)
+	sparkle_node.scale = Vector2(target_scale, target_scale)
+	
+func _start_reward_visuals() -> void:
 	if is_instance_valid(reward_layer):
-		reward_layer.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+		reward_layer.visible = true
+
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = true
+
+	if is_instance_valid(banner_label):
+		banner_label.visible = true
+		banner_label.text = "CLUE FOUND!"
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = true
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+		_animation_time = 0.0
+		_sparkle_animating = true
+		
+func _hide_reward_visuals_for_briefcase() -> void:
+	_sparkle_animating = false
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = false
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = false
+
+	if is_instance_valid(banner_label):
+		banner_label.visible = false
+		banner_label.text = ""
+
+	if is_instance_valid(reward_panel):
+		reward_panel.visible = false
+
+	if is_instance_valid(reward_text):
+		reward_text.text = ""
+
+	if is_instance_valid(tap_instruction_label):
+		tap_instruction_label.visible = false
+		tap_instruction_label.text = ""
 
 	if is_instance_valid(tap_catcher):
-		tap_catcher.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+		tap_catcher.visible = false
+		tap_catcher.disabled = true
 
 	if is_instance_valid(collect_button):
-		collect_button.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-	
-	if is_instance_valid(briefcase_reveal_sprite):
-		briefcase_reveal_sprite.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-	
-	_start_intro_dialogue_delayed()
+		collect_button.visible = false
+		collect_button.disabled = true
+
+func _process(delta: float) -> void:
+	if not _sparkle_animating:
+		return
+
+	_animation_time += delta
+
+	if is_instance_valid(sparkle) and sparkle.visible:
+		_apply_sparkle_animation(sparkle)
 
 func _init_controllers() -> void:
 	pause_controller = PauseControllerScript.new()
@@ -265,6 +349,9 @@ func _connect_global_signals() -> void:
 	if not GameState.player_role_assigned.is_connected(_on_role_assigned):
 		GameState.player_role_assigned.connect(_on_role_assigned)
 
+	if not GameState.briefcase_updated.is_connected(_on_briefcase_updated):
+		GameState.briefcase_updated.connect(_on_briefcase_updated)
+
 func _setup_music() -> void:
 	if Engine.has_singleton("MusicController") or MusicController:
 		MusicController.play_track(MusicController.MusicTrack.PINAS_HOUSE)
@@ -273,6 +360,19 @@ func _setup_scene() -> void:
 	var saved_pos = GameState.get_spawn_position(multiplayer.get_unique_id())
 	if saved_pos != Vector2.ZERO:
 		print("[PinasHouse] Return point saved: ", saved_pos)
+
+func _set_search_ui_mouse_filter_recursive(node: Node) -> void:
+	for child in node.get_children():
+		if child is Control:
+			# Search room UI is decorative only, so it should not block touches
+			child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_set_search_ui_mouse_filter_recursive(child)
+		
+func _prepare_search_room_ui_for_mobile() -> void:
+	if not is_instance_valid(search_room_ui):
+		return
+
+	_set_search_ui_mouse_filter_recursive(search_room_ui)
 
 func _connect_zone_interactions() -> void:
 	if is_instance_valid(note_area) and not note_area.input_event.is_connected(_on_note_area_input_event):
@@ -351,9 +451,51 @@ func _show_note() -> void:
 		note_collision.disabled = false
 	if is_instance_valid(note_sprite):
 		note_sprite.visible = true
+		_play_note_reveal_shake()
 	if is_instance_valid(note_btn):
 		note_btn.visible = true
 		note_btn.disabled = false
+
+func _play_note_reveal_shake() -> void:
+	if not is_instance_valid(note_sprite):
+		return
+
+	if note_sprite.has_meta("reveal_shake_tween"):
+		var old_tween: Tween = note_sprite.get_meta("reveal_shake_tween")
+		if is_instance_valid(old_tween):
+			old_tween.kill()
+		note_sprite.remove_meta("reveal_shake_tween")
+
+	var base_position: Vector2 = note_sprite.position
+
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+
+	for i in range(NOTE_REVEAL_SHAKE_COUNT):
+		tween.tween_property(
+			note_sprite,
+			"position",
+			base_position + Vector2(-NOTE_REVEAL_SHAKE_OFFSET, 0),
+			NOTE_REVEAL_SHAKE_STEP
+		)
+		tween.tween_property(
+			note_sprite,
+			"position",
+			base_position + Vector2(NOTE_REVEAL_SHAKE_OFFSET, 0),
+			NOTE_REVEAL_SHAKE_STEP
+		)
+
+	tween.tween_property(note_sprite, "position", base_position, NOTE_REVEAL_SHAKE_STEP)
+
+	note_sprite.set_meta("reveal_shake_tween", tween)
+
+	tween.finished.connect(func():
+		if is_instance_valid(note_sprite):
+			note_sprite.position = base_position
+			if note_sprite.has_meta("reveal_shake_tween"):
+				note_sprite.remove_meta("reveal_shake_tween")
+	)
 
 func _hide_cabinet_reward_state() -> void:
 	if is_instance_valid(cabinet_area):
@@ -377,8 +519,7 @@ func _start_intro_dialogue_delayed() -> void:
 	_run_intro_sequence()
 
 func _run_intro_sequence() -> void:
-	DialogueSystems.play("pinas_house_enter", DialogueLibraries.PINAS_HOUSE_ENTER)
-	await DialogueSystems.wait_finished("pinas_house_enter")
+	await _play_locked_dialogue("pinas_house_enter", DialogueLibraries.PINAS_HOUSE_ENTER)
 	_report_intro_ready()
 
 func _report_intro_ready() -> void:
@@ -417,19 +558,14 @@ func _begin_zone_flow_local() -> void:
 
 	_intro_flow_started = true
 	_zone_active = true
-	_tool_phase_active = true
-	_tools_unlocked = true
 
-	if is_instance_valid(search_room_ui):
-		search_room_ui.visible = true
+	tool_hunt_controller.set_search_mode_local(true)
 
 	if is_instance_valid(search_room_label):
 		search_room_label.text = "Find missing tools:"
 
-	tool_hunt_controller.set_tools_unlocked_local(true)
-
 	if multiplayer.is_server() or not multiplayer.has_multiplayer_peer():
-		consequence_controller.start_server()
+		_start_strike_system()
 
 func update_role_visibility() -> void:
 	match GameState.local_role:
@@ -524,6 +660,12 @@ func pulse_ledger_guidance(enable: bool) -> void:
 func _on_ledger_button_pressed() -> void:
 	if GameState.local_role != GameState.Role.SIDEKICK:
 		return
+	
+	if _dialogue_input_locked:
+		return
+		
+	if GameState.local_role != GameState.Role.SIDEKICK:
+		return
 
 	_ledger_opened_once = true
 	pulse_ledger_guidance(false)
@@ -537,13 +679,66 @@ func _on_ledger_button_pressed() -> void:
 		show_notification("Use the ledger steps to solve the equation.", 2.0)
 
 func _on_briefcase_button_pressed() -> void:
-	if briefcase_panel:
-		briefcase_panel.visible = not briefcase_panel.visible
+	if GameState.local_role != GameState.Role.SIDEKICK:
+		return
+
+	if _dialogue_input_locked:
+		return
+
+	if not is_instance_valid(briefcase_panel):
+		return
+
+	_refresh_briefcase_display()
+
+	var should_open: bool = not briefcase_panel.visible
+
+	if should_open and is_instance_valid(ledger_panel):
+		ledger_panel.visible = false
+
+	briefcase_panel.visible = should_open
+
+func _ensure_briefcase_display() -> void:
+	if not is_instance_valid(briefcase_panel):
+		return
+
+	if is_instance_valid(briefcase_display):
+		return
+
+	briefcase_display = TextureRect.new()
+	briefcase_display.name = "BriefcaseDisplay"
+	briefcase_display.visible = false
+	briefcase_display.set_anchors_preset(Control.PRESET_FULL_RECT)
+	briefcase_display.offset_left = -152.0
+	briefcase_display.offset_top = 40.0
+	briefcase_display.offset_right = 185.0
+	briefcase_display.offset_bottom = 67.0
+	briefcase_display.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	briefcase_display.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	briefcase_display.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	briefcase_panel.add_child(briefcase_display)
+
+
+func _refresh_briefcase_display() -> void:
+	if not is_instance_valid(briefcase_display):
+		return
+
+	var texture: Texture2D = GameState.get_briefcase_texture("forest")
+	briefcase_display.texture = texture
+	briefcase_display.visible = texture != null
+
+
+func _on_briefcase_updated() -> void:
+	_refresh_briefcase_display()
 
 func _on_back_pressed() -> void:
+	if _dialogue_input_locked:
+		return
+		
 	_return_to_forest()
 
 func _return_to_forest() -> void:
+	_stop_strike_system()
 	get_tree().paused = false
 
 	if pause_controller:
@@ -560,6 +755,9 @@ func _on_clue_collected(zone_id: String, _clue_data: Dictionary) -> void:
 		clue_collected = true
 
 func _on_note_area_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+	if _dialogue_input_locked:
+		return
+	
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
@@ -570,6 +768,9 @@ func _on_note_area_input_event(_viewport: Node, event: InputEvent, _shape_idx: i
 			_on_note_pressed()
 
 func _on_cabinet_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+	if _dialogue_input_locked:
+		return
+		
 	if not _cabinet_phase_active:
 		return
 
@@ -644,7 +845,7 @@ func show_reward() -> void:
 
 func reward_sequence() -> void:
 	sparkle.visible = false
-	reward_banner.visible = false
+	banner_label.visible = false
 	clue_sprite.visible = false
 	collect_button.visible = false
 
@@ -656,7 +857,7 @@ func reward_sequence() -> void:
 	sparkle.visible = true
 
 	await get_tree().create_timer(0.6, true).timeout
-	reward_banner.visible = true
+	banner_label.visible = true
 
 	reward_text.text = "CLUE FOUND!\n\nThe ladle matters because it represents the kitchen work Pina ignored.\n\n\"We use our eyes to find things, but Pina never used hers…\""
 	await get_tree().create_timer(0.6, true).timeout
@@ -677,6 +878,7 @@ func _on_collect_clue_pressed() -> void:
 
 	if is_instance_valid(collect_button):
 		collect_button.visible = false
+		collect_button.disabled = true
 
 	if multiplayer.has_multiplayer_peer():
 		if multiplayer.is_server():
@@ -691,7 +893,8 @@ func _on_collect_clue_pressed() -> void:
 func rpc_request_collect_clue() -> void:
 	if not multiplayer.is_server():
 		return
-	_collect_clue_server()
+
+	rpc_show_briefcase_reveal_then_finalize.rpc()
 
 func _collect_clue_server() -> void:
 	if multiplayer.has_multiplayer_peer():
@@ -705,9 +908,19 @@ func _collect_clue_server() -> void:
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_finalize_clue_collection() -> void:
+	_stop_strike_system()
 	GameState.collect_clue("pinas_house")
-	get_tree().paused = false
-	exit_zone()
+
+	_dialogue_input_locked = false
+
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.texture = null
+
+	if is_instance_valid(reward_layer):
+		reward_layer.visible = false
+
+	_return_to_forest()
 
 func exit_zone() -> void:
 	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
@@ -739,6 +952,9 @@ func _on_in_game_volume_changed(value: float) -> void:
 # =========================
 
 func _on_note_pressed() -> void:
+	if _dialogue_input_locked:
+		return
+		
 	note_controller.on_note_pressed()
 
 func _on_note_interacted() -> void:
@@ -844,27 +1060,64 @@ func _on_wrong_object_input(_viewport: Node, event: InputEvent, _shape_idx: int)
 # Consequence wrappers
 # =========================
 
+func _start_strike_system() -> void:
+	if _consequence_active:
+		return
+
+	_consequence_active = true
+	_strikes_left = MAX_ATTACKS
+	_attack_index = 0
+	_failed = false
+	_penalty_on_cooldown = false
+
+	print("[PinasHouse] Strike system started. Strikes left: ", _strikes_left)
+
+
+func _stop_strike_system() -> void:
+	_consequence_active = false
+	_penalty_on_cooldown = false
+
+	print("[PinasHouse] Strike system stopped.")
+
+
+func _can_apply_strike() -> bool:
+	return _consequence_active and not _failed and not _penalty_on_cooldown and not clue_collected
+
+
+func _begin_penalty_cooldown() -> void:
+	_penalty_on_cooldown = true
+	await get_tree().create_timer(PENALTY_COOLDOWN_SEC, true).timeout
+	_penalty_on_cooldown = false
+	
+func _apply_strike_server(reason: String) -> void:
+	if not _can_apply_strike():
+		return
+
+	_penalty_on_cooldown = true
+	_strikes_left = max(0, _strikes_left - 1)
+	_attack_index = min(MAX_ATTACKS - _strikes_left, 9)
+
+	print("[PinasHouse] Strike applied. Reason=", reason, " | Strikes left=", _strikes_left, " | Attack index=", _attack_index)
+
+	rpc_play_aswang_attack.rpc(_attack_index, true)
+	rpc_play_validation_feedback.rpc(reason)
+
+	if _strikes_left <= 0:
+		consequence_controller.fail_zone_server()
+		return
+
+	await get_tree().create_timer(PENALTY_COOLDOWN_SEC, true).timeout
+	_penalty_on_cooldown = false
+
 func _start_consequences_server() -> void:
 	consequence_controller.start_server()
-
-func _on_first_attack_server() -> void:
-	consequence_controller.on_first_attack_server()
-
-@rpc("any_peer", "reliable", "call_local")
-func rpc_play_first_attack_warning() -> void:
-	consequence_controller.play_first_attack_warning()
-
-func _on_tick_server() -> void:
-	consequence_controller.on_tick_server()
-
-func _on_scheduled_attack_server() -> void:
-	consequence_controller.on_scheduled_attack_server()
 
 @rpc("any_peer", "reliable")
 func rpc_request_penalty(reason: String) -> void:
 	if not multiplayer.is_server():
 		return
-	consequence_controller.apply_penalty_server(reason)
+
+	_apply_strike_server(reason)
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_play_aswang_attack(idx: int, from_penalty: bool) -> void:
@@ -876,11 +1129,11 @@ func rpc_request_consequence_state() -> void:
 		return
 
 	var peer := multiplayer.get_remote_sender_id()
-	rpc_apply_consequence_state.rpc_id(peer, _attack_index, _time_left, _failed)
+	rpc_apply_consequence_state.rpc_id(peer, _attack_index, _strikes_left, _failed)
 
 @rpc("any_peer", "reliable", "call_local")
-func rpc_apply_consequence_state(attack_idx: int, time_left: int, failed: bool) -> void:
-	consequence_controller.apply_consequence_state(attack_idx, time_left, failed)
+func rpc_apply_consequence_state(attack_idx: int, strikes_left: int, failed: bool) -> void:
+	consequence_controller.apply_consequence_state(attack_idx, strikes_left, failed)
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_play_validation_feedback(dialogue_id: String) -> void:
@@ -924,6 +1177,7 @@ func broadcast_pinas_house_solved() -> void:
 @rpc("any_peer", "reliable", "call_local")
 func rpc_pinas_house_solved() -> void:
 	_note_solved = true
+	GameState.set_puzzle_solved("pinas_house", true)
 	_ledger_hint_shown = false
 	hide_notification()
 	pulse_ledger_guidance(false)
@@ -940,35 +1194,131 @@ func _finish_tool_phase_server() -> void:
 	
 #ledger functions
 func _populate_ledger_content() -> void:
+	var ledger_view: Dictionary = PuzzleManager.get_zone_ledger_display("pinas_house")
+
+	if ledger_view.is_empty():
+		return
+
 	if is_instance_valid(ledger_title_label):
-		ledger_title_label.text = "Finding the Missing Number"
+		ledger_title_label.text = str(ledger_view.get("title", ""))
 
 	if is_instance_valid(ledger_left_header_label):
-		ledger_left_header_label.text = "How to Solve"
+		ledger_left_header_label.text = str(ledger_view.get("left_header", ""))
 
 	if is_instance_valid(ledger_left_body_label):
-		ledger_left_body_label.text = "1. Move the number.\n2. Do the opposite.\n3. Divide if needed."
+		ledger_left_body_label.text = str(ledger_view.get("left_body", ""))
 
 	if is_instance_valid(ledger_right_header_label):
-		ledger_right_header_label.text = "Example"
+		ledger_right_header_label.text = str(ledger_view.get("right_header", ""))
 
 	if is_instance_valid(ledger_right_body_label):
-		ledger_right_body_label.text = "2x - 8 = 2\n\n1. Add 8 to both sides.\n   2x = 10\n\n2. Divide by 2.\n   x = 5"
+		ledger_right_body_label.text = str(ledger_view.get("right_body", ""))
 
 func _refresh_inside_zone_buttons() -> void:
 	var is_sidekick: bool = GameState.local_role == GameState.Role.SIDEKICK
 
 	if is_instance_valid(inside_zone_control):
+		if inside_zone_control.has_method("set_sidekick_ui_visible"):
+			inside_zone_control.set_sidekick_ui_visible(is_sidekick)
+
 		if inside_zone_control.has_method("set_pause_enabled"):
 			inside_zone_control.set_pause_enabled(true)
 
 		if inside_zone_control.has_method("set_briefcase_enabled"):
 			inside_zone_control.set_briefcase_enabled(is_sidekick)
 
-		# Ledger button should be visible for the sidekick as soon as the zone starts.
-		# Arrow/pulse are handled separately by pulse_ledger_guidance().
 		if inside_zone_control.has_method("set_ledger_enabled"):
-			inside_zone_control.set_ledger_enabled(is_sidekick)			
+			inside_zone_control.set_ledger_enabled(is_sidekick)
+
+func _set_dialogue_input_lock(locked: bool) -> void:
+	_dialogue_input_locked = locked
+
+	var is_sidekick: bool = GameState.local_role == GameState.Role.SIDEKICK
+
+	# Pause must stay enabled
+	if is_instance_valid(inside_zone_control):
+		if inside_zone_control.has_method("set_pause_enabled"):
+			inside_zone_control.set_pause_enabled(true)
+
+		if inside_zone_control.has_method("set_ledger_enabled"):
+			inside_zone_control.set_ledger_enabled(is_sidekick and not locked)
+
+		if inside_zone_control.has_method("set_briefcase_enabled"):
+			inside_zone_control.set_briefcase_enabled(is_sidekick and not locked)
+
+	# Desktop/back button should not work during dialogue
+	if is_instance_valid(back_button):
+		back_button.disabled = locked
+
+	# Main world interactions
+	if is_instance_valid(note_area):
+		note_area.input_pickable = not locked and (_note_phase_active or _note_solved)
+
+	if is_instance_valid(note_collision):
+		note_collision.disabled = locked or not (_note_phase_active or _note_solved)
+
+	if is_instance_valid(cabinet_area):
+		cabinet_area.input_pickable = not locked and _cabinet_phase_active
+
+	if is_instance_valid(cabinet_collision):
+		cabinet_collision.disabled = locked or not _cabinet_phase_active
+
+	# Shared wrong-click zone used for both search room and cabinet hunt
+	if is_instance_valid(wrong_click_zone):
+		wrong_click_zone.input_pickable = not locked and (_tool_phase_active or _cabinet_phase_active)
+
+		for child in wrong_click_zone.get_children():
+			if child is CollisionShape2D:
+				child.disabled = locked or not (_tool_phase_active or _cabinet_phase_active)
+
+	# Tool props
+	if is_instance_valid(pan_prop):
+		pan_prop.input_pickable = not locked and (_tool_phase_active and _tools_unlocked and not _tools_collected["pan"])
+	if is_instance_valid(pan_collision):
+		pan_collision.disabled = locked or not (_tool_phase_active and _tools_unlocked and not _tools_collected["pan"])
+
+	if is_instance_valid(ladle_prop):
+		ladle_prop.input_pickable = not locked and (_tool_phase_active and _tools_unlocked and not _tools_collected["ladle"])
+	if is_instance_valid(ladle_collision):
+		ladle_collision.disabled = locked or not (_tool_phase_active and _tools_unlocked and not _tools_collected["ladle"])
+
+	if is_instance_valid(pot_prop):
+		pot_prop.input_pickable = not locked and (_tool_phase_active and _tools_unlocked and not _tools_collected["pot"])
+	if is_instance_valid(pot_collision):
+		pot_collision.disabled = locked or not (_tool_phase_active and _tools_unlocked and not _tools_collected["pot"])
+
+	# Cabinet ladle reward interaction
+	if is_instance_valid(cabinet_ladle_area):
+		cabinet_ladle_area.input_pickable = not locked and (_cabinet_opened and not _ladle_found)
+
+	if is_instance_valid(cabinet_ladle_collision):
+		cabinet_ladle_collision.disabled = locked or not (_cabinet_opened and not _ladle_found)
+
+	# Note boards behind dialogue
+	if is_instance_valid(sidekick_board):
+		if sidekick_board.has_method("set_inputs_enabled"):
+			if locked:
+				sidekick_board.set_inputs_enabled(false)
+			else:
+				var can_input: bool = _note_phase_active and _detective_note_seen and not _note_solved
+				sidekick_board.set_inputs_enabled(can_input)
+
+	if is_instance_valid(detective_close):
+		detective_close.disabled = locked
+
+	if is_instance_valid(sidekick_close):
+		sidekick_close.disabled = locked
+
+	if not locked:
+		_refresh_inside_zone_buttons()
+		tool_hunt_controller.apply_tool_nodes()
+		note_controller.apply_note_interaction_gate()
+
+func _play_locked_dialogue(dialogue_id: String, lines: Array) -> void:
+	_set_dialogue_input_lock(true)
+	DialogueSystems.play(dialogue_id, lines)
+	await DialogueSystems.wait_finished(dialogue_id)
+	_set_dialogue_input_lock(false)
 
 #Reward
 func _reset_cabinet_clue_state() -> void:
@@ -996,8 +1346,8 @@ func _reset_cabinet_clue_state() -> void:
 	if is_instance_valid(reward_panel):
 		reward_panel.visible = false
 
-	if is_instance_valid(reward_banner):
-		reward_banner.visible = false
+	if is_instance_valid(banner_label):
+		banner_label.visible = false
 
 	if is_instance_valid(clue_sprite):
 		clue_sprite.visible = false
@@ -1029,6 +1379,9 @@ func _reset_cabinet_clue_state() -> void:
 		dark_overlay.modulate.a = 0.0
 
 func _on_cabinet_ladle_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+	if _dialogue_input_locked:
+		return
+	
 	if not _cabinet_opened or _ladle_found:
 		return
 
@@ -1090,17 +1443,18 @@ func rpc_start_ladle_found_sequence() -> void:
 	if is_instance_valid(dark_overlay):
 		dark_overlay.modulate.a = 0.45
 
-	if is_instance_valid(sparkle):
-		sparkle.visible = true
-
 	if is_instance_valid(clue_sprite):
 		clue_sprite.visible = true
 
-	if is_instance_valid(reward_banner):
-		reward_banner.visible = true
-
 	if is_instance_valid(banner_label):
+		banner_label.visible = true
 		banner_label.text = "CLUE FOUND!"
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = true
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+		_animation_time = 0.0
+		_sparkle_animating = true
 
 	if is_instance_valid(reward_panel):
 		reward_panel.visible = false
@@ -1124,6 +1478,9 @@ func rpc_start_ladle_found_sequence() -> void:
 		briefcase_reveal_sprite.visible = false
 
 func _on_reward_tap_catcher_pressed() -> void:
+	if _dialogue_input_locked:
+		return
+	
 	if not _waiting_reward_continue:
 		return
 
@@ -1206,7 +1563,8 @@ func _on_reward_tap_catcher_pressed() -> void:
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_begin_briefcase_store_sequence() -> void:
-	get_tree().paused = true
+	# Do NOT pause the tree here. Mobile clients can get stuck paused.
+	_dialogue_input_locked = true
 
 	if is_instance_valid(reward_layer):
 		reward_layer.visible = true
@@ -1218,10 +1576,11 @@ func rpc_begin_briefcase_store_sequence() -> void:
 	if is_instance_valid(reward_text):
 		reward_text.text = ""
 
-	if is_instance_valid(reward_banner):
-		reward_banner.visible = false
+	if is_instance_valid(banner_label):
+		banner_label.visible = false
 
 	if is_instance_valid(banner_label):
+		banner_label.visible = false
 		banner_label.text = ""
 
 	if is_instance_valid(clue_sprite):
@@ -1240,8 +1599,9 @@ func rpc_begin_briefcase_store_sequence() -> void:
 
 	if is_instance_valid(collect_button):
 		collect_button.visible = false
+		collect_button.disabled = true
 
-	# Keep overlay but make sure briefcase is visible above it
+	# Keep overlay, show only briefcase reveal
 	if is_instance_valid(dark_overlay):
 		dark_overlay.modulate.a = 0.45
 
@@ -1249,11 +1609,58 @@ func rpc_begin_briefcase_store_sequence() -> void:
 		briefcase_reveal_sprite.visible = true
 		briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
 		briefcase_reveal_sprite.z_index = 100
-		print("[Briefcase] Showing briefcase reveal sprite")
 
 @rpc("any_peer", "call_local", "reliable")
 func rpc_play_tools_done_dialogue() -> void:
 	_play_tools_done_dialogue_local()
 
 func _play_tools_done_dialogue_local() -> void:
-	DialogueSystems.play("pinas_house_tools_done", DialogueLibraries.PINAS_HOUSE_TOOLS_DONE)
+	await _play_locked_dialogue("pinas_house_tools_done", DialogueLibraries.PINAS_HOUSE_TOOLS_DONE)
+
+func _show_briefcase_reveal_local() -> void:
+	if not is_instance_valid(briefcase_reveal_sprite):
+		return
+
+	var reveal_texture: Texture2D = GameState.get_briefcase_texture("pinas_house_reveal")
+	briefcase_reveal_sprite.texture = reveal_texture
+	briefcase_reveal_sprite.visible = reveal_texture != null
+	briefcase_reveal_sprite.modulate = Color(1, 1, 1, 1)
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_show_briefcase_reveal_then_finalize() -> void:
+	_hide_reward_visuals_for_briefcase()
+	_show_briefcase_reveal_local()
+
+	await get_tree().create_timer(1.5).timeout
+
+	if multiplayer.has_multiplayer_peer():
+		if multiplayer.is_server():
+			rpc_finalize_clue.rpc()
+	else:
+		rpc_finalize_clue()
+		
+@rpc("any_peer", "reliable", "call_local")
+func rpc_finalize_clue() -> void:
+	GameState.collect_clue("pinas_house")
+
+	_sparkle_animating = false
+
+	if is_instance_valid(sparkle):
+		sparkle.visible = false
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+
+	if is_instance_valid(clue_sprite):
+		clue_sprite.visible = false
+
+	if is_instance_valid(banner_label):
+		banner_label.visible = false
+		banner_label.text = ""
+
+	if is_instance_valid(briefcase_reveal_sprite):
+		briefcase_reveal_sprite.visible = false
+		briefcase_reveal_sprite.texture = null
+
+	if is_instance_valid(reward_layer):
+		reward_layer.visible = false
+
+	_return_to_forest()

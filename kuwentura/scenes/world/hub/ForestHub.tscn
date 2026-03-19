@@ -1,8 +1,8 @@
-[gd_scene load_steps=38 format=4 uid="uid://c65bu18udl64v"]
+[gd_scene load_steps=37 format=4 uid="uid://c65bu18udl64v"]
 
 [ext_resource type="Texture2D" uid="uid://k60h4yhhde0x" path="res://assets/backgrounds/forest.png" id="2_87r7r"]
 [ext_resource type="Texture2D" uid="uid://d06a48u2atl4o" path="res://assets/sprites/places/pinasHouseZone.png" id="2_anhpr"]
-[ext_resource type="Texture2D" uid="uid://fyaaxc6p5k04" path="res://assets/tiles/forestPathTilemap.png" id="2_k5ulr"]
+[ext_resource type="Texture2D" uid="uid://fyaaxc6p5k04" path="res://assets/tiles/ForestPathTilemap.png" id="2_k5ulr"]
 [ext_resource type="Script" uid="uid://b57klslahartq" path="res://scripts/world/hub/zone_portal.gd" id="3_dyw7g"]
 [ext_resource type="Texture2D" uid="uid://p18vin8nbajb" path="res://assets/sprites/places/oldWellZone.png" id="5_ggw0p"]
 [ext_resource type="Texture2D" uid="uid://co67v77hnrb2d" path="res://assets/sprites/places/pinasHouseOpenDoor.png" id="5_wp30c"]
@@ -10,7 +10,7 @@
 [ext_resource type="Script" uid="uid://dhq7o8y147g37" path="res://scripts/world/hub/forest_hub.gd" id="6_forest_hub"]
 [ext_resource type="PackedScene" uid="uid://i2gpufiq0ql0" path="res://scenes/controls/TouchControls.tscn" id="7_6nmbo"]
 [ext_resource type="Texture2D" uid="uid://c27biqcyrcmo8" path="res://assets/sprites/places/backyardPathZone.png" id="7_i1yoq"]
-[ext_resource type="Script" uid="uid://mmcj3rgi3q85" path="res://scripts/world/hub/finish_zone_indicator.gd" id="7_indicator"]
+[ext_resource type="Script" path="res://scripts/world/hub/finish_zone_indicator.gd" id="7_indicator"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="8_ggw0p"]
 [ext_resource type="Texture2D" uid="uid://vhtyew110bgu" path="res://assets/sprites/zoneObjects/woodenSignage.png" id="9_rbch1"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="11_i1yoq"]
@@ -19,7 +19,6 @@
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="13_cpdo7"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="14_wp30c"]
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="15_cpdo7"]
-[ext_resource type="Texture2D" uid="uid://b2ryp42vnc38n" path="res://assets/sprites/players/briefcaseOpen.png" id="16_wp30c"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="18_t6pvo"]
 [ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/clues/ladleClue.png" id="19_hdutc"]
 
@@ -891,11 +890,10 @@ thickness = 20
 color = Color(0.6509804, 0.4392157, 0.26666668, 1)
 thickness = 20
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_1cndf"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_rbch1"]
 texture = ExtResource("15_cpdo7")
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_t6pvo"]
-texture = ExtResource("16_wp30c")
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_8ci0b"]
 
 [node name="ForestHub" type="Node2D"]
 script = ExtResource("6_forest_hub")
@@ -1633,13 +1631,121 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -293.0
-offset_top = -269.0
-offset_right = 293.0
-offset_bottom = 317.0
+offset_left = -393.0
+offset_top = -331.0
+offset_right = 519.0
+offset_bottom = 501.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_1cndf")
+theme_override_styles/panel = SubResource("StyleBoxTexture_rbch1")
+
+[node name="Control" type="Control" parent="SidekickLayer/Ledger"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LedgerTitle" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 200.0
+offset_right = 431.0
+offset_bottom = 251.0
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("8_ggw0p")
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerLeftHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 173.0
+offset_top = 270.0
+offset_right = 433.0
+offset_bottom = 330.0
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("8_ggw0p")
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerLeftBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 339.0
+offset_right = 446.0
+offset_bottom = 482.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("8_ggw0p")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="LedgerRightHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 478.0
+offset_top = 208.0
+offset_right = 753.0
+offset_bottom = 276.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("8_ggw0p")
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerRightBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 478.0
+offset_top = 274.0
+offset_right = 739.0
+offset_bottom = 492.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("8_ggw0p")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="PrevPageButton" type="Button" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 275.0
+offset_right = 90.0
+offset_bottom = 393.0
+theme_override_colors/font_color = Color(0.9901666, 0.9396903, 0.92559636, 1)
+theme_override_font_sizes/font_size = 80
+text = "<"
+flat = true
+expand_icon = true
+
+[node name="NextPageButton" type="Button" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 851.0
+offset_top = 273.0
+offset_right = 905.0
+offset_bottom = 391.0
+theme_override_colors/font_color = Color(0.9901666, 0.9396903, 0.92559636, 1)
+theme_override_font_sizes/font_size = 80
+text = ">"
+flat = true
+expand_icon = true
+
+[node name="PageIndicator" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 661.0
+offset_top = 174.0
+offset_right = 759.0
+offset_bottom = 208.0
+theme_override_colors/font_color = Color(0.44313726, 0.22745098, 0.16862746, 1)
+theme_override_fonts/font = ExtResource("8_ggw0p")
+theme_override_font_sizes/font_size = 25
+text = "1/1"
+horizontal_alignment = 2
+vertical_alignment = 1
 
 [node name="Briefcase" type="Panel" parent="SidekickLayer"]
 visible = false
@@ -1654,7 +1760,22 @@ offset_right = 247.0
 offset_bottom = 197.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_t6pvo")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_8ci0b")
+
+[node name="BriefcaseDisplay" type="TextureRect" parent="SidekickLayer/Briefcase"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -152.0
+offset_top = 40.0
+offset_right = 185.0
+offset_bottom = 67.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
 
 [connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/Resume_PlayButton" to="." method="_on_resume_play_button_pressed"]
 [connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/OptionButton" to="." method="_on_option_button_pressed"]

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bv2f8hf4rymwo"
-path="res://.godot/imported/Detective_idle.png-6b1c5eb2efa5184bce0867ad93ed7d80.ctex"
+uid="uid://cj7dwoc61gg6x"
+path="res://.godot/imported/point.png-85c0afdccf883b60ddd0eee334991092.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/Detective/Detective_idle.png"
-dest_files=["res://.godot/imported/Detective_idle.png-6b1c5eb2efa5184bce0867ad93ed7d80.ctex"]
+source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/point.png"
+dest_files=["res://.godot/imported/point.png-85c0afdccf883b60ddd0eee334991092.ctex"]
 
 [params]
 

@@ -28,6 +28,9 @@ func _ready() -> void:
 
 	y_input.visible = false
 	y_input.editable = false
+	
+	if is_instance_valid(x_input):
+		x_input.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
 
 	if not submit.pressed.is_connected(_on_submit_pressed):
 		submit.pressed.connect(_on_submit_pressed)
@@ -52,6 +55,10 @@ func open_board() -> void:
 
 
 func _on_submit_pressed() -> void:
+	var scene = get_tree().current_scene
+	if scene and "_dialogue_input_locked" in scene and scene._dialogue_input_locked:
+		return
+
 	_check_answer()
 
 

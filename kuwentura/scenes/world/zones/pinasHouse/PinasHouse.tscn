@@ -1,4 +1,4 @@
-[gd_scene load_steps=80 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=78 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://miy70k8n04ul" path="res://assets/sprites/places/pinasHouseBackground.png" id="2_vt60f"]
@@ -38,8 +38,6 @@
 [ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="36_u6sy3"]
 [ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/clues/ladleClue.png" id="37_dcipd"]
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="39_0s51p"]
-[ext_resource type="Texture2D" uid="uid://c7f1pyernjqux" path="res://assets/sprites/zoneObjects/pinasHouseObjects/PinasBriefcase.png" id="39_cyexm"]
-[ext_resource type="Texture2D" uid="uid://b2ryp42vnc38n" path="res://assets/sprites/players/briefcaseOpen.png" id="40_cyexm"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_btbyq"]
 size = Vector2(321.00024, 356.50024)
@@ -69,7 +67,7 @@ size = Vector2(365.00024, 198.00044)
 size = Vector2(210.75008, 109.25011)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ra7mo"]
-size = Vector2(772.00055, 235.50015)
+size = Vector2(410.00006, 235.50015)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fvin0"]
 size = Vector2(1340.0009, 84.99942)
@@ -249,8 +247,7 @@ shadow_offset = Vector2(0, 3.41)
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_m2a4r"]
 texture = ExtResource("39_0s51p")
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wjw6o"]
-texture = ExtResource("40_cyexm")
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_u6sy3"]
 
 [node name="PinasHouse" type="Node2D"]
 process_mode = 1
@@ -449,8 +446,8 @@ scale = Vector2(0.9999994, 0.9999994)
 shape = SubResource("RectangleShape2D_u6sy3")
 
 [node name="CollisionShape2D4" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
-position = Vector2(387.99988, 105.999916)
-scale = Vector2(0.99999934, 0.99999934)
+position = Vector2(568.99976, 105.999886)
+scale = Vector2(0.9999992, 0.9999992)
 shape = SubResource("RectangleShape2D_ra7mo")
 
 [node name="CollisionShape2D5" type="CollisionShape2D" parent="InteractiveLayer/Objects/WrongClickZone"]
@@ -563,6 +560,7 @@ offset_top = 852.0
 offset_right = 1071.0
 offset_bottom = 987.0
 size_flags_horizontal = 3
+mouse_filter = 2
 texture = ExtResource("25_eedqa")
 expand_mode = 1
 stretch_mode = 5
@@ -573,6 +571,7 @@ offset_left = 1083.0
 offset_top = 846.0
 offset_right = 1259.0
 offset_bottom = 990.0
+mouse_filter = 2
 texture = ExtResource("26_cd1wg")
 expand_mode = 1
 
@@ -582,6 +581,7 @@ offset_left = 622.0
 offset_top = 848.0
 offset_right = 797.0
 offset_bottom = 987.0
+mouse_filter = 2
 texture = ExtResource("27_egl2a")
 expand_mode = 1
 
@@ -781,6 +781,7 @@ theme_override_font_sizes/font_size = 35
 placeholder_text = "Answer"
 alignment = 1
 expand_to_text_length = true
+virtual_keyboard_type = 2
 flat = true
 
 [node name="YInput" type="LineEdit" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
@@ -849,7 +850,7 @@ offset_top = 202.0
 offset_right = 932.0
 offset_bottom = 300.0
 
-[node name="GuidanceArrow" type="Sprite2D" parent="RoleLayer/Control"]
+[node name="GuidancedArrow" type="Sprite2D" parent="RoleLayer/Control"]
 visible = false
 position = Vector2(1186, 247)
 scale = Vector2(0.32, 0.27333334)
@@ -1081,7 +1082,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="RewardLayer" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="DarkOverlay" type="ColorRect" parent="RewardLayer"]
 modulate = Color(1, 1, 1, 0)
@@ -1104,22 +1104,26 @@ position = Vector2(715.4999, 258.00003)
 scale = Vector2(0.25199997, 0.2303333)
 texture = ExtResource("37_dcipd")
 
-[node name="RewardBanner" type="Sprite2D" parent="RewardLayer"]
-position = Vector2(739.00006, -56)
-scale = Vector2(0.34629634, 0.36954734)
-texture = ExtResource("36_u6sy3")
-
-[node name="BannerLabel" type="Label" parent="RewardLayer/RewardBanner"]
-offset_left = -768.12854
-offset_top = 325.50003
-offset_right = 646.8447
-offset_bottom = 419.43207
-theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+[node name="BannerLabel" type="Label" parent="RewardLayer"]
+anchors_preset = -1
+anchor_left = -0.029618787
+anchor_right = -0.029618787
+offset_left = 34.753967
+offset_top = 39.66298
+offset_right = 1449.7273
+offset_bottom = 133.59502
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 45
+text = "CLUE FOUND!"
 horizontal_alignment = 1
 vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
+
+[node name="RewardBanner" type="Sprite2D" parent="RewardLayer"]
+visible = false
+position = Vector2(739.00006, -56)
+scale = Vector2(0.34629634, 0.36954734)
+texture = ExtResource("36_u6sy3")
 
 [node name="TapInstruction" type="Label" parent="RewardLayer"]
 offset_left = 483.0
@@ -1178,13 +1182,12 @@ flat = true
 
 [node name="BriefcaseRevealSprite" type="TextureRect" parent="RewardLayer"]
 visible = false
-offset_left = 326.0
-offset_top = 62.0
-offset_right = 2246.0
-offset_bottom = 1142.0
+offset_left = 315.0
+offset_top = 87.0
+offset_right = 2257.7966
+offset_bottom = 1230.1853
 scale = Vector2(0.3947917, 0.4273148)
 mouse_filter = 2
-texture = ExtResource("39_cyexm")
 
 [node name="NotificationUI" type="CanvasLayer" parent="."]
 
@@ -1310,7 +1313,7 @@ offset_right = 247.0
 offset_bottom = 197.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_wjw6o")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_u6sy3")
 
 [connection signal="input_event" from="InteractiveLayer/Objects/WrongClickZone" to="." method="_on_wrong_object_input"]
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
