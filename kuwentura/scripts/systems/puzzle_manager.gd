@@ -32,9 +32,14 @@ const PUZZLE_DATA = {
 	},
 
 	"ledger": {
+	"layout": "two_column",
 	"title": "Finding the Missing Number",
+	"left_header": "How to Solve",
+	"left_body": "1. Move the number.\n2. Do the opposite.\n3. Divide if needed.",
+	"right_header": "Example",
+	"right_body": "2x - 8 = 2\n\n1. Add 8 to both sides.\n   2x = 10\n\n2. Divide by 2.\n   x = 5",
 	"instruction": "Undo what was done to x.\nMove the number first.\nThen divide if needed.",
-	"example": "Example: 2x - 8 = 2\nStep 1: Add 8 to both sides.\nNow it becomes 2x = 10.\nStep 2: Divide both sides by 2.\nNow it becomes x = 5."
+	"example": "Example: 2x - 8 = 2\nStep 1: Add 8 to both sides.\nNow it becomes x = 10.\nStep 2: Divide both sides by 2.\nNow it becomes x = 5."
 	},
 
 	"variations": [
@@ -119,10 +124,12 @@ const PUZZLE_DATA = {
 		},
 		
 		"ledger": {
-			"title": "Traditional Measurements",
-			"formula": "1 Dali = 2 cm",
-			"instruction": "To convert Dali to centimeters, multiply by 2.",
-			"example": "60 Dali × 2 = 120 cm"
+		"layout": "single_body",
+		"title": "Measurement Conversion",
+		"body": "1 Dali = 2 Centimeters\n\nTo convert Dali to cm:\nMultiply the Dali value by 2.\n\nExample:\n40 Dali × 2 = 80 cm",
+		"formula": "1 Dali = 2 cm",
+		"instruction": "To convert Dali to centimeters, multiply by 2.",
+		"example": "40 Dali × 2 = 80 cm"
 		},
 		
 		"variations": [
@@ -348,6 +355,86 @@ const PUZZLE_DATA = {
 		}
 	}
 }
+
+const LEDGER_ZONE_ORDER := [
+	"pinas_house",
+	"backyard_path",
+	"old_well",
+	"storage_hut",
+	"abandoned_house"
+]
+
+
+func get_zone_ledger_display(zone_id: String) -> Dictionary:
+	if not PUZZLE_DATA.has(zone_id):
+		push_warning("[PuzzleManager] Unknown ledger zone: " + zone_id)
+		return {}
+
+	var zone_data: Dictionary = PUZZLE_DATA[zone_id]
+	var ledger: Dictionary = zone_data.get("ledger", {})
+	var layout: String = str(ledger.get("layout", "single_body"))
+	var fallback_body: String = _build_fallback_ledger_body(ledger)
+
+	return {
+		"zone_id": zone_id,
+		"zone_name": str(zone_data.get("name", zone_id)),
+		"layout": layout,
+		"title": str(ledger.get("title", zone_data.get("name", "Ledger"))),
+		"body": str(ledger.get("body", fallback_body)),
+		"left_header": str(ledger.get("left_header", "")),
+		"left_body": str(ledger.get("left_body", ledger.get("instruction", ""))),
+		"right_header": str(ledger.get("right_header", "")),
+		"right_body": str(ledger.get("right_body", ledger.get("example", "")))
+	}
+
+
+func get_unlocked_global_ledger_entries() -> Array:
+	var entries: Array = []
+
+	for zone_id in LEDGER_ZONE_ORDER:
+		var unlocked: bool = GameState.is_puzzle_solved(zone_id) or GameState.has_clue(zone_id)
+		if not unlocked:
+			continue
+
+		var ledger_entry: Dictionary = get_zone_ledger_display(zone_id)
+		if ledger_entry.is_empty():
+			continue
+
+		entries.append(ledger_entry)
+
+	return entries
+
+
+func _build_fallback_ledger_body(ledger: Dictionary) -> String:
+	var blocks: Array[String] = []
+
+	if ledger.has("formula"):
+		blocks.append(str(ledger.get("formula", "")))
+
+	if ledger.has("instruction"):
+		blocks.append(str(ledger.get("instruction", "")))
+
+	if ledger.has("example"):
+		blocks.append("Example:\n" + str(ledger.get("example", "")))
+
+	if ledger.has("formulas"):
+		var formulas: Dictionary = ledger.get("formulas", {})
+		var formula_lines: Array[String] = []
+		for key in formulas.keys():
+			formula_lines.append(str(key).capitalize() + ": " + str(formulas[key]))
+		if not formula_lines.is_empty():
+			blocks.append("Formulas:\n" + "\n".join(formula_lines))
+
+	if ledger.has("roman_guide"):
+		var roman: Dictionary = ledger.get("roman_guide", {})
+		var roman_lines: Array[String] = []
+		for key in roman.keys():
+			roman_lines.append(str(key) + " = " + str(roman[key]))
+		if not roman_lines.is_empty():
+			blocks.append("Roman Numeral Guide:\n" + ", ".join(roman_lines))
+
+	return "\n\n".join(blocks)
+
 
 #------------------------------------------------------------------------------
 # Public API
