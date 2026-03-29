@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://djmy1sc73f144"
-path="res://.godot/imported/ezgif-frame-006.jpg-f886e68ae0eb7aa245b6aff8d9e6c680.ctex"
+path.bptc="res://.godot/imported/ezgif-frame-006.jpg-f886e68ae0eb7aa245b6aff8d9e6c680.bptc.ctex"
+path.astc="res://.godot/imported/ezgif-frame-006.jpg-f886e68ae0eb7aa245b6aff8d9e6c680.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-006.jpg"
-dest_files=["res://.godot/imported/ezgif-frame-006.jpg-f886e68ae0eb7aa245b6aff8d9e6c680.ctex"]
+dest_files=["res://.godot/imported/ezgif-frame-006.jpg-f886e68ae0eb7aa245b6aff8d9e6c680.bptc.ctex", "res://.godot/imported/ezgif-frame-006.jpg-f886e68ae0eb7aa245b6aff8d9e6c680.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c2w32odtn3c80"
-path="res://.godot/imported/joinGame.png-08e2f3ab366e9b899a716d5ddac85874.ctex"
+path.bptc="res://.godot/imported/joinGame.png-08e2f3ab366e9b899a716d5ddac85874.bptc.ctex"
+path.astc="res://.godot/imported/joinGame.png-08e2f3ab366e9b899a716d5ddac85874.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/buttons/joinGame.png"
-dest_files=["res://.godot/imported/joinGame.png-08e2f3ab366e9b899a716d5ddac85874.ctex"]
+dest_files=["res://.godot/imported/joinGame.png-08e2f3ab366e9b899a716d5ddac85874.bptc.ctex", "res://.godot/imported/joinGame.png-08e2f3ab366e9b899a716d5ddac85874.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

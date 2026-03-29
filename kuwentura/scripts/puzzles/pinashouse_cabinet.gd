@@ -1,8 +1,10 @@
 extends StaticBody2D
 
+const PUZZLE_ID := "pinashouse_puzzle"
 
-func _on_body_entered(body):
-	if body.name == "Player":
-		# Show puzzle UI (we'll build this next)
-		get_tree().get_root().get_node("UI").show_puzzle("pinashouse_puzzle")
-		get_node("/root/Main").puzzle_ui.show_puzzle("pinashouse_puzzle")
+@onready var puzzle_ui = get_node("/root/Main").puzzle_ui
+
+
+func _on_body_entered(body: Node2D) -> void:
+	if body is Player:
+		puzzle_ui.show_puzzle(PUZZLE_ID)
