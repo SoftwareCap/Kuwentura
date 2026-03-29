@@ -1,27 +1,20 @@
 extends Node
+## Tracks collected clues for the Bakunawa challenge.
 
-#==============================================================================
-# CLUE MANAGER
-# Tracks collected clues for the Bakunawa challenge
-#==============================================================================
+signal clue_added(zone_name: String)
 
-var collected_clues: Array = []
-var clue_count: int = 0
+var collected_clues: Array[String] = []
 
 
-func add_clue(zone_name: String, clue_data: Dictionary) -> void:
-	if zone_name in collected_clues:
+func add_clue(zone_name: String, _clue_data: Dictionary = {}) -> void:
+	if has_clue(zone_name):
 		return
-
 	collected_clues.append(zone_name)
-	clue_count += 1
-
-	print("Clue collected from zone:", zone_name)
-	print("Total clues:", clue_count)
+	clue_added.emit(zone_name)
 
 
 func get_clue_count() -> int:
-	return clue_count
+	return collected_clues.size()
 
 
 func has_clue(zone_name: String) -> bool:

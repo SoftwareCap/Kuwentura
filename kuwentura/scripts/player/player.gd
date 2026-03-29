@@ -1,0 +1,224 @@
+extends CharacterBody2D
+
+class_name Player
+
+# CONSTANTS
+
+# Network interpolation thresholds
+const TELEPORT_THRESHOLD := 100.0 # Snap instantly beyond this distance
+const LERP_DIST_FAR := 50.0 # Distance band: far
+const LERP_DIST_NEAR := 10.0 # Distance band: near
+const LERP_FACTOR_FAR := 0.5
+const LERP_FACTOR_MID := 0.3
+const LERP_FACTOR_DEFAULT := 0.15
+
+# Sync
+const POSITION_CHANGED_THRESHOLD := 0.5
+
+# Physics
+const FLOOR_MAX_ANGLE_DEG := 60.0
+const FLOOR_SAFE_MARGIN := 0.05
+const GROUNDING_VELOCITY := 100.0
+
+# NODE REFERENCES
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+
+# EXPORTS
+@export var speed: float = 350.0
+@export var jump_force: float = -700.0
+@export var role: String = "Detective"
+@export var avatar_scale: Vector2 = Vector2(1.0, 1.0)
+@export var sync_interval: float = 0.05
+
+# STATE
+var is_host: bool = false
+
+var _is_in_lobby: bool = false
+var _sync_timer: float = 0.0
+var _last_sent_position: Vector2 = Vector2.ZERO
+var _last_sent_animation: String = ""
+var _remote_animation: String = ""
+var _was_on_floor: bool = true
+var _intended_x_position: float = 0.0
+
+
+# LIFECYCLE
+func _ready() -> void:
+	_is_in_lobby = get_parent() is Control
+
+	if multiplayer.has_multiplayer_peer():
+		z_index = 10 if is_multiplayer_authority() else 0
+	else:
+		z_index = 10
+
+	if not _is_in_lobby:
+		_configure_physics()
+		scale = avatar_scale
+		_intended_x_position = global_position.x
+		force_update_transform()
+
+		if _is_local_player():
+			_last_sent_position = global_position
+			_last_sent_animation = "idle"
+
+
+func _process(_delta: float) -> void:
+	if _is_in_lobby:
+		_update_animation()
+		return
+
+	if not multiplayer.has_multiplayer_peer():
+		return
+
+	if not is_multiplayer_authority():
+		_update_from_network_state()
+
+
+func _physics_process(delta: float) -> void:
+	if _is_in_lobby:
+		return
+
+	if not multiplayer.has_multiplayer_peer():
+		_process_local_movement(delta)
+		return
+
+	if is_multiplayer_authority():
+		_process_local_movement(delta)
+		var current_anim := _update_animation()
+		_sync_state(delta, current_anim)
+	else:
+		velocity = Vector2.ZERO
+
+
+# SETUP
+func _configure_physics() -> void:
+	"""Apply physics settings that prevent sliding at small scales."""
+	floor_constant_speed = false
+	floor_stop_on_slope = true
+	floor_block_on_wall = true
+	floor_max_angle = deg_to_rad(FLOOR_MAX_ANGLE_DEG)
+	floor_snap_length = 0.0
+	motion_mode = MOTION_MODE_GROUNDED
+	safe_margin = FLOOR_SAFE_MARGIN
+	up_direction = Vector2.UP
+
+
+# MOVEMENT
+func _process_local_movement(delta: float) -> void:
+	"""Process input, gravity, jump, and horizontal drift prevention."""
+	var direction := Input.get_axis("game_left", "game_right")
+
+	if direction == 0 and is_on_floor():
+		_intended_x_position = global_position.x
+
+	velocity.x = direction * speed
+
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+		_was_on_floor = false
+	else:
+		if not _was_on_floor:
+			velocity.y = 0
+			_was_on_floor = true
+		elif velocity.y > 0:
+			velocity.y = 0
+
+	if Input.is_action_just_pressed("game_jump"):
+		_try_jump()
+
+	move_and_slide()
+
+	if is_on_floor() and direction == 0:
+		global_position.x = _intended_x_position
+
+
+func _try_jump() -> void:
+	if is_on_floor():
+		velocity.y = jump_force
+
+
+# ANIMATION
+func _update_animation() -> String:
+	"""Play the correct sprite animation based on velocity and return its name."""
+	if velocity.x == 0:
+		sprite.play("idle")
+		return "idle"
+	sprite.play("walk")
+	sprite.flip_h = velocity.x < 0
+	return "walk"
+
+
+# NETWORK — LOCAL PLAYER
+func _is_local_player() -> bool:
+	"""True when this node is the local authority in a multiplayer session."""
+	return multiplayer.has_multiplayer_peer() and is_multiplayer_authority()
+
+
+func _sync_state(delta: float, current_anim: String) -> void:
+	"""Throttle-check and broadcast state to other peers."""
+	_sync_timer += delta
+	var pos_changed := global_position.distance_to(_last_sent_position) > POSITION_CHANGED_THRESHOLD
+	var anim_changed := current_anim != _last_sent_animation
+
+	if _sync_timer >= sync_interval and (pos_changed or anim_changed):
+		_sync_timer = 0.0
+		_last_sent_position = global_position
+		_last_sent_animation = current_anim
+		_send_state(current_anim)
+
+
+func _send_state(animation: String) -> void:
+	"""Broadcast position, velocity, facing, and animation via RPC."""
+	var facing := "left" if sprite.flip_h else "right"
+	NetworkManager.sync_player_state.rpc(global_position, velocity, facing, animation)
+	NetworkManager.report_position(multiplayer.get_unique_id(), global_position)
+
+
+# NETWORK — REMOTE PLAYER
+func _update_from_network_state() -> void:
+	"""Interpolate position and sync animation from the partner's broadcast state."""
+	var peer_id := int(str(name))
+	if peer_id == 0:
+		return
+
+	var state := NetworkManager.get_partner_state(peer_id)
+	if state.is_empty():
+		return
+
+	var target_pos := state.get("position", global_position) as Vector2
+	var distance := global_position.distance_to(target_pos)
+
+	if distance > TELEPORT_THRESHOLD:
+		global_position = target_pos
+		return
+
+	var lerp_factor := LERP_FACTOR_DEFAULT
+	if distance > LERP_DIST_FAR:
+		lerp_factor = LERP_FACTOR_FAR
+	elif distance > LERP_DIST_NEAR:
+		lerp_factor = LERP_FACTOR_MID
+
+	global_position = global_position.lerp(target_pos, lerp_factor)
+	sprite.flip_h = (state.get("facing", "right") == "left")
+
+	var anim := state.get("animation", "idle") as String
+	if anim != _remote_animation:
+		_remote_animation = anim
+		sprite.play(anim)
+
+
+# PUBLIC API
+func _force_grounded() -> void:
+	"""Snap the player to the floor after a scene transition."""
+	velocity = Vector2.ZERO
+	if not is_on_floor():
+		velocity.y = GROUNDING_VELOCITY
+		move_and_slide()
+	velocity = Vector2.ZERO
+
+
+func _force_initial_sync() -> void:
+	"""Send an immediate state broadcast so other players can see this player on spawn."""
+	if not _is_local_player():
+		return
+	_send_state("idle")

@@ -1,12 +1,10 @@
 extends Node2D
 
-## Forest Hub - Main world scene with zone portals and player spawning
+## Forest Hub - Main world scene with zone portals and player spawning.
 
-# Preload both player scenes
 @onready var player_host_scene: PackedScene = preload("res://scenes/players/PlayerHost.tscn")
 @onready var player_sidekick_scene: PackedScene = preload("res://scenes/players/PlayerSidekick.tscn")
 
-# Scale configuration for Forest Hub
 @export var detective_scale: Vector2 = Vector2(0.2, 0.2)
 @export var sidekick_scale: Vector2 = Vector2(0.2, 0.2)
 @export var ground_y: float = 750.0
@@ -18,8 +16,9 @@ extends Node2D
 @onready var option_sub_panel: Panel = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel
 @onready var volume_slider: HSlider = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeSlider
 @onready var volume_value_label: Label = $PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeValue
+@onready var room_code_label: Label = $HUDLayer/RoomCode
+@onready var finish_zone_indicator: Node = $FinishZoneIndicator
 
-#Forest Ledger
 @onready var forest_ledger_title_label: Label = $SidekickLayer/Ledger/Control/LedgerTitle
 @onready var forest_ledger_left_header_label: Label = $SidekickLayer/Ledger/Control/LedgerLeftHeader
 @onready var forest_ledger_left_body_label: Label = $SidekickLayer/Ledger/Control/LedgerLeftBody
@@ -30,656 +29,352 @@ extends Node2D
 @onready var forest_page_indicator_label: Label = $SidekickLayer/Ledger/Control/PageIndicator
 @onready var forest_ledger_control: Control = $SidekickLayer/Ledger/Control
 
-var _ledger_pages: Array[Dictionary] = []
-var _current_ledger_page: int = 0
-var _ledger_page_animating: bool = false
-
-const LEDGER_PAGE_TURN_DURATION: float = 0.16
-const LEDGER_EMPTY_TEXT := "Solve a zone puzzle to unlock \nledger notes in the forest."
-
-# Track spawned players
-var _spawned_players: Dictionary = {}
-
-# Panel management
-var _current_open_panel: String = ""  # "map", "ledger", "briefcase", or ""
-var _is_animating: bool = false
-
-# Animation constants
-const PANEL_ANIMATION_DURATION: float = 0.4
-const LEDGER_OPEN_SCALE: Vector2 = Vector2(1.0, 1.0)
-const LEDGER_CLOSED_SCALE: Vector2 = Vector2(0.1, 1.0)
-const BRIEFCASE_OPEN_SCALE: Vector2 = Vector2(1.0, 1.0)
-const BRIEFCASE_CLOSED_SCALE: Vector2 = Vector2(1.0, 0.1)
-
-# Sidekick UI elements
 @onready var sidekick_layer: CanvasLayer = $SidekickLayer
 @onready var ledger_panel: Panel = $SidekickLayer/Ledger
 @onready var briefcase_panel: Panel = $SidekickLayer/Briefcase
 @onready var briefcase_display: TextureRect = $SidekickLayer/Briefcase/BriefcaseDisplay
-
-# Map panel (accessible by both)
 @onready var map_layer: CanvasLayer = $MapLayer
 @onready var map_panel: Panel = $MapLayer/Map
-
-# Portal references
 @onready var portals: Node2D = $"Zone Portals"
-
-# Door animation references (for Pina's house)
 @onready var pinas_house_door: Sprite2D = $"Zone Portals/PortalPinasHouse/DoorOpen"
+
+const PANEL_ANIMATION_DURATION: float = 0.4
+const LEDGER_PAGE_TURN_DURATION: float = 0.16
 const DOOR_ANIMATION_DURATION: float = 0.5
+const LEDGER_EMPTY_TEXT := "Solve a zone puzzle to unlock \nledger notes in the forest."
+const LEDGER_OPEN_SCALE: Vector2 = Vector2(1.0, 1.0)
+const LEDGER_CLOSED_SCALE: Vector2 = Vector2(0.1, 1.0)
+const BRIEFCASE_OPEN_SCALE: Vector2 = Vector2(1.0, 1.0)
+const BRIEFCASE_CLOSED_SCALE: Vector2 = Vector2(1.0, 0.1)
+const SCENE_MAIN_MENU := "res://scenes/mainMenu/MainMenu.tscn"
+const SETTINGS_FILE := "user://settings.json"
 
-# Room code label (only visible to host, follows camera via CanvasLayer)
-@onready var room_code_label: Label = $HUDLayer/RoomCode
-
-# Finish zone indicator (shows completion status for each zone)
-@onready var finish_zone_indicator = $FinishZoneIndicator
-
-# Mapping of zone_name to indicator child node names
-const ZONE_INDICATOR_MAP: Dictionary = {
-	"pinas_house": "PinasHouse",
-	"old_well": "OldWell",
-	"backyard_path": "Backyard",
-	"storage_hut": "StorageHut",
-	"abandoned_house": "AbandonedHouse"
-}
+var _spawned_players: Dictionary = {}
+var _current_open_panel: String = ""
+var _is_animating: bool = false
+var _ledger_pages: Array[Dictionary] = []
+var _current_ledger_page: int = 0
+var _ledger_page_animating: bool = false
 
 
-func _ready():
-	# Setup room code label - only visible to host
-	_setup_room_code_label()
-	
-	# Verify required nodes exist
-	if spawn_points == null:
-		push_error("[ForestHub] SpawnPoints node not found! Creating fallback spawn points.")
-		spawn_points = Node2D.new()
-		spawn_points.name = "SpawnPoints"
-		add_child(spawn_points)
-		
-		# Create default spawn markers
-		var detective_spawn = Marker2D.new()
-		detective_spawn.name = "DetectiveSpawn"
-		detective_spawn.position = Vector2(400, ground_y)
-		spawn_points.add_child(detective_spawn)
-		
-		var sidekick_spawn = Marker2D.new()
-		sidekick_spawn.name = "SidekickSpawn"
-		sidekick_spawn.position = Vector2(600, ground_y)
-		spawn_points.add_child(sidekick_spawn)
-	
-	# Play forest hub music
+func _ready() -> void:
+	_ensure_spawn_points()
 	MusicController.play_track(MusicController.MusicTrack.FOREST_HUB)
-	
-	print("[ForestHub] Initializing... Multiplayer ID: ", multiplayer.get_unique_id())
-	print("[ForestHub] Peers: ", multiplayer.get_peers())
-	
-	# Connect to network signals
-	NetworkManager.player_connected.connect(_on_player_connected)
-	NetworkManager.player_disconnected.connect(_on_player_disconnected)
-	NetworkManager.partner_disconnected.connect(_on_partner_disconnected)
-	
-	# Connect to spawn signals from NetworkManager (RPCs now handled there)
-	if not NetworkManager.spawn_player_requested.is_connected(_on_spawn_player_requested):
-		NetworkManager.spawn_player_requested.connect(_on_spawn_player_requested)
-	if not NetworkManager.despawn_player_requested.is_connected(_on_despawn_player_requested):
-		NetworkManager.despawn_player_requested.connect(_on_despawn_player_requested)
-	
-	# Connect to rejoin signal for position sync
-	if not NetworkManager.rejoin_game_requested.is_connected(_on_rejoin_game_requested):
-		NetworkManager.rejoin_game_requested.connect(_on_rejoin_game_requested)
-	
-	# Connect touch controls pause button
-	print("[ForestHub] Setting up touch controls...")
-	if touch_controls:
-		print("[ForestHub] TouchControls found")
-		# Connect to the pause_pressed signal from TouchControls
-		if touch_controls.has_signal("pause_pressed"):
-			print("[ForestHub] TouchControls has pause_pressed signal")
-			if not touch_controls.pause_pressed.is_connected(_on_pause_button_pressed):
-				touch_controls.pause_pressed.connect(_on_pause_button_pressed)
-				print("[ForestHub] Connected pause_pressed signal")
-		else:
-			print("[ForestHub] TouchControls does NOT have pause_pressed signal")
-	else:
-		push_error("[ForestHub] TouchControls not found!")
-	
-	# Initialize pause panel
-	print("[ForestHub] Initializing pause panel...")
-	if in_game_pause_panel:
-		print("[ForestHub] Pause panel found, setting invisible")
-		in_game_pause_panel.visible = false
-		# Set initial volume slider value
-		if volume_slider:
-			volume_slider.value = MusicController.get_volume() * 100
-			print("[ForestHub] Volume slider set to: ", volume_slider.value)
-			# Connect volume slider signal
-			if not volume_slider.value_changed.is_connected(_on_in_game_volume_changed):
-				volume_slider.value_changed.connect(_on_in_game_volume_changed)
-				print("[ForestHub] Volume slider signal connected")
-		if volume_value_label:
-			volume_value_label.text = str(int(MusicController.get_volume() * 100)) + "%"
-	else:
-		push_error("[ForestHub] InGamePausePanel not found!")
-	
-	# Spawn local player
+	_connect_signals()
+	_setup_room_code_label()
+	_setup_pause_panel()
 	_spawn_local_player()
-	
-	# Setup UI controls (Map, Ledger, Briefcase buttons)
 	_setup_ui_controls()
 	_setup_forest_ledger_navigation()
 	_refresh_forest_ledger_pages()
-	
-	# Connect to zone portal signals for door animations
 	_connect_portal_signals()
-	
-	# Setup zone completion indicators
 	_setup_zone_completion_indicators()
-	
-		# Connect to zone completion signal for dynamic updates
-	if not GameState.zone_completed.is_connected(_on_zone_completed):
-		GameState.zone_completed.connect(_on_zone_completed)
-
-	# Connect to global briefcase updates
-	if not GameState.briefcase_updated.is_connected(_on_briefcase_updated):
-		GameState.briefcase_updated.connect(_on_briefcase_updated)
-
-	# Load the correct forest briefcase image immediately
 	_refresh_briefcase_display()
-	
-	# Spawn already connected peers (both server and client)
 	for peer_id in multiplayer.get_peers():
 		if peer_id != multiplayer.get_unique_id() and not _spawned_players.has(peer_id):
-			print("[ForestHub] Spawning already connected peer: ", peer_id)
 			_spawn_player_for_peer(peer_id)
-	
-	# Server tells all clients about existing players
 	if multiplayer.is_server():
 		await get_tree().process_frame
-		# Get saved positions for all peers
-		var host_pos = GameState.get_spawn_position(1)
-		
-		# Tell each peer to spawn all other players (including the host)
+		var host_pos := GameState.get_spawn_position(1)
 		for peer_id in multiplayer.get_peers():
 			if peer_id != multiplayer.get_unique_id():
-				# Tell this peer to spawn the host (ID 1) with position
-				print("[ForestHub] Telling peer ", peer_id, " to spawn host at ", host_pos)
 				_rpc_spawn_player_with_pos.rpc_id(peer_id, 1, true, host_pos)
-				
-				# Tell all other peers to spawn this peer with position
-				var peer_pos = GameState.get_spawn_position(peer_id)
+				var peer_pos := GameState.get_spawn_position(peer_id)
 				for other_peer in multiplayer.get_peers():
 					if other_peer != peer_id and other_peer != multiplayer.get_unique_id():
-						print("[ForestHub] Telling peer ", other_peer, " to spawn peer ", peer_id, " at ", peer_pos)
 						_rpc_spawn_player_with_pos.rpc_id(other_peer, peer_id, false, peer_pos)
-		
-		# NOTE: We no longer clear positions here automatically.
-		# Positions are now cleared when entering a zone (before saving new positions).
-		# This ensures both players spawn at their correct return positions even if
-		# there are network delays. Positions will be overwritten when entering the next zone.
 
 
-## Setup room code label - only visible to host
+func _exit_tree() -> void:
+	var signal_pairs := [
+		[NetworkManager.player_connected, _on_player_connected],
+		[NetworkManager.player_disconnected, _on_player_disconnected],
+		[NetworkManager.partner_disconnected, _on_partner_disconnected],
+		[NetworkManager.spawn_player_requested, _on_spawn_player_requested],
+		[NetworkManager.despawn_player_requested,_on_despawn_player_requested],
+		[NetworkManager.rejoin_game_requested, _on_rejoin_game_requested],
+	]
+	for pair in signal_pairs:
+		var sig: Signal = pair[0]
+		var cb: Callable = pair[1]
+		if sig.is_connected(cb):
+			sig.disconnect(cb)
+
+
+func _connect_signals() -> void:
+	var signal_pairs := [
+		[NetworkManager.player_connected, _on_player_connected],
+		[NetworkManager.player_disconnected, _on_player_disconnected],
+		[NetworkManager.partner_disconnected, _on_partner_disconnected],
+		[NetworkManager.spawn_player_requested, _on_spawn_player_requested],
+		[NetworkManager.despawn_player_requested,_on_despawn_player_requested],
+		[NetworkManager.rejoin_game_requested, _on_rejoin_game_requested],
+	]
+	for pair in signal_pairs:
+		var sig: Signal = pair[0]
+		var cb: Callable = pair[1]
+		if not sig.is_connected(cb):
+			sig.connect(cb)
+	if not GameState.zone_completed.is_connected(_on_zone_completed):
+		GameState.zone_completed.connect(_on_zone_completed)
+	if not GameState.briefcase_updated.is_connected(_on_briefcase_updated):
+		GameState.briefcase_updated.connect(_on_briefcase_updated)
+	if touch_controls:
+		if touch_controls.has_signal("pause_pressed") and not touch_controls.pause_pressed.is_connected(_on_pause_button_pressed):
+			touch_controls.pause_pressed.connect(_on_pause_button_pressed)
+
+
+func _ensure_spawn_points() -> void:
+	if spawn_points:
+		return
+	push_error("[ForestHub] SpawnPoints node not found — creating fallback.")
+	spawn_points = Node2D.new()
+	spawn_points.name = "SpawnPoints"
+	add_child(spawn_points)
+	for cfg in [["DetectiveSpawn", Vector2(400, ground_y)], ["SidekickSpawn", Vector2(600, ground_y)]]:
+		var m := Marker2D.new()
+		m.name = cfg[0]
+		m.position = cfg[1]
+		spawn_points.add_child(m)
+
+
 func _setup_room_code_label() -> void:
 	if not room_code_label:
 		return
-	
-	# Only show room code to the host (Detective)
 	if multiplayer.is_server():
-		var room_code = NetworkManager.get_room_code()
-		if room_code.is_empty():
-			room_code = "N/A"
-		room_code_label.text = "Code: " + room_code
+		var code := NetworkManager.get_invite_code()
+		room_code_label.text = "Code: " + (code if not code.is_empty() else "N/A")
 		room_code_label.visible = true
-		print("[ForestHub] Room code displayed for host: ", room_code)
 	else:
-		# Hide from sidekick
 		room_code_label.visible = false
-		print("[ForestHub] Room code hidden for sidekick")
 
 
-## Open the pause panel (called when touch controls option button is pressed)
+func _setup_pause_panel() -> void:
+	if not in_game_pause_panel:
+		push_error("[ForestHub] InGamePausePanel not found!")
+		return
+	in_game_pause_panel.visible = false
+	_sync_volume_ui()
+	if volume_slider and not volume_slider.value_changed.is_connected(_on_in_game_volume_changed):
+		volume_slider.value_changed.connect(_on_in_game_volume_changed)
+
+
+func _sync_volume_ui() -> void:
+	if volume_slider:
+		volume_slider.value = MusicController.get_volume() * 100
+	if volume_value_label:
+		volume_value_label.text = str(int(MusicController.get_volume() * 100)) + "%"
+
+
 func _on_pause_button_pressed() -> void:
-	print("[ForestHub] ========== PAUSE BUTTON PRESSED ==========")
-	if in_game_pause_panel:
-		in_game_pause_panel.visible = true
-		# Hide option sub-panel when opening pause
-		if option_sub_panel:
-			option_sub_panel.visible = false
-		print("[ForestHub] Pause panel visible: ", in_game_pause_panel.visible)
-		print("[ForestHub] In-game pause panel OPENED")
-		# Pause the game
-		get_tree().paused = true
-		# Pause background music
-		MusicController.pause_music()
-		print("[ForestHub] Background music PAUSED")
-	else:
-		push_error("[ForestHub] Cannot open pause - in_game_pause_panel is null!")
+	if not in_game_pause_panel:
+		push_error("[ForestHub] Cannot open pause — in_game_pause_panel is null!")
+		return
+	in_game_pause_panel.visible = true
+	if option_sub_panel:
+		option_sub_panel.visible = false
+	get_tree().paused = true
+	MusicController.pause_music()
 
 
-## Resume button pressed - closes pause panel and resumes game
 func _on_resume_play_button_pressed() -> void:
-	print("[ForestHub] Resume button pressed - resuming game")
 	if in_game_pause_panel:
 		in_game_pause_panel.visible = false
 	if option_sub_panel:
 		option_sub_panel.visible = false
-	# Resume background music before unpausing game
 	MusicController.resume_music()
-	print("[ForestHub] Background music RESUMED")
 	get_tree().paused = false
-	print("[ForestHub] Game RESUMED")
 
 
-## Option button pressed - opens the option sub-panel
 func _on_option_button_pressed() -> void:
-	print("[ForestHub] Option button pressed - opening options")
-	if option_sub_panel:
-		option_sub_panel.visible = true
-		# Update slider to current volume
-		if volume_slider:
-			volume_slider.value = MusicController.get_volume() * 100
-		if volume_value_label:
-			volume_value_label.text = str(int(MusicController.get_volume() * 100)) + "%"
-		print("[ForestHub] Option sub-panel OPENED")
-	else:
-		push_error("[ForestHub] Cannot open options - option_sub_panel is null!")
+	if not option_sub_panel:
+		push_error("[ForestHub] Cannot open options — option_sub_panel is null!")
+		return
+	option_sub_panel.visible = true
+	_sync_volume_ui()
 
 
-## Back button pressed (BackToPrevious on option sub-panel) - returns to pause panel
 func _on_in_game_option_back_pressed() -> void:
-	print("[ForestHub] Back button pressed")
 	if option_sub_panel and option_sub_panel.visible:
-		# If option panel is open, close it and return to pause panel
 		option_sub_panel.visible = false
-		print("[ForestHub] Option sub-panel closed, back to pause panel")
 
 
-## Exit to Main Menu button pressed
 func _on_exit_to_main_menu_button_pressed() -> void:
-	print("[ForestHub] Exit to Main Menu button pressed")
-	# Unpause before leaving
 	get_tree().paused = false
-	
-	# Disconnect from network if connected
 	if NetworkManager.has_active_connection():
 		NetworkManager.disconnect_network()
-		# Small delay to ensure disconnect is processed
 		await get_tree().create_timer(0.2).timeout
-	
-	# Save settings
-	_save_pause()
-	
-	# Return to main menu (check if still in tree after delay)
+	_save_settings()
 	if is_inside_tree():
-		get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
+		get_tree().change_scene_to_file(SCENE_MAIN_MENU)
 
 
 func _on_in_game_volume_changed(value: float) -> void:
-	var volume = value / 100.0
-	MusicController.set_volume(volume)
+	MusicController.set_volume(value / 100.0)
 	if volume_value_label:
 		volume_value_label.text = str(int(value)) + "%"
-	print("[ForestHub] Volume changed to: ", volume)
-	# Save settings immediately when volume changes
-	_save_pause()
+	_save_settings()
 
 
-func _save_pause() -> void:
-	const OPTION_FILE = "user://settings.json"
-	var data = {
-		"volume": MusicController.get_volume()
-	}
-	
-	var file = FileAccess.open(OPTION_FILE, FileAccess.WRITE)
+func _save_settings() -> void:
+	var file := FileAccess.open(SETTINGS_FILE, FileAccess.WRITE)
 	if file:
-		file.store_string(JSON.stringify(data))
+		file.store_string(JSON.stringify({"volume": MusicController.get_volume()}))
 		file.close()
-		print("[ForestHub] Settings saved successfully")
 
 
-func _on_spawn_player_requested(peer_id: int, is_detective: bool):
-	print("[ForestHub] Spawn requested via NetworkManager: peer_id=", peer_id, " is_detective=", is_detective)
-	# Get saved position to pass to RPC so all clients spawn at correct position
-	var saved_pos = GameState.get_spawn_position(peer_id)
+func _on_spawn_player_requested(peer_id: int, is_detective: bool) -> void:
+	var saved_pos := GameState.get_spawn_position(peer_id)
 	_rpc_spawn_player(peer_id, is_detective, saved_pos)
 
 
-func _on_despawn_player_requested(peer_id: int):
-	print("[ForestHub] Despawn requested via NetworkManager: peer_id=", peer_id)
+func _on_despawn_player_requested(peer_id: int) -> void:
 	_rpc_despawn_player(peer_id)
 
 
-func _spawn_local_player():
-	var peer_id: int = multiplayer.get_unique_id()
-	print("[ForestHub] Spawning local player, peer_id: ", peer_id)
-	_spawn_player_for_peer(peer_id)
+func _spawn_local_player() -> void:
+	_spawn_player_for_peer(multiplayer.get_unique_id())
 
 
-func _spawn_player_for_peer(peer_id: int) -> void:
-	# Prevent duplicate spawns
-	if _spawned_players.has(peer_id):
-		print("[ForestHub] Player ", peer_id, " already spawned, skipping")
-		return
-	
-	var is_detective: bool = (peer_id == 1)
-	
+func _instantiate_player(is_detective: bool) -> CharacterBody2D:
 	var player: CharacterBody2D
-	var spawn_marker: Marker2D
-	var spawn_pos: Vector2
-	
-	print("[ForestHub] === SPAWNING peer_id=", peer_id, " is_detective=", is_detective, " my_id=", multiplayer.get_unique_id())
-	
 	if is_detective:
 		player = player_host_scene.instantiate()
 		player.role = "Detective"
 		player.avatar_scale = detective_scale
-		print("[ForestHub] Instantiated Detective scene")
 	else:
 		player = player_sidekick_scene.instantiate()
 		player.role = "Sidekick"
 		player.avatar_scale = sidekick_scale
-		print("[ForestHub] Instantiated Sidekick scene")
-	
-	player.name = str(peer_id)
-	
-	# Get spawn position
-	# Check if player has a saved position (from returning from a zone)
-	var saved_pos = GameState.get_spawn_position(peer_id)
-	var has_saved_pos = saved_pos != Vector2.ZERO
-	
-	print("[ForestHub] Spawn check for peer ", peer_id, " (", "Detective" if is_detective else "Sidekick", "): saved_pos=", saved_pos, ", has_saved=", has_saved_pos)
-	
-	if has_saved_pos:
-		# Player is returning from a zone - use their saved position
-		spawn_pos = saved_pos
-		print("[ForestHub] ✓ Using SAVED RETURN position for ", "Detective" if is_detective else "Sidekick", " at: ", spawn_pos)
-	else:
-		# First time spawn or rejoin - use initial spawn markers
-		if is_detective:
-			spawn_marker = spawn_points.get_node_or_null("DetectiveSpawn")
-		else:
-			spawn_marker = spawn_points.get_node_or_null("SidekickSpawn")
-		
-		if spawn_marker:
-			spawn_pos = spawn_marker.global_position
-			print("[ForestHub] ○ Using SPAWN MARKER for ", "Detective" if is_detective else "Sidekick", " at: ", spawn_pos, " (first time spawn or rejoin)")
-		else:
-			# FIXED: Detective on LEFT (200), Sidekick on RIGHT (600) to match spawn marker layout
-			spawn_pos = Vector2(200 if is_detective else 600, ground_y)
-			push_warning("[ForestHub] Spawn marker not found for " + ("Detective" if is_detective else "Sidekick") + ", using default position: " + str(spawn_pos))
-	
-	# INSTANT SPAWN: Set position before adding to tree to prevent any interpolation
+	return player
+
+
+func _resolve_spawn_position(peer_id: int, is_detective: bool, forced_pos: Vector2 = Vector2.ZERO) -> Vector2:
+	if forced_pos != Vector2.ZERO:
+		return forced_pos
+	var saved_pos := GameState.get_spawn_position(peer_id)
+	if saved_pos != Vector2.ZERO:
+		return saved_pos
+	var marker_name := "DetectiveSpawn" if is_detective else "SidekickSpawn"
+	var marker := spawn_points.get_node_or_null(marker_name) as Marker2D
+	if marker:
+		return marker.global_position
+	var default_pos := Vector2(200 if is_detective else 600, ground_y)
+	push_warning("[ForestHub] Spawn marker not found for %s, using default: %s" % [
+		"Detective" if is_detective else "Sidekick", str(default_pos)
+	])
+	return default_pos
+
+
+func _finalize_spawn(player: CharacterBody2D, peer_id: int, spawn_pos: Vector2) -> void:
 	player.global_position = spawn_pos
-	
-	# Clear any stale network state for this peer to prevent interpolation from old position
-	# This ensures instant spawn without sliding
 	if NetworkManager.has_method("clear_partner_state"):
 		NetworkManager.clear_partner_state(peer_id)
-	
-	# Stabilize physics immediately to prevent sliding
 	_stabilize_player_physics(player)
-	
-	# Set multiplayer authority
 	player.set_multiplayer_authority(peer_id)
-	
-	# Track and add to scene
+	_force_visibility_recursive(player)
 	_spawned_players[peer_id] = player
 	add_child(player, true)
-	
-	# Clear the used spawn position for the local player only
-	# This prevents stale data on next zone entry; position will be re-saved when entering
-	if peer_id == multiplayer.get_unique_id():
-		GameState.clear_spawn_position(peer_id)
-	
-	# Force visibility and re-stabilize after adding to tree
-	_force_visibility_recursive(player)
 	_call_stabilize_after_frame(player)
-	
-	# IMMEDIATE SYNC: If this is the local player, force immediate position broadcast
-	# This fixes the "invisible until moving" bug for BOTH host and sidekick
 	if peer_id == multiplayer.get_unique_id():
 		await get_tree().process_frame
 		if is_instance_valid(player) and player.has_method("_force_initial_sync"):
-			print("[ForestHub] Forcing immediate position sync for local ", player.role)
 			player._force_initial_sync()
-			# Also explicitly sync to ensure all peers get the position
-			_sync_player_position_to_all.rpc(peer_id, spawn_pos)
-	
-	# Deferred visibility check to ensure it sticks
+			if multiplayer.is_server():
+				_sync_player_position_to_all.rpc(peer_id, spawn_pos)
 	_call_deferred_visibility_check(player)
-	
-	print("[ForestHub] === SPAWNED ", player.role, " (ID: ", peer_id, ") at ", spawn_pos, " visible=", player.visible, " in_tree=", player.is_inside_tree())
+
+
+func _spawn_player_for_peer(peer_id: int) -> void:
+	if _spawned_players.has(peer_id):
+		return
+	var is_detective := (peer_id == 1)
+	var spawn_pos := _resolve_spawn_position(peer_id, is_detective)
+	var player := _instantiate_player(is_detective)
+	player.name = str(peer_id)
+	await _finalize_spawn(player, peer_id, spawn_pos)
+	if peer_id == multiplayer.get_unique_id():
+		GameState.clear_spawn_position(peer_id)
 
 
 func _on_player_connected(peer_id: int, _role: int = 0) -> void:
-	print("[ForestHub] Player connected signal: ", peer_id)
-	
-	if multiplayer.is_server():
-		# Clean up any existing player node for this peer (in case of reconnection)
-		var existing_node = get_node_or_null(str(peer_id))
-		if existing_node:
-			print("[ForestHub] Removing existing player node for peer ", peer_id)
-			existing_node.queue_free()
-			_spawned_players.erase(peer_id)
-		
-		# Also clean up any other sidekick nodes (in case peer_id changed on reconnect)
-		# This prevents duplicate sidekick avatars
-		for child in get_children():
-			if child is CharacterBody2D:
-				var child_peer_id = int(child.name)
-				if child_peer_id > 1 and child_peer_id != peer_id:  # Not host and not the new peer
-					if not multiplayer.get_peers().has(child_peer_id):
-						print("[ForestHub] Cleaning up old sidekick node: ", child.name)
-						child.queue_free()
-		
-		# Server spawns the new player locally
-		if not _spawned_players.has(peer_id):
-			_spawn_player_for_peer(peer_id)
-			# Ensure the player is visible after spawning
-			_ensure_player_visible(peer_id)
-		
-		# Tell the new peer to spawn the host (ID 1) - include host's position
-		var host_pos = GameState.get_spawn_position(1)
-		print("[ForestHub] Telling peer ", peer_id, " to spawn host (ID 1) at pos: ", host_pos)
-		_rpc_spawn_player_with_pos.rpc_id(peer_id, 1, true, host_pos)
-		
-		# Tell all existing peers (including server) about the new player - include new player's position
-		for other_peer in multiplayer.get_peers():
-			if other_peer != peer_id:
-				var new_player_pos = GameState.get_spawn_position(peer_id)
-				print("[ForestHub] Telling peer ", other_peer, " to spawn new player ", peer_id, " at pos: ", new_player_pos)
-				_rpc_spawn_player_with_pos.rpc_id(other_peer, peer_id, false, new_player_pos)
-				# Ensure visibility on the remote peer's side as well
-				_ensure_player_visible_on_peer.rpc_id(other_peer, peer_id)
+	if not multiplayer.is_server():
+		return
+	var existing := get_node_or_null(str(peer_id))
+	if existing:
+		existing.queue_free()
+		_spawned_players.erase(peer_id)
+	for child in get_children():
+		if child is CharacterBody2D:
+			var cid := int(child.name)
+			if cid > 1 and cid != peer_id and not multiplayer.get_peers().has(cid):
+				child.queue_free()
+	if not _spawned_players.has(peer_id):
+		_spawn_player_for_peer(peer_id)
+		_ensure_player_visible(peer_id)
+	var host_pos := GameState.get_spawn_position(1)
+	_rpc_spawn_player_with_pos.rpc_id(peer_id, 1, true, host_pos)
+	for other_peer in multiplayer.get_peers():
+		if other_peer != peer_id:
+			var new_pos := GameState.get_spawn_position(peer_id)
+			_rpc_spawn_player_with_pos.rpc_id(other_peer, peer_id, false, new_pos)
+			_ensure_player_visible_on_peer.rpc_id(other_peer, peer_id)
 
 
 func _on_player_disconnected(peer_id: int) -> void:
-	print("[ForestHub] Player disconnected: ", peer_id)
-	
-	# Remove the player node if it exists
-	var player_node: Node = get_node_or_null(str(peer_id))
+	var player_node := get_node_or_null(str(peer_id)) as Node
 	if player_node:
-		print("[ForestHub] Removing player node for peer ", peer_id)
 		player_node.queue_free()
-	
 	_spawned_players.erase(peer_id)
-	
-	# Tell all clients to remove this player
 	if multiplayer.is_server():
 		NetworkManager.request_despawn_player(peer_id)
-		
-		# Also clean up any orphaned sidekick nodes (in case of quick reconnect with new peer_id)
 		_cleanup_orphaned_players()
 
 
-## Called when partner disconnects (host disconnected for sidekick, or sidekick disconnected for host)
 func _on_partner_disconnected(reason: String) -> void:
-	print("[ForestHub] Partner disconnected, reason: ", reason)
-	
-	# Only go back to main menu if WE are the sidekick and the HOST disconnected
-	# The host (detective) should stay in the game when sidekick disconnects
-	var my_role = NetworkManager.get_my_role()
-	
-	# Host disconnected → sidekick goes back to menu
-	# Sidekick disconnected → host stays in game (can wait for rejoin)
+	var my_role := NetworkManager.get_my_role()
 	if reason == "host_disconnected" or (not NetworkManager.has_active_connection() and my_role != "detective"):
-		print("[ForestHub] Host disconnected! Returning to main menu...")
-		
-		# Unpause before leaving
 		get_tree().paused = false
-		
-		# Ensure network is fully disconnected
 		NetworkManager.disconnect_network()
-		
-		# Show a message to the player (optional - could add a popup here)
-		
-		# Return to main menu after a short delay to allow cleanup
 		await get_tree().create_timer(0.5).timeout
 		if is_inside_tree():
-			get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
+			get_tree().change_scene_to_file(SCENE_MAIN_MENU)
 
 
-## Clean up orphaned player nodes (for reconnection scenarios)
 func _cleanup_orphaned_players() -> void:
-	# Get list of currently connected peers
-	var connected_peers = multiplayer.get_peers()
-	
-	# Check all children for player nodes that shouldn't exist
+	var connected_peers := multiplayer.get_peers()
 	for child in get_children():
-		# Check if this is a player node (CharacterBody2D with name as number)
 		if child is CharacterBody2D:
-			var peer_id = int(child.name)
-			if peer_id > 0:  # Valid peer ID
-				# If this peer is not in our spawned list and not in connected peers, remove it
-				if not _spawned_players.has(peer_id) and not connected_peers.has(peer_id):
-					print("[ForestHub] Cleaning up orphaned player node: ", child.name)
-					child.queue_free()
+			var pid := int(child.name)
+			if pid > 0 and not _spawned_players.has(pid) and not connected_peers.has(pid):
+				child.queue_free()
 
 
-## Spawn player via NetworkManager signal (not direct RPC)
 func _rpc_spawn_player(peer_id: int, is_detective_role: bool, forced_pos: Vector2 = Vector2.ZERO) -> void:
-	print("[ForestHub] === RPC SPAWN peer_id=", peer_id, " is_detective=", is_detective_role, " my_id=", multiplayer.get_unique_id(), " forced_pos=", forced_pos)
-	
-	if _spawned_players.has(peer_id):
-		print("[ForestHub] Player ", peer_id, " already exists, skipping")
+	if _spawned_players.has(peer_id) or peer_id == multiplayer.get_unique_id():
 		return
-	
-	if peer_id == multiplayer.get_unique_id():
-		print("[ForestHub] Not spawning self")
-		return
-	
-	# Remove any existing node with this name (in case of cleanup issues)
-	var existing_node = get_node_or_null(str(peer_id))
-	if existing_node:
-		print("[ForestHub] Removing existing node with name ", peer_id)
-		existing_node.queue_free()
-	
-	var player: CharacterBody2D
-	var spawn_marker: Marker2D
-	var spawn_pos: Vector2
-	
-	# PRIORITY: Use forced position from host if provided (fixes sidekick not seeing host's return position)
-	if forced_pos != Vector2.ZERO:
-		spawn_pos = forced_pos
-		print("[ForestHub] RPC: ✓ Using FORCED position from host for ", "Detective" if is_detective_role else "Sidekick", " at: ", spawn_pos)
-	else:
-		# Check for saved position (from returning from a zone)
-		var saved_pos = GameState.get_spawn_position(peer_id)
-		var has_saved_pos = saved_pos != Vector2.ZERO
-		
-		if has_saved_pos:
-			# Player is returning from a zone - use their saved position
-			spawn_pos = saved_pos
-			print("[ForestHub] RPC: ✓ Using SAVED RETURN position for ", "Detective" if is_detective_role else "Sidekick", " at: ", spawn_pos)
-		else:
-			# Use initial spawn markers
-			if is_detective_role:
-				spawn_marker = spawn_points.get_node_or_null("DetectiveSpawn")
-			else:
-				spawn_marker = spawn_points.get_node_or_null("SidekickSpawn")
-			
-			if spawn_marker:
-				spawn_pos = spawn_marker.global_position
-				print("[ForestHub] RPC: ○ Using SPAWN MARKER for ", "Detective" if is_detective_role else "Sidekick", " at: ", spawn_pos, " (first time spawn or rejoin)")
-			else:
-				# FIXED: Detective on LEFT (200), Sidekick on RIGHT (600) to match spawn marker layout
-				spawn_pos = Vector2(200 if is_detective_role else 600, ground_y)
-				push_warning("[ForestHub] RPC: Spawn marker not found for " + ("Detective" if is_detective_role else "Sidekick") + ", using default position: " + str(spawn_pos))
-	
-	if is_detective_role:
-		player = player_host_scene.instantiate()
-		player.role = "Detective"
-		player.avatar_scale = detective_scale
-		print("[ForestHub] RPC: Instantiated Detective")
-	else:
-		player = player_sidekick_scene.instantiate()
-		player.role = "Sidekick"
-		player.avatar_scale = sidekick_scale
-		print("[ForestHub] RPC: Instantiated Sidekick")
-	
+	var existing := get_node_or_null(str(peer_id))
+	if existing:
+		existing.queue_free()
+	var spawn_pos := _resolve_spawn_position(peer_id, is_detective_role, forced_pos)
+	var player := _instantiate_player(is_detective_role)
 	player.name = str(peer_id)
-	
-	# INSTANT SPAWN: Set position before adding to tree to prevent any interpolation
-	player.global_position = spawn_pos
-	
-	# Clear any stale network state for this peer to prevent interpolation from old position
-	if NetworkManager.has_method("clear_partner_state"):
-		NetworkManager.clear_partner_state(peer_id)
-	
-	# Stabilize physics to prevent sliding
-	_stabilize_player_physics(player)
-	
-	player.set_multiplayer_authority(peer_id)
-	_force_visibility_recursive(player)
-	_spawned_players[peer_id] = player
-	add_child(player, true)
-	
-	# Stabilize after adding to tree
-	_call_stabilize_after_frame(player)
-	
-	# IMMEDIATE SYNC: If this is the local player, force immediate position broadcast
-	if peer_id == multiplayer.get_unique_id():
-		await get_tree().process_frame
-		if is_instance_valid(player) and player.has_method("_force_initial_sync"):
-			print("[ForestHub] Forcing immediate position sync for local ", player.role, " (RPC spawn)")
-			player._force_initial_sync()
-			# Also explicitly sync to ensure all peers get the position
-			_sync_player_position_to_all.rpc(peer_id, spawn_pos)
-	
-	# Deferred visibility check
-	_call_deferred_visibility_check(player)
-	
-	print("[ForestHub] === RPC SPAWNED ", player.role, " (ID: ", peer_id, ") at ", player.global_position, " visible=", player.visible)
+	await _finalize_spawn(player, peer_id, spawn_pos)
 
 
-## Stabilize player physics to prevent sliding after spawn
 func _stabilize_player_physics(player: CharacterBody2D) -> void:
-	"""Set physics properties to ensure player stays grounded."""
-	# Reset velocity to prevent any inherited motion
 	player.velocity = Vector2.ZERO
-	
-	# Ensure player is grounded by adjusting position slightly if needed
-	# This is done before adding to tree, so we set a flag for post-add stabilization
 	player.set_meta("_needs_grounding", true)
 
 
-## Call stabilization after player is added to scene tree
 func _call_stabilize_after_frame(player: CharacterBody2D) -> void:
-	"""Stabilize player after they've been added to the scene tree."""
-	# Wait for physics to settle - multiple frames for safety
 	await get_tree().physics_frame
 	await get_tree().physics_frame
-	
 	if not is_instance_valid(player):
 		return
-	
-	# Reset velocity to zero
 	player.velocity = Vector2.ZERO
-	
-	# Force the player onto the floor
 	if player.has_method("_force_grounded"):
 		player._force_grounded()
-	
-	# Additional safety: wait another frame and verify grounded
 	await get_tree().physics_frame
 	if is_instance_valid(player):
 		player.velocity = Vector2.ZERO
@@ -687,7 +382,6 @@ func _call_stabilize_after_frame(player: CharacterBody2D) -> void:
 			player._force_grounded()
 
 
-## Force visibility on a player and all its children recursively
 func _force_visibility_recursive(node: Node) -> void:
 	if node is CanvasItem:
 		node.visible = true
@@ -697,149 +391,69 @@ func _force_visibility_recursive(node: Node) -> void:
 		_force_visibility_recursive(child)
 
 
-## Deferred visibility check to ensure player stays visible
 func _call_deferred_visibility_check(player: CharacterBody2D) -> void:
 	await get_tree().create_timer(0.1).timeout
 	if is_instance_valid(player):
 		_force_visibility_recursive(player)
-		print("[ForestHub] Deferred visibility check for player ", player.name)
 
 
-## Ensure a player is visible (called after spawning)
 func _ensure_player_visible(peer_id: int) -> void:
-	var player_node = get_node_or_null(str(peer_id))
-	if not player_node:
-		return
-	
-	_force_visibility_recursive(player_node)
-	print("[ForestHub] Ensured visibility for player ", peer_id)
+	var player_node := get_node_or_null(str(peer_id))
+	if player_node:
+		_force_visibility_recursive(player_node)
 
 
-## RPC to ensure player visibility on a specific peer
 @rpc("authority", "reliable")
 func _ensure_player_visible_on_peer(peer_id: int) -> void:
-	var player_node = get_node_or_null(str(peer_id))
-	if not player_node:
-		return
-	
-	_force_visibility_recursive(player_node)
-	print("[ForestHub] Ensured visibility on peer for player ", peer_id)
+	var player_node := get_node_or_null(str(peer_id))
+	if player_node:
+		_force_visibility_recursive(player_node)
 
 
 func _rpc_despawn_player(peer_id: int) -> void:
 	if peer_id == multiplayer.get_unique_id():
 		return
-	var player_node: Node = get_node_or_null(str(peer_id))
+	var player_node := get_node_or_null(str(peer_id)) as Node
 	if player_node:
 		player_node.queue_free()
 	_spawned_players.erase(peer_id)
 
 
-func _exit_tree():
-	if NetworkManager.player_connected.is_connected(_on_player_connected):
-		NetworkManager.player_connected.disconnect(_on_player_connected)
-	if NetworkManager.player_disconnected.is_connected(_on_player_disconnected):
-		NetworkManager.player_disconnected.disconnect(_on_player_disconnected)
-	if NetworkManager.partner_disconnected.is_connected(_on_partner_disconnected):
-		NetworkManager.partner_disconnected.disconnect(_on_partner_disconnected)
-	if NetworkManager.spawn_player_requested.is_connected(_on_spawn_player_requested):
-		NetworkManager.spawn_player_requested.disconnect(_on_spawn_player_requested)
-	if NetworkManager.despawn_player_requested.is_connected(_on_despawn_player_requested):
-		NetworkManager.despawn_player_requested.disconnect(_on_despawn_player_requested)
-	if NetworkManager.rejoin_game_requested.is_connected(_on_rejoin_game_requested):
-		NetworkManager.rejoin_game_requested.disconnect(_on_rejoin_game_requested)
-
-
-## Handle rejoin game - update detective position if already in forest
 func _on_rejoin_game_requested(rejoin_data: Dictionary) -> void:
-	print("[ForestHub] Rejoin data received, updating player positions...")
-	
-	var player_positions = rejoin_data.get("player_positions", {})
-	
-	# Update detective position if they're already spawned
-	var detective_node = get_node_or_null("1")
+	var player_positions: Dictionary = rejoin_data.get("player_positions", {})
+	var detective_node := get_node_or_null("1")
 	if detective_node and str(detective_node.name) == "1":
-		var host_pos_data = player_positions.get("1", {})
+		var host_pos_data: Variant = player_positions.get("1", {})
 		if host_pos_data is Dictionary and host_pos_data.has("position"):
-			var pos = Vector2(host_pos_data.position.x, host_pos_data.position.y)
-			detective_node.global_position = pos
-			print("[ForestHub] Updated detective position to: ", pos)
-	
-	# Spawn any missing players and ensure visibility
-	for peer_id_str in player_positions.keys():
-		var peer_id = int(peer_id_str)
-		if peer_id != multiplayer.get_unique_id() and not _spawned_players.has(peer_id):
-			print("[ForestHub] Spawning missing player from rejoin: ", peer_id)
-			# Get position from rejoin data
-			var pos_data = player_positions.get(peer_id_str, {})
-			var spawn_pos = Vector2.ZERO
+			detective_node.global_position = Vector2(host_pos_data.position.x, host_pos_data.position.y)
+	for peer_id_str in player_positions:
+		var pid := int(peer_id_str)
+		if pid != multiplayer.get_unique_id() and not _spawned_players.has(pid):
+			var pos_data: Variant = player_positions.get(peer_id_str, {})
+			var spawn_pos := Vector2.ZERO
 			if pos_data is Dictionary and pos_data.has("position"):
 				spawn_pos = Vector2(pos_data.position.x, pos_data.position.y)
-			if peer_id == 1:
-				_rpc_spawn_player(peer_id, true, spawn_pos)  # Detective
-			else:
-				_rpc_spawn_player(peer_id, false, spawn_pos)  # Sidekick
-			# Ensure visibility after spawn
-			_ensure_player_visible(peer_id)
+			_rpc_spawn_player(pid, pid == 1, spawn_pos)
+			_ensure_player_visible(pid)
 
 
-## RPC to spawn a player with explicit position
-# Called by host to tell clients where to spawn a player (fixes position sync issues)
 @rpc("authority", "reliable", "call_local")
-func _rpc_spawn_player_with_pos(peer_id: int, is_detective: bool, pos: Vector2):
-	print("[ForestHub] RPC _rpc_spawn_player_with_pos: peer_id=", peer_id, " is_detective=", is_detective, " pos=", pos)
+func _rpc_spawn_player_with_pos(peer_id: int, is_detective: bool, pos: Vector2) -> void:
 	_rpc_spawn_player(peer_id, is_detective, pos)
 
 
-## RPC to sync player spawn position to all clients
-# This ensures the sidekick sees the host immediately when returning from zones
 @rpc("authority", "reliable", "call_local")
-func _sync_player_position_to_all(peer_id: int, pos: Vector2):
-	print("[ForestHub] Received position sync for player ", peer_id, " at ", pos)
-	
-	# Update network manager state so other players see the correct position
+func _sync_player_position_to_all(peer_id: int, pos: Vector2) -> void:
 	if multiplayer.is_server() and NetworkManager.has_method("_store_position"):
 		NetworkManager._store_position(peer_id, pos)
-	
-	# If we have the player node locally, snap it to position immediately
-	var player_node = get_node_or_null(str(peer_id))
+	var player_node := get_node_or_null(str(peer_id))
 	if is_instance_valid(player_node):
 		player_node.global_position = pos
 		player_node.velocity = Vector2.ZERO
-		print("[ForestHub] ✓ Synced player ", peer_id, " to position ", pos)
-	else:
-		print("[ForestHub] ⚠ Player node ", peer_id, " not found yet, will sync when spawned")
 
 
-func _process(_delta):
-	# Button positions are now controlled via Inspector - no dynamic updates needed
-	pass
-
-
-func _input(event):
-	# Debug: Press F1 to list all players
-	if event is InputEventKey and event.pressed and event.keycode == KEY_F1:
-		print("[ForestHub] === DEBUG: Spawned players ===")
-		for peer_id in _spawned_players:
-			var p = _spawned_players[peer_id]
-			print("  Player ", peer_id, ": role=", p.role, " pos=", p.global_position, " visible=", p.visible)
-		print("[ForestHub] === Scene children ===")
-		for child in get_children():
-			if child is CharacterBody2D:
-				print("  Node: ", child.name, " role=", child.role, " pos=", child.global_position)
-
-
-# ============================================================================
-# PANEL MANAGEMENT (Map, Ledger, Briefcase)
-# ============================================================================
 func _setup_ui_controls() -> void:
-	"""Setup UI controls visibility based on role and connect signals."""
-	var my_role := NetworkManager.get_my_role()
-	var is_sidekick := (my_role != "detective")
-	
-	print("[ForestHub] Setting up UI controls for role: ", my_role)
-	
-	# Connect to TouchControls signals
+	var is_sidekick := (NetworkManager.get_my_role() != "detective")
 	if touch_controls:
 		if not touch_controls.map_pressed.is_connected(_on_map_button_pressed):
 			touch_controls.map_pressed.connect(_on_map_button_pressed)
@@ -847,107 +461,74 @@ func _setup_ui_controls() -> void:
 			touch_controls.ledger_pressed.connect(_on_ledger_button_pressed)
 		if not touch_controls.briefcase_pressed.is_connected(_on_briefcase_button_pressed):
 			touch_controls.briefcase_pressed.connect(_on_briefcase_button_pressed)
-		
-		# Set visibility based on role
-		if touch_controls.map_button:
-			touch_controls.map_button.visible = true  # Map is visible to both
-		if touch_controls.ledger_button:
-			touch_controls.ledger_button.visible = is_sidekick  # Ledger only for sidekick
-		if touch_controls.briefcase_button:
-			touch_controls.briefcase_button.visible = is_sidekick  # Briefcase only for sidekick
-	
-	# Initialize panels as hidden
+		# Use get_button() to safely resolve buttons inside TouchControls
+		# without accidentally resolving same-named nodes elsewhere in the tree.
+		var map_btn: TouchScreenButton = touch_controls.get_node_or_null("Map")
+		if map_btn:
+			map_btn.visible = true
+		var ledger_btn: TouchScreenButton = touch_controls.get_node_or_null("Ledger")
+		if ledger_btn:
+			ledger_btn.visible = is_sidekick
+		var briefcase_btn: TouchScreenButton = touch_controls.get_node_or_null("Briefcase")
+		if briefcase_btn:
+			briefcase_btn.visible = is_sidekick
 	_close_all_panels(false)
 
 
-func _on_map_button_pressed() -> void:
-	"""Toggle map panel."""
+func _toggle_panel(panel_name: String) -> void:
 	if _is_animating:
 		return
-	
-	if _current_open_panel == "map":
+	if _current_open_panel == panel_name:
 		_close_all_panels()
 	else:
 		_close_all_panels(false)
-		_open_panel("map")
+		_open_panel(panel_name)
 
+
+func _on_map_button_pressed() -> void:
+	_toggle_panel("map")
 
 func _on_ledger_button_pressed() -> void:
-	"""Toggle ledger panel with book opening animation."""
-	if _is_animating:
-		return
-	
-	if _current_open_panel == "ledger":
-		_close_all_panels()
-	else:
-		_close_all_panels(false)
-		_open_panel("ledger")
-
+	_toggle_panel("ledger")
 
 func _on_briefcase_button_pressed() -> void:
-	"""Toggle briefcase panel with opening animation."""
-	if _is_animating:
-		return
-	
-	if _current_open_panel == "briefcase":
-		_close_all_panels()
-	else:
-		_close_all_panels(false)
-		_open_panel("briefcase")
+	_toggle_panel("briefcase")
 
 
 func _open_panel(panel_name: String) -> void:
-	"""Open a specific panel with animation."""
 	match panel_name:
-		"map":
-			_open_map()
-		"ledger":
-			_open_ledger()
-		"briefcase":
-			_open_briefcase()
-	
+		"map": _open_map()
+		"ledger": _open_ledger()
+		"briefcase": _open_briefcase()
 	_current_open_panel = panel_name
-	print("[ForestHub] Opened panel: ", panel_name)
 
 
 func _close_all_panels(animate: bool = true) -> void:
-	"""Close all panels."""
-	if _current_open_panel == "":
+	if _current_open_panel.is_empty():
 		return
-	
 	match _current_open_panel:
-		"map":
-			_close_map(animate)
-		"ledger":
-			_close_ledger(animate)
-		"briefcase":
-			_close_briefcase(animate)
-	
+		"map": _close_map(animate)
+		"ledger": _close_ledger(animate)
+		"briefcase": _close_briefcase(animate)
 	_current_open_panel = ""
 
 
-# ============================================================================
-# MAP PANEL
-# ============================================================================
 func _open_map() -> void:
 	if not map_panel:
 		return
-	
 	map_panel.visible = true
 	map_panel.modulate = Color(1, 1, 1, 0)
 	map_panel.scale = Vector2(0.8, 0.8)
-	
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_BACK)
 	tween.set_ease(Tween.EASE_OUT)
 	tween.tween_property(map_panel, "modulate", Color(1, 1, 1, 1), PANEL_ANIMATION_DURATION)
-	tween.parallel().tween_property(map_panel, "scale", Vector2(1, 1), PANEL_ANIMATION_DURATION)
+	tween.parallel().tween_property(map_panel, "scale", Vector2.ONE, PANEL_ANIMATION_DURATION)
 
 
 func _close_map(animate: bool = true) -> void:
 	if not map_panel or not map_panel.visible:
 		return
-	
 	if animate:
 		var tween := create_tween()
 		tween.set_trans(Tween.TRANS_BACK)
@@ -959,21 +540,15 @@ func _close_map(animate: bool = true) -> void:
 		map_panel.visible = false
 
 
-# ============================================================================
-# LEDGER PANEL (Book Opening Animation)
-# ============================================================================
 func _open_ledger() -> void:
 	if not ledger_panel:
 		return
-
 	_refresh_forest_ledger_pages()
 	_show_forest_ledger_page(_current_ledger_page, false)
-
 	_is_animating = true
 	ledger_panel.visible = true
 	ledger_panel.scale = LEDGER_CLOSED_SCALE
 	ledger_panel.pivot_offset = ledger_panel.size / 2
-
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_ELASTIC)
 	tween.set_ease(Tween.EASE_OUT)
@@ -984,115 +559,81 @@ func _open_ledger() -> void:
 func _close_ledger(animate: bool = true) -> void:
 	if not ledger_panel or not ledger_panel.visible:
 		return
-	
 	if animate:
 		_is_animating = true
-		# Book closing animation
 		var tween := create_tween()
 		tween.set_trans(Tween.TRANS_BACK)
 		tween.set_ease(Tween.EASE_IN)
 		tween.tween_property(ledger_panel, "scale", LEDGER_CLOSED_SCALE, PANEL_ANIMATION_DURATION * 0.5)
-		tween.tween_callback(func(): 
+		tween.tween_callback(func():
 			ledger_panel.visible = false
-			_is_animating = false
-		)
+			_is_animating = false)
 	else:
 		ledger_panel.visible = false
 		ledger_panel.scale = LEDGER_CLOSED_SCALE
 
+
 func _setup_forest_ledger_navigation() -> void:
 	if is_instance_valid(forest_prev_page_button) and not forest_prev_page_button.pressed.is_connected(_on_forest_prev_page_pressed):
 		forest_prev_page_button.pressed.connect(_on_forest_prev_page_pressed)
-
 	if is_instance_valid(forest_next_page_button) and not forest_next_page_button.pressed.is_connected(_on_forest_next_page_pressed):
 		forest_next_page_button.pressed.connect(_on_forest_next_page_pressed)
 
 
 func _refresh_forest_ledger_pages() -> void:
 	_ledger_pages.clear()
-
 	var entries: Array = PuzzleManager.get_unlocked_global_ledger_entries()
-
 	if entries.is_empty():
 		_ledger_pages.append({
-			"title": "Ledger",
-			"left_header": "Notes",
-			"left_body": LEDGER_EMPTY_TEXT,
-			"right_header": "",
-			"right_body": ""
+			"title": "Ledger", "left_header": "Notes",
+			"left_body": LEDGER_EMPTY_TEXT, "right_header": "", "right_body": "",
 		})
 	else:
 		for entry in entries:
 			_ledger_pages.append(_convert_entry_to_book_page(entry))
-
-	if _ledger_pages.is_empty():
-		_current_ledger_page = 0
-	else:
-		_current_ledger_page = clamp(_current_ledger_page, 0, _ledger_pages.size() - 1)
+	_current_ledger_page = clamp(_current_ledger_page, 0, max(_ledger_pages.size() - 1, 0))
 
 
 func _convert_entry_to_book_page(entry: Dictionary) -> Dictionary:
 	var layout: String = str(entry.get("layout", "single_body"))
-
 	if layout == "two_column":
 		return {
 			"title": str(entry.get("zone_name", entry.get("title", "Ledger"))),
 			"left_header": str(entry.get("left_header", "")),
 			"left_body": str(entry.get("left_body", "")),
 			"right_header": str(entry.get("right_header", "")),
-			"right_body": str(entry.get("right_body", ""))
+			"right_body": str(entry.get("right_body", "")),
 		}
-
-	var title_text: String = str(entry.get("zone_name", entry.get("title", "Ledger")))
-	var single_title: String = str(entry.get("title", "Notes"))
-	var body_text: String = str(entry.get("body", ""))
-
-	var split_pages: Dictionary = _split_body_into_book_pages(body_text)
-
+	var body_text := str(entry.get("body", ""))
+	var split_pages  := _split_body_into_book_pages(body_text)
 	return {
-		"title": title_text,
-		"left_header": single_title,
+		"title": str(entry.get("zone_name", entry.get("title", "Ledger"))),
+		"left_header":  str(entry.get("title", "Notes")),
 		"left_body": str(split_pages.get("left", "")),
 		"right_header": "Example" if str(split_pages.get("right", "")) != "" else "",
-		"right_body": str(split_pages.get("right", ""))
+		"right_body": str(split_pages.get("right", "")),
 	}
 
 
 func _split_body_into_book_pages(body_text: String) -> Dictionary:
-	var sections: PackedStringArray = body_text.split("\n\n", false)
-
+	var sections := body_text.split("\n\n", false)
 	if sections.size() <= 1:
-		return {
-			"left": body_text,
-			"right": ""
-		}
-
-	var midpoint: int = int(ceil(float(sections.size()) / 2.0))
-	var left_parts: Array[String] = []
+		return {"left": body_text, "right": ""}
+	var midpoint := int(ceil(float(sections.size()) / 2.0))
+	var left_parts:  Array[String] = []
 	var right_parts: Array[String] = []
-
 	for i in range(sections.size()):
-		var part: String = sections[i]
-		if i < midpoint:
-			left_parts.append(part)
-		else:
-			right_parts.append(part)
-
-	return {
-		"left": "\n\n".join(left_parts),
-		"right": "\n\n".join(right_parts)
-	}
+		if i < midpoint: left_parts.append(sections[i])
+		else: right_parts.append(sections[i])
+	return {"left": "\n\n".join(left_parts), "right": "\n\n".join(right_parts)}
 
 
 func _show_forest_ledger_page(page_index: int, animate: bool = true) -> void:
 	if _ledger_pages.is_empty():
 		return
-
 	page_index = clamp(page_index, 0, _ledger_pages.size() - 1)
-
 	if animate and _ledger_page_animating:
 		return
-
 	if not animate:
 		_current_ledger_page = page_index
 		_apply_forest_ledger_page(_ledger_pages[_current_ledger_page])
@@ -1100,98 +641,66 @@ func _show_forest_ledger_page(page_index: int, animate: bool = true) -> void:
 		if is_instance_valid(forest_ledger_control):
 			forest_ledger_control.scale = Vector2.ONE
 		return
-
 	_ledger_page_animating = true
 	_current_ledger_page = page_index
-
 	if is_instance_valid(forest_ledger_control):
 		forest_ledger_control.pivot_offset = forest_ledger_control.size / 2
-
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN_OUT)
-
 	if is_instance_valid(forest_ledger_control):
 		tween.tween_property(forest_ledger_control, "scale", Vector2(0.05, 1.0), LEDGER_PAGE_TURN_DURATION)
-
 	tween.tween_callback(func():
 		_apply_forest_ledger_page(_ledger_pages[_current_ledger_page])
-		_update_forest_ledger_navigation()
-	)
-
+		_update_forest_ledger_navigation())
 	if is_instance_valid(forest_ledger_control):
 		tween.tween_property(forest_ledger_control, "scale", Vector2.ONE, LEDGER_PAGE_TURN_DURATION)
-
-	tween.tween_callback(func():
-		_ledger_page_animating = false
-	)
+	tween.tween_callback(func(): _ledger_page_animating = false)
 
 
 func _apply_forest_ledger_page(page_data: Dictionary) -> void:
 	if is_instance_valid(forest_ledger_title_label):
 		forest_ledger_title_label.text = str(page_data.get("title", ""))
-
 	if is_instance_valid(forest_ledger_left_header_label):
 		forest_ledger_left_header_label.text = str(page_data.get("left_header", ""))
-
 	if is_instance_valid(forest_ledger_left_body_label):
 		forest_ledger_left_body_label.text = str(page_data.get("left_body", ""))
-
 	if is_instance_valid(forest_ledger_right_header_label):
 		forest_ledger_right_header_label.text = str(page_data.get("right_header", ""))
-
 	if is_instance_valid(forest_ledger_right_body_label):
 		forest_ledger_right_body_label.text = str(page_data.get("right_body", ""))
 
 
 func _update_forest_ledger_navigation() -> void:
-	var total_pages: int = _ledger_pages.size()
-
+	var total_pages := _ledger_pages.size()
 	if is_instance_valid(forest_page_indicator_label):
 		forest_page_indicator_label.text = str(_current_ledger_page + 1) + " / " + str(max(total_pages, 1))
-
 	if is_instance_valid(forest_prev_page_button):
-		forest_prev_page_button.visible = total_pages > 1
+		forest_prev_page_button.visible  = total_pages > 1
 		forest_prev_page_button.disabled = _current_ledger_page <= 0
-
 	if is_instance_valid(forest_next_page_button):
-		forest_next_page_button.visible = total_pages > 1
+		forest_next_page_button.visible  = total_pages > 1
 		forest_next_page_button.disabled = _current_ledger_page >= total_pages - 1
 
 
 func _on_forest_prev_page_pressed() -> void:
-	if _ledger_page_animating:
-		return
-
-	if _current_ledger_page <= 0:
-		return
-
-	_show_forest_ledger_page(_current_ledger_page - 1, true)
+	if not _ledger_page_animating and _current_ledger_page > 0:
+		_show_forest_ledger_page(_current_ledger_page - 1, true)
 
 
 func _on_forest_next_page_pressed() -> void:
-	if _ledger_page_animating:
-		return
+	if not _ledger_page_animating and _current_ledger_page < _ledger_pages.size() - 1:
+		_show_forest_ledger_page(_current_ledger_page + 1, true)
 
-	if _current_ledger_page >= _ledger_pages.size() - 1:
-		return
 
-	_show_forest_ledger_page(_current_ledger_page + 1, true)
-
-# ============================================================================
-# BRIEFCASE PANEL (Case Opening Animation)
-# ============================================================================
 func _open_briefcase() -> void:
 	if not briefcase_panel:
 		return
-
 	_refresh_briefcase_display()
-
 	_is_animating = true
-	briefcase_panel.visible = true
+	briefcase_panel.visible  = true
 	briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
 	briefcase_panel.pivot_offset = Vector2(briefcase_panel.size.x / 2, 0)
-
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_BOUNCE)
 	tween.set_ease(Tween.EASE_OUT)
@@ -1202,21 +711,19 @@ func _open_briefcase() -> void:
 func _close_briefcase(animate: bool = true) -> void:
 	if not briefcase_panel or not briefcase_panel.visible:
 		return
-	
 	if animate:
 		_is_animating = true
-		# Briefcase closing animation
 		var tween := create_tween()
 		tween.set_trans(Tween.TRANS_BACK)
 		tween.set_ease(Tween.EASE_IN)
 		tween.tween_property(briefcase_panel, "scale", BRIEFCASE_CLOSED_SCALE, PANEL_ANIMATION_DURATION * 0.5)
-		tween.tween_callback(func(): 
+		tween.tween_callback(func():
 			briefcase_panel.visible = false
-			_is_animating = false
-		)
+			_is_animating = false)
 	else:
 		briefcase_panel.visible = false
 		briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
+
 
 func _on_briefcase_updated() -> void:
 	_refresh_briefcase_display()
@@ -1225,160 +732,89 @@ func _on_briefcase_updated() -> void:
 func _refresh_briefcase_display() -> void:
 	if not is_instance_valid(briefcase_display):
 		return
-
 	var texture: Texture2D = GameState.get_briefcase_texture("forest")
 	briefcase_display.texture = texture
 	briefcase_display.visible = texture != null
 
-# ============================================================================
-# DOOR ANIMATION (Zone Entry)
-# ============================================================================
+
 func _connect_portal_signals() -> void:
-	"""Connect to zone portal signals for door animations."""
 	if not portals:
 		return
-	
+	await get_tree().process_frame
 	for portal in portals.get_children():
-		if portal.has_signal("players_entering"):
-			if not portal.players_entering.is_connected(_on_players_entering_zone):
-				portal.players_entering.connect(_on_players_entering_zone)
-				print("[ForestHub] Connected to portal signal: ", portal.zone_name)
-		if portal.has_signal("players_entered"):
-			if not portal.players_entered.is_connected(_on_players_entered_zone):
-				portal.players_entered.connect(_on_players_entered_zone)
-				print("[ForestHub] Connected to portal entered signal: ", portal.zone_name)
+		if portal.has_signal("players_entering") and not portal.players_entering.is_connected(_on_players_entering_zone):
+			portal.players_entering.connect(_on_players_entering_zone)
+		if portal.has_signal("players_entered") and not portal.players_entered.is_connected(_on_players_entered_zone):
+			portal.players_entered.connect(_on_players_entered_zone)
 
 
 func _on_players_entering_zone(zone_name: String) -> void:
-	"""Handle door animation when players are entering a zone."""
-	print("[ForestHub] Players entering zone: ", zone_name)
-	
-	# Animate Pina's house door
 	if zone_name == "pinas_house":
 		_animate_pinas_house_door()
 
 
 func _on_players_entered_zone(zone_name: String) -> void:
-	"""Handle scene change after door animation completes."""
-	print("[ForestHub] Players entered zone, proceeding to scene change: ", zone_name)
-	
-	# Find the portal that emitted this signal
-	var target_portal = null
+	var target_portal: Node = null
 	for portal in portals.get_children():
 		if portal.zone_name == zone_name:
 			target_portal = portal
 			break
-	
 	if not target_portal:
 		push_warning("[ForestHub] Could not find portal for zone: " + zone_name)
 		return
-	
-	# Tell portal to complete the zone entry (change scene immediately)
 	target_portal.complete_zone_entry()
 
 
 func _animate_pinas_house_door() -> void:
-	"""Animate the Pina's house door opening - keeps zone sprite visible."""
 	if not pinas_house_door:
 		push_warning("[ForestHub] Pina's house door sprite not found!")
 		return
-	
-	print("[ForestHub] Animating Pina's house door opening")
-	
-	# Simply show the door open sprite with a fade-in effect
-	# The zone sprite (closed door) stays visible underneath
 	pinas_house_door.visible = true
 	pinas_house_door.modulate.a = 0.0
-	
-	var tween = create_tween()
+	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_OUT)
-	
-	# Fade in the open door sprite (0.5s)
 	tween.tween_property(pinas_house_door, "modulate:a", 1.0, 0.5)
-	
-	# Connect to tree_exiting to hide the door when scene changes
-	# This ensures the door is hidden when returning to forest hub
 	if not tree_exiting.is_connected(_on_tree_exiting_hide_door):
 		tree_exiting.connect(_on_tree_exiting_hide_door)
 
 
-## Hide door when leaving the scene
 func _on_tree_exiting_hide_door() -> void:
-	"""Hide the open door when leaving the forest hub."""
 	if pinas_house_door:
 		pinas_house_door.visible = false
 
 
-# ============================================================================
-# ZONE COMPLETION INDICATORS
-# ============================================================================
-
-## Setup zone completion indicators - hide/show based on GameState
 func _setup_zone_completion_indicators() -> void:
 	if not finish_zone_indicator:
 		push_warning("[ForestHub] FinishZoneIndicator node not found!")
 		return
-	
-	print("[ForestHub] Setting up zone completion indicators...")
-	
-	# Set up portal positions for each indicator
 	for portal in portals.get_children():
 		var zone_name: String = portal.zone_name
-		
-		# Position indicator at portal location
 		if finish_zone_indicator.has_method("set_portal_position"):
 			finish_zone_indicator.set_portal_position(zone_name, portal.global_position)
-		
-		var indicator_child_name: String = ZONE_INDICATOR_MAP.get(zone_name, "")
-		if indicator_child_name.is_empty():
-			continue
-		
-		# Find the enter button for this portal
-		var enter_button = portal.get_node_or_null("EnterButton")
-		
-		# Check if zone is completed
-		var is_completed = GameState.zones_status.get(zone_name, GameState.ZoneStatus.AVAILABLE) == GameState.ZoneStatus.COMPLETED
-		
+		var enter_button := portal.get_node_or_null("EnterButton")
+		var is_completed: bool = GameState.zones_status.get(zone_name, GameState.ZoneStatus.AVAILABLE) == GameState.ZoneStatus.COMPLETED
 		if is_completed:
-			# Zone completed: show indicator via script, disable enter button
 			if finish_zone_indicator.has_method("show_indicator"):
 				finish_zone_indicator.show_indicator(zone_name)
 			if enter_button:
-				enter_button.visible = false
+				enter_button.visible  = false
 				enter_button.disabled = true
-			print("[ForestHub] Zone '", zone_name, "' is completed - indicator shown, enter disabled")
 		else:
-			# Zone not completed: hide indicator
 			if finish_zone_indicator.has_method("hide_indicator"):
 				finish_zone_indicator.hide_indicator(zone_name)
-			# Don't touch button - zone_portal.gd handles button visibility based on player presence
 
 
-## Called when a zone is completed (dynamic update)
 func _on_zone_completed(completed_zone: String) -> void:
-	print("[ForestHub] Zone completed signal received: ", completed_zone)
-	
-	var indicator_child_name: String = ZONE_INDICATOR_MAP.get(completed_zone, "")
-	if indicator_child_name.is_empty():
-		return
-	
-	# Find the portal and update it
 	for portal in portals.get_children():
-		if portal.zone_name == completed_zone:
-			# Position indicator at portal location if not already set
-			if finish_zone_indicator.has_method("set_portal_position"):
-				finish_zone_indicator.set_portal_position(completed_zone, portal.global_position)
-			
-			# Show the indicator via script
-			if finish_zone_indicator.has_method("show_indicator"):
-				finish_zone_indicator.show_indicator(completed_zone)
-			
-			# Disable the enter button
-			var enter_button = portal.get_node_or_null("EnterButton")
-			if enter_button:
-				enter_button.visible = false
-				enter_button.disabled = true
-			
-			print("[ForestHub] Updated completion indicator for: ", completed_zone)
-			break
+		if portal.zone_name != completed_zone:
+			continue
+		if finish_zone_indicator.has_method("set_portal_position"):
+			finish_zone_indicator.set_portal_position(completed_zone, portal.global_position)
+		if finish_zone_indicator.has_method("show_indicator"):
+			finish_zone_indicator.show_indicator(completed_zone)
+		var enter_button := portal.get_node_or_null("EnterButton")
+		if enter_button:
+			enter_button.visible  = false
+			enter_button.disabled = true
+		break

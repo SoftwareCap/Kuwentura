@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bpq0k85yh5e0p"
-path="res://.godot/imported/deductionboard.png-52e71d3fb98722ea36ff23e9eb523967.ctex"
+path.bptc="res://.godot/imported/deductionboard.png-52e71d3fb98722ea36ff23e9eb523967.bptc.ctex"
+path.astc="res://.godot/imported/deductionboard.png-52e71d3fb98722ea36ff23e9eb523967.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/sprites/zoneObjects/backyardPathObjects/deductionboard.png"
-dest_files=["res://.godot/imported/deductionboard.png-52e71d3fb98722ea36ff23e9eb523967.ctex"]
+dest_files=["res://.godot/imported/deductionboard.png-52e71d3fb98722ea36ff23e9eb523967.bptc.ctex", "res://.godot/imported/deductionboard.png-52e71d3fb98722ea36ff23e9eb523967.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

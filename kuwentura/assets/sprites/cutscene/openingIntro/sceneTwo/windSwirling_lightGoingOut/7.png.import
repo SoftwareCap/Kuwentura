@@ -2,21 +2,23 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bfatm2pincf81"
-path="res://.godot/imported/7.png-e8d27cc9b0ed5ad4a2577ebf84e8e1dc.ctex"
+uid="uid://sl0msc04hcau"
+path.bptc="res://.godot/imported/7.png-c36715ddb2495a0588093a4ac60b6e96.bptc.ctex"
+path.astc="res://.godot/imported/7.png-c36715ddb2495a0588093a4ac60b6e96.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightGoingOut/7.png"
-dest_files=["res://.godot/imported/7.png-e8d27cc9b0ed5ad4a2577ebf84e8e1dc.ctex"]
+source_file="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/7.png"
+dest_files=["res://.godot/imported/7.png-c36715ddb2495a0588093a4ac60b6e96.bptc.ctex", "res://.godot/imported/7.png-c36715ddb2495a0588093a4ac60b6e96.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

@@ -1,24 +1,23 @@
 extends RefCounted
 
-var zone
+## Note Controller - Manages the hidden number note puzzle for Pina's House.
+
+const FONT_SIZE_PUZZLE: int = 42
+const FONT_SIZE_SOLVED: int = 34
+
+var zone: Node
 
 
-func setup(owner) -> void:
+func setup(owner: Node) -> void:
 	zone = owner
 
-	if is_instance_valid(zone.detective_board):
-		zone.detective_board.visible = false
+	for board in [zone.detective_board, zone.sidekick_board]:
+		if is_instance_valid(board):
+			board.visible = false
 
-	if is_instance_valid(zone.sidekick_board):
-		zone.sidekick_board.visible = false
-
-	if is_instance_valid(zone.detective_close):
-		if not zone.detective_close.pressed.is_connected(zone._close_boards):
-			zone.detective_close.pressed.connect(zone._close_boards.bind(true))
-
-	if is_instance_valid(zone.sidekick_close):
-		if not zone.sidekick_close.pressed.is_connected(zone._close_boards):
-			zone.sidekick_close.pressed.connect(zone._close_boards.bind(true))
+	for btn_node in [zone.detective_close, zone.sidekick_close]:
+		if is_instance_valid(btn_node) and not btn_node.pressed.is_connected(zone._close_boards):
+			btn_node.pressed.connect(zone._close_boards.bind(true))
 
 	if is_instance_valid(zone.note_btn):
 		zone.note_btn.visible = false
@@ -36,10 +35,6 @@ func setup(owner) -> void:
 		zone.sidekick_board.apply_puzzle_view()
 
 
-func on_note_pressed() -> void:
-	on_note_interacted()
-
-
 func on_note_interacted() -> void:
 	if not zone._note_phase_active and not zone._note_solved:
 		return
@@ -54,33 +49,24 @@ func on_note_interacted() -> void:
 	if GameState.local_role == GameState.Role.DETECTIVE:
 		if is_instance_valid(zone.detective_board):
 			zone.detective_board.visible = true
-
 		if zone._note_solved:
 			apply_solved_text()
 		else:
 			apply_unsolved_text()
-
 		mark_detective_note_seen()
 
 	elif GameState.local_role == GameState.Role.SIDEKICK:
 		if is_instance_valid(zone.sidekick_board):
 			zone.sidekick_board.visible = true
-
 			if zone.sidekick_board.has_method("open_board"):
 				zone.sidekick_board.open_board()
-
 			if zone._note_solved:
 				if zone.sidekick_board.has_method("apply_solved_view"):
 					zone.sidekick_board.apply_solved_view()
 			else:
 				if zone.sidekick_board.has_method("apply_puzzle_view"):
 					zone.sidekick_board.apply_puzzle_view()
-
-				if zone.sidekick_board.has_method("set_inputs_enabled"):
-					zone.sidekick_board.set_inputs_enabled(zone._detective_note_seen)
-
-				if zone.sidekick_board.has_method("set_puzzle_inputs_visible"):
-					zone.sidekick_board.set_puzzle_inputs_visible(true)
+				_apply_sidekick_board_input_state()
 
 	if will_play_note_dialogue:
 		await zone._play_locked_dialogue("pinas_house_note_clicked", DialogueLibraries.PINAS_HOUSE_NOTE_CLICKED)
@@ -92,16 +78,8 @@ func on_note_interacted() -> void:
 		zone.hide_notification()
 		zone.pulse_ledger_guidance(false)
 
-	if GameState.local_role == GameState.Role.SIDEKICK and is_instance_valid(zone.sidekick_board):
-		if zone.sidekick_board.has_method("set_inputs_enabled"):
-			var can_input: bool = zone._note_phase_active and zone._detective_note_seen and not zone._note_solved
-			zone.sidekick_board.set_inputs_enabled(can_input)
-
-		if zone.sidekick_board.has_method("set_puzzle_inputs_visible"):
-			zone.sidekick_board.set_puzzle_inputs_visible(not zone._note_solved)
-
-		if zone._note_solved and zone.sidekick_board.has_method("apply_solved_view"):
-			zone.sidekick_board.apply_solved_view()
+	if GameState.local_role == GameState.Role.SIDEKICK:
+		_apply_sidekick_board_input_state()
 
 	zone.apply_note_interaction_gate()
 	apply_close_button_visibility()
@@ -110,11 +88,9 @@ func on_note_interacted() -> void:
 func mark_detective_note_seen() -> void:
 	if zone._detective_note_seen:
 		return
-
 	if not zone.multiplayer.has_multiplayer_peer():
 		set_detective_note_seen_local(true)
 		return
-
 	if zone.multiplayer.is_server():
 		set_detective_note_seen_local(true)
 		zone.rpc_set_detective_note_seen.rpc(true)
@@ -124,55 +100,42 @@ func mark_detective_note_seen() -> void:
 
 func set_detective_note_seen_local(seen: bool) -> void:
 	zone._detective_note_seen = seen
-
-	if is_instance_valid(zone.sidekick_board) and zone.sidekick_board.has_method("set_inputs_enabled"):
-		var can_input: bool = zone._note_phase_active and seen and not zone._note_solved
-		zone.sidekick_board.set_inputs_enabled(can_input)
+	_apply_sidekick_board_input_state()
 
 
 func close_boards(force: bool = false) -> void:
 	if not force:
 		return
-
-	if is_instance_valid(zone.detective_board):
-		zone.detective_board.visible = false
-
-	if is_instance_valid(zone.sidekick_board):
-		zone.sidekick_board.visible = false
+	for board in [zone.detective_board, zone.sidekick_board]:
+		if is_instance_valid(board):
+			board.visible = false
 
 
 func apply_close_button_visibility() -> void:
 	var show_close: bool = zone._note_solved
-
-	if is_instance_valid(zone.detective_close):
-		zone.detective_close.visible = show_close
-
-	if is_instance_valid(zone.sidekick_close):
-		zone.sidekick_close.visible = show_close
+	for btn_node in [zone.detective_close, zone.sidekick_close]:
+		if is_instance_valid(btn_node):
+			btn_node.visible = show_close
 
 
 func apply_unsolved_text() -> void:
-	var puzzle: Dictionary = PuzzleManager.get_puzzle_for_zone("pinas_house")
-	var equation_text: String = str(puzzle.get("equation", "x = ?"))
-
-	if is_instance_valid(zone.detective_text):
-		zone.detective_text.text = (
-			"HIDDEN NUMBER NOTE\n\n"
-			+ "Solve the equation:\n"
-			+ equation_text
-		)
-		zone.detective_text.add_theme_font_size_override("font_size", 42)
+	if not is_instance_valid(zone.detective_text):
+		return
+	var equation: String = str(zone._puzzle_data.get("equation", "x = ?"))
+	zone.detective_text.text = "HIDDEN NUMBER NOTE\n\nSolve the equation:\n" + equation
+	zone.detective_text.add_theme_font_size_override("font_size", FONT_SIZE_PUZZLE)
 
 
 func apply_solved_text() -> void:
-	if is_instance_valid(zone.detective_text):
-		zone.detective_text.text = (
-			"Where pots and pans quietly stay,\n"
-			+ "A hidden clue now waits your way.\n"
-			+ "Open the cabinet and you will see,\n"
-			+ "The next secret of Pina’s mystery."
-		)
-		zone.detective_text.add_theme_font_size_override("font_size", 34)
+	if not is_instance_valid(zone.detective_text):
+		return
+	zone.detective_text.text = (
+		"Where pots and pans quietly stay,\n"
+		+ "A hidden clue now waits your way.\n"
+		+ "Open the cabinet and you will see,\n"
+		+ "The next secret of Pina's mystery."
+	)
+	zone.detective_text.add_theme_font_size_override("font_size", FONT_SIZE_SOLVED)
 
 
 func on_sidekick_solved() -> void:
@@ -189,34 +152,57 @@ func after_note_solved() -> void:
 	zone._ledger_hint_shown = false
 
 	apply_solved_text()
-
-	if is_instance_valid(zone.detective_board):
-		zone.detective_board.visible = true
-
-	if is_instance_valid(zone.sidekick_board):
-		zone.sidekick_board.visible = true
-
-		if zone.sidekick_board.has_method("apply_solved_view"):
-			zone.sidekick_board.apply_solved_view()
-
+	_show_boards_solved()
 	apply_close_button_visibility()
 	zone.pulse_ledger_guidance(false)
 	zone._enable_cabinet_interaction()
 
-	await zone._play_locked_dialogue("pinas_house_riddle_reveal", DialogueLibraries.PINAS_HOUSE_RIDDLE_REVEAL)
+	if zone.multiplayer.is_server():
+		# Detective: play dialogue and await it — locks input until done
+		await zone._play_locked_dialogue("pinas_house_riddle_reveal", DialogueLibraries.PINAS_HOUSE_RIDDLE_REVEAL)
+	else:
+		# Sidekick: play dialogue locally and await it finishing.
+		# This does NOT depend on the detective so it won't freeze.
+		zone._set_dialogue_input_lock(true)
+		DialogueSystem.play("pinas_house_riddle_reveal", DialogueLibraries.PINAS_HOUSE_RIDDLE_REVEAL)
+		await DialogueSystem.wait_finished("pinas_house_riddle_reveal")
+		zone._set_dialogue_input_lock(false)
+		# Show the solved board after dialogue closes
+		if is_instance_valid(zone.sidekick_board):
+			zone.sidekick_board.visible = true
+			if zone.sidekick_board.has_method("apply_solved_view"):
+				zone.sidekick_board.apply_solved_view()
 
 	zone.show_notification("Search where the clue is hidden.", 8.0)
 
 
 func apply_note_interaction_gate() -> void:
 	var can_interact: bool = zone._note_phase_active or zone._note_solved
-
 	if is_instance_valid(zone.note_area):
 		zone.note_area.input_pickable = can_interact
-
 	if is_instance_valid(zone.note_collision):
 		zone.note_collision.disabled = not can_interact
-
 	if is_instance_valid(zone.note_btn):
 		zone.note_btn.disabled = true
 		zone.note_btn.visible = false
+
+
+func _show_boards_solved() -> void:
+	if is_instance_valid(zone.detective_board):
+		zone.detective_board.visible = true
+	if is_instance_valid(zone.sidekick_board):
+		zone.sidekick_board.visible = true
+		if zone.sidekick_board.has_method("apply_solved_view"):
+			zone.sidekick_board.apply_solved_view()
+
+
+func _apply_sidekick_board_input_state() -> void:
+	if not is_instance_valid(zone.sidekick_board):
+		return
+	var can_input: bool = zone._note_phase_active and zone._detective_note_seen and not zone._note_solved
+	if zone.sidekick_board.has_method("set_inputs_enabled"):
+		zone.sidekick_board.set_inputs_enabled(can_input)
+	if zone.sidekick_board.has_method("set_puzzle_inputs_visible"):
+		zone.sidekick_board.set_puzzle_inputs_visible(not zone._note_solved)
+	if zone._note_solved and zone.sidekick_board.has_method("apply_solved_view"):
+		zone.sidekick_board.apply_solved_view()
