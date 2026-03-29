@@ -1,0 +1,63 @@
+[gd_scene load_steps=10 format=3 uid="uid://dyyyweg8fp41o"]
+
+[ext_resource type="Script" uid="uid://utoyickcuupw" path="res://scripts/character/character_grandma.gd" id="1_xsoqk"]
+[ext_resource type="Texture2D" uid="uid://b5hfsojjwduu5" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/light_emerging_from_book.png" id="2_avpvm"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4ursl"]
+atlas = ExtResource("2_avpvm")
+region = Rect2(0, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ghcke"]
+atlas = ExtResource("2_avpvm")
+region = Rect2(1144, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ndmr1"]
+atlas = ExtResource("2_avpvm")
+region = Rect2(2288, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jxfjc"]
+atlas = ExtResource("2_avpvm")
+region = Rect2(3432, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_beths"]
+atlas = ExtResource("2_avpvm")
+region = Rect2(4576, 0, 1144, 1108)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_48mbu"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4ursl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ghcke")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ndmr1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jxfjc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_beths")
+}],
+"loop": false,
+"name": &"sitting_light",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_d7ixl"]
+
+[node name="GrandmaLightEmerge" type="CharacterBody2D"]
+script = ExtResource("1_xsoqk")
+metadata/_custom_type_script = "uid://bwa5cliuua5sb"
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_48mbu")
+animation = &"sitting_light"
+frame = 4
+frame_progress = 1.0
+speed_scale = 0.7
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_d7ixl")

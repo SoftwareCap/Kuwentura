@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cvgl2uufuo2gg"
-path="res://.godot/imported/storageHutZone.png-4d4fe6ea0dc3b246f11238d9df7b791d.ctex"
+path.bptc="res://.godot/imported/storageHutZone.png-4d4fe6ea0dc3b246f11238d9df7b791d.bptc.ctex"
+path.astc="res://.godot/imported/storageHutZone.png-4d4fe6ea0dc3b246f11238d9df7b791d.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/sprites/places/storageHutZone.png"
-dest_files=["res://.godot/imported/storageHutZone.png-4d4fe6ea0dc3b246f11238d9df7b791d.ctex"]
+dest_files=["res://.godot/imported/storageHutZone.png-4d4fe6ea0dc3b246f11238d9df7b791d.bptc.ctex", "res://.godot/imported/storageHutZone.png-4d4fe6ea0dc3b246f11238d9df7b791d.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

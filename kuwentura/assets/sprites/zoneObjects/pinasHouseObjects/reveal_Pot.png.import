@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://biv0fdxvxv0bq"
-path="res://.godot/imported/reveal_Pot.png-c4605d1c071feb46ce8295778e95622e.ctex"
+path.bptc="res://.godot/imported/reveal_Pot.png-c4605d1c071feb46ce8295778e95622e.bptc.ctex"
+path.astc="res://.godot/imported/reveal_Pot.png-c4605d1c071feb46ce8295778e95622e.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/reveal_Pot.png"
-dest_files=["res://.godot/imported/reveal_Pot.png-c4605d1c071feb46ce8295778e95622e.ctex"]
+dest_files=["res://.godot/imported/reveal_Pot.png-c4605d1c071feb46ce8295778e95622e.bptc.ctex", "res://.godot/imported/reveal_Pot.png-c4605d1c071feb46ce8295778e95622e.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

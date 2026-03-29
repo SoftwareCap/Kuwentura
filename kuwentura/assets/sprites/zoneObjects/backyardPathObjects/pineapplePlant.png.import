@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://tthjtt0yqrf6"
-path="res://.godot/imported/pineapplePlant.png-ea3cc866c5a5df054bc43e5fda72db98.ctex"
+path.bptc="res://.godot/imported/pineapplePlant.png-ea3cc866c5a5df054bc43e5fda72db98.bptc.ctex"
+path.astc="res://.godot/imported/pineapplePlant.png-ea3cc866c5a5df054bc43e5fda72db98.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/sprites/zoneObjects/backyardPathObjects/pineapplePlant.png"
-dest_files=["res://.godot/imported/pineapplePlant.png-ea3cc866c5a5df054bc43e5fda72db98.ctex"]
+dest_files=["res://.godot/imported/pineapplePlant.png-ea3cc866c5a5df054bc43e5fda72db98.bptc.ctex", "res://.godot/imported/pineapplePlant.png-ea3cc866c5a5df054bc43e5fda72db98.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

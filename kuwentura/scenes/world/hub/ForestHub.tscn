@@ -1010,6 +1010,36 @@ position = Vector2(-69, -230)
 scale = Vector2(0.4, 0.4)
 texture = ExtResource("5_wp30c")
 
+[node name="PinaSignage" type="Node2D" parent="Zone Portals/PortalPinasHouse"]
+z_index = -1
+position = Vector2(-5027, -455)
+
+[node name="Sprite2D" type="Sprite2D" parent="Zone Portals/PortalPinasHouse/PinaSignage"]
+position = Vector2(4599.75, 473.75003)
+scale = Vector2(0.4383331, 0.4383331)
+texture = ExtResource("9_rbch1")
+
+[node name="Label" type="Label" parent="Zone Portals/PortalPinasHouse/PinaSignage"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 4544.0
+offset_top = 417.0
+offset_right = 4652.0
+offset_bottom = 474.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_constants/line_spacing = -1
+theme_override_font_sizes/font_size = 10
+text = "To enter Pina's House, both players must stand on the door."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+metadata/_edit_use_anchors_ = true
+
 [node name="OldWell" type="Area2D" parent="Zone Portals"]
 position = Vector2(2342, 424)
 collision_layer = 0
@@ -1060,6 +1090,36 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_t6pvo")
 action_mode = 0
 text = "Enter Old Well"
 
+[node name="WellSignage" type="Node2D" parent="Zone Portals/OldWell"]
+z_index = -1
+position = Vector2(-4736, -402)
+
+[node name="Sprite2D" type="Sprite2D" parent="Zone Portals/OldWell/WellSignage"]
+position = Vector2(4599.75, 473.75003)
+scale = Vector2(0.4383331, 0.4383331)
+texture = ExtResource("9_rbch1")
+
+[node name="Label" type="Label" parent="Zone Portals/OldWell/WellSignage"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 4544.0
+offset_top = 417.0
+offset_right = 4652.0
+offset_bottom = 474.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_constants/line_spacing = -1
+theme_override_font_sizes/font_size = 10
+text = "To access the Old Well, both players must stand infront of it."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+metadata/_edit_use_anchors_ = true
+
 [node name="Backyard" type="Area2D" parent="Zone Portals"]
 position = Vector2(2830, 417)
 collision_layer = 0
@@ -1069,6 +1129,7 @@ zone_name = "backyard_path"
 scene_path = "res://scenes/world/zones/backyardPath/BackyardPath.tscn"
 
 [node name="Sprite2D" type="Sprite2D" parent="Zone Portals/Backyard"]
+z_index = -2
 position = Vector2(-69.56248, -10.999994)
 scale = Vector2(0.33746338, 0.21496584)
 texture = ExtResource("7_i1yoq")
@@ -1110,6 +1171,36 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_t6pvo")
 action_mode = 0
 text = "Enter Backyard Path"
 
+[node name="BackyardSignage" type="Node2D" parent="Zone Portals/Backyard"]
+z_index = -1
+position = Vector2(-4801, -395)
+
+[node name="Sprite2D" type="Sprite2D" parent="Zone Portals/Backyard/BackyardSignage"]
+position = Vector2(4599.75, 473.75003)
+scale = Vector2(0.4383331, 0.4383331)
+texture = ExtResource("9_rbch1")
+
+[node name="Label" type="Label" parent="Zone Portals/Backyard/BackyardSignage"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 4544.0
+offset_top = 417.0
+offset_right = 4652.0
+offset_bottom = 474.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_constants/line_spacing = -1
+theme_override_font_sizes/font_size = 10
+text = "To enter the Backyard Path, both players must stand on the broken fence."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+metadata/_edit_use_anchors_ = true
+
 [node name="StorageHut" type="Area2D" parent="Zone Portals"]
 position = Vector2(3499, 401)
 collision_layer = 0
@@ -1119,6 +1210,7 @@ zone_name = "storage_hut"
 scene_path = "res://scenes/world/zones/storageHut/StorageHut.tscn"
 
 [node name="Sprite2D" type="Sprite2D" parent="Zone Portals/StorageHut"]
+z_index = -1
 position = Vector2(-109, -152.00002)
 scale = Vector2(0.4, 0.4)
 texture = ExtResource("6_dyw7g")
@@ -1160,6 +1252,36 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_t6pvo")
 action_mode = 0
 text = "Enter Storage Hut"
 
+[node name="StorageHutSignage" type="Node2D" parent="Zone Portals/StorageHut"]
+z_index = -1
+position = Vector2(-4785, -379)
+
+[node name="Sprite2D" type="Sprite2D" parent="Zone Portals/StorageHut/StorageHutSignage"]
+position = Vector2(4599.75, 473.75003)
+scale = Vector2(0.4383331, 0.4383331)
+texture = ExtResource("9_rbch1")
+
+[node name="Label" type="Label" parent="Zone Portals/StorageHut/StorageHutSignage"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 4544.0
+offset_top = 417.0
+offset_right = 4652.0
+offset_bottom = 474.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_constants/line_spacing = -1
+theme_override_font_sizes/font_size = 10
+text = "To enter the Storage Hut, both players must stand on the door."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+metadata/_edit_use_anchors_ = true
+
 [node name="AbandonedHouse" type="Area2D" parent="Zone Portals"]
 position = Vector2(4248, 401)
 collision_layer = 0
@@ -1169,6 +1291,7 @@ zone_name = "abandoned_house"
 scene_path = "res://scenes/world/zones/abandonedHouse/AbandonedHouse.tscn"
 
 [node name="Sprite2D" type="Sprite2D" parent="Zone Portals/AbandonedHouse"]
+z_index = -1
 position = Vector2(-112, -152)
 scale = Vector2(0.4, 0.4)
 texture = ExtResource("6_dyw7g")
@@ -1210,6 +1333,36 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_t6pvo")
 action_mode = 0
 text = "Enter Abandoned House"
 
+[node name="StorageHutSignage2" type="Node2D" parent="Zone Portals/AbandonedHouse"]
+z_index = -1
+position = Vector2(-4787, -379)
+
+[node name="Sprite2D" type="Sprite2D" parent="Zone Portals/AbandonedHouse/StorageHutSignage2"]
+position = Vector2(4599.75, 473.75003)
+scale = Vector2(0.4383331, 0.4383331)
+texture = ExtResource("9_rbch1")
+
+[node name="Label" type="Label" parent="Zone Portals/AbandonedHouse/StorageHutSignage2"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 4544.0
+offset_top = 417.0
+offset_right = 4652.0
+offset_bottom = 474.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_constants/line_spacing = -1
+theme_override_font_sizes/font_size = 10
+text = "To enter the Abandoned House, both players must stand on the door."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+metadata/_edit_use_anchors_ = true
+
 [node name="Signage" type="Node2D" parent="."]
 
 [node name="Sprite2D" type="Sprite2D" parent="Signage"]
@@ -1231,13 +1384,11 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_constants/line_spacing = -1
-theme_override_font_sizes/font_size = 9
-text = "Gather all 5 clues
-from the zones…
-but beware,
-the story is not yet done."
+theme_override_font_sizes/font_size = 10
+text = "Gather all 5 clues from the zones… but beware, the story is not yet done."
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="Terrain" type="TileMapLayer" parent="."]
 z_index = -1

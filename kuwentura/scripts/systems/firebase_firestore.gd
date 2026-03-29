@@ -19,9 +19,7 @@ func _is_configured() -> bool:
 	return FirebaseAuth.API_KEY != "YOUR_API_KEY_HERE" and not FirebaseAuth.API_KEY.is_empty()
 
 
-# ============================================================================
 # SAVE OPERATIONS
-# ============================================================================
 
 func save_game_state(user_id: String, data: Dictionary):
 	"""Save game state to Firestore (async, signals result)"""
@@ -123,9 +121,7 @@ func _on_save_response(_result, response_code, _headers, body, request_id):
 		FirebaseManager.on_cloud_save_failed("HTTP " + str(response_code))
 
 
-# ============================================================================
 # LOAD OPERATIONS
-# ============================================================================
 
 func load_game_state():
 	"""Load game state from Firestore"""
@@ -237,9 +233,7 @@ func _on_load_response(_result, response_code, _headers, body, request_id):
 		FirebaseManager.on_cloud_load_failed("HTTP " + str(response_code))
 
 
-# ============================================================================
 # CHECK EXISTS
-# ============================================================================
 
 func check_save_exists():
 	"""Check if a cloud save exists (HEAD request)"""
@@ -272,9 +266,7 @@ func _on_check_response(_result, response_code, _headers, _body, http):
 	FirebaseManager.emit_signal("cloud_status_changed", exists, timestamp)
 
 
-# ============================================================================
 # DELETE
-# ============================================================================
 
 func delete_document(document_path: String):
 	"""Delete a document from Firestore"""
@@ -299,9 +291,7 @@ func _on_delete_response(_result, response_code, _headers, _body, http):
 	print("[Firestore] Delete response: ", response_code)
 
 
-# ============================================================================
 # DATA CONVERSION
-# ============================================================================
 
 func _convert_to_firestore_format(data: Dictionary) -> Dictionary:
 	"""Convert Godot Dictionary to Firestore document format"""
