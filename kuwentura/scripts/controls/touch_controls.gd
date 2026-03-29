@@ -1,7 +1,8 @@
+class_name TouchControls
 extends CanvasLayer
 
-## TouchControls handles visibility of on-screen touch controls
-## The TouchScreenButton nodes automatically trigger input actions when pressed
+## TouchControls handles visibility of on-screen touch controls.
+## TouchScreenButton nodes automatically trigger input actions when pressed.
 
 signal pause_pressed
 signal map_pressed
@@ -9,9 +10,9 @@ signal ledger_pressed
 signal briefcase_pressed
 
 enum VisibilityMode {
-	AUTO,       ## Show on mobile/tablet, hide on desktop
-	ALWAYS_SHOW,## Always visible
-	ALWAYS_HIDE ## Always hidden
+	AUTO, ## Show on mobile/tablet, hide on desktop
+	ALWAYS_SHOW, ## Always visible
+	ALWAYS_HIDE  ## Always hidden
 }
 
 @export var visibility_mode: VisibilityMode = VisibilityMode.ALWAYS_SHOW
@@ -25,79 +26,85 @@ enum VisibilityMode {
 @onready var map_button: TouchScreenButton = $Map
 @onready var ledger_button: TouchScreenButton = $Ledger
 @onready var briefcase_button: TouchScreenButton = $Briefcase
-@onready var briefcase_panel: Panel = $SidekickLayer/Briefcase
-
-
-func _notification(what: int):
-	# Handle node being removed from tree (scene change)
-	if what == NOTIFICATION_PREDELETE:
-		# Disconnect signals to prevent errors during cleanup
-		if left_button and left_button.pressed.is_connected(_on_left_pressed):
-			left_button.pressed.disconnect(_on_left_pressed)
-			left_button.released.disconnect(_on_left_released)
-		if right_button and right_button.pressed.is_connected(_on_right_pressed):
-			right_button.pressed.disconnect(_on_right_pressed)
-			right_button.released.disconnect(_on_right_released)
-		if jump_button and jump_button.pressed.is_connected(_on_jump_pressed):
-			jump_button.pressed.disconnect(_on_jump_pressed)
-			jump_button.released.disconnect(_on_jump_released)
-		if pause_button and pause_button.pressed.is_connected(_on_pause_pressed):
-			pause_button.pressed.disconnect(_on_pause_pressed)
-			pause_button.released.disconnect(_on_pause_released)
 
 var _is_visible: bool = true
-
-# Button original scales for press animation
 var _original_scales: Dictionary = {}
 
+const OPAQUE := Color(1, 1, 1, 1)
+const TRANSPARENT := Color(1, 1, 1, 0)
 
-func _ready():
-	# Store original scales for press animations (with null checks)
-	if left_button:
-		_original_scales[left_button] = left_button.scale
-	if right_button:
-		_original_scales[right_button] = right_button.scale
-	if jump_button:
-		_original_scales[jump_button] = jump_button.scale
-	if pause_button:
-		_original_scales[pause_button] = pause_button.scale
-	if map_button:
-		_original_scales[map_button] = map_button.scale
-	if ledger_button:
-		_original_scales[ledger_button] = ledger_button.scale
-	if briefcase_button:
-		_original_scales[briefcase_button] = briefcase_button.scale
-	
-	_connect_button_signals()
+# Central registry — single source of truth for all button wiring.
+# key: id → { button, signal (or null) }
+# Buttons without a signal (movement, jump) emit only animation.
+var _button_registry: Dictionary = {}
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		for id in _button_registry:
+			_disconnect_button(id)
+
+
+func _ready() -> void:
+	_button_registry = {
+		"left" : { "button" : left_button, "signal" : null },
+		"right" : { "button" : right_button, "signal" : null },
+		"jump" : { "button" : jump_button, "signal" : null },
+		"pause" : { "button" : pause_button, "signal" : pause_pressed },
+		"map" : { "button" : map_button, "signal" : map_pressed },
+		"ledger" : { "button" : ledger_button, "signal" : ledger_pressed },
+		"briefcase" : { "button" : briefcase_button, "signal" : briefcase_pressed },
+	}
+
+	for id in _button_registry:
+		var button: TouchScreenButton = _button_registry[id].button
+		if button:
+			_original_scales[button] = button.scale
+			_connect_button(id)
+
 	_apply_visibility_mode()
 
 
-func _connect_button_signals():
-	# Connect signals programmatically to avoid editor setup (with null checks)
-	if left_button:
-		left_button.pressed.connect(_on_left_pressed)
-		left_button.released.connect(_on_left_released)
-	if right_button:
-		right_button.pressed.connect(_on_right_pressed)
-		right_button.released.connect(_on_right_released)
-	if jump_button:
-		jump_button.pressed.connect(_on_jump_pressed)
-		jump_button.released.connect(_on_jump_released)
-	if pause_button:
-		pause_button.pressed.connect(_on_pause_pressed)
-		pause_button.released.connect(_on_pause_released)
-	if map_button:
-		map_button.pressed.connect(_on_map_pressed)
-		map_button.released.connect(_on_map_released)
-	if ledger_button:
-		ledger_button.pressed.connect(_on_ledger_pressed)
-		ledger_button.released.connect(_on_ledger_released)
-	if briefcase_button:
-		briefcase_button.pressed.connect(_on_briefcase_pressed)
-		briefcase_button.released.connect(_on_briefcase_released)
+# Public getter — lets external scripts access buttons safely by id
+# without accidentally resolving sibling nodes of the same name.
+func get_button(id: String) -> TouchScreenButton:
+	var entry: Dictionary = _button_registry.get(id, {})
+	return entry.get("button", null) as TouchScreenButton
 
 
-func _apply_visibility_mode():
+# Connection helpers
+func _connect_button(id: String) -> void:
+	var button: TouchScreenButton = _button_registry[id].button
+	if not button:
+		return
+	button.pressed.connect(_on_button_pressed.bind(id))
+	button.released.connect(_on_button_released.bind(id))
+
+
+func _disconnect_button(id: String) -> void:
+	var button: TouchScreenButton = _button_registry[id].button
+	if not button:
+		return
+	if button.pressed.is_connected(_on_button_pressed):
+		button.pressed.disconnect(_on_button_pressed)
+	if button.released.is_connected(_on_button_released):
+		button.released.disconnect(_on_button_released)
+
+
+# Generic button handlers
+func _on_button_pressed(id: String) -> void:
+	var entry: Dictionary = _button_registry[id]
+	_animate_button_press(entry.button, true)
+	if entry.signal:
+		entry.signal.emit()
+
+
+func _on_button_released(id: String) -> void:
+	_animate_button_press(_button_registry[id].button, false)
+
+
+# Visibility
+func _apply_visibility_mode() -> void:
 	match visibility_mode:
 		VisibilityMode.AUTO:
 			visible = _should_show_on_this_device()
@@ -109,132 +116,72 @@ func _apply_visibility_mode():
 
 
 func _should_show_on_this_device() -> bool:
-	## Show touch controls on mobile platforms and web
-	var platform = OS.get_name()
-	return platform in ["Android", "iOS", "Web"]
+	return OS.get_name() in ["Android", "iOS", "Web"]
 
 
-## Animate button press
-func _animate_button_press(button: TouchScreenButton, pressed: bool):
-	var original_scale = _original_scales.get(button, Vector2.ONE)
-	var target_scale = original_scale * button_scale_pressed if pressed else original_scale
-	
-	var tween = create_tween()
-	tween.set_ease(Tween.EASE_OUT)
-	tween.set_trans(Tween.TRANS_QUAD)
-	tween.tween_property(button, "scale", target_scale, 0.05)
-
-
-## Show the touch controls
-func show_controls():
+func show_controls() -> void:
 	if _is_visible:
 		return
 	_is_visible = true
 	visible = true
-	self.modulate = Color(1, 1, 1, 0)
-	var tween = create_tween()
-	tween.tween_property(self, "modulate", Color(1, 1, 1, 1), fade_duration)
+	self.modulate = TRANSPARENT
+	_fade_modulate(OPAQUE)
 
 
-## Hide the touch controls
-func hide_controls():
+func hide_controls() -> void:
 	if not _is_visible:
 		return
 	_is_visible = false
-	var tween = create_tween()
-	tween.tween_property(self, "modulate", Color(1, 1, 1, 0), fade_duration)
-	tween.tween_callback(func(): visible = false)
+	_fade_modulate(TRANSPARENT).tween_callback(func(): visible = false)
 
 
-## Toggle visibility
-func toggle_controls():
+func toggle_controls() -> void:
 	if _is_visible:
 		hide_controls()
 	else:
 		show_controls()
 
 
-## Enable/disable specific buttons
-func set_movement_enabled(enabled: bool):
-	left_button.visible = enabled
-	right_button.visible = enabled
+func _fade_modulate(target: Color) -> Tween:
+	var tween := create_tween()
+	tween.tween_property(self, "modulate", target, fade_duration)
+	return tween
 
 
-func set_jump_enabled(enabled: bool):
-	jump_button.visible = enabled
+# Enable / disable
+func set_button_visible(id: String, value: bool) -> void:
+	var entry: Dictionary = _button_registry.get(id, {})
+	var button: TouchScreenButton = entry.get("button")
+	if button:
+		button.visible = value
 
 
-func set_pause_enabled(enabled: bool):
-	if pause_button:
-		pause_button.visible = enabled
+# Convenience wrappers for common groups and backward compatibility
+func set_movement_enabled(enabled: bool) -> void:
+	set_button_visible("left", enabled)
+	set_button_visible("right", enabled)
 
 
-## Check if controls are currently visible
+func set_jump_enabled(enabled: bool) -> void:
+	set_button_visible("jump", enabled)
+
+
+func set_pause_enabled(enabled: bool) -> void:
+	set_button_visible("pause", enabled)
+
+
+# Animation
+func _animate_button_press(button: TouchScreenButton, pressed: bool) -> void:
+	if not button:
+		return
+	var original_scale: Vector2 = _original_scales.get(button, Vector2.ONE)
+	var target_scale: Vector2 = original_scale * button_scale_pressed if pressed else original_scale
+	var tween := create_tween()
+	tween.set_ease(Tween.EASE_OUT)
+	tween.set_trans(Tween.TRANS_QUAD)
+	tween.tween_property(button, "scale", target_scale, 0.05)
+
+
+# Queries
 func is_showing() -> bool:
 	return _is_visible
-
-
-# ==================== BUTTON SIGNAL HANDLERS ====================
-
-func _on_left_pressed() -> void:
-	_animate_button_press(left_button, true)
-
-
-func _on_left_released() -> void:
-	_animate_button_press(left_button, false)
-
-
-func _on_right_pressed() -> void:
-	_animate_button_press(right_button, true)
-
-
-func _on_right_released() -> void:
-	_animate_button_press(right_button, false)
-
-
-func _on_jump_pressed() -> void:
-	_animate_button_press(jump_button, true)
-
-
-func _on_jump_released() -> void:
-	_animate_button_press(jump_button, false)
-
-
-func _on_pause_pressed() -> void:
-	_animate_button_press(pause_button, true)
-	print("[TouchControls] Pause button pressed, emitting signal")
-	pause_pressed.emit()
-
-
-func _on_pause_released() -> void:
-	_animate_button_press(pause_button, false)
-
-
-func _on_map_pressed() -> void:
-	_animate_button_press(map_button, true)
-	print("[TouchControls] Map button pressed, emitting signal")
-	map_pressed.emit()
-
-
-func _on_map_released() -> void:
-	_animate_button_press(map_button, false)
-
-
-func _on_ledger_pressed() -> void:
-	_animate_button_press(ledger_button, true)
-	print("[TouchControls] Ledger button pressed, emitting signal")
-	ledger_pressed.emit()
-
-
-func _on_ledger_released() -> void:
-	_animate_button_press(ledger_button, false)
-
-
-func _on_briefcase_pressed() -> void:
-	_animate_button_press(briefcase_button, true)
-	print("[TouchControls] Briefcase button pressed, emitting signal")
-	briefcase_pressed.emit()
-
-
-func _on_briefcase_released() -> void:
-	_animate_button_press(briefcase_button, false)

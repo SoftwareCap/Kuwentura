@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bufgocsvw5dh3"
-path="res://.godot/imported/aswang9.png-7dc266cf89d5091586bd15aedeaa97eb.ctex"
+path.bptc="res://.godot/imported/aswang9.png-7dc266cf89d5091586bd15aedeaa97eb.bptc.ctex"
+path.astc="res://.godot/imported/aswang9.png-7dc266cf89d5091586bd15aedeaa97eb.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/sprites/consequences/aswang/aswang9.png"
-dest_files=["res://.godot/imported/aswang9.png-7dc266cf89d5091586bd15aedeaa97eb.ctex"]
+dest_files=["res://.godot/imported/aswang9.png-7dc266cf89d5091586bd15aedeaa97eb.bptc.ctex", "res://.godot/imported/aswang9.png-7dc266cf89d5091586bd15aedeaa97eb.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

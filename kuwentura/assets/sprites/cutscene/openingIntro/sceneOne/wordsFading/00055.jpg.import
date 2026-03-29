@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://urh73o0uwr5o"
-path="res://.godot/imported/00055.jpg-bd8124c2b54cb2a4cf339072328071ed.ctex"
+path.bptc="res://.godot/imported/00055.jpg-bd8124c2b54cb2a4cf339072328071ed.bptc.ctex"
+path.astc="res://.godot/imported/00055.jpg-bd8124c2b54cb2a4cf339072328071ed.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00055.jpg"
-dest_files=["res://.godot/imported/00055.jpg-bd8124c2b54cb2a4cf339072328071ed.ctex"]
+dest_files=["res://.godot/imported/00055.jpg-bd8124c2b54cb2a4cf339072328071ed.bptc.ctex", "res://.godot/imported/00055.jpg-bd8124c2b54cb2a4cf339072328071ed.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

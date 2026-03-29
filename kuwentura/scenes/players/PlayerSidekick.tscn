@@ -1,7 +1,7 @@
 [gd_scene load_steps=23 format=3 uid="uid://udt37i3bt31c"]
 
+[ext_resource type="Script" uid="uid://bwa5cliuua5sb" path="res://scripts/player/player.gd" id="1_djqfg"]
 [ext_resource type="Texture2D" uid="uid://bxbkwkkjox3dh" path="res://assets/sprites/players/sidekick/sidekick_idle.png" id="1_ig6if"]
-[ext_resource type="Script" uid="uid://d5emekkjkv5l" path="res://scripts/players/player_sidekick.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://d35eqgjkkuyn7" path="res://assets/sprites/players/sidekick/sidekick_walk.png" id="2_djqfg"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_7461x"]
@@ -144,9 +144,10 @@ collision_layer = 2
 floor_max_angle = 1.0472
 floor_snap_length = 8.0
 safe_margin = 0.05
-script = ExtResource("1_script")
-speed = 200
-jump_force = -500
+script = ExtResource("1_djqfg")
+speed = 200.0
+jump_force = -500.0
+role = "Sidekick"
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_wm3to")

@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://llr505ongc63"
-path="res://.godot/imported/shadow_Pan.png-ac6064e88b610056f95e329f7b3e2292.ctex"
+path.bptc="res://.godot/imported/shadow_Pan.png-ac6064e88b610056f95e329f7b3e2292.bptc.ctex"
+path.astc="res://.godot/imported/shadow_Pan.png-ac6064e88b610056f95e329f7b3e2292.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Pan.png"
-dest_files=["res://.godot/imported/shadow_Pan.png-ac6064e88b610056f95e329f7b3e2292.ctex"]
+dest_files=["res://.godot/imported/shadow_Pan.png-ac6064e88b610056f95e329f7b3e2292.bptc.ctex", "res://.godot/imported/shadow_Pan.png-ac6064e88b610056f95e329f7b3e2292.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
