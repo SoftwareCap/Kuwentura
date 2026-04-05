@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b5hfsojjwduu5"
-path="res://.godot/imported/light_emerging_from_book.png-9d108463559ea22ac8807b7f6d783b65.ctex"
+path.bptc="res://.godot/imported/light_emerging_from_book.png-9d108463559ea22ac8807b7f6d783b65.bptc.ctex"
+path.astc="res://.godot/imported/light_emerging_from_book.png-9d108463559ea22ac8807b7f6d783b65.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/sprites/cutscene/openingIntro/sceneTwo/light_emerging_from_book.png"
-dest_files=["res://.godot/imported/light_emerging_from_book.png-9d108463559ea22ac8807b7f6d783b65.ctex"]
+dest_files=["res://.godot/imported/light_emerging_from_book.png-9d108463559ea22ac8807b7f6d783b65.bptc.ctex", "res://.godot/imported/light_emerging_from_book.png-9d108463559ea22ac8807b7f6d783b65.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

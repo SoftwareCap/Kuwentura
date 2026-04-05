@@ -1,0 +1,2059 @@
+[gd_scene load_steps=434 format=3 uid="uid://cvtcyji82jmqc"]
+
+[ext_resource type="Script" uid="uid://cb5kt2gbakcmw" path="res://scripts/cutscenes/opening_cutscene.gd" id="1_d6xy6"]
+[ext_resource type="Texture2D" uid="uid://c3p5qn3e3uw1n" path="res://assets/sprites/cutscene/openingIntro/openingCutsceneBG.png" id="4_2u2gq"]
+[ext_resource type="Texture2D" uid="uid://bh55aw02x6ve0" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00001.jpg" id="4_eugi6"]
+[ext_resource type="PackedScene" uid="uid://7lttltfl4u86" path="res://scenes/character/Grandma.tscn" id="5_j0k8s"]
+[ext_resource type="Texture2D" uid="uid://dgljx5nmsb3c8" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00002.jpg" id="5_qyrfs"]
+[ext_resource type="Texture2D" uid="uid://c22o86rgj8cs4" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00003.jpg" id="6_nmafo"]
+[ext_resource type="Texture2D" uid="uid://b4twdbf7fugiv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-001.jpg" id="6_th3px"]
+[ext_resource type="Texture2D" uid="uid://d2041dgll2fqd" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-002.jpg" id="7_7b1a4"]
+[ext_resource type="Texture2D" uid="uid://nrbepqcoydco" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00004.jpg" id="7_cwpie"]
+[ext_resource type="Texture2D" uid="uid://dl6rr7updwavo" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00005.jpg" id="8_hmj8c"]
+[ext_resource type="Texture2D" uid="uid://d1inwfq4qyrxc" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-003.jpg" id="8_t0jij"]
+[ext_resource type="Texture2D" uid="uid://d06ohamyo86b8" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-004.jpg" id="9_dr1dp"]
+[ext_resource type="Texture2D" uid="uid://cu6hyl7y21sge" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00006.jpg" id="9_tl6s6"]
+[ext_resource type="Texture2D" uid="uid://cgwilq0blbc6v" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-005.jpg" id="10_2xwmh"]
+[ext_resource type="Texture2D" uid="uid://ch1wgoedbv8x2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00007.jpg" id="10_cx3ip"]
+[ext_resource type="Texture2D" uid="uid://djmy1sc73f144" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-006.jpg" id="11_4mkq6"]
+[ext_resource type="Texture2D" uid="uid://bm65b2jnwu1d4" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00008.jpg" id="11_fq7a1"]
+[ext_resource type="Texture2D" uid="uid://celwvth6w6hsu" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00009.jpg" id="12_cgio5"]
+[ext_resource type="Texture2D" uid="uid://hcd1c6bymvqc" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-007.jpg" id="12_rx43u"]
+[ext_resource type="Texture2D" uid="uid://bajoy37vmd8ix" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-008.jpg" id="13_hnc0w"]
+[ext_resource type="Texture2D" uid="uid://bs1y1kvoc8jrl" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00010.jpg" id="13_yjtkd"]
+[ext_resource type="Texture2D" uid="uid://dbtsb5bllgyx1" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-009.jpg" id="14_epdfg"]
+[ext_resource type="Texture2D" uid="uid://bqox26v4gi6ij" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00011.jpg" id="14_iuour"]
+[ext_resource type="Texture2D" uid="uid://dg4f3fcaue585" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00012.jpg" id="15_34emw"]
+[ext_resource type="Texture2D" uid="uid://o7vwx8ua1v6c" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-010.jpg" id="15_gmvoc"]
+[ext_resource type="Texture2D" uid="uid://dnbwqm7acdcsc" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00013.jpg" id="16_hc6bb"]
+[ext_resource type="Texture2D" uid="uid://cjll7qywmdifw" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-011.jpg" id="16_kpsqu"]
+[ext_resource type="Texture2D" uid="uid://n8w2vupdudmx" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-012.jpg" id="17_j1q2s"]
+[ext_resource type="Texture2D" uid="uid://drijocbf5fo34" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00014.jpg" id="17_n24a0"]
+[ext_resource type="Texture2D" uid="uid://cidd4o8xifwn1" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-013.jpg" id="18_4yo0q"]
+[ext_resource type="Texture2D" uid="uid://w2rso81k8rp2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00015.jpg" id="18_6qc16"]
+[ext_resource type="Texture2D" uid="uid://cnc4q8quiilhk" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00016.jpg" id="19_dgnjl"]
+[ext_resource type="Texture2D" uid="uid://dpswmb5h63r3s" path="res://assets/sprites/cutscene/openingIntro/sceneOne/bookFlipping/ezgif-frame-014.jpg" id="19_s0vm4"]
+[ext_resource type="Texture2D" uid="uid://c4ayy3kyw3fy6" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/1.png" id="20_eog4c"]
+[ext_resource type="Texture2D" uid="uid://dpornbf4kgxym" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00017.jpg" id="20_jiev4"]
+[ext_resource type="Texture2D" uid="uid://xmie5emd7leg" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00018.jpg" id="21_2f0m6"]
+[ext_resource type="Texture2D" uid="uid://cybtap6cqkbm1" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/2.png" id="21_tib5f"]
+[ext_resource type="Texture2D" uid="uid://cq1vl0tw0x0xa" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/3.png" id="22_h76lv"]
+[ext_resource type="Texture2D" uid="uid://8fe8ggn74kxr" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00019.jpg" id="22_ojbcl"]
+[ext_resource type="Texture2D" uid="uid://dtbpim8iflp6r" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/4.png" id="23_43j7x"]
+[ext_resource type="Texture2D" uid="uid://cgvaktu5g4sxs" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00020.jpg" id="23_vc2sp"]
+[ext_resource type="Texture2D" uid="uid://0e5mbckf0kpp" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00021.jpg" id="24_1eune"]
+[ext_resource type="Texture2D" uid="uid://dngclr8dp8jw3" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/5.png" id="24_yhlo2"]
+[ext_resource type="Texture2D" uid="uid://bviajobcgr3p5" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00022.jpg" id="25_7qhlb"]
+[ext_resource type="Texture2D" uid="uid://b644j453adiph" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/6.png" id="25_jtnwx"]
+[ext_resource type="Texture2D" uid="uid://dn4h3rit6ttaj" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00023.jpg" id="26_ce8kv"]
+[ext_resource type="Texture2D" uid="uid://sl0msc04hcau" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/7.png" id="26_ysraj"]
+[ext_resource type="Texture2D" uid="uid://c3u38k1ecv17e" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/8.png" id="27_gpnpm"]
+[ext_resource type="Texture2D" uid="uid://4y15eaho0qsm" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00024.jpg" id="27_om4s5"]
+[ext_resource type="Texture2D" uid="uid://mq85uqgakdje" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/9.png" id="28_s7xl5"]
+[ext_resource type="Texture2D" uid="uid://c2m72ye0x235b" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00025.jpg" id="28_w5r2o"]
+[ext_resource type="Texture2D" uid="uid://dsd82w7fiyep8" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/10.png" id="29_085ws"]
+[ext_resource type="Texture2D" uid="uid://tdnfdu6s2hnm" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00026.jpg" id="29_jl1h0"]
+[ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="30_d6xy6"]
+[ext_resource type="PackedScene" uid="uid://b75rhqvevyetw" path="res://scenes/character/GrandmaFlipping.tscn" id="30_kfcpv"]
+[ext_resource type="Texture2D" uid="uid://1c2h4nc7u3fw" path="res://assets/sprites/players/detective/detective_idle.png" id="30_kiegq"]
+[ext_resource type="Texture2D" uid="uid://07nvofpv4t" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00027.jpg" id="30_x7cs1"]
+[ext_resource type="PackedScene" uid="uid://dyyyweg8fp41o" path="res://scenes/character/GrandmaLightEmerge.tscn" id="31_8g587"]
+[ext_resource type="Texture2D" uid="uid://bxbkwkkjox3dh" path="res://assets/sprites/players/sidekick/sidekick_idle.png" id="31_d6xy6"]
+[ext_resource type="Texture2D" uid="uid://sjwsbdsynyxd" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00028.jpg" id="31_uucyx"]
+[ext_resource type="Texture2D" uid="uid://c1if3dl4d2v5d" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00029.jpg" id="32_h1j2c"]
+[ext_resource type="Texture2D" uid="uid://cgk1b4toktsew" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00030.jpg" id="33_wawex"]
+[ext_resource type="Texture2D" uid="uid://bn41n1hnt7g0p" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00031.jpg" id="34_t3ggh"]
+[ext_resource type="Texture2D" uid="uid://d2bjpdtrtp3jj" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00032.jpg" id="35_7fpk1"]
+[ext_resource type="Texture2D" uid="uid://bgofnugylq8yw" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00033.jpg" id="36_52esh"]
+[ext_resource type="Texture2D" uid="uid://c2avdj5thr76k" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00034.jpg" id="37_km58s"]
+[ext_resource type="Texture2D" uid="uid://jojlcvcfm7ob" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00035.jpg" id="38_ylerd"]
+[ext_resource type="Texture2D" uid="uid://c1foaxkp6etu0" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00036.jpg" id="39_5756x"]
+[ext_resource type="Texture2D" uid="uid://cuvtgux4hf6kq" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00037.jpg" id="40_dslhm"]
+[ext_resource type="Texture2D" uid="uid://div3tetofy0ns" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00038.jpg" id="41_ygp6w"]
+[ext_resource type="Texture2D" uid="uid://8a04gw4u7hxc" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00039.jpg" id="42_6lgma"]
+[ext_resource type="Texture2D" uid="uid://b6g7acp0kmfwv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00040.jpg" id="43_t2m1a"]
+[ext_resource type="Texture2D" uid="uid://bxt3qjw0llal2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00041.jpg" id="44_so5ty"]
+[ext_resource type="Texture2D" uid="uid://bysvl7jgb5cwv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00042.jpg" id="45_1jow3"]
+[ext_resource type="Texture2D" uid="uid://dgj10rhamb033" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00043.jpg" id="46_jk33l"]
+[ext_resource type="Texture2D" uid="uid://bjgim24dxf1ge" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00044.jpg" id="47_w0w8c"]
+[ext_resource type="Texture2D" uid="uid://dp8q01pggwso5" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00045.jpg" id="48_7exyu"]
+[ext_resource type="Texture2D" uid="uid://br83aowm1lgip" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00046.jpg" id="49_37j0r"]
+[ext_resource type="Texture2D" uid="uid://b256lcgy2bgtc" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00047.jpg" id="50_5x7jy"]
+[ext_resource type="Texture2D" uid="uid://531mnwlyiwuk" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00048.jpg" id="51_6khyq"]
+[ext_resource type="Texture2D" uid="uid://fpfbp3p7r3bx" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00049.jpg" id="52_3fj3k"]
+[ext_resource type="Texture2D" uid="uid://c8wqxid1tbbsg" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00050.jpg" id="53_edh8m"]
+[ext_resource type="Texture2D" uid="uid://c1sreiamrdr4h" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00051.jpg" id="54_mhavr"]
+[ext_resource type="Texture2D" uid="uid://df4ms32u3kva5" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00052.jpg" id="55_m4h7t"]
+[ext_resource type="Texture2D" uid="uid://difv6qso7liil" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00053.jpg" id="56_ab8h1"]
+[ext_resource type="Texture2D" uid="uid://dg2vby4en0qfr" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00054.jpg" id="57_maoal"]
+[ext_resource type="Texture2D" uid="uid://urh73o0uwr5o" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00055.jpg" id="58_mh2lp"]
+[ext_resource type="Texture2D" uid="uid://p0y5uuvdtxdy" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00056.jpg" id="59_nmbsd"]
+[ext_resource type="Texture2D" uid="uid://3h6u45qqqvbm" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00057.jpg" id="60_1ktxj"]
+[ext_resource type="Texture2D" uid="uid://c760fbrclow5n" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00058.jpg" id="61_dmylm"]
+[ext_resource type="Texture2D" uid="uid://0v08rplg1e86" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00059.jpg" id="62_x6mjy"]
+[ext_resource type="Texture2D" uid="uid://di7b6bi01a8ib" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00060.jpg" id="63_vf263"]
+[ext_resource type="Texture2D" uid="uid://3p00s0jrql04" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00061.jpg" id="64_co0fa"]
+[ext_resource type="Texture2D" uid="uid://duafjgf4v2hdf" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00062.jpg" id="65_7xx6v"]
+[ext_resource type="Texture2D" uid="uid://oy6s5xfgadvd" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00063.jpg" id="66_oshtl"]
+[ext_resource type="Texture2D" uid="uid://ctksf5gyadt0b" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00064.jpg" id="67_ebahu"]
+[ext_resource type="Texture2D" uid="uid://c7xmdky6t4xpv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00065.jpg" id="68_c825f"]
+[ext_resource type="Texture2D" uid="uid://c0mw7m38f5hbk" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00066.jpg" id="69_xl184"]
+[ext_resource type="Texture2D" uid="uid://c2eiwjty5o73k" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00067.jpg" id="70_jrm86"]
+[ext_resource type="Texture2D" uid="uid://dtyw4yttgvma0" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00068.jpg" id="71_31yhp"]
+[ext_resource type="Texture2D" uid="uid://c1noe7jk4r2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00069.jpg" id="72_iep12"]
+[ext_resource type="Texture2D" uid="uid://cxgbxwx67vcy2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00070.jpg" id="73_62p3k"]
+[ext_resource type="Texture2D" uid="uid://qab0xyckv7pd" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00071.jpg" id="74_eyqfq"]
+[ext_resource type="Texture2D" uid="uid://cvrox6srx185o" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00072.jpg" id="75_u7c5h"]
+[ext_resource type="Texture2D" uid="uid://c8m41ukmwxtry" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00073.jpg" id="76_5nqx0"]
+[ext_resource type="Texture2D" uid="uid://i61ad73sykdu" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00074.jpg" id="77_dxq4j"]
+[ext_resource type="Texture2D" uid="uid://bvtqufv5qlf0m" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00075.jpg" id="78_npojl"]
+[ext_resource type="Texture2D" uid="uid://b70wfhetianrd" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00076.jpg" id="79_f56ls"]
+[ext_resource type="Texture2D" uid="uid://bjr8csfooenlq" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00077.jpg" id="80_kb74s"]
+[ext_resource type="Texture2D" uid="uid://mh2fcxojncb4" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00078.jpg" id="81_kfj0p"]
+[ext_resource type="Texture2D" uid="uid://xatg7bwe0vno" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00079.jpg" id="82_oc756"]
+[ext_resource type="Texture2D" uid="uid://daa26nch6odb2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00080.jpg" id="83_eap6q"]
+[ext_resource type="Texture2D" uid="uid://c8u4ymocb7jgj" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00081.jpg" id="84_726r8"]
+[ext_resource type="Texture2D" uid="uid://du0t3hc35vbla" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00082.jpg" id="85_uc32k"]
+[ext_resource type="Texture2D" uid="uid://d4h7l2wcbi82a" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00083.jpg" id="86_ukoyb"]
+[ext_resource type="Texture2D" uid="uid://ovpgoc5mjf10" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00084.jpg" id="87_m1jol"]
+[ext_resource type="Texture2D" uid="uid://d1ua5stqrn838" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00085.jpg" id="88_uravw"]
+[ext_resource type="Texture2D" uid="uid://cyog8sc61xyk8" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00086.jpg" id="89_sbhr5"]
+[ext_resource type="Texture2D" uid="uid://dt1l0kr3n4vum" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00087.jpg" id="90_b0p1k"]
+[ext_resource type="Texture2D" uid="uid://cy5winnbsrwin" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00088.jpg" id="91_xxwvs"]
+[ext_resource type="Texture2D" uid="uid://wpivjtc1p62x" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00089.jpg" id="92_d8m3k"]
+[ext_resource type="Texture2D" uid="uid://x4aw4uuish5q" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00090.jpg" id="93_0qc4x"]
+[ext_resource type="Texture2D" uid="uid://j056fl1o2f3i" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00091.jpg" id="94_hpid8"]
+[ext_resource type="Texture2D" uid="uid://daxacsl5why4w" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00092.jpg" id="95_qf8ve"]
+[ext_resource type="Texture2D" uid="uid://chkrnssvet83v" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00093.jpg" id="96_oaurr"]
+[ext_resource type="Texture2D" uid="uid://mrwa8s6aovdo" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00094.jpg" id="97_y3st6"]
+[ext_resource type="Texture2D" uid="uid://diow2lsc8hpun" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00095.jpg" id="98_5lkg1"]
+[ext_resource type="Texture2D" uid="uid://wdnrpatkxyde" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00096.jpg" id="99_1dljs"]
+[ext_resource type="Texture2D" uid="uid://cewrl2up00wo0" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00097.jpg" id="100_s2nix"]
+[ext_resource type="Texture2D" uid="uid://cyl1sgk8735fi" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00098.jpg" id="101_45wt1"]
+[ext_resource type="Texture2D" uid="uid://ct1tt6f51pyua" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00099.jpg" id="102_ywyf0"]
+[ext_resource type="Texture2D" uid="uid://bksbsj8yflamv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00100.jpg" id="103_xm0gr"]
+[ext_resource type="Texture2D" uid="uid://qiu5j20f1di8" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00101.jpg" id="104_v1jgu"]
+[ext_resource type="Texture2D" uid="uid://jp16sv8vuexn" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00102.jpg" id="105_oarbj"]
+[ext_resource type="Texture2D" uid="uid://fsnibwxdavnl" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00103.jpg" id="106_5wsy7"]
+[ext_resource type="Texture2D" uid="uid://dkctedkspr6q2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00104.jpg" id="107_2mr2i"]
+[ext_resource type="Texture2D" uid="uid://cmdds2w4tpjy1" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00105.jpg" id="108_rxwjt"]
+[ext_resource type="Texture2D" uid="uid://b0gtlbchuwqqs" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00106.jpg" id="109_0abyc"]
+[ext_resource type="Texture2D" uid="uid://xi0sjssavefb" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00107.jpg" id="110_d6frm"]
+[ext_resource type="Texture2D" uid="uid://b3ar1v06kloi0" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00108.jpg" id="111_yaqod"]
+[ext_resource type="Texture2D" uid="uid://b1q2hw84l2at7" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00109.jpg" id="112_7wywi"]
+[ext_resource type="Texture2D" uid="uid://mn3eiefb5u2m" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00110.jpg" id="113_q0ud0"]
+[ext_resource type="Texture2D" uid="uid://dm8r7hdg7uy01" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00111.jpg" id="114_ag3m1"]
+[ext_resource type="Texture2D" uid="uid://dy64am8c7exrm" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00112.jpg" id="115_d0fx4"]
+[ext_resource type="Texture2D" uid="uid://c0fq0r7wt4b3h" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00113.jpg" id="116_xbajs"]
+[ext_resource type="Texture2D" uid="uid://u8eyidgvkfpn" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00114.jpg" id="117_eot78"]
+[ext_resource type="Texture2D" uid="uid://d0hv7sduprcy2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00115.jpg" id="118_3q5ww"]
+[ext_resource type="Texture2D" uid="uid://bguk40n8hprwx" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00116.jpg" id="119_whkwp"]
+[ext_resource type="Texture2D" uid="uid://cnswjd3gvxk48" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00117.jpg" id="120_if7wn"]
+[ext_resource type="Texture2D" uid="uid://dwh7ajxyo433p" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00118.jpg" id="121_nonh6"]
+[ext_resource type="Texture2D" uid="uid://b2lcfrldslwe3" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00119.jpg" id="122_2k0wx"]
+[ext_resource type="Texture2D" uid="uid://bmj5wx75nsefh" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00120.jpg" id="123_312du"]
+[ext_resource type="Texture2D" uid="uid://drh2ap45hug1f" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00121.jpg" id="124_5k267"]
+[ext_resource type="Texture2D" uid="uid://bcbyoldrbo1vs" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00122.jpg" id="125_6ikuv"]
+[ext_resource type="Texture2D" uid="uid://ddayrtilqvpms" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00123.jpg" id="126_l1vp8"]
+[ext_resource type="Texture2D" uid="uid://cp6imo1b0qrs8" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00124.jpg" id="127_icjfg"]
+[ext_resource type="Texture2D" uid="uid://dtj7md22tdt3x" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00125.jpg" id="128_0orc6"]
+[ext_resource type="Texture2D" uid="uid://brsessluma3s6" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00126.jpg" id="129_81qr7"]
+[ext_resource type="Texture2D" uid="uid://cvrc424y0mk72" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00127.jpg" id="130_vhm8q"]
+[ext_resource type="Texture2D" uid="uid://dl638o7uwicje" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00128.jpg" id="131_jokpq"]
+[ext_resource type="Texture2D" uid="uid://ee7g4igcxbkk" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00129.jpg" id="132_ah1ny"]
+[ext_resource type="Texture2D" uid="uid://bgubck103xna2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00130.jpg" id="133_hey7v"]
+[ext_resource type="Texture2D" uid="uid://b6642p36nxkfj" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00131.jpg" id="134_b7lda"]
+[ext_resource type="Texture2D" uid="uid://bignyciop6ynv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00132.jpg" id="135_82hfu"]
+[ext_resource type="Texture2D" uid="uid://c5nwv4ael00vc" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00133.jpg" id="136_k5vx1"]
+[ext_resource type="Texture2D" uid="uid://bhndvjjdyubds" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00134.jpg" id="137_25475"]
+[ext_resource type="Texture2D" uid="uid://d1sewngi4lhjx" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00135.jpg" id="138_w8rgu"]
+[ext_resource type="Texture2D" uid="uid://dx3hco81fsth2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00136.jpg" id="139_v3lhm"]
+[ext_resource type="Texture2D" uid="uid://di5pbp3xr46jg" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00137.jpg" id="140_si6mc"]
+[ext_resource type="Texture2D" uid="uid://d0sw1pe73yyw7" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00138.jpg" id="141_m11h4"]
+[ext_resource type="Texture2D" uid="uid://djrfm6vg3ulj7" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00139.jpg" id="142_hmfxi"]
+[ext_resource type="Texture2D" uid="uid://p4yio6kq2s12" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00140.jpg" id="143_a3hra"]
+[ext_resource type="Texture2D" uid="uid://b2su3xdu5turu" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00141.jpg" id="144_irch5"]
+[ext_resource type="Texture2D" uid="uid://byixa8fvkrtkc" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00142.jpg" id="145_c7q4k"]
+[ext_resource type="Texture2D" uid="uid://cviqvxhjcxndl" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00143.jpg" id="146_t8bj0"]
+[ext_resource type="Texture2D" uid="uid://dv0wqlsadpky8" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00144.jpg" id="147_p74m2"]
+[ext_resource type="Texture2D" uid="uid://djij6alagbdt1" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00145.jpg" id="148_addec"]
+[ext_resource type="Texture2D" uid="uid://demevde52b6sv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00146.jpg" id="149_xwu1q"]
+[ext_resource type="Texture2D" uid="uid://0a356n3yojem" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00147.jpg" id="150_h4lf3"]
+[ext_resource type="Texture2D" uid="uid://b20g4ham5cn60" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00148.jpg" id="151_srdgg"]
+[ext_resource type="Texture2D" uid="uid://ch8pxwbfuipcp" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00149.jpg" id="152_j3dua"]
+[ext_resource type="Texture2D" uid="uid://cd4ya1xymx2u6" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00150.jpg" id="153_u2fm4"]
+[ext_resource type="Texture2D" uid="uid://bs48bu7a65anf" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00151.jpg" id="154_podwp"]
+[ext_resource type="Texture2D" uid="uid://df1xsis5f6nmk" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00152.jpg" id="155_kgdlg"]
+[ext_resource type="Texture2D" uid="uid://481qpodj58wv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00153.jpg" id="156_mthx2"]
+[ext_resource type="Texture2D" uid="uid://cuxrc3b7dyxc2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00154.jpg" id="157_7ubei"]
+[ext_resource type="Texture2D" uid="uid://bt5t6no6t5b10" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00155.jpg" id="158_ti3ds"]
+[ext_resource type="Texture2D" uid="uid://bjhm164v4a4bm" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00156.jpg" id="159_wawis"]
+[ext_resource type="Texture2D" uid="uid://dkko4hnmni0r6" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00157.jpg" id="160_4yo1b"]
+[ext_resource type="Texture2D" uid="uid://bvve07fc4dqvd" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00158.jpg" id="161_4ao25"]
+[ext_resource type="Texture2D" uid="uid://xu68mg3v3akr" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00159.jpg" id="162_xunsn"]
+[ext_resource type="Texture2D" uid="uid://cwfdjey7gkyxe" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00160.jpg" id="163_slrkr"]
+[ext_resource type="Texture2D" uid="uid://o57085or8shp" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00161.jpg" id="164_4kwi1"]
+[ext_resource type="Texture2D" uid="uid://txx1sw0qfxtk" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00162.jpg" id="165_1yjf7"]
+[ext_resource type="Texture2D" uid="uid://jp8rgworls1y" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00163.jpg" id="166_ocayx"]
+[ext_resource type="Texture2D" uid="uid://cdwu0lhxg4iq8" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00164.jpg" id="167_m4qpo"]
+[ext_resource type="Texture2D" uid="uid://cgenmpljbu58c" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00165.jpg" id="168_8y4lh"]
+[ext_resource type="Texture2D" uid="uid://dofv6pbu6ivdp" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00166.jpg" id="169_6hj0t"]
+[ext_resource type="Texture2D" uid="uid://bqkqlypgky3uv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00167.jpg" id="170_3o0r0"]
+[ext_resource type="Texture2D" uid="uid://dje6jmlexthv7" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00168.jpg" id="171_h14d4"]
+[ext_resource type="Texture2D" uid="uid://bva7tgnh40gkv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00169.jpg" id="172_1nohj"]
+[ext_resource type="Texture2D" uid="uid://ib1kjteo23r0" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00170.jpg" id="173_6b3ta"]
+[ext_resource type="Texture2D" uid="uid://oftl0ombxv62" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00171.jpg" id="174_mq6g6"]
+[ext_resource type="Texture2D" uid="uid://c0pfeyjrmd1sy" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00172.jpg" id="175_mjkt4"]
+[ext_resource type="Texture2D" uid="uid://ksd3qc36l8gv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00173.jpg" id="176_fc4p1"]
+[ext_resource type="Texture2D" uid="uid://plrrswch7ran" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00174.jpg" id="177_q115i"]
+[ext_resource type="Texture2D" uid="uid://dvcm1eecmecju" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00175.jpg" id="178_gi7un"]
+[ext_resource type="Texture2D" uid="uid://dryog2svj58cj" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00176.jpg" id="179_u08cb"]
+[ext_resource type="Texture2D" uid="uid://1u1i3xn2mg1" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00177.jpg" id="180_6a7du"]
+[ext_resource type="Texture2D" uid="uid://cv57w5mg8b1vr" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00178.jpg" id="181_bsp57"]
+[ext_resource type="Texture2D" uid="uid://bpesj7iavv2lb" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00179.jpg" id="182_635sf"]
+[ext_resource type="Texture2D" uid="uid://cguaho0rdjhst" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00180.jpg" id="183_anwa2"]
+[ext_resource type="Texture2D" uid="uid://dxu0xmod67l4u" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00181.jpg" id="184_evm8d"]
+[ext_resource type="Texture2D" uid="uid://cuytxsyrf2utm" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00182.jpg" id="185_8uroh"]
+[ext_resource type="Texture2D" uid="uid://d15obc43cah3b" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00183.jpg" id="186_luf47"]
+[ext_resource type="Texture2D" uid="uid://bslxqk7vweoe5" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00184.jpg" id="187_ah2mc"]
+[ext_resource type="Texture2D" uid="uid://dp2cg5w3k0ncx" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00185.jpg" id="188_oljht"]
+[ext_resource type="Texture2D" uid="uid://bwkivamkc2ja" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00186.jpg" id="189_uylv6"]
+[ext_resource type="Texture2D" uid="uid://rg1wtc8pq6ue" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00187.jpg" id="190_15o6f"]
+[ext_resource type="Texture2D" uid="uid://b36t34c7qmjye" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00188.jpg" id="191_763yu"]
+[ext_resource type="Texture2D" uid="uid://c6mgxprrpnxwj" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00189.jpg" id="192_txqe5"]
+[ext_resource type="Texture2D" uid="uid://dckmcm3qqnuly" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00190.jpg" id="193_mutxd"]
+[ext_resource type="Texture2D" uid="uid://dvrsjqe3kn51j" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00191.jpg" id="194_8e63b"]
+[ext_resource type="Texture2D" uid="uid://c0ekxbvp71dwe" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00192.jpg" id="195_l8djp"]
+[ext_resource type="Texture2D" uid="uid://kqrf3rgslocs" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00193.jpg" id="196_4efsv"]
+[ext_resource type="Texture2D" uid="uid://bxgx38q4wn8c0" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00194.jpg" id="197_a0vgs"]
+[ext_resource type="Texture2D" uid="uid://dmlf1quvm0kuq" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00195.jpg" id="198_chpl3"]
+[ext_resource type="Texture2D" uid="uid://jwsngqea73nu" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00196.jpg" id="199_08jdh"]
+[ext_resource type="Texture2D" uid="uid://cus38de4dy2xw" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00197.jpg" id="200_05sss"]
+[ext_resource type="Texture2D" uid="uid://d0feuc4ukitcg" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00198.jpg" id="201_v8qo1"]
+[ext_resource type="Texture2D" uid="uid://brs3yay64fx7k" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00199.jpg" id="202_4b64r"]
+[ext_resource type="Texture2D" uid="uid://da8j28rc0oumj" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00200.jpg" id="203_mav28"]
+[ext_resource type="Texture2D" uid="uid://da8jrx24ghswf" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00201.jpg" id="204_gdwdl"]
+[ext_resource type="Texture2D" uid="uid://dgatujn7e5s5m" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00202.jpg" id="205_ccctu"]
+[ext_resource type="Texture2D" uid="uid://dth2s7mqrvrbv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00203.jpg" id="206_77sjc"]
+[ext_resource type="Texture2D" uid="uid://c8rq2tl6a67v1" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00204.jpg" id="207_1sc8j"]
+[ext_resource type="Texture2D" uid="uid://wuxwo6wn5f7n" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00205.jpg" id="208_bsbn0"]
+[ext_resource type="Texture2D" uid="uid://dqvh4utcl6mcy" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00206.jpg" id="209_8r2jy"]
+[ext_resource type="Texture2D" uid="uid://bxlrnujdv00yx" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00207.jpg" id="210_5fqhl"]
+[ext_resource type="Texture2D" uid="uid://cgbm3fs1sm2g7" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00208.jpg" id="211_s4rfw"]
+[ext_resource type="Texture2D" uid="uid://b81ghj7bwwthj" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00209.jpg" id="212_qu2ed"]
+[ext_resource type="Texture2D" uid="uid://d1qiss6v4tn6t" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00210.jpg" id="213_vhytc"]
+[ext_resource type="Texture2D" uid="uid://dmi6tpowjwb8f" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00211.jpg" id="214_eexvp"]
+[ext_resource type="Texture2D" uid="uid://eyde1ieab3ec" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00212.jpg" id="215_sg0py"]
+[ext_resource type="Texture2D" uid="uid://b5ja2yfk3ckna" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00213.jpg" id="216_m5htk"]
+[ext_resource type="Texture2D" uid="uid://bcyc7sariikcn" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00214.jpg" id="217_ju0d7"]
+[ext_resource type="Texture2D" uid="uid://dx5jowtw7l8pm" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00215.jpg" id="218_j5o0n"]
+[ext_resource type="Texture2D" uid="uid://t5j4gdsn35am" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00216.jpg" id="219_wg8ma"]
+[ext_resource type="Texture2D" uid="uid://ceyvxhf48uh50" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00217.jpg" id="220_odf3e"]
+[ext_resource type="Texture2D" uid="uid://bsx4mplmkg50r" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00218.jpg" id="221_7n20h"]
+[ext_resource type="Texture2D" uid="uid://c0xyk7pkhj7kj" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00219.jpg" id="222_am1p6"]
+[ext_resource type="Texture2D" uid="uid://bwlrev2xd4545" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00220.jpg" id="223_en85j"]
+[ext_resource type="Texture2D" uid="uid://bqt03706bbmi5" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00221.jpg" id="224_w01n3"]
+[ext_resource type="Texture2D" uid="uid://ndw5evbt2yt1" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00222.jpg" id="225_yowwl"]
+[ext_resource type="Texture2D" uid="uid://bhorf61o20y5t" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00223.jpg" id="226_m0m7l"]
+[ext_resource type="Texture2D" uid="uid://cdm8okejc4iuw" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00224.jpg" id="227_abnw0"]
+[ext_resource type="Texture2D" uid="uid://cd0n4xw4yu8ry" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00225.jpg" id="228_e51y2"]
+[ext_resource type="Texture2D" uid="uid://b7p1gmkea1hh7" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00226.jpg" id="229_otbqc"]
+[ext_resource type="Texture2D" uid="uid://chhnolbyxoyn8" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00227.jpg" id="230_c6i42"]
+[ext_resource type="Texture2D" uid="uid://hkomanja7503" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00228.jpg" id="231_s1tf0"]
+[ext_resource type="Texture2D" uid="uid://cxpgg5mmoiooc" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00229.jpg" id="232_845oj"]
+[ext_resource type="Texture2D" uid="uid://gqwycr0y80rn" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00230.jpg" id="233_vwjg5"]
+[ext_resource type="Texture2D" uid="uid://brwfw3gbdytwg" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00231.jpg" id="234_3hskr"]
+[ext_resource type="Texture2D" uid="uid://l5t0q8tr1bty" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00232.jpg" id="235_8pr6y"]
+[ext_resource type="Texture2D" uid="uid://bjgxv2fcln413" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00233.jpg" id="236_ep27g"]
+[ext_resource type="Texture2D" uid="uid://duy401m3xrn1s" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00234.jpg" id="237_3g1ii"]
+[ext_resource type="Texture2D" uid="uid://cfhegsg4qjukw" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00235.jpg" id="238_oiunk"]
+[ext_resource type="Texture2D" uid="uid://bc1q1oqn4ch4g" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00236.jpg" id="239_t08v1"]
+[ext_resource type="Texture2D" uid="uid://by716vd8imt3c" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00237.jpg" id="240_igeqa"]
+[ext_resource type="Texture2D" uid="uid://3q5spfx8hh4n" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00238.jpg" id="241_m7i3k"]
+[ext_resource type="Texture2D" uid="uid://b8w25a78r75g7" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00239.jpg" id="242_gdalc"]
+[ext_resource type="Texture2D" uid="uid://dw12hdeecwgit" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00240.jpg" id="243_s1b45"]
+[ext_resource type="Texture2D" uid="uid://byn8ydo0mvxk4" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00241.jpg" id="244_lg0a6"]
+[ext_resource type="Texture2D" uid="uid://bwwnmqiysthrc" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00242.jpg" id="245_x2xdt"]
+[ext_resource type="Texture2D" uid="uid://dgw6vyuhqdsd6" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00243.jpg" id="246_xced2"]
+[ext_resource type="Texture2D" uid="uid://dn148lgiwsny7" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00244.jpg" id="247_10dt7"]
+[ext_resource type="Texture2D" uid="uid://dg8r8ky3bwhb7" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00245.jpg" id="248_v3juj"]
+[ext_resource type="Texture2D" uid="uid://bf13ah6dd7520" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00246.jpg" id="249_tm0j2"]
+[ext_resource type="Texture2D" uid="uid://datfr5nwwsg2f" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00247.jpg" id="250_60roi"]
+[ext_resource type="Texture2D" uid="uid://u6by0hsjbo2y" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00248.jpg" id="251_1kkkb"]
+[ext_resource type="Texture2D" uid="uid://dc3g6ffbd5qq3" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00249.jpg" id="252_1sdpk"]
+[ext_resource type="Texture2D" uid="uid://c6jjyccqrco45" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00250.jpg" id="253_doh6t"]
+[ext_resource type="Texture2D" uid="uid://hrdgr4yqv5ft" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00251.jpg" id="254_bycj4"]
+[ext_resource type="Texture2D" uid="uid://dl8riqj3epcml" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00252.jpg" id="255_pevi1"]
+[ext_resource type="Texture2D" uid="uid://c46wtgsq1v5re" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00253.jpg" id="256_51m0s"]
+[ext_resource type="Texture2D" uid="uid://msgwpsc6urks" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00254.jpg" id="257_i8v56"]
+[ext_resource type="Texture2D" uid="uid://dn0u5gkje8i4" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00255.jpg" id="258_5ewcv"]
+[ext_resource type="Texture2D" uid="uid://bwnieyfpcl1iq" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00256.jpg" id="259_bbk64"]
+[ext_resource type="Texture2D" uid="uid://cs8ssq06vymu2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00257.jpg" id="260_244i1"]
+[ext_resource type="Texture2D" uid="uid://djqfmor6tkn66" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00258.jpg" id="261_21k44"]
+[ext_resource type="Texture2D" uid="uid://8uw8qy2dhx1i" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00259.jpg" id="262_lvbem"]
+[ext_resource type="Texture2D" uid="uid://dwn6iqbvqlu1j" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00260.jpg" id="263_bxkub"]
+[ext_resource type="Texture2D" uid="uid://d25asp1p4tre0" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00261.jpg" id="264_nc7qb"]
+[ext_resource type="Texture2D" uid="uid://bv7qmsul4ip08" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00262.jpg" id="265_tp0pi"]
+[ext_resource type="Texture2D" uid="uid://btxy6kjjcydu2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00263.jpg" id="266_vk7ex"]
+[ext_resource type="Texture2D" uid="uid://dfv3w5wdj0ee4" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00264.jpg" id="267_4olat"]
+[ext_resource type="Texture2D" uid="uid://fvjc3q31h3rd" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00265.jpg" id="268_h4ir6"]
+[ext_resource type="Texture2D" uid="uid://dcp4h2xpql3si" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00266.jpg" id="269_u2m7v"]
+[ext_resource type="Texture2D" uid="uid://bjtnnrr7cmkgg" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00267.jpg" id="270_1rsog"]
+[ext_resource type="Texture2D" uid="uid://d3a8k7p7p3occ" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00268.jpg" id="271_gnbcj"]
+[ext_resource type="Texture2D" uid="uid://clvf7w3ohnvvv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00269.jpg" id="272_v6kgg"]
+[ext_resource type="Texture2D" uid="uid://ddjln6rmj2iiv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00270.jpg" id="273_dxmbh"]
+[ext_resource type="Texture2D" uid="uid://4xe1alx78kn4" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00271.jpg" id="274_w7l3t"]
+[ext_resource type="Texture2D" uid="uid://1vb6sxmlkkag" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00272.jpg" id="275_uopn2"]
+[ext_resource type="Texture2D" uid="uid://brfob7xpttmbb" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00273.jpg" id="276_d8b03"]
+[ext_resource type="Texture2D" uid="uid://6x15nkgqvs2f" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00274.jpg" id="277_uhfr0"]
+[ext_resource type="Texture2D" uid="uid://smjvag2qjrcp" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00275.jpg" id="278_it7t6"]
+[ext_resource type="Texture2D" uid="uid://c71624ducbenr" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00276.jpg" id="279_x8rnx"]
+[ext_resource type="Texture2D" uid="uid://1j7siovpfg2g" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00277.jpg" id="280_k53et"]
+[ext_resource type="Texture2D" uid="uid://bes5pr3l4de1o" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00278.jpg" id="281_tixsc"]
+[ext_resource type="Texture2D" uid="uid://dj44e5m6nu3vf" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00279.jpg" id="282_vux1m"]
+[ext_resource type="Texture2D" uid="uid://c5qlvupl3xnro" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00280.jpg" id="283_4is0a"]
+[ext_resource type="Texture2D" uid="uid://dxvf5agjmvc6" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00281.jpg" id="284_yqfah"]
+[ext_resource type="Texture2D" uid="uid://dt52iiixj2vuy" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00282.jpg" id="285_q35qn"]
+[ext_resource type="Texture2D" uid="uid://tos12hv81ifc" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00283.jpg" id="286_tr184"]
+[ext_resource type="Texture2D" uid="uid://c828jddsbuea0" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00284.jpg" id="287_38dp7"]
+[ext_resource type="Texture2D" uid="uid://cgxy6edrxugy8" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00285.jpg" id="288_6mnv6"]
+[ext_resource type="Texture2D" uid="uid://3xy4rj4gsx5x" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00286.jpg" id="289_tar3r"]
+[ext_resource type="Texture2D" uid="uid://c5xtc0fyrkj23" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00287.jpg" id="290_xmmcw"]
+[ext_resource type="Texture2D" uid="uid://dv62q2hoy0gq6" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00288.jpg" id="291_l2uro"]
+[ext_resource type="Texture2D" uid="uid://cd8le7y80b8n4" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00289.jpg" id="292_2as3o"]
+[ext_resource type="Texture2D" uid="uid://dtsjldc0ncqnx" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00290.jpg" id="293_kd716"]
+[ext_resource type="Texture2D" uid="uid://dsateiqn5re1v" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00291.jpg" id="294_af6yy"]
+[ext_resource type="Texture2D" uid="uid://c27q0fg6u8nev" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00292.jpg" id="295_6n7bn"]
+[ext_resource type="Texture2D" uid="uid://bgge663ic8ul3" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00293.jpg" id="296_0kha3"]
+[ext_resource type="Texture2D" uid="uid://btdtjox61fikr" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00294.jpg" id="297_2ubra"]
+[ext_resource type="Texture2D" uid="uid://sg2xnogcgi16" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00295.jpg" id="298_dexun"]
+[ext_resource type="Texture2D" uid="uid://celq7xcr3aiqy" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00296.jpg" id="299_1s0gr"]
+[ext_resource type="Texture2D" uid="uid://dhucrn1yats8y" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00297.jpg" id="300_dlag7"]
+[ext_resource type="Texture2D" uid="uid://bophjgu42j2og" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00298.jpg" id="301_76aoe"]
+[ext_resource type="Texture2D" uid="uid://cc1fjvw4agki6" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00299.jpg" id="302_7lkc2"]
+[ext_resource type="Texture2D" uid="uid://d0ag1lqlcgcj2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00300.jpg" id="303_drqfm"]
+[ext_resource type="Texture2D" uid="uid://jwxfpgsoaaqi" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00301.jpg" id="304_51ddu"]
+[ext_resource type="Texture2D" uid="uid://cvv4ixny3d5ib" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00302.jpg" id="305_4u40h"]
+[ext_resource type="Texture2D" uid="uid://d4kycty77blnw" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00303.jpg" id="306_fioa5"]
+[ext_resource type="Texture2D" uid="uid://c4g12j6w8pi2o" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00304.jpg" id="307_es7pn"]
+[ext_resource type="Texture2D" uid="uid://40try4mndd8y" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00305.jpg" id="308_erk0d"]
+[ext_resource type="Texture2D" uid="uid://ch3kdsd1rky3o" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00306.jpg" id="309_qmexs"]
+[ext_resource type="Texture2D" uid="uid://b8ckfa6rfxmfx" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00307.jpg" id="310_hfw6k"]
+[ext_resource type="Texture2D" uid="uid://tk2ngxsh6g8u" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00308.jpg" id="311_m4idd"]
+[ext_resource type="Texture2D" uid="uid://diqaj3lanessr" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00309.jpg" id="312_ermdi"]
+[ext_resource type="Texture2D" uid="uid://dx8sj356xfwt5" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00310.jpg" id="313_jp326"]
+[ext_resource type="Texture2D" uid="uid://ctd54mu2g8d7x" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00311.jpg" id="314_kt14e"]
+[ext_resource type="Texture2D" uid="uid://cf57jjnbwyht2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00312.jpg" id="315_whx7q"]
+[ext_resource type="Texture2D" uid="uid://v426nqt240a2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00313.jpg" id="316_gipxb"]
+[ext_resource type="Texture2D" uid="uid://cwjntf83b2otb" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00314.jpg" id="317_78ewd"]
+[ext_resource type="Texture2D" uid="uid://ch4tgc2tkjbin" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00315.jpg" id="318_1r5tb"]
+[ext_resource type="Texture2D" uid="uid://b52nguobf17e2" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00316.jpg" id="319_1b40e"]
+[ext_resource type="Texture2D" uid="uid://coubu6rkqxw2h" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00317.jpg" id="320_bupnb"]
+[ext_resource type="Texture2D" uid="uid://d4n35oknuofc" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00318.jpg" id="321_v37oq"]
+[ext_resource type="Texture2D" uid="uid://fqcc1t1ex2cv" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00319.jpg" id="322_gg1ob"]
+[ext_resource type="Texture2D" uid="uid://y8cqlrddy4w" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00320.jpg" id="323_jd8j3"]
+[ext_resource type="Texture2D" uid="uid://dnpgi1jq3sxp7" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00321.jpg" id="324_d5v30"]
+[ext_resource type="Texture2D" uid="uid://pmmc6ggboxpf" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00322.jpg" id="325_63et3"]
+[ext_resource type="Texture2D" uid="uid://nu57x1jwb262" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00323.jpg" id="326_0g23v"]
+[ext_resource type="Texture2D" uid="uid://pjvetxu7u1f1" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00324.jpg" id="327_b16k1"]
+[ext_resource type="Texture2D" uid="uid://mb04jr7pinco" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00325.jpg" id="328_bhxkx"]
+[ext_resource type="Texture2D" uid="uid://bdwnjp2avv7rd" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00326.jpg" id="329_c6wjp"]
+[ext_resource type="Texture2D" uid="uid://c0cx50e6yjma6" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00327.jpg" id="330_314yy"]
+[ext_resource type="Texture2D" uid="uid://qv832b1ha44q" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00328.jpg" id="331_u7fgy"]
+[ext_resource type="Texture2D" uid="uid://6nw3twbuod8i" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00329.jpg" id="332_cw38h"]
+[ext_resource type="Texture2D" uid="uid://b60hb13rn3agp" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00330.jpg" id="333_yljft"]
+[ext_resource type="Texture2D" uid="uid://cytnkttr1o5py" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00331.jpg" id="334_ferr8"]
+[ext_resource type="Texture2D" uid="uid://c7nhj2hvnshwf" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00332.jpg" id="335_fh2y5"]
+[ext_resource type="Texture2D" uid="uid://bwufy6cdg301y" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00333.jpg" id="336_l2rb2"]
+[ext_resource type="Texture2D" uid="uid://bi5x0udw1wbuu" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00334.jpg" id="337_4kf5h"]
+[ext_resource type="Texture2D" uid="uid://dohd1818jrp3t" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00335.jpg" id="338_ahbcj"]
+[ext_resource type="Texture2D" uid="uid://cwq2i01ktmosb" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00336.jpg" id="339_xbqnh"]
+[ext_resource type="Texture2D" uid="uid://dysrwnn2ibjv8" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00337.jpg" id="340_515wv"]
+[ext_resource type="Texture2D" uid="uid://dgvx71rgmr8r3" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00338.jpg" id="341_ik8oe"]
+[ext_resource type="Texture2D" uid="uid://cy1pogwf2iegm" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00339.jpg" id="342_x7tjr"]
+[ext_resource type="Texture2D" uid="uid://d370ftn6j5b2b" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00340.jpg" id="343_wq8cu"]
+[ext_resource type="Texture2D" uid="uid://dvt748ov0alew" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00341.jpg" id="344_etj5a"]
+[ext_resource type="Texture2D" uid="uid://cf4poy1rju1d1" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00342.jpg" id="345_hphsr"]
+[ext_resource type="Texture2D" uid="uid://cgncdp73kokeb" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00343.jpg" id="346_nc5jb"]
+[ext_resource type="Texture2D" uid="uid://cyd0ho57l3rh" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00344.jpg" id="347_b3emr"]
+[ext_resource type="Texture2D" uid="uid://d3yuodtidf2g3" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00345.jpg" id="348_ospqj"]
+[ext_resource type="Texture2D" uid="uid://csadyq1t3b3eh" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00346.jpg" id="349_o0mgp"]
+[ext_resource type="Texture2D" uid="uid://cjuejjbmiqeti" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00347.jpg" id="350_7cfnf"]
+[ext_resource type="Texture2D" uid="uid://dfvsl6638pnyk" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00348.jpg" id="351_6psm0"]
+[ext_resource type="Texture2D" uid="uid://bfjngtxs44yul" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00349.jpg" id="352_5h7ek"]
+[ext_resource type="Texture2D" uid="uid://b5b04rdetavgd" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00350.jpg" id="353_neqr1"]
+[ext_resource type="Texture2D" uid="uid://bmtwyl6kgtl0r" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00351.jpg" id="354_bho27"]
+[ext_resource type="Texture2D" uid="uid://b0ming8kmh0vx" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00352.jpg" id="355_cuwus"]
+[ext_resource type="Texture2D" uid="uid://1lbq57movknm" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00353.jpg" id="356_gc8kj"]
+[ext_resource type="Texture2D" uid="uid://df7nket0ugv47" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00354.jpg" id="357_vfe46"]
+[ext_resource type="Texture2D" uid="uid://fid4asthmdk7" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00355.jpg" id="358_xwt1w"]
+[ext_resource type="Texture2D" uid="uid://b3ke58a4p3y2v" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00356.jpg" id="359_yic5m"]
+[ext_resource type="Texture2D" uid="uid://c5jw7nmmqj6op" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00357.jpg" id="360_jx0tp"]
+[ext_resource type="Texture2D" uid="uid://b3no3bigxs0nx" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00358.jpg" id="361_ypqxs"]
+[ext_resource type="Texture2D" uid="uid://bsbrp1gblguw6" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00359.jpg" id="362_1sjrq"]
+[ext_resource type="Texture2D" uid="uid://c8brdxhandxwm" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00360.jpg" id="363_e506r"]
+[ext_resource type="Texture2D" uid="uid://bkcyh1mrqmkwf" path="res://assets/sprites/cutscene/openingIntro/sceneThree/1.png" id="393_hc6bb"]
+[ext_resource type="Texture2D" uid="uid://u7ubhk5misyx" path="res://assets/sprites/cutscene/dialogueBox.png" id="393_qyrfs"]
+[ext_resource type="Texture2D" uid="uid://cacm1e2ee86ev" path="res://assets/sprites/cutscene/openingIntro/sceneThree/2.png" id="394_n24a0"]
+[ext_resource type="Texture2D" uid="uid://b6jxmpx6nyl0o" path="res://assets/sprites/cutscene/openingIntro/sceneThree/3.png" id="395_6qc16"]
+[ext_resource type="Texture2D" uid="uid://gddhmvb8hejs" path="res://assets/sprites/cutscene/openingIntro/sceneThree/4.png" id="396_dgnjl"]
+[ext_resource type="Texture2D" uid="uid://nhovesck3t56" path="res://assets/sprites/cutscene/openingIntro/sceneThree/5.png" id="397_jiev4"]
+[ext_resource type="Texture2D" uid="uid://1pb660e8842" path="res://assets/sprites/cutscene/openingIntro/sceneThree/7.png" id="398_2f0m6"]
+[ext_resource type="Texture2D" uid="uid://csvgadwfnh2lq" path="res://assets/sprites/cutscene/openingIntro/sceneThree/8.png" id="399_ojbcl"]
+[ext_resource type="Texture2D" uid="uid://1ueoq3l5k3di" path="res://assets/sprites/cutscene/openingIntro/sceneThree/9.png" id="400_vc2sp"]
+[ext_resource type="Texture2D" uid="uid://bifamfvp77trv" path="res://assets/sprites/cutscene/openingIntro/sceneThree/10.png" id="401_1eune"]
+[ext_resource type="Texture2D" uid="uid://bln8lib02wtgf" path="res://assets/sprites/cutscene/openingIntro/sceneThree/11.png" id="402_7qhlb"]
+[ext_resource type="Texture2D" uid="uid://clq2sjualifv5" path="res://assets/sprites/cutscene/openingIntro/sceneThree/12.png" id="403_ce8kv"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ys1ra"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_eugi6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_qyrfs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_nmafo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_cwpie")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_hmj8c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_tl6s6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_cx3ip")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_fq7a1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_cgio5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_yjtkd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_iuour")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_34emw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_hc6bb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_n24a0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_6qc16")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_dgnjl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_jiev4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_2f0m6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_ojbcl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_vc2sp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_1eune")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_7qhlb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_ce8kv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_om4s5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_w5r2o")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_jl1h0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_x7cs1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_uucyx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_h1j2c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("33_wawex")
+}, {
+"duration": 1.0,
+"texture": ExtResource("34_t3ggh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("35_7fpk1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("36_52esh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("37_km58s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("38_ylerd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("39_5756x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("40_dslhm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("41_ygp6w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("42_6lgma")
+}, {
+"duration": 1.0,
+"texture": ExtResource("43_t2m1a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("44_so5ty")
+}, {
+"duration": 1.0,
+"texture": ExtResource("45_1jow3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("46_jk33l")
+}, {
+"duration": 1.0,
+"texture": ExtResource("47_w0w8c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("48_7exyu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("49_37j0r")
+}, {
+"duration": 1.0,
+"texture": ExtResource("50_5x7jy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("51_6khyq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("52_3fj3k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("53_edh8m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("54_mhavr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("55_m4h7t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("56_ab8h1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("57_maoal")
+}, {
+"duration": 1.0,
+"texture": ExtResource("58_mh2lp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("59_nmbsd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("60_1ktxj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("61_dmylm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("62_x6mjy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("63_vf263")
+}, {
+"duration": 1.0,
+"texture": ExtResource("64_co0fa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("65_7xx6v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("66_oshtl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("67_ebahu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("68_c825f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("69_xl184")
+}, {
+"duration": 1.0,
+"texture": ExtResource("70_jrm86")
+}, {
+"duration": 1.0,
+"texture": ExtResource("71_31yhp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("72_iep12")
+}, {
+"duration": 1.0,
+"texture": ExtResource("73_62p3k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("74_eyqfq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("75_u7c5h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("76_5nqx0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("77_dxq4j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("78_npojl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("79_f56ls")
+}, {
+"duration": 1.0,
+"texture": ExtResource("80_kb74s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("81_kfj0p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("82_oc756")
+}, {
+"duration": 1.0,
+"texture": ExtResource("83_eap6q")
+}, {
+"duration": 1.0,
+"texture": ExtResource("84_726r8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("85_uc32k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("86_ukoyb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("87_m1jol")
+}, {
+"duration": 1.0,
+"texture": ExtResource("88_uravw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("89_sbhr5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("90_b0p1k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("91_xxwvs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("92_d8m3k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("93_0qc4x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("94_hpid8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("95_qf8ve")
+}, {
+"duration": 1.0,
+"texture": ExtResource("96_oaurr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("97_y3st6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("98_5lkg1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("99_1dljs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_s2nix")
+}, {
+"duration": 1.0,
+"texture": ExtResource("101_45wt1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("102_ywyf0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("103_xm0gr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("104_v1jgu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("105_oarbj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("106_5wsy7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("107_2mr2i")
+}, {
+"duration": 1.0,
+"texture": ExtResource("108_rxwjt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("109_0abyc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("110_d6frm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("111_yaqod")
+}, {
+"duration": 1.0,
+"texture": ExtResource("112_7wywi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("113_q0ud0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("114_ag3m1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("115_d0fx4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("116_xbajs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("117_eot78")
+}, {
+"duration": 1.0,
+"texture": ExtResource("118_3q5ww")
+}, {
+"duration": 1.0,
+"texture": ExtResource("119_whkwp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("120_if7wn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("121_nonh6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("122_2k0wx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("123_312du")
+}, {
+"duration": 1.0,
+"texture": ExtResource("124_5k267")
+}, {
+"duration": 1.0,
+"texture": ExtResource("125_6ikuv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("126_l1vp8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("127_icjfg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("128_0orc6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("129_81qr7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("130_vhm8q")
+}, {
+"duration": 1.0,
+"texture": ExtResource("131_jokpq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("132_ah1ny")
+}, {
+"duration": 1.0,
+"texture": ExtResource("133_hey7v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("134_b7lda")
+}, {
+"duration": 1.0,
+"texture": ExtResource("135_82hfu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("136_k5vx1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("137_25475")
+}, {
+"duration": 1.0,
+"texture": ExtResource("138_w8rgu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("139_v3lhm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("140_si6mc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("141_m11h4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("142_hmfxi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("143_a3hra")
+}, {
+"duration": 1.0,
+"texture": ExtResource("144_irch5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("145_c7q4k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("146_t8bj0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("147_p74m2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("148_addec")
+}, {
+"duration": 1.0,
+"texture": ExtResource("149_xwu1q")
+}, {
+"duration": 1.0,
+"texture": ExtResource("150_h4lf3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("151_srdgg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("152_j3dua")
+}, {
+"duration": 1.0,
+"texture": ExtResource("153_u2fm4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("154_podwp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("155_kgdlg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("156_mthx2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("157_7ubei")
+}, {
+"duration": 1.0,
+"texture": ExtResource("158_ti3ds")
+}, {
+"duration": 1.0,
+"texture": ExtResource("159_wawis")
+}, {
+"duration": 1.0,
+"texture": ExtResource("160_4yo1b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("161_4ao25")
+}, {
+"duration": 1.0,
+"texture": ExtResource("162_xunsn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("163_slrkr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("164_4kwi1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("165_1yjf7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("166_ocayx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("167_m4qpo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("168_8y4lh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("169_6hj0t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("170_3o0r0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("171_h14d4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("172_1nohj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("173_6b3ta")
+}, {
+"duration": 1.0,
+"texture": ExtResource("174_mq6g6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("175_mjkt4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("176_fc4p1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("177_q115i")
+}, {
+"duration": 1.0,
+"texture": ExtResource("178_gi7un")
+}, {
+"duration": 1.0,
+"texture": ExtResource("179_u08cb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("180_6a7du")
+}, {
+"duration": 1.0,
+"texture": ExtResource("181_bsp57")
+}, {
+"duration": 1.0,
+"texture": ExtResource("182_635sf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("183_anwa2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("184_evm8d")
+}, {
+"duration": 1.0,
+"texture": ExtResource("185_8uroh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("186_luf47")
+}, {
+"duration": 1.0,
+"texture": ExtResource("187_ah2mc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("188_oljht")
+}, {
+"duration": 1.0,
+"texture": ExtResource("189_uylv6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("190_15o6f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("191_763yu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("192_txqe5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("193_mutxd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("194_8e63b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("195_l8djp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("196_4efsv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("197_a0vgs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("198_chpl3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("199_08jdh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("200_05sss")
+}, {
+"duration": 1.0,
+"texture": ExtResource("201_v8qo1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("202_4b64r")
+}, {
+"duration": 1.0,
+"texture": ExtResource("203_mav28")
+}, {
+"duration": 1.0,
+"texture": ExtResource("204_gdwdl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("205_ccctu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("206_77sjc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("207_1sc8j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("208_bsbn0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("209_8r2jy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("210_5fqhl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("211_s4rfw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("212_qu2ed")
+}, {
+"duration": 1.0,
+"texture": ExtResource("213_vhytc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("214_eexvp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("215_sg0py")
+}, {
+"duration": 1.0,
+"texture": ExtResource("216_m5htk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("217_ju0d7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("218_j5o0n")
+}, {
+"duration": 1.0,
+"texture": ExtResource("219_wg8ma")
+}, {
+"duration": 1.0,
+"texture": ExtResource("220_odf3e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("221_7n20h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("222_am1p6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("223_en85j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("224_w01n3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("225_yowwl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("226_m0m7l")
+}, {
+"duration": 1.0,
+"texture": ExtResource("227_abnw0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("228_e51y2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("229_otbqc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("230_c6i42")
+}, {
+"duration": 1.0,
+"texture": ExtResource("231_s1tf0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("232_845oj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("233_vwjg5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("234_3hskr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("235_8pr6y")
+}, {
+"duration": 1.0,
+"texture": ExtResource("236_ep27g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("237_3g1ii")
+}, {
+"duration": 1.0,
+"texture": ExtResource("238_oiunk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("239_t08v1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("240_igeqa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("241_m7i3k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("242_gdalc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("243_s1b45")
+}, {
+"duration": 1.0,
+"texture": ExtResource("244_lg0a6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("245_x2xdt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("246_xced2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("247_10dt7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("248_v3juj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("249_tm0j2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("250_60roi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("251_1kkkb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("252_1sdpk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("253_doh6t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("254_bycj4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("255_pevi1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("256_51m0s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("257_i8v56")
+}, {
+"duration": 1.0,
+"texture": ExtResource("258_5ewcv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("259_bbk64")
+}, {
+"duration": 1.0,
+"texture": ExtResource("260_244i1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("261_21k44")
+}, {
+"duration": 1.0,
+"texture": ExtResource("262_lvbem")
+}, {
+"duration": 1.0,
+"texture": ExtResource("263_bxkub")
+}, {
+"duration": 1.0,
+"texture": ExtResource("264_nc7qb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("265_tp0pi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("266_vk7ex")
+}, {
+"duration": 1.0,
+"texture": ExtResource("267_4olat")
+}, {
+"duration": 1.0,
+"texture": ExtResource("268_h4ir6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("269_u2m7v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("270_1rsog")
+}, {
+"duration": 1.0,
+"texture": ExtResource("271_gnbcj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("272_v6kgg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("273_dxmbh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("274_w7l3t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("275_uopn2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("276_d8b03")
+}, {
+"duration": 1.0,
+"texture": ExtResource("277_uhfr0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("278_it7t6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("279_x8rnx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("280_k53et")
+}, {
+"duration": 1.0,
+"texture": ExtResource("281_tixsc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("282_vux1m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("283_4is0a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("284_yqfah")
+}, {
+"duration": 1.0,
+"texture": ExtResource("285_q35qn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("286_tr184")
+}, {
+"duration": 1.0,
+"texture": ExtResource("287_38dp7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("288_6mnv6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("289_tar3r")
+}, {
+"duration": 1.0,
+"texture": ExtResource("290_xmmcw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("291_l2uro")
+}, {
+"duration": 1.0,
+"texture": ExtResource("292_2as3o")
+}, {
+"duration": 1.0,
+"texture": ExtResource("293_kd716")
+}, {
+"duration": 1.0,
+"texture": ExtResource("294_af6yy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("295_6n7bn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("296_0kha3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("297_2ubra")
+}, {
+"duration": 1.0,
+"texture": ExtResource("298_dexun")
+}, {
+"duration": 1.0,
+"texture": ExtResource("299_1s0gr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("300_dlag7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("301_76aoe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("302_7lkc2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("303_drqfm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("304_51ddu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("305_4u40h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("306_fioa5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("307_es7pn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("308_erk0d")
+}, {
+"duration": 1.0,
+"texture": ExtResource("309_qmexs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("310_hfw6k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("311_m4idd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("312_ermdi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("313_jp326")
+}, {
+"duration": 1.0,
+"texture": ExtResource("314_kt14e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("315_whx7q")
+}, {
+"duration": 1.0,
+"texture": ExtResource("316_gipxb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("317_78ewd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("318_1r5tb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("319_1b40e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("320_bupnb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("321_v37oq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("322_gg1ob")
+}, {
+"duration": 1.0,
+"texture": ExtResource("323_jd8j3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("324_d5v30")
+}, {
+"duration": 1.0,
+"texture": ExtResource("325_63et3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("326_0g23v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("327_b16k1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("328_bhxkx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("329_c6wjp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("330_314yy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("331_u7fgy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("332_cw38h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("333_yljft")
+}, {
+"duration": 1.0,
+"texture": ExtResource("334_ferr8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("335_fh2y5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("336_l2rb2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("337_4kf5h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("338_ahbcj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("339_xbqnh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("340_515wv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("341_ik8oe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("342_x7tjr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("343_wq8cu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("344_etj5a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("345_hphsr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("346_nc5jb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("347_b3emr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("348_ospqj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("349_o0mgp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("350_7cfnf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("351_6psm0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("352_5h7ek")
+}, {
+"duration": 1.0,
+"texture": ExtResource("353_neqr1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("354_bho27")
+}, {
+"duration": 1.0,
+"texture": ExtResource("355_cuwus")
+}, {
+"duration": 1.0,
+"texture": ExtResource("356_gc8kj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("357_vfe46")
+}, {
+"duration": 1.0,
+"texture": ExtResource("358_xwt1w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("359_yic5m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("360_jx0tp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("361_ypqxs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("362_1sjrq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("363_e506r")
+}],
+"loop": false,
+"name": &"words_fading",
+"speed": 5.0
+}]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3s42a"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_th3px")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_7b1a4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_t0jij")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_dr1dp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_2xwmh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_4mkq6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_rx43u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_hnc0w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_epdfg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_gmvoc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_kpsqu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_j1q2s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_4yo0q")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_s0vm4")
+}],
+"loop": true,
+"name": &"book_flipping",
+"speed": 8.0
+}]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wind"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("20_eog4c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_tib5f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_h76lv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_43j7x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_yhlo2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_jtnwx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_ysraj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_gpnpm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_s7xl5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_085ws")
+}],
+"loop": false,
+"name": &"wind_swirling",
+"speed": 10.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h81p4"]
+atlas = ExtResource("30_kiegq")
+region = Rect2(0, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4sqdd"]
+atlas = ExtResource("30_kiegq")
+region = Rect2(1144, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2u2gq"]
+atlas = ExtResource("30_kiegq")
+region = Rect2(2288, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j0k8s"]
+atlas = ExtResource("30_kiegq")
+region = Rect2(3432, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_th3px"]
+atlas = ExtResource("30_kiegq")
+region = Rect2(4576, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7b1a4"]
+atlas = ExtResource("30_kiegq")
+region = Rect2(5720, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t0jij"]
+atlas = ExtResource("30_kiegq")
+region = Rect2(6864, 0, 1144, 1108)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_dr1dp"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h81p4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4sqdd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2u2gq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j0k8s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_th3px")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7b1a4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t0jij")
+}],
+"loop": true,
+"name": &"detective_idle_silhiouette",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2xwmh"]
+atlas = ExtResource("31_d6xy6")
+region = Rect2(0, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4mkq6"]
+atlas = ExtResource("31_d6xy6")
+region = Rect2(1000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rx43u"]
+atlas = ExtResource("31_d6xy6")
+region = Rect2(2000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hnc0w"]
+atlas = ExtResource("31_d6xy6")
+region = Rect2(3000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_epdfg"]
+atlas = ExtResource("31_d6xy6")
+region = Rect2(4000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gmvoc"]
+atlas = ExtResource("31_d6xy6")
+region = Rect2(5000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kpsqu"]
+atlas = ExtResource("31_d6xy6")
+region = Rect2(6000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j1q2s"]
+atlas = ExtResource("31_d6xy6")
+region = Rect2(7000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4yo0q"]
+atlas = ExtResource("31_d6xy6")
+region = Rect2(8000, 0, 1000, 1000)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_s0vm4"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2xwmh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4mkq6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rx43u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hnc0w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_epdfg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gmvoc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kpsqu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j1q2s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4yo0q")
+}],
+"loop": true,
+"name": &"sidekick_idle_silhiouette",
+"speed": 5.0
+}]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_om4s5"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("393_hc6bb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("394_n24a0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("395_6qc16")
+}, {
+"duration": 1.0,
+"texture": ExtResource("396_dgnjl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("397_jiev4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("398_2f0m6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("399_ojbcl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("400_vc2sp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("401_1eune")
+}, {
+"duration": 1.0,
+"texture": ExtResource("402_7qhlb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("403_ce8kv")
+}],
+"loop": true,
+"name": &"players_pull",
+"speed": 5.0
+}]
+
+[sub_resource type="Animation" id="Animation_fade_in"]
+resource_name = "fade_in"
+length = 2.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("FadeRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0, 0, 0, 1), Color(0, 0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_fade_out"]
+resource_name = "fade_out"
+length = 2.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("FadeRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0, 0, 0, 0), Color(0, 0, 0, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_main"]
+_data = {
+&"fade_in": SubResource("Animation_fade_in"),
+&"fade_out": SubResource("Animation_fade_out")
+}
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2bykp"]
+bg_color = Color(0.360784, 0.215686, 0.180392, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5m2cp"]
+bg_color = Color(0.65098, 0.439216, 0.266667, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1tyme"]
+bg_color = Color(0.752941, 0.505882, 0.329412, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_x4prc"]
+
+[node name="OpeningCutscene" type="Node2D"]
+script = ExtResource("1_d6xy6")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(618, 325)
+
+[node name="Scene1" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Background" type="Sprite2D" parent="Scene1"]
+z_index = -1
+position = Vector2(620.44446, 349.00003)
+scale = Vector2(0.646, 0.646)
+texture = ExtResource("4_2u2gq")
+
+[node name="Grandma" parent="Scene1" instance=ExtResource("5_j0k8s")]
+position = Vector2(785, 301)
+scale = Vector2(0.5, 0.5)
+
+[node name="BookScene" type="Control" parent="Scene1"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="WordsFading" type="AnimatedSprite2D" parent="Scene1/BookScene"]
+position = Vector2(614, 330)
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_ys1ra")
+animation = &"words_fading"
+frame = 359
+frame_progress = 1.0
+speed_scale = 8.0
+
+[node name="BookFlipping" type="AnimatedSprite2D" parent="Scene1/BookScene"]
+position = Vector2(614, 330)
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_3s42a")
+animation = &"book_flipping"
+
+[node name="Scene2" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="GrandmaFlipping" parent="Scene2" instance=ExtResource("30_kfcpv")]
+position = Vector2(785, 301)
+scale = Vector2(0.5, 0.5)
+
+[node name="GrandmaLightEmerge" parent="Scene2" instance=ExtResource("31_8g587")]
+position = Vector2(785, 301)
+scale = Vector2(0.5, 0.5)
+
+[node name="WindAnimation" type="AnimatedSprite2D" parent="Scene2"]
+z_index = -1
+position = Vector2(620.444, 349)
+scale = Vector2(0.646, 0.646)
+sprite_frames = SubResource("SpriteFrames_wind")
+animation = &"wind_swirling"
+frame = 9
+frame_progress = 1.0
+speed_scale = 0.6
+
+[node name="Scene2_DialogueLabel" type="Label" parent="Scene2"]
+z_index = 1
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 138.0
+offset_top = 450.0
+offset_right = 1043.0
+offset_bottom = 554.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 28
+text = "What is happening to this book?"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Scene2_NameLabel" type="Label" parent="Scene2"]
+z_index = 1
+layout_mode = 0
+offset_left = 96.0
+offset_top = 477.0
+offset_right = 296.0
+offset_bottom = 511.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "Grandmother"
+
+[node name="Scene3" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Scene3_Background" type="ColorRect" parent="Scene3"]
+z_index = -1
+layout_mode = 0
+offset_right = 1240.8889
+offset_bottom = 698.0
+color = Color(0.05, 0.05, 0.1, 1)
+
+[node name="Scene3_BookGlow" type="PointLight2D" parent="Scene3"]
+visible = false
+position = Vector2(960, 540)
+color = Color(1, 0.9, 0.6, 1)
+energy = 2.0
+texture = ExtResource("30_d6xy6")
+texture_scale = 5.0
+
+[node name="DetectiveSilhouette" type="AnimatedSprite2D" parent="Scene3"]
+modulate = Color(0, 0, 0, 0.8)
+position = Vector2(328, 454)
+scale = Vector2(0.4, 0.4)
+sprite_frames = SubResource("SpriteFrames_dr1dp")
+animation = &"detective_idle_silhiouette"
+frame_progress = 0.50152653
+
+[node name="SidekickSilhouette" type="AnimatedSprite2D" parent="Scene3"]
+modulate = Color(0, 0, 0, 0.8)
+position = Vector2(900, 450)
+scale = Vector2(0.4, 0.4)
+sprite_frames = SubResource("SpriteFrames_s0vm4")
+animation = &"sidekick_idle_silhiouette"
+
+[node name="PlayersPull" type="AnimatedSprite2D" parent="Scene3"]
+position = Vector2(621.1313, 357.5)
+scale = Vector2(0.6018518, 0.6018518)
+sprite_frames = SubResource("SpriteFrames_om4s5")
+animation = &"players_pull"
+
+[node name="Scene3_DialogueLabel" type="Label" parent="Scene3"]
+z_index = 1
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 138.0
+offset_top = 434.0
+offset_right = 1043.0
+offset_bottom = 538.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 28
+text = "Only those who seek the truth can restore the lost story."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Scene3_NameLabel" type="Label" parent="Scene3"]
+z_index = 1
+layout_mode = 0
+offset_left = 96.0
+offset_top = 477.0
+offset_right = 296.0
+offset_bottom = 511.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "Narrator"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_main")
+}
+
+[node name="DialogueBox" type="Sprite2D" parent="."]
+position = Vector2(617.99994, 525)
+scale = Vector2(0.6574074, 0.6574074)
+texture = ExtResource("393_qyrfs")
+
+[node name="SkipButton" type="Button" parent="."]
+z_index = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 1090.0
+offset_top = 565.0
+offset_right = 1218.0
+offset_bottom = 618.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_2bykp")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_5m2cp")
+theme_override_styles/hover = SubResource("StyleBoxFlat_1tyme")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_5m2cp")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_x4prc")
+action_mode = 0
+text = "Skip"
+
+[node name="Scene1_DialogueLabel" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 158.0
+offset_top = 490.0
+offset_right = 1063.0
+offset_bottom = 594.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 31
+text = "Long ago, in a quiet village, there lived a girl named Pina..."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Scene1_NameLabel" type="Label" parent="."]
+offset_left = 96.0
+offset_top = 477.0
+offset_right = 296.0
+offset_bottom = 511.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "Grandmother:"

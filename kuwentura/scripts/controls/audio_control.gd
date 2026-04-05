@@ -2,6 +2,7 @@ extends Node
 
 enum MusicTrack {
 	MAIN_MENU,
+	OPENING_CUTSCENE,
 	FOREST_HUB,
 	PINAS_HOUSE,
 	BACKYARD_PATH,
@@ -10,6 +11,7 @@ enum MusicTrack {
 # Maps each track to its resource path — single source of truth for all paths
 const TRACK_PATHS: Dictionary = {
 	MusicTrack.MAIN_MENU: "res://assets/audios/MainMenuBG.mp3",
+	MusicTrack.OPENING_CUTSCENE: "res://assets/audios/OpeningCutsceneBG.mp3",
 	MusicTrack.FOREST_HUB: "res://assets/audios/ForestBG.mp3",
 	MusicTrack.PINAS_HOUSE: "res://assets/audios/PinasHouseBG.mp3",
 	MusicTrack.BACKYARD_PATH: "res://assets/audios/BackyardBG.mp3",

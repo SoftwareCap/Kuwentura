@@ -1,4 +1,4 @@
-[gd_scene load_steps=421 format=3 uid="uid://cvtcyji82jmqc"]
+[gd_scene load_steps=434 format=3 uid="uid://cvtcyji82jmqc"]
 
 [ext_resource type="Script" uid="uid://cb5kt2gbakcmw" path="res://scripts/cutscenes/opening_cutscene.gd" id="1_d6xy6"]
 [ext_resource type="Texture2D" uid="uid://c3p5qn3e3uw1n" path="res://assets/sprites/cutscene/openingIntro/openingCutsceneBG.png" id="4_2u2gq"]
@@ -392,6 +392,18 @@
 [ext_resource type="Texture2D" uid="uid://b3no3bigxs0nx" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00358.jpg" id="361_ypqxs"]
 [ext_resource type="Texture2D" uid="uid://bsbrp1gblguw6" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00359.jpg" id="362_1sjrq"]
 [ext_resource type="Texture2D" uid="uid://c8brdxhandxwm" path="res://assets/sprites/cutscene/openingIntro/sceneOne/wordsFading/00360.jpg" id="363_e506r"]
+[ext_resource type="Texture2D" uid="uid://bkcyh1mrqmkwf" path="res://assets/sprites/cutscene/openingIntro/sceneThree/1.png" id="393_hc6bb"]
+[ext_resource type="Texture2D" uid="uid://u7ubhk5misyx" path="res://assets/sprites/cutscene/dialogueBox.png" id="393_qyrfs"]
+[ext_resource type="Texture2D" uid="uid://cacm1e2ee86ev" path="res://assets/sprites/cutscene/openingIntro/sceneThree/2.png" id="394_n24a0"]
+[ext_resource type="Texture2D" uid="uid://b6jxmpx6nyl0o" path="res://assets/sprites/cutscene/openingIntro/sceneThree/3.png" id="395_6qc16"]
+[ext_resource type="Texture2D" uid="uid://gddhmvb8hejs" path="res://assets/sprites/cutscene/openingIntro/sceneThree/4.png" id="396_dgnjl"]
+[ext_resource type="Texture2D" uid="uid://nhovesck3t56" path="res://assets/sprites/cutscene/openingIntro/sceneThree/5.png" id="397_jiev4"]
+[ext_resource type="Texture2D" uid="uid://1pb660e8842" path="res://assets/sprites/cutscene/openingIntro/sceneThree/7.png" id="398_2f0m6"]
+[ext_resource type="Texture2D" uid="uid://csvgadwfnh2lq" path="res://assets/sprites/cutscene/openingIntro/sceneThree/8.png" id="399_ojbcl"]
+[ext_resource type="Texture2D" uid="uid://1ueoq3l5k3di" path="res://assets/sprites/cutscene/openingIntro/sceneThree/9.png" id="400_vc2sp"]
+[ext_resource type="Texture2D" uid="uid://bifamfvp77trv" path="res://assets/sprites/cutscene/openingIntro/sceneThree/10.png" id="401_1eune"]
+[ext_resource type="Texture2D" uid="uid://bln8lib02wtgf" path="res://assets/sprites/cutscene/openingIntro/sceneThree/11.png" id="402_7qhlb"]
+[ext_resource type="Texture2D" uid="uid://clq2sjualifv5" path="res://assets/sprites/cutscene/openingIntro/sceneThree/12.png" id="403_ce8kv"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_ys1ra"]
 animations = [{
@@ -1697,6 +1709,47 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="SpriteFrames" id="SpriteFrames_om4s5"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("393_hc6bb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("394_n24a0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("395_6qc16")
+}, {
+"duration": 1.0,
+"texture": ExtResource("396_dgnjl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("397_jiev4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("398_2f0m6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("399_ojbcl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("400_vc2sp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("401_1eune")
+}, {
+"duration": 1.0,
+"texture": ExtResource("402_7qhlb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("403_ce8kv")
+}],
+"loop": false,
+"name": &"players_pull",
+"speed": 5.0
+}]
+
 [sub_resource type="Animation" id="Animation_fade_in"]
 resource_name = "fade_in"
 length = 2.0
@@ -1835,6 +1888,7 @@ frame_progress = 1.0
 speed_scale = 0.6
 
 [node name="Scene2_DialogueLabel" type="Label" parent="Scene2"]
+z_index = 1
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -1847,6 +1901,7 @@ offset_right = 1043.0
 offset_bottom = 554.0
 grow_horizontal = 2
 grow_vertical = 0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 text = "What is happening to this book?"
 horizontal_alignment = 1
@@ -1854,16 +1909,17 @@ vertical_alignment = 1
 autowrap_mode = 3
 
 [node name="Scene2_NameLabel" type="Label" parent="Scene2"]
+z_index = 1
 layout_mode = 0
-offset_left = 180.0
-offset_top = 479.0
-offset_right = 380.0
-offset_bottom = 513.0
+offset_left = 96.0
+offset_top = 477.0
+offset_right = 296.0
+offset_bottom = 511.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 24
 text = "Grandmother"
 
 [node name="Scene3" type="Control" parent="."]
-visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -1885,24 +1941,30 @@ texture = ExtResource("30_d6xy6")
 texture_scale = 5.0
 
 [node name="DetectiveSilhouette" type="AnimatedSprite2D" parent="Scene3"]
-modulate = Color(0.1, 0.1, 0.2, 0.8)
-position = Vector2(152, 327)
+modulate = Color(0, 0, 0, 0.8)
+position = Vector2(328, 454)
 scale = Vector2(0.4, 0.4)
 sprite_frames = SubResource("SpriteFrames_dr1dp")
 animation = &"detective_idle_silhiouette"
 frame_progress = 0.50152653
 
 [node name="SidekickSilhouette" type="AnimatedSprite2D" parent="Scene3"]
-modulate = Color(0.1, 0.1, 0.2, 0.8)
-position = Vector2(297, 256)
+modulate = Color(0, 0, 0, 0.8)
+position = Vector2(900, 450)
 scale = Vector2(0.4, 0.4)
 sprite_frames = SubResource("SpriteFrames_s0vm4")
 animation = &"sidekick_idle_silhiouette"
 
-[node name="Scene3_PullTweenTarget" type="Marker2D" parent="Scene3"]
-position = Vector2(750, 349)
+[node name="PlayersPull" type="AnimatedSprite2D" parent="Scene3"]
+position = Vector2(621.1313, 357.5)
+scale = Vector2(0.6018518, 0.6018518)
+sprite_frames = SubResource("SpriteFrames_om4s5")
+animation = &"players_pull"
+frame = 10
+frame_progress = 1.0
 
 [node name="Scene3_DialogueLabel" type="Label" parent="Scene3"]
+z_index = 1
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -1910,11 +1972,12 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = 138.0
-offset_top = 450.0
+offset_top = 434.0
 offset_right = 1043.0
-offset_bottom = 554.0
+offset_bottom = 538.0
 grow_horizontal = 2
 grow_vertical = 0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 text = "Only those who seek the truth can restore the lost story."
 horizontal_alignment = 1
@@ -1922,11 +1985,13 @@ vertical_alignment = 1
 autowrap_mode = 3
 
 [node name="Scene3_NameLabel" type="Label" parent="Scene3"]
+z_index = 1
 layout_mode = 0
-offset_left = 180.0
-offset_top = 479.0
-offset_right = 380.0
-offset_bottom = 513.0
+offset_left = 96.0
+offset_top = 477.0
+offset_right = 296.0
+offset_bottom = 511.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 24
 text = "Narrator"
 
@@ -1935,6 +2000,11 @@ libraries = {
 &"": SubResource("AnimationLibrary_main")
 }
 
+[node name="DialogueBox" type="Sprite2D" parent="."]
+position = Vector2(617.99994, 525)
+scale = Vector2(0.6574074, 0.6574074)
+texture = ExtResource("393_qyrfs")
+
 [node name="SkipButton" type="Button" parent="."]
 z_index = 1
 anchors_preset = 8
@@ -1942,10 +2012,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 1073.0
-offset_top = 562.0
-offset_right = 1201.0
-offset_bottom = 615.0
+offset_left = 1090.0
+offset_top = 565.0
+offset_right = 1218.0
+offset_bottom = 618.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
@@ -1974,6 +2044,7 @@ offset_right = 1063.0
 offset_bottom = 594.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 31
 text = "Long ago, in a quiet village, there lived a girl named Pina..."
 horizontal_alignment = 1
@@ -1981,9 +2052,10 @@ vertical_alignment = 1
 autowrap_mode = 3
 
 [node name="Scene1_NameLabel" type="Label" parent="."]
-offset_left = 180.0
-offset_top = 479.0
-offset_right = 380.0
-offset_bottom = 513.0
+offset_left = 96.0
+offset_top = 477.0
+offset_right = 296.0
+offset_bottom = 511.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 24
-text = "Grandmother"
+text = "Grandmother:"

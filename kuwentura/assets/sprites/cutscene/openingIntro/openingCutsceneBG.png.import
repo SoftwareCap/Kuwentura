@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c3p5qn3e3uw1n"
-path="res://.godot/imported/openingCutsceneBG.png-17238f1adacc8341632d8ef674d14275.ctex"
+path.bptc="res://.godot/imported/openingCutsceneBG.png-17238f1adacc8341632d8ef674d14275.bptc.ctex"
+path.astc="res://.godot/imported/openingCutsceneBG.png-17238f1adacc8341632d8ef674d14275.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/sprites/cutscene/openingIntro/openingCutsceneBG.png"
-dest_files=["res://.godot/imported/openingCutsceneBG.png-17238f1adacc8341632d8ef674d14275.ctex"]
+dest_files=["res://.godot/imported/openingCutsceneBG.png-17238f1adacc8341632d8ef674d14275.bptc.ctex", "res://.godot/imported/openingCutsceneBG.png-17238f1adacc8341632d8ef674d14275.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
