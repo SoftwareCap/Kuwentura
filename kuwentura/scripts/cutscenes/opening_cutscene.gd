@@ -11,6 +11,7 @@ extends Node
 @onready var book_scene : Node = $Scene1/BookScene
 @onready var words_fading : AnimatedSprite2D = $Scene1/BookScene/WordsFading
 @onready var book_flipping : AnimatedSprite2D = $Scene1/BookScene/BookFlipping
+@onready var dialogue_box : Sprite2D = $DialogueBox
 # Labels are direct children of root — always render on top
 @onready var dialogue_label1 : Label = $Scene1_DialogueLabel
 @onready var name_label1 : Label = $Scene1_NameLabel
@@ -27,7 +28,7 @@ extends Node
 @onready var scene3_book_glow : PointLight2D = $Scene3/Scene3_BookGlow
 @onready var detective_silhouette : Node = $Scene3/DetectiveSilhouette
 @onready var sidekick_silhouette : Node = $Scene3/SidekickSilhouette
-@onready var pull_tween_target : Node = $Scene3/Scene3_PullTweenTarget
+@onready var players_pull : AnimatedSprite2D = $Scene3/PlayersPull
 @onready var dialogue_label3 : Label = $Scene3/Scene3_DialogueLabel
 @onready var name_label3 : Label = $Scene3/Scene3_NameLabel
 
@@ -51,6 +52,9 @@ func _ready() -> void:
 	_clear_dialogue(dialogue_label1, name_label1)
 	_clear_dialogue(dialogue_label2, name_label2)
 	_clear_dialogue(dialogue_label3, name_label3)
+	
+	dialogue_box.visible = false
+	players_pull.visible = false
 
 	# BookScene and its children hidden at start
 	book_scene.visible = false
@@ -77,6 +81,7 @@ func _on_skip_pressed() -> void:
 
 # MAIN COROUTINE
 func _run_cutscene() -> void:
+	MusicController.play_track(MusicController.MusicTrack.OPENING_CUTSCENE, 1.0)
 	await _scene1()
 	_transition_to_scene2()
 	await _scene2()
@@ -90,7 +95,7 @@ func _scene1() -> void:
 	# Grandma reads — BookScene still hidden
 	_play_anim(grandma, "sitting_idle")
 	await _say1("Grandmother", "Long ago, in a quiet village, there lived a girl named Pina…")
-	await _say1("Grandmother", "She was known for—")
+	await _say1_auto("Grandmother", "She was known for—", 1.0)
 
 	# BookScene fades in smoothly, WordsFading plays on top
 	book_scene.visible = true
@@ -131,19 +136,19 @@ func _scene2() -> void:
 	# GrandmaFlipping plays over scene1 background (still visible)
 	_play_anim(grandma_flip, "sitting_flipping")
 	await _say2_auto("Grandmother", "What is happening to this book?", 1.2)
-	await _say2("", "The story is fading.")
+	await _say2("Grandmother", "The story is fading.")
 
 	# GrandmaFlipping hides, GrandmaLightEmerge takes over
 	grandma_flip.get_parent().visible  = false
 	grandma_light.get_parent().visible = true
 	_play_anim(grandma_light, "sitting_light")
-	await _say2_auto("", "If the story disappears…", 1.2)
+	await _say2_auto("Grandmother", "If the story disappears…", 1.2)
 
 	# WindAnimation starts automatically — hides scene1 background instantly
 	scene1_background.visible = false
 	wind_anim.visible = true
 	_play_anim(wind_anim, "wind_swirling")
-	await _say2_auto("", "The legend will be lost forever.", 1.0)
+	await _say2_auto("Grandmother", "The legend will be lost forever.", 1.0)
 
 	_clear_dialogue(dialogue_label2, name_label2)
 
@@ -151,11 +156,19 @@ func _scene2() -> void:
 # TRANSITION  Scene 2 → Scene 3
 func _transition_to_scene3() -> void:
 	skip_button.visible = false
-	_clear_dialogue(dialogue_label2, name_label2)
 
-	# Fade out scene2, fade in scene3
-	await _fade_node(scene2, 0.0)
+	# Fade out scene2 and dialogue box together BEFORE clearing
+	var fade_out := create_tween().set_parallel(true)
+	fade_out.tween_property(scene2, "modulate:a", 0.0, FADE_DURATION)
+	fade_out.tween_property(dialogue_box, "modulate:a", 0.0, FADE_DURATION)
+	await fade_out.finished
+
+	# Clear after fade so labels don't pop off visibly
+	_clear_dialogue(dialogue_label2, name_label2)
 	scene2.visible = false
+	dialogue_box.visible = false
+
+	# Fade in scene3 and restore dialogue box alpha
 	scene3.visible = true
 	await _fade_node(scene3, 1.0)
 
@@ -178,11 +191,15 @@ func _scene3() -> void:
 	tw.tween_property(sidekick_silhouette,  "modulate:a", 1.0, 1.0)
 	await tw.finished
 
-	await _say3_auto("Narrator", "Only those who seek the truth can restore the lost story.", 1.5)
-	await _say3_auto("Narrator", "The legend of Pina has been forgotten.", 1.5)
-	await _say3_auto("Narrator", "Find the truth behind her disappearance.", 1.5)
-	await _say3("Narrator", "Restore the missing pieces of the tale.")
-
+	await _say3_auto("", "Only those who seek the truth can restore the lost story.", 1.5)
+	await _say3_auto("", "The legend of Pina has been forgotten.", 1.5)
+	await _say3_auto("", "Find the truth behind her disappearance.", 1.5)
+	await _say3("", "Restore the missing pieces of the tale.")
+	
+	_clear_dialogue(dialogue_label3, name_label3)
+	players_pull.visible = true
+	_play_anim(players_pull, "players_pull")
+	await _wait(players_pull.sprite_frames.get_frame_count("players_pull") * (1.0 / players_pull.sprite_frames.get_animation_speed("players_pull")))
 	# Environment dissolves to white before loading next scene
 	var dissolve := create_tween()
 	dissolve.tween_property(scene3, "modulate:a", 0.0, 2.0)
@@ -238,7 +255,9 @@ func _say(dlabel: Label, nlabel: Label, speaker: String, text: String) -> void:
 	_typing_done  = false
 	nlabel.text = speaker
 	dlabel.text = ""
-
+	
+	dialogue_box.modulate.a = 1.0
+	dialogue_box.visible = true
 	skip_button.text = "Skip"
 	skip_button.visible = true
 
@@ -265,6 +284,7 @@ func _say(dlabel: Label, nlabel: Label, speaker: String, text: String) -> void:
 	while not _skip_pressed:
 		await get_tree().process_frame
 
+	dialogue_box.visible = false
 	skip_button.visible = false
 	_skip_pressed = false
 
@@ -282,7 +302,9 @@ func _say_auto(dlabel: Label, nlabel: Label, speaker: String, text: String, hold
 	_skip_pressed = false
 	nlabel.text = speaker
 	dlabel.text = ""
-
+	
+	dialogue_box.modulate.a = 1.0
+	dialogue_box.visible = true
 	skip_button.visible = false
 
 	var char_index : int = 0
