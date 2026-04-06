@@ -12,6 +12,7 @@ const REWARD_ITEMS := ["key_fragment_1", "card_piece"]
 const MEMORY_PUZZLE_ID := "abandoned_house_memory"
 const MEMORY_FACE_IDS := ["face_1", "face_2", "face_3", "face_4", "face_5", "face_6"]
 const MEMORY_REWARD_ITEMS := ["key_fragment_2", "light_bulb"]
+const DRAWER_REWARD_ITEMS := ["key_fragment_3"]
 
 # Keeps the puzzle more responsive on different screen sizes.
 const BOOK_WIDTH_RATIOS := {
@@ -49,10 +50,39 @@ const BOOK_CROP_REGIONS := {
 @export var key_fragment_1_texture: Texture2D
 @export var card_piece_texture: Texture2D
 
+@export var key_fragment_3_texture: Texture2D
+
 @export var mirror_not_lighted_texture: Texture2D
 @export var mirror_lighted_with_fp_texture: Texture2D
 @export var mirror_lighted_no_fp_texture: Texture2D
 @export var lighted_room_texture: Texture2D
+
+const DRAWER_PUZZLE_ID := "abandoned_house_drawer_unlocked"
+const DRAWER_CORRECT_CODE := [3, 5, 4]
+
+@export var drawer_closed_texture: Texture2D
+@export var drawer_open_texture: Texture2D
+@export var drawer_lock_zoom_texture: Texture2D
+@export var lock_digit_textures: Array[Texture2D] = []
+
+@onready var drawer_area: Area2D = $InteractiveLayer/DrawerArea
+
+@onready var drawer_panel: PanelContainer = $PuzzleCanvasLayer/Dimmer/DrawerPanel
+@onready var drawer_instruction_label: Label = $PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/InstructionLabel
+@onready var drawer_texture_rect: TextureRect = $PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/DrawerHolder/DrawerTexture
+@onready var drawer_lock_hotspot: TextureButton = $PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/DrawerHolder/DrawerLockHotspot
+@onready var close_drawer_button: Button = $PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/BottomBar/CloseDrawerButton
+
+@onready var drawer_lock_panel: PanelContainer = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel
+@onready var drawer_lock_instruction_label: Label = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/InstructionLabel
+@onready var drawer_lock_texture_rect: TextureRect = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/LockHolder/DrawerLockTexture
+@onready var digit_1_button: TextureButton = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/LockHolder/Digit1
+@onready var digit_2_button: TextureButton = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/LockHolder/Digit2
+@onready var digit_3_button: TextureButton = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/LockHolder/Digit3
+@onready var close_drawer_lock_button: Button = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/BottomBar/CloseDrawerLockButton
+
+var _drawer_unlocked: bool = false
+var _drawer_digits: Array[int] = [0, 0, 0]
 
 @onready var mirror_area: Area2D = $InteractiveLayer/MirrorArea
 @onready var bedroom_background: Sprite2D = $BackgroundLayer/BedroomBackground
@@ -99,6 +129,8 @@ const BOOK_CROP_REGIONS := {
 @onready var card_item: VBoxContainer = $RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow/CardItem
 @onready var card_texture_rect: TextureRect = $RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow/CardItem/CardTexture
 @onready var collect_clue_button: Button = $RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/CollectClueButton
+
+@onready var key_fragment_hotspot: TextureButton = $PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/DrawerHolder/KeyFragmentHotspot
 
 const MIRROR_PUZZLE_ID := "abandoned_house_mirror_lit"
 
@@ -154,6 +186,10 @@ func _ready() -> void:
 	_default_room_texture = bedroom_background.texture
 	_setup_mirror_ui()
 	_load_mirror_progress()
+	
+	_setup_drawer_ui()
+	_load_drawer_progress()
+	_setup_drawer_lock_digits()
 
 	await get_tree().process_frame
 	_resize_books_popup()
@@ -236,7 +272,31 @@ func _connect_signals() -> void:
 
 	if not lamp_hotspot.pressed.is_connected(_on_lamp_hotspot_pressed):
 		lamp_hotspot.pressed.connect(_on_lamp_hotspot_pressed)
+		
+	if not drawer_area.input_event.is_connected(_on_drawer_area_input_event):
+		drawer_area.input_event.connect(_on_drawer_area_input_event)
 
+	if not close_drawer_button.pressed.is_connected(_on_close_drawer_button_pressed):
+		close_drawer_button.pressed.connect(_on_close_drawer_button_pressed)
+
+	if not drawer_lock_hotspot.pressed.is_connected(_on_drawer_lock_hotspot_pressed):
+		drawer_lock_hotspot.pressed.connect(_on_drawer_lock_hotspot_pressed)
+
+	if not close_drawer_lock_button.pressed.is_connected(_on_close_drawer_lock_button_pressed):
+		close_drawer_lock_button.pressed.connect(_on_close_drawer_lock_button_pressed)
+	
+	if not digit_1_button.pressed.is_connected(_on_drawer_digit_pressed.bind(0)):
+		digit_1_button.pressed.connect(_on_drawer_digit_pressed.bind(0))
+
+	if not digit_2_button.pressed.is_connected(_on_drawer_digit_pressed.bind(1)):
+		digit_2_button.pressed.connect(_on_drawer_digit_pressed.bind(1))
+
+	if not digit_3_button.pressed.is_connected(_on_drawer_digit_pressed.bind(2)):
+		digit_3_button.pressed.connect(_on_drawer_digit_pressed.bind(2))
+
+	if key_fragment_hotspot and not key_fragment_hotspot.pressed.is_connected(_on_key_fragment_hotspot_pressed):
+		key_fragment_hotspot.pressed.connect(_on_key_fragment_hotspot_pressed)
+		
 func _refresh_role_label() -> void:
 	var role_text := "Unknown"
 
@@ -625,6 +685,10 @@ func _collect_reward_items_rpc(item_ids: Array) -> void:
 		GameState.grant_zone_items(ZONE_ID, item_ids)
 
 	_hide_reward_panel()
+
+	# refresh drawer UI in case key_fragment_3 was just collected
+	if item_ids.has("key_fragment_3"):
+		_refresh_drawer_panel_state()
 
 @rpc("any_peer", "reliable", "call_local")
 func _collect_books_reward_rpc() -> void:
@@ -1186,3 +1250,353 @@ func _close_puzzle_panel() -> void:
 	if not memory_puzzle_panel.visible and not mirror_puzzle_panel.visible:
 		dimmer.visible = false
 		dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+func _setup_drawer_ui() -> void:
+	if drawer_panel:
+		drawer_panel.visible = false
+		drawer_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	if drawer_lock_panel:
+		drawer_lock_panel.visible = false
+		drawer_lock_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func _load_drawer_progress() -> void:
+	if GameState and GameState.has_method("is_puzzle_solved"):
+		_drawer_unlocked = GameState.is_puzzle_solved(DRAWER_PUZZLE_ID)
+	else:
+		_drawer_unlocked = false
+
+	if _drawer_unlocked:
+		_drawer_digits = DRAWER_CORRECT_CODE.duplicate()
+	else:
+		_drawer_digits = [0, 0, 0]
+
+	_refresh_drawer_panel_state()
+	_refresh_drawer_lock_panel_state()
+	_refresh_drawer_digit_visuals()
+
+
+func _on_drawer_area_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+	if not _is_primary_press_event(event):
+		return
+
+	_open_drawer_panel()
+
+
+func _open_drawer_panel() -> void:
+	_close_books_panel()
+	_close_memory_panel()
+	_close_mirror_panel()
+
+	drawer_lock_panel.visible = false
+	drawer_lock_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	dimmer.visible = true
+	dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	drawer_panel.visible = true
+	drawer_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	_refresh_drawer_panel_state()
+
+
+func _close_drawer_panel() -> void:
+	drawer_panel.visible = false
+	drawer_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	if not books_puzzle_panel.visible and not memory_puzzle_panel.visible and not mirror_puzzle_panel.visible and not drawer_lock_panel.visible:
+		dimmer.visible = false
+		dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func _on_close_drawer_button_pressed() -> void:
+	_close_drawer_panel()
+
+
+func _refresh_drawer_panel_state() -> void:
+	if _drawer_unlocked:
+		if drawer_open_texture:
+			drawer_texture_rect.texture = drawer_open_texture
+
+		drawer_instruction_label.text = "The drawer is open."
+		drawer_lock_hotspot.visible = false
+		drawer_lock_hotspot.disabled = true
+		_refresh_drawer_fragment_state()
+		return
+
+	if drawer_closed_texture:
+		drawer_texture_rect.texture = drawer_closed_texture
+
+	if _is_local_detective():
+		drawer_instruction_label.text = "Tap the lock to inspect it."
+		drawer_lock_hotspot.visible = true
+		drawer_lock_hotspot.disabled = false
+	else:
+		drawer_instruction_label.text = "Only the Detective can inspect this lock."
+		drawer_lock_hotspot.visible = false
+		drawer_lock_hotspot.disabled = true
+
+	if key_fragment_hotspot:
+		key_fragment_hotspot.visible = false
+		key_fragment_hotspot.disabled = true
+
+
+func _on_drawer_lock_hotspot_pressed() -> void:
+	if _drawer_unlocked:
+		return
+
+	if not _is_local_detective():
+		_show_notification("Only the Detective can inspect this lock.")
+		return
+
+	_open_drawer_lock_panel()
+
+
+func _open_drawer_lock_panel() -> void:
+	drawer_panel.visible = false
+	drawer_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	dimmer.visible = true
+	dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	drawer_lock_panel.visible = true
+	drawer_lock_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	_refresh_drawer_lock_panel_state()
+
+
+func _close_drawer_lock_panel() -> void:
+	drawer_lock_panel.visible = false
+	drawer_lock_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	_open_drawer_panel()
+
+
+func _on_close_drawer_lock_button_pressed() -> void:
+	_close_drawer_lock_panel()
+
+
+func _refresh_drawer_lock_panel_state() -> void:
+	if drawer_lock_zoom_texture:
+		drawer_lock_texture_rect.texture = drawer_lock_zoom_texture
+	elif drawer_closed_texture:
+		drawer_lock_texture_rect.texture = drawer_closed_texture
+
+	_refresh_drawer_digit_visuals()
+
+	var allow_input := _is_local_detective() and not _drawer_unlocked
+
+	digit_1_button.disabled = not allow_input
+	digit_2_button.disabled = not allow_input
+	digit_3_button.disabled = not allow_input
+
+	if _drawer_unlocked:
+		drawer_lock_instruction_label.text = "The drawer is unlocked."
+	elif _is_local_detective():
+		drawer_lock_instruction_label.text = "Tap each digit to enter the code."
+	else:
+		drawer_lock_instruction_label.text = "Wait for the Detective to enter the code."
+
+
+func _setup_drawer_lock_digits() -> void:
+	if lock_digit_textures.size() < 10:
+		push_warning("[AbandonedHouse] Please assign 10 lock digit textures in order 0 to 9.")
+		return
+
+	for button in [digit_1_button, digit_2_button, digit_3_button]:
+		if button == null:
+			continue
+
+		button.ignore_texture_size = true
+		button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+		button.focus_mode = Control.FOCUS_NONE
+
+	_refresh_drawer_digit_visuals()
+
+
+func _refresh_drawer_digit_visuals() -> void:
+	_set_digit_button_texture(digit_1_button, _drawer_digits[0])
+	_set_digit_button_texture(digit_2_button, _drawer_digits[1])
+	_set_digit_button_texture(digit_3_button, _drawer_digits[2])
+
+
+func _set_digit_button_texture(button: TextureButton, digit_value: int) -> void:
+	if button == null:
+		return
+
+	if digit_value < 0 or digit_value >= lock_digit_textures.size():
+		return
+
+	var tex: Texture2D = lock_digit_textures[digit_value]
+	button.texture_normal = tex
+	button.texture_pressed = tex
+	button.texture_hover = tex
+	button.texture_disabled = tex
+
+
+func _on_drawer_digit_pressed(index: int) -> void:
+	if _drawer_unlocked:
+		return
+
+	if not _is_local_detective():
+		_show_notification("Only the Detective can change the lock code.")
+		return
+
+	var next_value: int = (_drawer_digits[index] + 1) % 10
+
+	if multiplayer.has_multiplayer_peer():
+		_sync_drawer_digit_changed_rpc.rpc(index, next_value)
+	else:
+		_apply_drawer_digit_changed(index, next_value)
+
+
+@rpc("any_peer", "reliable", "call_local")
+func _sync_drawer_digit_changed_rpc(index: int, value: int) -> void:
+	_apply_drawer_digit_changed(index, value)
+
+
+func _apply_drawer_digit_changed(index: int, value: int) -> void:
+	if index < 0 or index > 2:
+		return
+
+	if _drawer_unlocked:
+		return
+
+	_drawer_digits[index] = clampi(value, 0, 9)
+	_refresh_drawer_digit_visuals()
+
+	if _is_correct_drawer_code():
+		if multiplayer.has_multiplayer_peer():
+			_sync_drawer_unlocked_rpc.rpc()
+		else:
+			_apply_drawer_unlocked()
+
+
+func _is_correct_drawer_code() -> bool:
+	return (
+		_drawer_digits.size() == 3
+		and _drawer_digits[0] == DRAWER_CORRECT_CODE[0]
+		and _drawer_digits[1] == DRAWER_CORRECT_CODE[1]
+		and _drawer_digits[2] == DRAWER_CORRECT_CODE[2]
+	)
+
+
+@rpc("any_peer", "reliable", "call_local")
+func _sync_drawer_unlocked_rpc() -> void:
+	_apply_drawer_unlocked()
+
+
+func _apply_drawer_unlocked() -> void:
+	if _drawer_unlocked:
+		return
+
+	_drawer_unlocked = true
+	_drawer_digits = [
+	DRAWER_CORRECT_CODE[0],
+	DRAWER_CORRECT_CODE[1],
+	DRAWER_CORRECT_CODE[2]
+	]
+
+	if GameState and GameState.has_method("set_puzzle_solved"):
+		GameState.set_puzzle_solved(DRAWER_PUZZLE_ID, true)
+
+	_refresh_drawer_digit_visuals()
+	_refresh_drawer_panel_state()
+	_refresh_drawer_lock_panel_state()
+
+	_show_notification("The drawer unlocked.")
+
+	# If the player is currently viewing the lock panel,
+	# return them to the drawer panel so they can see it open.
+	if drawer_lock_panel.visible:
+		drawer_lock_panel.visible = false
+		drawer_lock_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+		drawer_panel.visible = true
+		drawer_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+
+		dimmer.visible = true
+		dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
+
+func _has_key_fragment_3() -> bool:
+	return GameState and GameState.has_method("has_zone_item") and GameState.has_zone_item(ZONE_ID, "key_fragment_3")
+
+
+func _refresh_drawer_fragment_state() -> void:
+	if not key_fragment_hotspot:
+		return
+
+	var should_show := _drawer_unlocked and not _has_key_fragment_3()
+
+	key_fragment_hotspot.visible = should_show
+
+	if not should_show:
+		key_fragment_hotspot.disabled = true
+		return
+
+	# visible to both, clickable only by detective
+	key_fragment_hotspot.disabled = not _is_local_detective()
+
+	if key_fragment_3_texture:
+		key_fragment_hotspot.texture_normal = key_fragment_3_texture
+		key_fragment_hotspot.texture_pressed = key_fragment_3_texture
+		key_fragment_hotspot.texture_hover = key_fragment_3_texture
+		key_fragment_hotspot.texture_disabled = key_fragment_3_texture
+
+	key_fragment_hotspot.ignore_texture_size = true
+	key_fragment_hotspot.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+	key_fragment_hotspot.focus_mode = Control.FOCUS_NONE
+
+
+func _on_key_fragment_hotspot_pressed() -> void:
+	if not _drawer_unlocked:
+		return
+
+	if _has_key_fragment_3():
+		return
+
+	if not _is_local_detective():
+		_show_notification("Only the Detective can inspect this fragment.")
+		return
+
+	if multiplayer.has_multiplayer_peer():
+		_show_drawer_reward_panel_rpc.rpc()
+	else:
+		_show_drawer_reward_panel()
+
+
+@rpc("any_peer", "reliable", "call_local")
+func _show_drawer_reward_panel_rpc() -> void:
+	_show_drawer_reward_panel()
+
+
+func _show_drawer_reward_panel() -> void:
+	if _has_key_fragment_3():
+		return
+
+	_pending_reward_items.clear()
+	_pending_reward_items.append_array(DRAWER_REWARD_ITEMS)
+
+	reward_title_label.text = "Item Found"
+	reward_body_label.text = "You found Key Fragment 3."
+
+	reward_items_row.visible = true
+
+	key_item.visible = true
+	card_item.visible = false
+
+	key_texture_rect.visible = true
+	card_texture_rect.visible = false
+
+	if key_fragment_3_texture:
+		key_texture_rect.texture = key_fragment_3_texture
+
+	collect_reward_button.text = "Collect Clue"
+	collect_reward_button.visible = _is_local_sidekick()
+
+	reward_dimmer.visible = true
+	reward_panel.visible = true
+
+	reward_dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
+	reward_panel.mouse_filter = Control.MOUSE_FILTER_STOP
