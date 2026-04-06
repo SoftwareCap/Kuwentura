@@ -89,6 +89,17 @@ var max_nightfall_attempts: int = 3
 var saved_spawn_positions: Dictionary = {}
 var solved_puzzles: Dictionary = {}
 
+var zone_inventory: Dictionary = {
+	"abandoned_house": {
+		"key_fragment_1": false,
+		"key_fragment_2": false,
+		"key_fragment_3": false,
+		"card_piece": false,
+		"light_bulb": false,
+		"combined_key": false,
+	}
+}
+
 const COSTUMES_IMPLEMENTED: bool = false
 
 const COSTUMES: Dictionary = {
@@ -124,6 +135,12 @@ const BRIEFCASE_ASSETS := {
 	"pineapple_with_ladle_reveal":"res://assets/briefcase/PineappleWithLadleReveal.png",
 	"ladle_with_pineapple_reveal":"res://assets/briefcase/LadleWithPineappleReveal.png",
 	"ladle_and_pineapple_global": "res://assets/briefcase/LadleAndPineapple.png",
+	
+	# Abandoned House
+	"abandoned_house_default":    "res://assets/sprites/zoneObjects/abandonedHouseObjects/defaultBC.png",
+	"abandoned_house_puzzle_1":   "res://assets/sprites/zoneObjects/abandonedHouseObjects/puzzle1BC.png",
+	"abandoned_house_puzzle_2":   "res://assets/sprites/zoneObjects/abandonedHouseObjects/puzzzle2BC.png",
+	"abandoned_house_used_lighter": "res://assets/sprites/zoneObjects/abandonedHouseObjects/usedLighterBC.png",
 }
 
 var selected_costumes: Dictionary = {
@@ -246,6 +263,7 @@ func get_briefcase_texture(context: String) -> Texture2D:
 func get_briefcase_texture_path(context: String) -> String:
 	var has_ladle     := has_clue(CLUE_PINAS_HOUSE)
 	var has_pineapple := has_clue(CLUE_BACKYARD_PATH)
+
 	match context:
 		"forest":
 			if has_ladle and has_pineapple:
@@ -256,10 +274,35 @@ func get_briefcase_texture_path(context: String) -> String:
 				return BRIEFCASE_ASSETS["pineapple_first_global"]
 			else:
 				return BRIEFCASE_ASSETS["no_clue"]
+
 		"pinas_house_reveal":
 			return BRIEFCASE_ASSETS["ladle_with_pineapple_reveal"] if has_pineapple else BRIEFCASE_ASSETS["ladle_first_reveal"]
+
 		"backyard_path_reveal":
 			return BRIEFCASE_ASSETS["pineapple_with_ladle_reveal"] if has_ladle else BRIEFCASE_ASSETS["pineapple_first_reveal"]
+
+		"abandoned_house":
+			var has_puzzle_1_items := (
+				has_zone_item("abandoned_house", "key_fragment_1")
+				or has_zone_item("abandoned_house", "card_piece")
+			)
+
+			var has_puzzle_2_items := (
+				has_zone_item("abandoned_house", "key_fragment_2")
+				or has_zone_item("abandoned_house", "light_bulb")
+			)
+
+			var mirror_lit := is_puzzle_solved("abandoned_house_mirror_lit")
+
+			if mirror_lit:
+				return BRIEFCASE_ASSETS["abandoned_house_used_lighter"]
+			elif has_puzzle_2_items:
+				return BRIEFCASE_ASSETS["abandoned_house_puzzle_2"]
+			elif has_puzzle_1_items:
+				return BRIEFCASE_ASSETS["abandoned_house_puzzle_1"]
+			else:
+				return BRIEFCASE_ASSETS["abandoned_house_default"]
+
 	return BRIEFCASE_ASSETS["no_clue"]
 
 
@@ -278,6 +321,7 @@ func get_save_data() -> Dictionary:
 		"session_seed":             _session_seed,
 		"selected_costumes":        selected_costumes.duplicate(true),
 		"_costume_confirmed_status":_costume_confirmed_status.duplicate(true),
+		"zone_inventory":           zone_inventory.duplicate(true),
 	}
 
 
@@ -294,10 +338,12 @@ func load_save_data(data: Dictionary) -> void:
 	if data.has("puzzle_seeds"):             puzzle_seeds                = data["puzzle_seeds"].duplicate(true)
 	if data.has("selected_costumes"):        selected_costumes           = data["selected_costumes"].duplicate(true)
 	if data.has("_costume_confirmed_status"):_costume_confirmed_status   = data["_costume_confirmed_status"].duplicate(true)
+	if data.has("zone_inventory"):            zone_inventory              = data["zone_inventory"].duplicate(true)
 	if data.has("session_seed"):
 		_session_seed = data["session_seed"]
 		_initialize_puzzle_seeds()
 	data_synced.emit()
+	
 
 
 func _initialize_puzzle_seeds() -> void:
@@ -433,6 +479,9 @@ func _report_position_to_host_rpc(peer_id: int, pos: Vector2) -> void:
 
 func reset_all_progress() -> void:
 	_reset_clues()
+	for zone_id in zone_inventory:
+		for item_id in zone_inventory[zone_id]:
+			zone_inventory[zone_id][item_id] = false
 	for zone_id in zones_status:
 		zones_status[zone_id] = ZoneStatus.AVAILABLE
 	current_zone      = "forest_hub"
@@ -455,3 +504,41 @@ func get_role_display_text() -> String:
 		Role.DETECTIVE: return "DETECTIVE (Host)"
 		Role.SIDEKICK:  return "SIDEKICK (Client)"
 		_:              return "NO ROLE ASSIGNED"
+
+func ensure_zone_inventory(zone_id: String) -> void:
+	if not zone_inventory.has(zone_id):
+		zone_inventory[zone_id] = {}
+
+
+func has_zone_item(zone_id: String, item_id: String) -> bool:
+	return bool(zone_inventory.get(zone_id, {}).get(item_id, false))
+
+
+func grant_zone_item(zone_id: String, item_id: String, auto_save: bool = true) -> void:
+	ensure_zone_inventory(zone_id)
+
+	if bool(zone_inventory[zone_id].get(item_id, false)):
+		return
+
+	zone_inventory[zone_id][item_id] = true
+	briefcase_updated.emit()
+
+	if auto_save:
+		_save_progress("zone_item_granted")
+
+
+func grant_zone_items(zone_id: String, item_ids: Array) -> void:
+	ensure_zone_inventory(zone_id)
+
+	var changed: bool = false
+
+	for raw_item_id in item_ids:
+		var item_id: String = str(raw_item_id)
+
+		if not bool(zone_inventory[zone_id].get(item_id, false)):
+			zone_inventory[zone_id][item_id] = true
+			changed = true
+
+	if changed:
+		briefcase_updated.emit()
+		_save_progress("zone_items_granted")

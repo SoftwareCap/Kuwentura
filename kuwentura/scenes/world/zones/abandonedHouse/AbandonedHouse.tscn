@@ -1,17 +1,371 @@
-[gd_scene load_steps=4 format=3 uid="uid://bandonedhouse"]
+[gd_scene load_steps=36 format=3 uid="uid://bandonedhouse"]
 
 [ext_resource type="Script" uid="uid://ftv8j2b15oka" path="res://scripts/world/zones/abandonedHouse/abandoned_house.gd" id="1_abandonedhouse"]
-[ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/Lobby.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://sq3ea80pg5xq" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/AbandonedHouse.png" id="2_kosje"]
+[ext_resource type="Texture2D" uid="uid://bwccumnrc00pr" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-1.png" id="2_pocdh"]
+[ext_resource type="Texture2D" uid="uid://cyyv53bejmfyj" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key-2.png" id="2_w3m7o"]
+[ext_resource type="Texture2D" uid="uid://cxoud0qppj31f" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-2.png" id="3_ctgii"]
+[ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="3_fnsr3"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
+[ext_resource type="Texture2D" uid="uid://ddpsrg1yqwx22" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Lighter.png" id="3_tdxjt"]
+[ext_resource type="Texture2D" uid="uid://dpuo3g1804rtj" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-3.png" id="4_cvcyb"]
+[ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="5_54qax"]
+[ext_resource type="Texture2D" uid="uid://dlqjo7cag3o4b" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-4.png" id="5_ctgii"]
+[ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="6_pocdh"]
+[ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="7_ctgii"]
+[ext_resource type="Texture2D" uid="uid://6m1iqxkimf78" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-1.png" id="7_elib0"]
+[ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="8_cvcyb"]
+[ext_resource type="Texture2D" uid="uid://cfw80tqeia5bl" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-2.png" id="8_mdwg5"]
+[ext_resource type="Texture2D" uid="uid://beapwr3xemxnh" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-3.png" id="9_w3m7o"]
+[ext_resource type="Texture2D" uid="uid://br84avkbblw6y" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-4.png" id="10_tdxjt"]
+[ext_resource type="Texture2D" uid="uid://0d84bdd88kfv" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-5.png" id="11_th3vv"]
+[ext_resource type="Texture2D" uid="uid://c84gh5aa58ihx" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-6.png" id="12_ogtg4"]
+[ext_resource type="Texture2D" uid="uid://ym75irc4dtcy" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key-1.png" id="14_wp1ru"]
+[ext_resource type="Texture2D" uid="uid://b41p3mhe6dips" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card.png" id="15_qwlxc"]
+[ext_resource type="Texture2D" uid="uid://degoflxfd7bdw" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/LightedWithFP.png" id="17_tgdgo"]
+[ext_resource type="Texture2D" uid="uid://brd17cn6m77du" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/LightedNoFP.png" id="18_lju7o"]
+[ext_resource type="Texture2D" uid="uid://q7i5a6xreg50" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/LightedRoom.png" id="19_ybixs"]
+[ext_resource type="Texture2D" uid="uid://dge111yp5pl1p" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/NotLighted.png" id="24_tdxjt"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wp1ru"]
+size = Vector2(168.5, 86)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qwlxc"]
+size = Vector2(152, 201)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bi0md"]
+size = Vector2(90, 119)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dfcwo"]
+size = Vector2(196, 37)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_iaen7"]
+size = Vector2(219.5, 342)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m0tg4"]
+bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.65178686, 0.44065732, 0.2680916, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_elib0"]
+color = Color(1, 1, 1, 1)
+thickness = 20
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_mdwg5"]
+color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+thickness = 20
 
 [node name="AbandonedHouse" type="Node2D"]
 script = ExtResource("1_abandonedhouse")
+key_fragment_2_texture = ExtResource("2_w3m7o")
+lighter_texture = ExtResource("3_tdxjt")
+book_1_texture = ExtResource("2_pocdh")
+book_2_texture = ExtResource("3_ctgii")
+book_3_texture = ExtResource("4_cvcyb")
+book_4_texture = ExtResource("5_ctgii")
+memory_card_back_texture = ExtResource("15_qwlxc")
+memory_card_1_texture = ExtResource("7_elib0")
+memory_card_2_texture = ExtResource("8_mdwg5")
+memory_card_3_texture = ExtResource("9_w3m7o")
+memory_card_4_texture = ExtResource("10_tdxjt")
+memory_card_5_texture = ExtResource("11_th3vv")
+memory_card_6_texture = ExtResource("12_ogtg4")
+key_fragment_1_texture = ExtResource("14_wp1ru")
+card_piece_texture = ExtResource("15_qwlxc")
+mirror_not_lighted_texture = ExtResource("24_tdxjt")
+mirror_lighted_with_fp_texture = ExtResource("17_tgdgo")
+mirror_lighted_no_fp_texture = ExtResource("18_lju7o")
+lighted_room_texture = ExtResource("19_ybixs")
+
+[node name="BackgroundLayer" type="Node2D" parent="."]
+
+[node name="BedroomBackground" type="Sprite2D" parent="BackgroundLayer"]
+position = Vector2(735, 373)
+scale = Vector2(1.0704942, 0.984375)
+texture = ExtResource("2_kosje")
+
+[node name="InteractiveLayer" type="Node2D" parent="."]
+
+[node name="BooksArea" type="Area2D" parent="InteractiveLayer"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractiveLayer/BooksArea"]
+position = Vector2(575.75, 250)
+shape = SubResource("RectangleShape2D_wp1ru")
+
+[node name="HintMarker" type="Sprite2D" parent="InteractiveLayer/BooksArea"]
+
+[node name="MirrorArea" type="Area2D" parent="InteractiveLayer"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractiveLayer/MirrorArea"]
+position = Vector2(1162, 331.5)
+shape = SubResource("RectangleShape2D_qwlxc")
+
+[node name="HintMarker" type="Sprite2D" parent="InteractiveLayer/MirrorArea"]
+
+[node name="PuzzleArea" type="Area2D" parent="InteractiveLayer"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractiveLayer/PuzzleArea"]
+position = Vector2(374, 284.5)
+shape = SubResource("RectangleShape2D_bi0md")
+
+[node name="HintMarker" type="Sprite2D" parent="InteractiveLayer/PuzzleArea"]
+
+[node name="DrawerArea" type="Area2D" parent="InteractiveLayer"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractiveLayer/DrawerArea"]
+position = Vector2(1121, 474.5)
+shape = SubResource("RectangleShape2D_dfcwo")
+
+[node name="HintMarker" type="Sprite2D" parent="InteractiveLayer/DrawerArea"]
+
+[node name="CabinetArea" type="Area2D" parent="InteractiveLayer"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractiveLayer/CabinetArea"]
+position = Vector2(1364.25, 354)
+shape = SubResource("RectangleShape2D_iaen7")
+
+[node name="HintMarker" type="Sprite2D" parent="InteractiveLayer/CabinetArea"]
+
+[node name="InsideZoneControl" parent="." instance=ExtResource("3_fnsr3")]
+
+[node name="PauseCanvasLayer" type="CanvasLayer" parent="."]
+process_mode = 3
+layer = 110
+
+[node name="InGamePausePanel" type="Panel" parent="PauseCanvasLayer"]
+visible = false
+top_level = true
+z_index = 10
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -442.25
+offset_top = -294.0
+offset_right = 442.25
+offset_bottom = 294.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_m0tg4")
+
+[node name="TitleLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -241.0
+offset_top = 18.0
+offset_right = 240.0
+offset_bottom = 127.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 70
+text = "Game Paused!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Separator" type="Line2D" parent="PauseCanvasLayer/InGamePausePanel"]
+position = Vector2(0.10900879, -58)
+scale = Vector2(0.73165876, 1)
+points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+width = 2.0
+default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+
+[node name="Resume_PlayButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 57.25
+offset_top = -107.0
+offset_right = 502.25
+offset_bottom = 38.0
+grow_vertical = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("5_54qax")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/Resume_PlayButton"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -286.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 40
+text = "Resume Game"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OptionButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -354.25
+offset_top = -107.0
+offset_right = -61.25
+offset_bottom = 38.0
+grow_horizontal = 0
+grow_vertical = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("6_pocdh")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionButton"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -128.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 40
+text = "Option"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ExitButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -247.5
+offset_top = -209.0
+offset_right = 247.5
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_vertical = 3
+texture_normal = ExtResource("7_ctgii")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/ExitButton"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -336.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 40
+text = "Exit to Main Menu"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OptionSubPanel" type="Panel" parent="PauseCanvasLayer/InGamePausePanel"]
+visible = false
+layout_mode = 0
+offset_right = 884.5
+offset_bottom = 588.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_m0tg4")
+
+[node name="OptionLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -94.5
+offset_top = 18.0
+offset_right = 94.5
+offset_bottom = 127.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 55
+text = "Option:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackToPrevious" type="TouchScreenButton" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+position = Vector2(20, 10)
+scale = Vector2(0.3, 0.3)
+texture_normal = ExtResource("8_cvcyb")
+
+[node name="Separator2" type="Line2D" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+position = Vector2(0.10900879, -58)
+scale = Vector2(0.73165876, 1)
+points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+width = 2.0
+default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+
+[node name="VolumeSliderControl" type="HBoxContainer" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -388.40625
+offset_top = -103.0
+offset_right = 388.40625
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 30
+
+[node name="VolumeLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 40
+text = "Music Volume:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VolumeSlider" type="HSlider" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/slider = SubResource("StyleBoxLine_elib0")
+theme_override_styles/grabber_area = SubResource("StyleBoxLine_mdwg5")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_mdwg5")
+value = 80.0
+
+[node name="VolumeValue" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "80%"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Background" type="Sprite2D" parent="."]
+visible = false
 position = Vector2(768, 320)
 texture = ExtResource("2_bg")
 
 [node name="TestLabel" type="Label" parent="."]
+visible = false
 offset_left = 185.0
 offset_top = 196.0
 offset_right = 1221.0
@@ -23,6 +377,7 @@ horizontal_alignment = 1
 
 [node name="RoleLabel" type="Label" parent="."]
 unique_name_in_owner = true
+visible = false
 offset_left = 305.0
 offset_top = 284.0
 offset_right = 1105.0
@@ -33,12 +388,293 @@ text = "Waiting for role..."
 horizontal_alignment = 1
 
 [node name="BackButton" type="Button" parent="."]
+visible = false
 offset_left = 50.0
 offset_top = 50.0
-offset_right = 300.0
+offset_right = 326.0
 offset_bottom = 120.0
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 32
 text = "← Back to Forest"
+
+[node name="NotificationLabel" type="Label" parent="."]
+visible = false
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="PuzzleCanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Dimmer" type="ColorRect" parent="PuzzleCanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 234.0
+offset_bottom = 111.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6627451)
+
+[node name="BooksPuzzlePanel" type="PanelContainer" parent="PuzzleCanvasLayer/Dimmer"]
+visible = false
+custom_minimum_size = Vector2(860, 500)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -736.0
+offset_top = -379.5
+offset_right = 738.0
+offset_bottom = 387.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer"]
+custom_minimum_size = Vector2(1200, 420)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="InstructionLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Narrowest should be on top and widest should be at the bottom."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PuzzleBoard" type="Control" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(760, 240)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ClosePuzzleButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "BACK"
+
+[node name="MemoryPuzzlePanel" type="PanelContainer" parent="PuzzleCanvasLayer/Dimmer"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="MarginContainer" type="MarginContainer" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="Control" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer"]
+layout_mode = 0
+offset_right = 140.0
+offset_bottom = 23.0
+
+[node name="InstructionLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer"]
+layout_mode = 0
+offset_top = 27.0
+offset_right = 140.0
+offset_bottom = 50.0
+
+[node name="MissingRow" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer"]
+layout_mode = 0
+offset_top = 54.0
+offset_right = 140.0
+offset_bottom = 254.0
+
+[node name="MissingCardPreview" type="TextureRect" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer/MissingRow"]
+custom_minimum_size = Vector2(140, 200)
+layout_mode = 2
+
+[node name="MemoryGrid" type="GridContainer" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer"]
+layout_mode = 0
+offset_top = 258.0
+offset_right = 140.0
+offset_bottom = 258.0
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
+columns = 4
+
+[node name="CloseMemoryButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer"]
+layout_mode = 0
+offset_top = 262.0
+offset_right = 140.0
+offset_bottom = 270.0
+
+[node name="BriefcasePanel" type="Control" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="BriefcaseTexture" type="TextureRect" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer/BriefcasePanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="ButtonsRow" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer/BriefcasePanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="UseButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer/BriefcasePanel/ButtonsRow"]
+layout_mode = 2
+
+[node name="CombineButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer/BriefcasePanel/ButtonsRow"]
+layout_mode = 2
+
+[node name="MirrorPuzzlePanel" type="PanelContainer" parent="PuzzleCanvasLayer/Dimmer"]
+custom_minimum_size = Vector2(860, 500)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -736.0
+offset_top = -379.5
+offset_right = 738.0
+offset_bottom = 387.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer"]
+custom_minimum_size = Vector2(1200, 420)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Mirror"
+horizontal_alignment = 1
+
+[node name="InstructionLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Inspect the mirror"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MirrorHolder" type="Control" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 240)
+layout_mode = 2
+
+[node name="MirrorTexture" type="TextureRect" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer/MirrorHolder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 289.0
+offset_top = 25.0
+offset_right = -339.0
+offset_bottom = 216.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("24_tdxjt")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LampHotspot" type="TextureButton" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer/MirrorHolder"]
+layout_mode = 0
+offset_left = 773.0
+offset_top = 223.0
+offset_right = 886.0
+offset_bottom = 401.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="BottomBar" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+alignment = 1
+
+[node name="CloseMirrorButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer/BottomBar"]
+custom_minimum_size = Vector2(140, 42)
+layout_mode = 2
+text = "BACK"
+
+[node name="RewardCanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="RewardDimmer" type="ColorRect" parent="RewardCanvasLayer"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.003921569, 0.003921569, 0.003921569, 0.5372549)
+
+[node name="RewardPanel" type="PanelContainer" parent="RewardCanvasLayer"]
+visible = false
+custom_minimum_size = Vector2(620, 420)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -990.0
+offset_top = -584.5
+offset_right = 990.0
+offset_bottom = 584.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="RewardCanvasLayer/RewardPanel"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="RewardCanvasLayer/RewardPanel/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="RewardTitleLabel" type="Label" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Puzzle Solved"
+
+[node name="RewardBodyLabel" type="Label" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "You found Key Fragment 1 and the Card Piece."
+
+[node name="RewardItemsRow" type="HBoxContainer" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="KeyItem" type="VBoxContainer" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow"]
+layout_mode = 2
+
+[node name="KeyTexture" type="TextureRect" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow/KeyItem"]
+custom_minimum_size = Vector2(180, 120)
+layout_mode = 2
+texture = ExtResource("14_wp1ru")
+stretch_mode = 5
+
+[node name="CardItem" type="VBoxContainer" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow"]
+layout_mode = 2
+
+[node name="CardTexture" type="TextureRect" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow/CardItem"]
+custom_minimum_size = Vector2(180, 180)
+layout_mode = 2
+texture = ExtResource("15_qwlxc")
+stretch_mode = 5
+
+[node name="CollectClueButton" type="Button" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Collect Clue"
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
