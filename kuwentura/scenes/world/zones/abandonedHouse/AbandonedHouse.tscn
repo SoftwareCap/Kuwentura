@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=3 uid="uid://bandonedhouse"]
+[gd_scene load_steps=49 format=3 uid="uid://bandonedhouse"]
 
 [ext_resource type="Script" uid="uid://ftv8j2b15oka" path="res://scripts/world/zones/abandonedHouse/abandoned_house.gd" id="1_abandonedhouse"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
@@ -26,7 +26,20 @@
 [ext_resource type="Texture2D" uid="uid://degoflxfd7bdw" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/LightedWithFP.png" id="17_tgdgo"]
 [ext_resource type="Texture2D" uid="uid://brd17cn6m77du" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/LightedNoFP.png" id="18_lju7o"]
 [ext_resource type="Texture2D" uid="uid://q7i5a6xreg50" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/LightedRoom.png" id="19_ybixs"]
+[ext_resource type="Texture2D" uid="uid://dijf4b80h348s" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/drawer.png" id="20_xk67h"]
+[ext_resource type="Texture2D" uid="uid://k5wjdcp4wtoh" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/openDrawer.png" id="21_a471t"]
+[ext_resource type="Texture2D" uid="uid://b8ax73bis06aa" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock.png" id="22_4qfmh"]
+[ext_resource type="Texture2D" uid="uid://cq6xkjlyyjaad" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-0.png" id="23_h53ye"]
+[ext_resource type="Texture2D" uid="uid://bbpfxdeqmsaee" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-1.png" id="24_nxkqi"]
 [ext_resource type="Texture2D" uid="uid://dge111yp5pl1p" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/NotLighted.png" id="24_tdxjt"]
+[ext_resource type="Texture2D" uid="uid://dq3y7iuv8qqdn" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-2.png" id="25_c5hd3"]
+[ext_resource type="Texture2D" uid="uid://8rdt6i74pdjm" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-3.png" id="26_ubkn4"]
+[ext_resource type="Texture2D" uid="uid://06vpn4oxfkku" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-4.png" id="27_to5f4"]
+[ext_resource type="Texture2D" uid="uid://cqlkdg4x5juic" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-5.png" id="28_hx2gr"]
+[ext_resource type="Texture2D" uid="uid://bsp743owfiqyb" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-6.png" id="29_sofx5"]
+[ext_resource type="Texture2D" uid="uid://b4n0jejrrwavg" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-7.png" id="30_0yu24"]
+[ext_resource type="Texture2D" uid="uid://cf7hbudmlovmc" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-8.png" id="31_1767a"]
+[ext_resource type="Texture2D" uid="uid://crc54hjbsog7g" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-9.png" id="32_fs4kb"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wp1ru"]
 size = Vector2(168.5, 86)
@@ -84,6 +97,10 @@ mirror_not_lighted_texture = ExtResource("24_tdxjt")
 mirror_lighted_with_fp_texture = ExtResource("17_tgdgo")
 mirror_lighted_no_fp_texture = ExtResource("18_lju7o")
 lighted_room_texture = ExtResource("19_ybixs")
+drawer_closed_texture = ExtResource("20_xk67h")
+drawer_open_texture = ExtResource("21_a471t")
+drawer_lock_zoom_texture = ExtResource("22_4qfmh")
+lock_digit_textures = Array[Texture2D]([ExtResource("23_h53ye"), ExtResource("24_nxkqi"), ExtResource("25_c5hd3"), ExtResource("26_ubkn4"), ExtResource("27_to5f4"), ExtResource("28_hx2gr"), ExtResource("29_sofx5"), ExtResource("30_0yu24"), ExtResource("31_1767a"), ExtResource("32_fs4kb")])
 
 [node name="BackgroundLayer" type="Node2D" parent="."]
 
@@ -603,6 +620,189 @@ layout_mode = 2
 alignment = 1
 
 [node name="CloseMirrorButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer/BottomBar"]
+custom_minimum_size = Vector2(140, 42)
+layout_mode = 2
+text = "BACK"
+
+[node name="DrawerPanel" type="PanelContainer" parent="PuzzleCanvasLayer/Dimmer"]
+custom_minimum_size = Vector2(860, 500)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -736.0
+offset_top = -379.5
+offset_right = 738.0
+offset_bottom = 387.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer"]
+custom_minimum_size = Vector2(1200, 420)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Drawer
+"
+horizontal_alignment = 1
+
+[node name="InstructionLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Inspect the drawer."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DrawerHolder" type="Control" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 240)
+layout_mode = 2
+
+[node name="DrawerTexture" type="TextureRect" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/DrawerHolder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 289.0
+offset_top = 25.0
+offset_right = -339.0
+offset_bottom = 216.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("20_xk67h")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DrawerLockHotspot" type="TextureButton" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/DrawerHolder"]
+layout_mode = 0
+offset_left = 403.0
+offset_top = 223.0
+offset_right = 718.0
+offset_bottom = 320.0
+
+[node name="KeyFragmentHotspot" type="TextureButton" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/DrawerHolder"]
+visible = false
+layout_mode = 0
+offset_left = 483.0
+offset_top = 165.0
+offset_right = 892.0
+offset_bottom = 325.0
+focus_mode = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="BottomBar" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+alignment = 1
+
+[node name="CloseDrawerButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/BottomBar"]
+custom_minimum_size = Vector2(140, 42)
+layout_mode = 2
+text = "BACK"
+
+[node name="DrawerLockPanel" type="PanelContainer" parent="PuzzleCanvasLayer/Dimmer"]
+visible = false
+custom_minimum_size = Vector2(860, 500)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -736.0
+offset_top = -379.5
+offset_right = 738.0
+offset_bottom = 387.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer"]
+custom_minimum_size = Vector2(1200, 420)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Drawer Lock"
+horizontal_alignment = 1
+
+[node name="InstructionLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Inspect the lock."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LockHolder" type="Control" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 240)
+layout_mode = 2
+
+[node name="DrawerLockTexture" type="TextureRect" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/LockHolder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 289.0
+offset_top = 25.0
+offset_right = -339.0
+offset_bottom = 216.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("22_4qfmh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Digit1" type="TextureButton" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/LockHolder"]
+layout_mode = 0
+offset_left = 358.0
+offset_top = 138.0
+offset_right = 560.0
+offset_bottom = 355.0
+
+[node name="Digit2" type="TextureButton" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/LockHolder"]
+layout_mode = 0
+offset_left = 578.0
+offset_top = 138.0
+offset_right = 789.0
+offset_bottom = 355.0
+
+[node name="Digit3" type="TextureButton" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/LockHolder"]
+layout_mode = 0
+offset_left = 807.0
+offset_top = 138.0
+offset_right = 1010.0
+offset_bottom = 355.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="BottomBar" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+alignment = 1
+
+[node name="CloseDrawerLockButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/BottomBar"]
 custom_minimum_size = Vector2(140, 42)
 layout_mode = 2
 text = "BACK"
