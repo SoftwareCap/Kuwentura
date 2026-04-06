@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://mx5pteuiy8od"
-path.bptc="res://.godot/imported/darkPanel.png-23ec61c5a9a1c0e528f21bfabb2602f6.bptc.ctex"
-path.astc="res://.godot/imported/darkPanel.png-23ec61c5a9a1c0e528f21bfabb2602f6.astc.ctex"
+path.bptc="res://.godot/imported/DarkPanel.png-c975526e7058cd745b4eb0f2fccbc65c.bptc.ctex"
+path.astc="res://.godot/imported/DarkPanel.png-c975526e7058cd745b4eb0f2fccbc65c.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/darkPanel.png"
-dest_files=["res://.godot/imported/darkPanel.png-23ec61c5a9a1c0e528f21bfabb2602f6.bptc.ctex", "res://.godot/imported/darkPanel.png-23ec61c5a9a1c0e528f21bfabb2602f6.astc.ctex"]
+source_file="res://assets/sprites/zoneObjects/DarkPanel.png"
+dest_files=["res://.godot/imported/DarkPanel.png-c975526e7058cd745b4eb0f2fccbc65c.bptc.ctex", "res://.godot/imported/DarkPanel.png-c975526e7058cd745b4eb0f2fccbc65c.astc.ctex"]
 
 [params]
 

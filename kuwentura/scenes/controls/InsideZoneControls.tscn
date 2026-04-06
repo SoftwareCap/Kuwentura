@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://chff8f3cdvqaf" path="res://assets/buttons/pauseButton.png" id="2_6v7nm"]
 [ext_resource type="Texture2D" uid="uid://b4ff13vwedej7" path="res://assets/buttons/players/ledgerbutton.png" id="3_dfxfg"]
 [ext_resource type="Texture2D" uid="uid://lrijshq5upgf" path="res://assets/buttons/players/briefcasebutton.png" id="4_80khv"]
-[ext_resource type="Texture2D" uid="uid://dhs2e7weqqu13" path="res://assets/buttons/players/mapbutton.png" id="5_nynux"]
+[ext_resource type="Texture2D" uid="uid://ujja3u0qopw2" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/defaultProgress.png" id="5_dfxfg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0aggx"]
 size = Vector2(200, 200)
@@ -45,8 +45,51 @@ shape = SubResource("RectangleShape2D_lg2p8")
 passby_press = true
 
 [node name="Map" type="TouchScreenButton" parent="."]
-position = Vector2(67, 15)
-scale = Vector2(0.04, 0.04)
-texture_normal = ExtResource("5_nynux")
+position = Vector2(-37, -51.000004)
+scale = Vector2(0.26354167, 0.19444443)
+texture_normal = ExtResource("5_dfxfg")
 shape = SubResource("RectangleShape2D_tdrpu")
 passby_press = true
+
+[node name="BriefcasePanel" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="BriefcaseTexture" type="TextureRect" parent="BriefcasePanel"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="CardPieceHotspot" type="Button" parent="BriefcasePanel"]
+visible = false
+layout_mode = 0
+offset_left = 543.0
+offset_top = 232.0
+offset_right = 722.0
+offset_bottom = 359.0
+flat = true
+
+[node name="LighterHotspot" type="Button" parent="BriefcasePanel"]
+visible = false
+layout_mode = 0
+offset_left = 728.0
+offset_top = 226.0
+offset_right = 890.0
+offset_bottom = 363.0
+flat = true
+
+[node name="ButtonsRow" type="HBoxContainer" parent="BriefcasePanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="UseButton" type="Button" parent="BriefcasePanel/ButtonsRow"]
+layout_mode = 2
+text = "Use"
+
+[node name="CombineButton" type="Button" parent="BriefcasePanel/ButtonsRow"]
+layout_mode = 2
+text = "Combine"
