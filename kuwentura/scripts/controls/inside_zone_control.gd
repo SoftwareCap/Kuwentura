@@ -28,6 +28,20 @@ enum VisibilityMode {
 
 @onready var card_piece_hotspot: Button = get_node_or_null("BriefcasePanel/CardPieceHotspot")
 
+@onready var key_fragment_1_hotspot: Button = get_node_or_null("BriefcasePanel/KeyFragment1Hotspot")
+@onready var key_fragment_2_hotspot: Button = get_node_or_null("BriefcasePanel/KeyFragment2Hotspot")
+@onready var key_fragment_3_hotspot: Button = get_node_or_null("BriefcasePanel/KeyFragment3Hotspot")
+
+const ABANDONED_KEY_FRAGMENT_IDS := [
+	"key_fragment_1",
+	"key_fragment_2",
+	"key_fragment_3"
+]
+
+const ABANDONED_COMBINED_KEY_ID := "assembled_key"
+
+var _selected_briefcase_items: Array[String] = []
+
 var _is_visible: bool = true
 var _original_scales: Dictionary = {}
 
@@ -72,7 +86,19 @@ func _ready() -> void:
 	
 	if use_button and not use_button.pressed.is_connected(_on_use_button_pressed):
 		use_button.pressed.connect(_on_use_button_pressed)
-	
+		
+	if combine_button and not combine_button.pressed.is_connected(_on_combine_button_pressed):
+		combine_button.pressed.connect(_on_combine_button_pressed)
+
+	if key_fragment_1_hotspot and not key_fragment_1_hotspot.pressed.is_connected(_on_key_fragment_1_hotspot_pressed):
+		key_fragment_1_hotspot.pressed.connect(_on_key_fragment_1_hotspot_pressed)
+
+	if key_fragment_2_hotspot and not key_fragment_2_hotspot.pressed.is_connected(_on_key_fragment_2_hotspot_pressed):
+		key_fragment_2_hotspot.pressed.connect(_on_key_fragment_2_hotspot_pressed)
+
+	if key_fragment_3_hotspot and not key_fragment_3_hotspot.pressed.is_connected(_on_key_fragment_3_hotspot_pressed):
+		key_fragment_3_hotspot.pressed.connect(_on_key_fragment_3_hotspot_pressed)
+		
 	if briefcase_panel:
 		briefcase_panel.visible = false
 		
@@ -235,45 +261,58 @@ func refresh_abandoned_house_briefcase_ui() -> void:
 	if not briefcase_panel or not briefcase_texture or not use_button or not combine_button:
 		return
 
-	var has_key_fragment := GameState.has_zone_item("abandoned_house", "key_fragment_1")
+	var has_key_fragment_1 := GameState.has_zone_item("abandoned_house", "key_fragment_1")
+	var has_key_fragment_2 := GameState.has_zone_item("abandoned_house", "key_fragment_2")
+	var has_key_fragment_3 := GameState.has_zone_item("abandoned_house", "key_fragment_3")
 	var has_card_piece := GameState.has_zone_item("abandoned_house", "card_piece")
 	var has_lighter := GameState.has_zone_item("abandoned_house", "light_bulb")
+	var has_full_key := GameState.has_zone_item("abandoned_house", ABANDONED_COMBINED_KEY_ID)
 
 	var mirror_lit := GameState.is_puzzle_solved("abandoned_house_mirror_lit")
-	
-	var has_any_usable_item := has_key_fragment or has_card_piece or has_lighter
 
 	briefcase_texture.texture = GameState.get_briefcase_texture("abandoned_house")
 
-	use_button.disabled = not has_any_usable_item
-	combine_button.disabled = not has_any_usable_item
-
-	use_button.modulate = Color(1, 1, 1, 1) if has_any_usable_item else Color(0.6, 0.6, 0.6, 1)
-	combine_button.modulate = Color(1, 1, 1, 1) if has_any_usable_item else Color(0.6, 0.6, 0.6, 1)
-
 	if card_piece_hotspot:
-		card_piece_hotspot.visible = has_card_piece
-		card_piece_hotspot.disabled = not has_card_piece
+		card_piece_hotspot.visible = has_card_piece and not has_full_key
+		card_piece_hotspot.disabled = not has_card_piece or has_full_key
 
 	if lighter_hotspot:
-		lighter_hotspot.visible = has_lighter and not mirror_lit
-		lighter_hotspot.disabled = not has_lighter or mirror_lit
+		lighter_hotspot.visible = has_lighter and not mirror_lit and not has_full_key
+		lighter_hotspot.disabled = not has_lighter or mirror_lit or has_full_key
+
+	if key_fragment_1_hotspot:
+		key_fragment_1_hotspot.visible = has_key_fragment_1 and not has_full_key
+		key_fragment_1_hotspot.disabled = not has_key_fragment_1 or has_full_key
+
+	if key_fragment_2_hotspot:
+		key_fragment_2_hotspot.visible = has_key_fragment_2 and not has_full_key
+		key_fragment_2_hotspot.disabled = not has_key_fragment_2 or has_full_key
+
+	if key_fragment_3_hotspot:
+		key_fragment_3_hotspot.visible = has_key_fragment_3 and not has_full_key
+		key_fragment_3_hotspot.disabled = not has_key_fragment_3 or has_full_key
 
 	_refresh_briefcase_item_highlights()
+	_refresh_briefcase_action_buttons()
 	
 func _refresh_briefcase_item_highlights() -> void:
 	if card_piece_hotspot:
-		card_piece_hotspot.modulate = Color(1, 1, 1, 0.35) if _selected_briefcase_item == "card_piece" else Color(1, 1, 1, 0.01)
+		card_piece_hotspot.modulate = Color(1, 1, 1, 0.35) if _is_briefcase_item_selected("card_piece") else Color(1, 1, 1, 0.01)
 
 	if lighter_hotspot:
-		lighter_hotspot.modulate = Color(1, 1, 1, 0.35) if _selected_briefcase_item == "light_bulb" else Color(1, 1, 1, 0.01)
+		lighter_hotspot.modulate = Color(1, 1, 1, 0.35) if _is_briefcase_item_selected("light_bulb") else Color(1, 1, 1, 0.01)
 
+	if key_fragment_1_hotspot:
+		key_fragment_1_hotspot.modulate = Color(1, 1, 1, 0.35) if _is_briefcase_item_selected("key_fragment_1") else Color(1, 1, 1, 0.01)
+
+	if key_fragment_2_hotspot:
+		key_fragment_2_hotspot.modulate = Color(1, 1, 1, 0.35) if _is_briefcase_item_selected("key_fragment_2") else Color(1, 1, 1, 0.01)
+
+	if key_fragment_3_hotspot:
+		key_fragment_3_hotspot.modulate = Color(1, 1, 1, 0.35) if _is_briefcase_item_selected("key_fragment_3") else Color(1, 1, 1, 0.01)
 
 func _select_briefcase_item(item_id: String) -> void:
-	_selected_briefcase_item = item_id
-	_armed_briefcase_item = ""
-	_refresh_briefcase_item_highlights()
-	briefcase_item_selected.emit(_selected_briefcase_item)
+	_toggle_briefcase_item_selection(item_id)
 		
 func _on_briefcase_pressed() -> void:
 	if not briefcase_panel:
@@ -284,6 +323,7 @@ func _on_briefcase_pressed() -> void:
 		briefcase_panel.hide()
 		return
 
+	_clear_briefcase_selection()
 	refresh_abandoned_house_briefcase_ui()
 	_layout_briefcase_panel()
 	briefcase_panel.show()
@@ -338,10 +378,11 @@ func _on_card_piece_hotspot_pressed() -> void:
 	_select_briefcase_item("card_piece")
 	
 func _on_use_button_pressed() -> void:
-	if _selected_briefcase_item.is_empty():
+	if _selected_briefcase_items.size() != 1:
 		return
 
-	_armed_briefcase_item = _selected_briefcase_item
+	_armed_briefcase_item = _selected_briefcase_items[0]
+	_selected_briefcase_item = _armed_briefcase_item
 	briefcase_panel.hide()
 	
 func consume_armed_item(expected_item_id: String) -> bool:
@@ -349,9 +390,7 @@ func consume_armed_item(expected_item_id: String) -> bool:
 		return false
 
 	_armed_briefcase_item = ""
-	_selected_briefcase_item = ""
-
-	_refresh_briefcase_item_highlights()
+	_clear_briefcase_selection()
 	return true
 
 func _on_lighter_hotspot_pressed() -> void:
@@ -359,4 +398,92 @@ func _on_lighter_hotspot_pressed() -> void:
 		return
 
 	_select_briefcase_item("light_bulb")
-	
+
+func _is_briefcase_item_selected(item_id: String) -> bool:
+	return _selected_briefcase_items.has(item_id)
+
+
+func _toggle_briefcase_item_selection(item_id: String) -> void:
+	if _selected_briefcase_items.has(item_id):
+		_selected_briefcase_items.erase(item_id)
+	else:
+		_selected_briefcase_items.append(item_id)
+
+	_selected_briefcase_item = _selected_briefcase_items[0] if _selected_briefcase_items.size() == 1 else ""
+	_armed_briefcase_item = ""
+
+	_refresh_briefcase_item_highlights()
+	_refresh_briefcase_action_buttons()
+	briefcase_item_selected.emit(_selected_briefcase_item)
+
+
+func _clear_briefcase_selection() -> void:
+	_selected_briefcase_items.clear()
+	_selected_briefcase_item = ""
+	_armed_briefcase_item = ""
+	_refresh_briefcase_item_highlights()
+	_refresh_briefcase_action_buttons()
+
+
+func _has_all_key_fragments_selected() -> bool:
+	return (
+		_selected_briefcase_items.size() == 3
+		and _selected_briefcase_items.has("key_fragment_1")
+		and _selected_briefcase_items.has("key_fragment_2")
+		and _selected_briefcase_items.has("key_fragment_3")
+	)
+
+
+func _refresh_briefcase_action_buttons() -> void:
+	if not use_button or not combine_button:
+		return
+
+	var mirror_lit := GameState.is_puzzle_solved("abandoned_house_mirror_lit")
+	var has_full_key := GameState.has_zone_item("abandoned_house", ABANDONED_COMBINED_KEY_ID)
+
+	var can_use := false
+	if _selected_briefcase_items.size() == 1:
+		var item_id := _selected_briefcase_items[0]
+		can_use = (
+			item_id == "card_piece"
+			or (item_id == "light_bulb" and not mirror_lit)
+			or item_id == ABANDONED_COMBINED_KEY_ID
+		)
+
+	var can_combine := _has_all_key_fragments_selected() and not has_full_key
+
+	use_button.disabled = not can_use
+	combine_button.disabled = not can_combine
+
+	use_button.modulate = Color(1, 1, 1, 1) if can_use else Color(0.6, 0.6, 0.6, 1)
+	combine_button.modulate = Color(1, 1, 1, 1) if can_combine else Color(0.6, 0.6, 0.6, 1)
+
+func _on_key_fragment_1_hotspot_pressed() -> void:
+	if not GameState.has_zone_item("abandoned_house", "key_fragment_1"):
+		return
+	_select_briefcase_item("key_fragment_1")
+
+
+func _on_key_fragment_2_hotspot_pressed() -> void:
+	if not GameState.has_zone_item("abandoned_house", "key_fragment_2"):
+		return
+	_select_briefcase_item("key_fragment_2")
+
+
+func _on_key_fragment_3_hotspot_pressed() -> void:
+	if not GameState.has_zone_item("abandoned_house", "key_fragment_3"):
+		return
+	_select_briefcase_item("key_fragment_3")
+
+func _on_combine_button_pressed() -> void:
+	if not _has_all_key_fragments_selected():
+		return
+
+	if GameState.has_zone_item("abandoned_house", ABANDONED_COMBINED_KEY_ID):
+		return
+
+	if GameState and GameState.has_method("grant_zone_items"):
+		GameState.grant_zone_items("abandoned_house", [ABANDONED_COMBINED_KEY_ID])
+
+	_clear_briefcase_selection()
+	refresh_abandoned_house_briefcase_ui()
