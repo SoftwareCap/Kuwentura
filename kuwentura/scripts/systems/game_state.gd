@@ -97,6 +97,7 @@ var zone_inventory: Dictionary = {
 		"card_piece": false,
 		"light_bulb": false,
 		"assembled_key": false,
+		"pinas_tiara": false
 	}
 }
 
@@ -297,8 +298,13 @@ func get_briefcase_texture_path(context: String) -> String:
 			var has_key_fragment_3 := has_zone_item("abandoned_house", "key_fragment_3")
 			var has_full_key := has_zone_item("abandoned_house", "assembled_key")
 			var mirror_lit := is_puzzle_solved("abandoned_house_mirror_lit")
+			var cabinet_opened := is_puzzle_solved("abandoned_house_cabinet_opened")
 
-			if has_full_key:
+			# Once the key has been used on the cabinet,
+			# reset the briefcase back to default.
+			if cabinet_opened:
+				return BRIEFCASE_ASSETS["abandoned_house_default"]
+			elif has_full_key:
 				return BRIEFCASE_ASSETS["abandoned_house_full_key"]
 			elif has_key_fragment_3:
 				return BRIEFCASE_ASSETS["abandoned_house_puzzle_3"]
