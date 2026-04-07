@@ -70,6 +70,11 @@ func _ready() -> void:
 	_connect_portal_signals()
 	_setup_zone_completion_indicators()
 	_refresh_briefcase_display()
+	
+	if briefcase_panel:
+		briefcase_panel.visible = false
+		briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
+	
 	for peer_id in multiplayer.get_peers():
 		if peer_id != multiplayer.get_unique_id() and not _spawned_players.has(peer_id):
 			_spawn_player_for_peer(peer_id)
@@ -454,24 +459,31 @@ func _sync_player_position_to_all(peer_id: int, pos: Vector2) -> void:
 
 func _setup_ui_controls() -> void:
 	var is_sidekick := (NetworkManager.get_my_role() != "detective")
-	if touch_controls:
-		if not touch_controls.map_pressed.is_connected(_on_map_button_pressed):
-			touch_controls.map_pressed.connect(_on_map_button_pressed)
-		if not touch_controls.ledger_pressed.is_connected(_on_ledger_button_pressed):
-			touch_controls.ledger_pressed.connect(_on_ledger_button_pressed)
-		if not touch_controls.briefcase_pressed.is_connected(_on_briefcase_button_pressed):
-			touch_controls.briefcase_pressed.connect(_on_briefcase_button_pressed)
-		# Use get_button() to safely resolve buttons inside TouchControls
-		# without accidentally resolving same-named nodes elsewhere in the tree.
-		var map_btn: TouchScreenButton = touch_controls.get_node_or_null("Map")
-		if map_btn:
-			map_btn.visible = true
-		var ledger_btn: TouchScreenButton = touch_controls.get_node_or_null("Ledger")
-		if ledger_btn:
-			ledger_btn.visible = is_sidekick
-		var briefcase_btn: TouchScreenButton = touch_controls.get_node_or_null("Briefcase")
-		if briefcase_btn:
-			briefcase_btn.visible = is_sidekick
+
+	if not touch_controls:
+		push_error("[ForestHub] TouchControls not found")
+		return
+
+	var map_btn: TouchScreenButton = touch_controls.get_node_or_null("Map")
+	if map_btn:
+		map_btn.visible = true
+		if not map_btn.pressed.is_connected(_on_map_button_pressed):
+			map_btn.pressed.connect(_on_map_button_pressed)
+
+	var ledger_btn: TouchScreenButton = touch_controls.get_node_or_null("Ledger")
+	if ledger_btn:
+		ledger_btn.visible = is_sidekick
+		if not ledger_btn.pressed.is_connected(_on_ledger_button_pressed):
+			ledger_btn.pressed.connect(_on_ledger_button_pressed)
+
+	var briefcase_btn: TouchScreenButton = touch_controls.get_node_or_null("Briefcase")
+	if briefcase_btn:
+		briefcase_btn.visible = is_sidekick
+		if not briefcase_btn.pressed.is_connected(_on_briefcase_button_pressed):
+			briefcase_btn.pressed.connect(_on_briefcase_button_pressed)
+	else:
+		push_error("[ForestHub] Briefcase button not found inside TouchControls")
+
 	_close_all_panels(false)
 
 
@@ -492,6 +504,7 @@ func _on_ledger_button_pressed() -> void:
 	_toggle_panel("ledger")
 
 func _on_briefcase_button_pressed() -> void:
+	print("[ForestHub] Briefcase button pressed")
 	_toggle_panel("briefcase")
 
 
@@ -504,12 +517,9 @@ func _open_panel(panel_name: String) -> void:
 
 
 func _close_all_panels(animate: bool = true) -> void:
-	if _current_open_panel.is_empty():
-		return
-	match _current_open_panel:
-		"map": _close_map(animate)
-		"ledger": _close_ledger(animate)
-		"briefcase": _close_briefcase(animate)
+	_close_map(animate)
+	_close_ledger(animate)
+	_close_briefcase(animate)
 	_current_open_panel = ""
 
 
@@ -695,12 +705,19 @@ func _on_forest_next_page_pressed() -> void:
 
 func _open_briefcase() -> void:
 	if not briefcase_panel:
+		push_error("[ForestHub] briefcase_panel is null")
 		return
+
 	_refresh_briefcase_display()
+
 	_is_animating = true
-	briefcase_panel.visible  = true
+	briefcase_panel.visible = true
+	briefcase_panel.modulate = Color(1, 1, 1, 1)
 	briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
 	briefcase_panel.pivot_offset = Vector2(briefcase_panel.size.x / 2, 0)
+
+	print("[ForestHub] Opening briefcase panel")
+
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_BOUNCE)
 	tween.set_ease(Tween.EASE_OUT)
@@ -731,10 +748,21 @@ func _on_briefcase_updated() -> void:
 
 func _refresh_briefcase_display() -> void:
 	if not is_instance_valid(briefcase_display):
+		push_error("[ForestHub] briefcase_display is invalid")
 		return
+
+	var path := GameState.get_briefcase_texture_path("forest")
+	print("[ForestHub] Forest briefcase path: ", path)
+
 	var texture: Texture2D = GameState.get_briefcase_texture("forest")
+
+	if texture == null:
+		push_warning("[ForestHub] Forest briefcase texture is null for path: " + path)
+		briefcase_display.visible = false
+		return
+
 	briefcase_display.texture = texture
-	briefcase_display.visible = texture != null
+	briefcase_display.visible = true
 
 
 func _connect_portal_signals() -> void:
