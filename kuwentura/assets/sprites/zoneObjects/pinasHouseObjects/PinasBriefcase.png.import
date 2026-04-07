@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c7f1pyernjqux"
-path.bptc="res://.godot/imported/PinasBriefcase.png-cf392afdd000092ed6d864a4129321ab.bptc.ctex"
-path.astc="res://.godot/imported/PinasBriefcase.png-cf392afdd000092ed6d864a4129321ab.astc.ctex"
+path.bptc="res://.godot/imported/pinasBriefcase.png-fa36d3d9163ca37f3fb9ad02152f3979.bptc.ctex"
+path.astc="res://.godot/imported/pinasBriefcase.png-fa36d3d9163ca37f3fb9ad02152f3979.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/PinasBriefcase.png"
-dest_files=["res://.godot/imported/PinasBriefcase.png-cf392afdd000092ed6d864a4129321ab.bptc.ctex", "res://.godot/imported/PinasBriefcase.png-cf392afdd000092ed6d864a4129321ab.astc.ctex"]
+source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/pinasBriefcase.png"
+dest_files=["res://.godot/imported/pinasBriefcase.png-fa36d3d9163ca37f3fb9ad02152f3979.bptc.ctex", "res://.godot/imported/pinasBriefcase.png-fa36d3d9163ca37f3fb9ad02152f3979.astc.ctex"]
 
 [params]
 

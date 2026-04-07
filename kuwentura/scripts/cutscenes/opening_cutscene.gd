@@ -44,8 +44,31 @@ const FADE_DURATION : float = 1.5
 var _skip_pressed : bool = false
 var _typing_done : bool = false
 
+# Letterbox background filler — covers gray side/top bars with the scene colour
+var _bg_filler : ColorRect
+
 
 func _ready() -> void:
+	# ── Letterbox filler ────────────────────────────────────────────────────
+	# Insert a full-screen ColorRect behind everything so the window's border
+	# areas (gray bars) show the cutscene background colour instead of gray.
+	# The color is sampled from Scene1's background; update _sync_filler_color()
+	# if you ever need it to change between scenes.
+	_bg_filler = ColorRect.new()
+	_bg_filler.name = "BgFiller"
+	_bg_filler.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Stretch to cover the full window regardless of viewport size
+	_bg_filler.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# Warm library brown — matches the Scene1 Background sprite dominant colour.
+	# Adjust this hex if your background art has a different edge colour.
+	_bg_filler.color = Color(0.22, 0.16, 0.10, 1.0)
+	# Add as a CanvasLayer so it sits behind the scene tree but fills the window
+	var cl := CanvasLayer.new()
+	cl.layer = -10
+	add_child(cl)
+	cl.add_child(_bg_filler)
+	# ────────────────────────────────────────────────────────────────────────
+
 	scene2.visible = false
 	scene2.modulate.a = 0.0
 
@@ -130,6 +153,10 @@ func _transition_to_scene2() -> void:
 	scene2.visible = true
 	scene2.modulate.a = 1.0
 
+	# Filler colour shifts to match Scene 2 dominant background
+	if _bg_filler:
+		_bg_filler.color = Color(0.10, 0.08, 0.06, 1.0)
+
 
 # SCENE 2 – "The Book Awakens"
 func _scene2() -> void:
@@ -167,6 +194,10 @@ func _transition_to_scene3() -> void:
 	_clear_dialogue(dialogue_label2, name_label2)
 	scene2.visible = false
 	dialogue_box.visible = false
+
+	# Filler shifts to dark for Scene 3
+	if _bg_filler:
+		_bg_filler.color = Color(0.04, 0.04, 0.08, 1.0)
 
 	# Fade in scene3 and restore dialogue box alpha
 	scene3.visible = true
