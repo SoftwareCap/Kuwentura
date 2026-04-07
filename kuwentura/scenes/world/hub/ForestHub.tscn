@@ -13,6 +13,7 @@
 [ext_resource type="Script" uid="uid://mmcj3rgi3q85" path="res://scripts/world/hub/finish_zone_indicator.gd" id="7_indicator"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="8_ggw0p"]
 [ext_resource type="Texture2D" uid="uid://vhtyew110bgu" path="res://assets/sprites/zoneObjects/woodenSignage.png" id="9_rbch1"]
+[ext_resource type="Texture2D" uid="uid://83u12e5m310k" path="res://assets/sprites/places/abandonedHouse.png" id="10_8ci0b"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="11_i1yoq"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="12_aispg"]
 [ext_resource type="Texture2D" uid="uid://cuhne1u8q0p3s" path="res://assets/sprites/clues/pineappleClue.png" id="12_hdutc"]
@@ -1034,8 +1035,8 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_constants/line_spacing = -1
-theme_override_font_sizes/font_size = 10
-text = "To enter Pina's House, both players must stand on the door."
+theme_override_font_sizes/font_size = 12
+text = "To enter, both players must stand on the door."
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
@@ -1114,8 +1115,8 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_constants/line_spacing = -1
-theme_override_font_sizes/font_size = 10
-text = "To access the Old Well, both players must stand infront of it."
+theme_override_font_sizes/font_size = 12
+text = "To access, both players must stand infront of it."
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
@@ -1195,8 +1196,8 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_constants/line_spacing = -1
-theme_override_font_sizes/font_size = 10
-text = "To enter the Backyard Path, both players must stand on the broken fence."
+theme_override_font_sizes/font_size = 11
+text = "To enter, both players must stand on the broken fence."
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
@@ -1276,8 +1277,8 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_constants/line_spacing = -1
-theme_override_font_sizes/font_size = 10
-text = "To enter the Storage Hut, both players must stand on the door."
+theme_override_font_sizes/font_size = 12
+text = "To enter, both players must stand on the door."
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
@@ -1293,9 +1294,9 @@ scene_path = "res://scenes/world/zones/abandonedHouse/AbandonedHouse.tscn"
 
 [node name="Sprite2D" type="Sprite2D" parent="Zone Portals/AbandonedHouse"]
 z_index = -1
-position = Vector2(-112, -152)
-scale = Vector2(0.4, 0.4)
-texture = ExtResource("6_dyw7g")
+position = Vector2(-54.000145, -100.40002)
+scale = Vector2(0.6749999, 0.6749999)
+texture = ExtResource("10_8ci0b")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Zone Portals/AbandonedHouse"]
 position = Vector2(7.25, 60)
@@ -1357,21 +1358,24 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_constants/line_spacing = -1
-theme_override_font_sizes/font_size = 10
-text = "To enter the Abandoned House, both players must stand on the door."
+theme_override_font_sizes/font_size = 12
+text = "To enter, both players must stand on the door."
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 metadata/_edit_use_anchors_ = true
 
 [node name="Signage" type="Node2D" parent="."]
+position = Vector2(102, 15)
 
 [node name="Sprite2D" type="Sprite2D" parent="Signage"]
+z_index = -1
 position = Vector2(4599.75, 473.75003)
 scale = Vector2(0.4383331, 0.4383331)
 texture = ExtResource("9_rbch1")
 
 [node name="Label" type="Label" parent="Signage"]
+z_index = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -1385,11 +1389,12 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_constants/line_spacing = -1
-theme_override_font_sizes/font_size = 10
-text = "Gather all 5 clues from the zones… but beware, the story is not yet done."
+theme_override_font_sizes/font_size = 13
+text = "Gather all 5 clues from the zones."
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
+metadata/_edit_use_anchors_ = true
 
 [node name="Terrain" type="TileMapLayer" parent="."]
 z_index = -1
