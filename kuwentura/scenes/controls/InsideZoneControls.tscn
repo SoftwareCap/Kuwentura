@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://chff8f3cdvqaf" path="res://assets/buttons/pauseButton.png" id="2_6v7nm"]
 [ext_resource type="Texture2D" uid="uid://b4ff13vwedej7" path="res://assets/buttons/players/ledgerbutton.png" id="3_dfxfg"]
 [ext_resource type="Texture2D" uid="uid://lrijshq5upgf" path="res://assets/buttons/players/briefcasebutton.png" id="4_80khv"]
-[ext_resource type="Texture2D" uid="uid://dhs2e7weqqu13" path="res://assets/buttons/players/mapbutton.png" id="5_nynux"]
+[ext_resource type="Texture2D" uid="uid://ujja3u0qopw2" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/defaultProgress.png" id="5_dfxfg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0aggx"]
 size = Vector2(200, 200)
@@ -39,14 +39,88 @@ passby_press = true
 
 [node name="Briefcase" type="TouchScreenButton" parent="."]
 position = Vector2(1238, 128)
-scale = Vector2(0.06, 0.06)
+scale = Vector2(0.069335975, 0.067871094)
 texture_normal = ExtResource("4_80khv")
 shape = SubResource("RectangleShape2D_lg2p8")
 passby_press = true
 
 [node name="Map" type="TouchScreenButton" parent="."]
-position = Vector2(67, 15)
-scale = Vector2(0.04, 0.04)
-texture_normal = ExtResource("5_nynux")
+visible = false
+position = Vector2(-37, -51.000004)
+scale = Vector2(0.26354167, 0.19444443)
+texture_normal = ExtResource("5_dfxfg")
 shape = SubResource("RectangleShape2D_tdrpu")
 passby_press = true
+
+[node name="BriefcasePanel" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="BriefcaseTexture" type="TextureRect" parent="BriefcasePanel"]
+visible = false
+layout_mode = 0
+offset_left = 229.0
+offset_top = 19.0
+offset_right = 1035.0
+offset_bottom = 493.0
+expand_mode = 1
+
+[node name="ButtonsRow" type="HBoxContainer" parent="BriefcasePanel"]
+layout_mode = 0
+offset_right = 119.0
+offset_bottom = 40.0
+
+[node name="UseButton" type="Button" parent="BriefcasePanel/ButtonsRow"]
+layout_mode = 2
+text = "Use"
+
+[node name="CombineButton" type="Button" parent="BriefcasePanel/ButtonsRow"]
+layout_mode = 2
+text = "Combine"
+
+[node name="CardPieceHotspot" type="Button" parent="BriefcasePanel"]
+visible = false
+layout_mode = 0
+offset_left = 576.0
+offset_top = 287.0
+offset_right = 629.0
+offset_bottom = 341.0
+flat = true
+
+[node name="LighterHotspot" type="Button" parent="BriefcasePanel"]
+layout_mode = 0
+offset_left = 641.0
+offset_top = 289.0
+offset_right = 702.0
+offset_bottom = 344.0
+flat = true
+
+[node name="KeyFragment1Hotspot" type="Button" parent="BriefcasePanel"]
+layout_mode = 0
+offset_left = 325.0
+offset_top = 287.0
+offset_right = 385.0
+offset_bottom = 342.0
+
+[node name="KeyFragment2Hotspot" type="Button" parent="BriefcasePanel"]
+layout_mode = 0
+offset_left = 395.0
+offset_top = 289.0
+offset_right = 445.0
+offset_bottom = 337.0
+
+[node name="KeyFragment3Hotspot" type="Button" parent="BriefcasePanel"]
+layout_mode = 0
+offset_left = 459.0
+offset_top = 286.0
+offset_right = 517.0
+offset_bottom = 341.0
+
+[node name="AssembledKeyHotspot" type="Button" parent="BriefcasePanel"]
+layout_mode = 0
+offset_left = 323.0
+offset_top = 282.0
+offset_right = 385.0
+offset_bottom = 341.0
