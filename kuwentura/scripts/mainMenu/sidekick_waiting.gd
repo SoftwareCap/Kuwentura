@@ -7,7 +7,7 @@ const ANIMATION_DURATION := 0.15
 const ARROW_SCALE_DEFAULT := Vector2(0.28, 0.28)
 const ARROW_SCALE_PRESSED := Vector2(0.24, 0.24)
 const AVATAR_BOUNCE_HEIGHT := 10.0
-const FADE_DURATION := 1.0
+const FADE_DURATION := 0.5
 const SETTINGS_FILE := "user://settings.json"
 const SCENE_MAIN_MENU := "res://scenes/mainMenu/MainMenu.tscn"
 const SCENE_OPENING_CUTSCENE := "res://scenes/cutscenes/opening/OpeningCutscene.tscn"
@@ -444,7 +444,7 @@ func _transition_to_game() -> void:
 		input_blocker.visible = false
 
 	var tween := create_tween()
-	tween.tween_property(self, "modulate", Color.TRANSPARENT, FADE_DURATION)
+	tween.tween_property(self, "modulate", Color.BLACK, FADE_DURATION)
 	await tween.finished
 	_change_to_game()
 

@@ -7,6 +7,7 @@ const ANIMATION_DURATION := 0.15
 const ARROW_SCALE_DEFAULT := Vector2(0.28, 0.28)
 const ARROW_SCALE_PRESSED := Vector2(0.24, 0.24)
 const AVATAR_BOUNCE_HEIGHT := 10.0
+const FADE_DURATION := 0.5
 const SETTINGS_FILE := "user://settings.json"
 const SCENE_MAIN_MENU := "res://scenes/mainMenu/MainMenu.tscn"
 const SCENE_OPENING_CUTSCENE := "res://scenes/cutscenes/opening/OpeningCutscene.tscn"
@@ -528,6 +529,7 @@ func _on_back_pressed() -> void:
 		get_tree().change_scene_to_file(SCENE_MAIN_MENU)
 
 
+# ── INSTANT transition: no fade, change scene immediately ──────────────────
 func _on_game_started(_checkpoint: String = "") -> void:
 	_is_leaving = true
 
@@ -537,9 +539,9 @@ func _on_game_started(_checkpoint: String = "") -> void:
 		settings_panel.visible = false
 	if input_blocker:
 		input_blocker.visible = false
-
+		
 	var tween := create_tween()
-	tween.tween_property(self, "modulate", Color(0, 0, 0, 0), 1.0)
+	tween.tween_property(self, "modulate", Color.BLACK, FADE_DURATION)
 	await tween.finished
 
 	if not is_instance_valid(self) or not is_inside_tree():
