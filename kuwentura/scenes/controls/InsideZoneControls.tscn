@@ -60,30 +60,15 @@ offset_bottom = 40.0
 [node name="BriefcaseTexture" type="TextureRect" parent="BriefcasePanel"]
 visible = false
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="CardPieceHotspot" type="Button" parent="BriefcasePanel"]
-visible = false
-layout_mode = 0
-offset_left = 543.0
-offset_top = 232.0
-offset_right = 722.0
-offset_bottom = 359.0
-flat = true
-
-[node name="LighterHotspot" type="Button" parent="BriefcasePanel"]
-visible = false
-layout_mode = 0
-offset_left = 728.0
-offset_top = 226.0
-offset_right = 890.0
-offset_bottom = 363.0
-flat = true
+offset_left = 229.0
+offset_top = 19.0
+offset_right = 1035.0
+offset_bottom = 493.0
+expand_mode = 1
 
 [node name="ButtonsRow" type="HBoxContainer" parent="BriefcasePanel"]
 layout_mode = 0
-offset_right = 40.0
+offset_right = 119.0
 offset_bottom = 40.0
 
 [node name="UseButton" type="Button" parent="BriefcasePanel/ButtonsRow"]
@@ -93,3 +78,41 @@ text = "Use"
 [node name="CombineButton" type="Button" parent="BriefcasePanel/ButtonsRow"]
 layout_mode = 2
 text = "Combine"
+
+[node name="CardPieceHotspot" type="Button" parent="BriefcasePanel"]
+visible = false
+layout_mode = 0
+offset_left = 576.0
+offset_top = 287.0
+offset_right = 629.0
+offset_bottom = 341.0
+flat = true
+
+[node name="LighterHotspot" type="Button" parent="BriefcasePanel"]
+layout_mode = 0
+offset_left = 641.0
+offset_top = 289.0
+offset_right = 702.0
+offset_bottom = 344.0
+flat = true
+
+[node name="KeyFragment1Hotspot" type="Button" parent="BriefcasePanel"]
+layout_mode = 0
+offset_left = 325.0
+offset_top = 287.0
+offset_right = 385.0
+offset_bottom = 342.0
+
+[node name="KeyFragment2Hotspot" type="Button" parent="BriefcasePanel"]
+layout_mode = 0
+offset_left = 395.0
+offset_top = 289.0
+offset_right = 445.0
+offset_bottom = 337.0
+
+[node name="KeyFragment3Hotspot" type="Button" parent="BriefcasePanel"]
+layout_mode = 0
+offset_left = 459.0
+offset_top = 286.0
+offset_right = 517.0
+offset_bottom = 341.0

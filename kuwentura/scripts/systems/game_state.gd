@@ -96,7 +96,7 @@ var zone_inventory: Dictionary = {
 		"key_fragment_3": false,
 		"card_piece": false,
 		"light_bulb": false,
-		"combined_key": false,
+		"assembled_key": false,
 	}
 }
 
@@ -142,6 +142,7 @@ const BRIEFCASE_ASSETS := {
 	"abandoned_house_puzzle_2":   "res://assets/sprites/zoneObjects/abandonedHouseObjects/puzzzle2BC.png",
 	"abandoned_house_used_lighter": "res://assets/sprites/zoneObjects/abandonedHouseObjects/usedLighterBC.png",
 	"abandoned_house_puzzle_3":    "res://assets/sprites/zoneObjects/abandonedHouseObjects/puzzle3BC.png",
+	"abandoned_house_full_key":    "res://assets/sprites/zoneObjects/abandonedHouseObjects/KeyBC.png",
 }
 
 var selected_costumes: Dictionary = {
@@ -294,9 +295,12 @@ func get_briefcase_texture_path(context: String) -> String:
 			)
 
 			var has_key_fragment_3 := has_zone_item("abandoned_house", "key_fragment_3")
+			var has_full_key := has_zone_item("abandoned_house", "assembled_key")
 			var mirror_lit := is_puzzle_solved("abandoned_house_mirror_lit")
 
-			if has_key_fragment_3:
+			if has_full_key:
+				return BRIEFCASE_ASSETS["abandoned_house_full_key"]
+			elif has_key_fragment_3:
 				return BRIEFCASE_ASSETS["abandoned_house_puzzle_3"]
 			elif mirror_lit:
 				return BRIEFCASE_ASSETS["abandoned_house_used_lighter"]
