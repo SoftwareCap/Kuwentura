@@ -128,14 +128,14 @@ const CLUE_PINAS_HOUSE   := "pinas_house"
 const CLUE_BACKYARD_PATH := "backyard_path"
 
 const BRIEFCASE_ASSETS := {
-	"no_clue":                    "res://assets/briefcase/NoClue.png",
-	"ladle_first_reveal":         "res://assets/briefcase/LadleFirstReveal.png",
-	"ladle_first_global":         "res://assets/briefcase/LadleFirstGlobal.png",
-	"pineapple_first_reveal":     "res://assets/briefcase/PineappleFirstReveal.png",
-	"pineapple_first_global":     "res://assets/briefcase/PineappleFirstGlobal.png",
-	"pineapple_with_ladle_reveal":"res://assets/briefcase/PineappleWithLadleReveal.png",
-	"ladle_with_pineapple_reveal":"res://assets/briefcase/LadleWithPineappleReveal.png",
-	"ladle_and_pineapple_global": "res://assets/briefcase/LadleAndPineapple.png",
+	"no_clue":                    "res://assets/sprites/briefcase/NoClue.png",
+	"ladle_first_reveal":         "res://assets/sprites/briefcase/LadleFirstReveal.png",
+	"ladle_first_global":         "res://assets/sprites/briefcase/LadleFirstGlobal.png",
+	"pineapple_first_reveal":     "res://assets/sprites/briefcase/PineappleFirstReveal.png",
+	"pineapple_first_global":     "res://assets/sprites/briefcase/PineappleFirstGlobal.png",
+	"pineapple_with_ladle_reveal":"res://assets/sprites/briefcase/PineappleWithLadleReveal.png",
+	"ladle_with_pineapple_reveal":"res://assets/sprites/briefcase/LadleWithPineappleReveal.png",
+	"ladle_and_pineapple_global": "res://assets/sprites/briefcase/LadleAndPineapple.png",
 	
 	# Abandoned House
 	"abandoned_house_default":    "res://assets/sprites/zoneObjects/abandonedHouseObjects/defaultBC.png",
@@ -264,61 +264,67 @@ func get_briefcase_texture(context: String) -> Texture2D:
 
 
 func get_briefcase_texture_path(context: String) -> String:
-	var has_ladle     := has_clue(CLUE_PINAS_HOUSE)
-	var has_pineapple := has_clue(CLUE_BACKYARD_PATH)
-
 	match context:
 		"forest":
-			if has_ladle and has_pineapple:
-				return BRIEFCASE_ASSETS["ladle_and_pineapple_global"]
-			elif has_ladle:
-				return BRIEFCASE_ASSETS["ladle_first_global"]
-			elif has_pineapple:
-				return BRIEFCASE_ASSETS["pineapple_first_global"]
-			else:
-				return BRIEFCASE_ASSETS["no_clue"]
+			return _get_forest_briefcase_texture_path()
 
 		"pinas_house_reveal":
+			var has_pineapple := has_clue(CLUE_BACKYARD_PATH)
 			return BRIEFCASE_ASSETS["ladle_with_pineapple_reveal"] if has_pineapple else BRIEFCASE_ASSETS["ladle_first_reveal"]
 
 		"backyard_path_reveal":
+			var has_ladle := has_clue(CLUE_PINAS_HOUSE)
 			return BRIEFCASE_ASSETS["pineapple_with_ladle_reveal"] if has_ladle else BRIEFCASE_ASSETS["pineapple_first_reveal"]
 
 		"abandoned_house":
-			var has_puzzle_1_items := (
-				has_zone_item("abandoned_house", "key_fragment_1")
-				or has_zone_item("abandoned_house", "card_piece")
-			)
-
-			var has_puzzle_2_items := (
-				has_zone_item("abandoned_house", "key_fragment_2")
-				or has_zone_item("abandoned_house", "light_bulb")
-			)
-
-			var has_key_fragment_3 := has_zone_item("abandoned_house", "key_fragment_3")
-			var has_full_key := has_zone_item("abandoned_house", "assembled_key")
-			var mirror_lit := is_puzzle_solved("abandoned_house_mirror_lit")
-			var cabinet_opened := is_puzzle_solved("abandoned_house_cabinet_opened")
-
-			# Once the key has been used on the cabinet,
-			# reset the briefcase back to default.
-			if cabinet_opened:
-				return BRIEFCASE_ASSETS["abandoned_house_default"]
-			elif has_full_key:
-				return BRIEFCASE_ASSETS["abandoned_house_full_key"]
-			elif has_key_fragment_3:
-				return BRIEFCASE_ASSETS["abandoned_house_puzzle_3"]
-			elif mirror_lit:
-				return BRIEFCASE_ASSETS["abandoned_house_used_lighter"]
-			elif has_puzzle_2_items:
-				return BRIEFCASE_ASSETS["abandoned_house_puzzle_2"]
-			elif has_puzzle_1_items:
-				return BRIEFCASE_ASSETS["abandoned_house_puzzle_1"]
-			else:
-				return BRIEFCASE_ASSETS["abandoned_house_default"]
+			return _get_abandoned_house_briefcase_texture_path()
 
 	return BRIEFCASE_ASSETS["no_clue"]
+	
+func _get_forest_briefcase_texture_path() -> String:
+	var has_ladle := has_clue(CLUE_PINAS_HOUSE)
+	var has_pineapple := has_clue(CLUE_BACKYARD_PATH)
 
+	if has_ladle and has_pineapple:
+		return BRIEFCASE_ASSETS["ladle_and_pineapple_global"]
+	elif has_ladle:
+		return BRIEFCASE_ASSETS["ladle_first_global"]
+	elif has_pineapple:
+		return BRIEFCASE_ASSETS["pineapple_first_global"]
+	else:
+		return BRIEFCASE_ASSETS["no_clue"]
+
+
+func _get_abandoned_house_briefcase_texture_path() -> String:
+	var has_puzzle_1_items := (
+		has_zone_item("abandoned_house", "key_fragment_1")
+		or has_zone_item("abandoned_house", "card_piece")
+	)
+
+	var has_puzzle_2_items := (
+		has_zone_item("abandoned_house", "key_fragment_2")
+		or has_zone_item("abandoned_house", "light_bulb")
+	)
+
+	var has_key_fragment_3 := has_zone_item("abandoned_house", "key_fragment_3")
+	var has_full_key := has_zone_item("abandoned_house", "assembled_key")
+	var mirror_lit := is_puzzle_solved("abandoned_house_mirror_lit")
+	var cabinet_opened := is_puzzle_solved("abandoned_house_cabinet_opened")
+
+	if cabinet_opened:
+		return BRIEFCASE_ASSETS["abandoned_house_default"]
+	elif has_full_key:
+		return BRIEFCASE_ASSETS["abandoned_house_full_key"]
+	elif has_key_fragment_3:
+		return BRIEFCASE_ASSETS["abandoned_house_puzzle_3"]
+	elif mirror_lit:
+		return BRIEFCASE_ASSETS["abandoned_house_used_lighter"]
+	elif has_puzzle_2_items:
+		return BRIEFCASE_ASSETS["abandoned_house_puzzle_2"]
+	elif has_puzzle_1_items:
+		return BRIEFCASE_ASSETS["abandoned_house_puzzle_1"]
+	else:
+		return BRIEFCASE_ASSETS["abandoned_house_default"]
 
 func get_save_data() -> Dictionary:
 	return {

@@ -475,6 +475,7 @@ func get_puzzle_for_zone(zone_id: String) -> Dictionary:
 	"reward": zone_data.get("reward", {}),
 	"consequence": zone_data.get("consequence", {}),
 
+	"variation_index": variation_index,
 	"variation_id": selected.get("id", 1),
 
 	# IMPORTANT — these are the values BackyardPath needs
