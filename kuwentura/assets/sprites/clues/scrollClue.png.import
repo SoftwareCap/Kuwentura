@@ -2,9 +2,9 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b1dy4fq6ytpn6"
-path.bptc="res://.godot/imported/inventoryBoard.png-b6729ab0d2c8e41cd01e4b52ef5d286b.bptc.ctex"
-path.astc="res://.godot/imported/inventoryBoard.png-b6729ab0d2c8e41cd01e4b52ef5d286b.astc.ctex"
+uid="uid://bepqi3l7fudbv"
+path.bptc="res://.godot/imported/scrollClue.png-50ef13f914e101fdc2fa3e11d5524f93.bptc.ctex"
+path.astc="res://.godot/imported/scrollClue.png-50ef13f914e101fdc2fa3e11d5524f93.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/inventoryBoard.png"
-dest_files=["res://.godot/imported/inventoryBoard.png-b6729ab0d2c8e41cd01e4b52ef5d286b.bptc.ctex", "res://.godot/imported/inventoryBoard.png-b6729ab0d2c8e41cd01e4b52ef5d286b.astc.ctex"]
+source_file="res://assets/sprites/clues/scrollClue.png"
+dest_files=["res://.godot/imported/scrollClue.png-50ef13f914e101fdc2fa3e11d5524f93.bptc.ctex", "res://.godot/imported/scrollClue.png-50ef13f914e101fdc2fa3e11d5524f93.astc.ctex"]
 
 [params]
 
