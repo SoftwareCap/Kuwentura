@@ -2,9 +2,9 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1c2h4nc7u3fw"
-path.s3tc="res://.godot/imported/detective_idle.png-6b4912007aac9f7b6e3e8261dbc466bb.s3tc.ctex"
-path.etc2="res://.godot/imported/detective_idle.png-6b4912007aac9f7b6e3e8261dbc466bb.etc2.ctex"
+uid="uid://cnl8w64qirb0r"
+path.s3tc="res://.godot/imported/cylinderContainer.png-7083f74caaae54a104a6d522ac9678df.s3tc.ctex"
+path.etc2="res://.godot/imported/cylinderContainer.png-7083f74caaae54a104a6d522ac9678df.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/players/detective/detective_idle.png"
-dest_files=["res://.godot/imported/detective_idle.png-6b4912007aac9f7b6e3e8261dbc466bb.s3tc.ctex", "res://.godot/imported/detective_idle.png-6b4912007aac9f7b6e3e8261dbc466bb.etc2.ctex"]
+source_file="res://assets/sprites/zoneObjects/storageHut/cylinderContainer.png"
+dest_files=["res://.godot/imported/cylinderContainer.png-7083f74caaae54a104a6d522ac9678df.s3tc.ctex", "res://.godot/imported/cylinderContainer.png-7083f74caaae54a104a6d522ac9678df.etc2.ctex"]
 
 [params]
 
