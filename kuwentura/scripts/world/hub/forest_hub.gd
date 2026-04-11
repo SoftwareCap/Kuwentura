@@ -9,6 +9,10 @@ extends Node2D
 @export var sidekick_scale: Vector2 = Vector2(0.2, 0.2)
 @export var ground_y: float = 750.0
 
+@onready var dialogue_panel: Panel = $DialogueLayer/DialoguePanel
+@onready var speaker_label: Label = $DialogueLayer/DialoguePanel/SpeakerLabel
+@onready var dialogue_label: Label = $DialogueLayer/DialoguePanel/DialogueLabel
+
 @onready var spawn_points: Node2D = $SpawnPoints
 @onready var touch_controls: CanvasLayer = $TouchControls
 @onready var pause_canvas_layer: CanvasLayer = $PauseCanvasLayer
@@ -39,6 +43,7 @@ extends Node2D
 @onready var pinas_house_door: Sprite2D = $"Zone Portals/PortalPinasHouse/DoorOpen"
 
 const PANEL_ANIMATION_DURATION: float = 0.4
+const DIALOGUE_SPEED: float = 0.04
 const LEDGER_PAGE_TURN_DURATION: float = 0.16
 const DOOR_ANIMATION_DURATION: float = 0.5
 const LEDGER_EMPTY_TEXT := "Solve a zone puzzle to unlock \nledger notes in the forest."
@@ -55,6 +60,7 @@ var _is_animating: bool = false
 var _ledger_pages: Array[Dictionary] = []
 var _current_ledger_page: int = 0
 var _ledger_page_animating: bool = false
+var _skip_pressed: bool = false
 
 
 func _ready() -> void:
@@ -70,11 +76,14 @@ func _ready() -> void:
 	_connect_portal_signals()
 	_setup_zone_completion_indicators()
 	_refresh_briefcase_display()
-	
+
 	if briefcase_panel:
 		briefcase_panel.visible = false
 		briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
-	
+
+	if dialogue_panel:
+		dialogue_panel.visible = false
+
 	for peer_id in multiplayer.get_peers():
 		if peer_id != multiplayer.get_unique_id() and not _spawned_players.has(peer_id):
 			_spawn_player_for_peer(peer_id)
@@ -89,6 +98,9 @@ func _ready() -> void:
 					if other_peer != peer_id and other_peer != multiplayer.get_unique_id():
 						_rpc_spawn_player_with_pos.rpc_id(other_peer, peer_id, false, peer_pos)
 
+	await get_tree().process_frame
+	_run_forest_dialogue()
+
 
 func _exit_tree() -> void:
 	var signal_pairs := [
@@ -96,7 +108,7 @@ func _exit_tree() -> void:
 		[NetworkManager.player_disconnected, _on_player_disconnected],
 		[NetworkManager.partner_disconnected, _on_partner_disconnected],
 		[NetworkManager.spawn_player_requested, _on_spawn_player_requested],
-		[NetworkManager.despawn_player_requested,_on_despawn_player_requested],
+		[NetworkManager.despawn_player_requested, _on_despawn_player_requested],
 		[NetworkManager.rejoin_game_requested, _on_rejoin_game_requested],
 	]
 	for pair in signal_pairs:
@@ -112,7 +124,7 @@ func _connect_signals() -> void:
 		[NetworkManager.player_disconnected, _on_player_disconnected],
 		[NetworkManager.partner_disconnected, _on_partner_disconnected],
 		[NetworkManager.spawn_player_requested, _on_spawn_player_requested],
-		[NetworkManager.despawn_player_requested,_on_despawn_player_requested],
+		[NetworkManager.despawn_player_requested, _on_despawn_player_requested],
 		[NetworkManager.rejoin_game_requested, _on_rejoin_game_requested],
 	]
 	for pair in signal_pairs:
@@ -615,10 +627,10 @@ func _convert_entry_to_book_page(entry: Dictionary) -> Dictionary:
 			"right_body": str(entry.get("right_body", "")),
 		}
 	var body_text := str(entry.get("body", ""))
-	var split_pages  := _split_body_into_book_pages(body_text)
+	var split_pages := _split_body_into_book_pages(body_text)
 	return {
 		"title": str(entry.get("zone_name", entry.get("title", "Ledger"))),
-		"left_header":  str(entry.get("title", "Notes")),
+		"left_header": str(entry.get("title", "Notes")),
 		"left_body": str(split_pages.get("left", "")),
 		"right_header": "Example" if str(split_pages.get("right", "")) != "" else "",
 		"right_body": str(split_pages.get("right", "")),
@@ -630,11 +642,13 @@ func _split_body_into_book_pages(body_text: String) -> Dictionary:
 	if sections.size() <= 1:
 		return {"left": body_text, "right": ""}
 	var midpoint := int(ceil(float(sections.size()) / 2.0))
-	var left_parts:  Array[String] = []
+	var left_parts: Array[String] = []
 	var right_parts: Array[String] = []
 	for i in range(sections.size()):
-		if i < midpoint: left_parts.append(sections[i])
-		else: right_parts.append(sections[i])
+		if i < midpoint:
+			left_parts.append(sections[i])
+		else:
+			right_parts.append(sections[i])
 	return {"left": "\n\n".join(left_parts), "right": "\n\n".join(right_parts)}
 
 
@@ -686,10 +700,10 @@ func _update_forest_ledger_navigation() -> void:
 	if is_instance_valid(forest_page_indicator_label):
 		forest_page_indicator_label.text = str(_current_ledger_page + 1) + " / " + str(max(total_pages, 1))
 	if is_instance_valid(forest_prev_page_button):
-		forest_prev_page_button.visible  = total_pages > 1
+		forest_prev_page_button.visible = total_pages > 1
 		forest_prev_page_button.disabled = _current_ledger_page <= 0
 	if is_instance_valid(forest_next_page_button):
-		forest_next_page_button.visible  = total_pages > 1
+		forest_next_page_button.visible = total_pages > 1
 		forest_next_page_button.disabled = _current_ledger_page >= total_pages - 1
 
 
@@ -707,17 +721,13 @@ func _open_briefcase() -> void:
 	if not briefcase_panel:
 		push_error("[ForestHub] briefcase_panel is null")
 		return
-
 	_refresh_briefcase_display()
-
 	_is_animating = true
 	briefcase_panel.visible = true
 	briefcase_panel.modulate = Color(1, 1, 1, 1)
 	briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
 	briefcase_panel.pivot_offset = Vector2(briefcase_panel.size.x / 2, 0)
-
 	print("[ForestHub] Opening briefcase panel")
-
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_BOUNCE)
 	tween.set_ease(Tween.EASE_OUT)
@@ -750,17 +760,13 @@ func _refresh_briefcase_display() -> void:
 	if not is_instance_valid(briefcase_display):
 		push_error("[ForestHub] briefcase_display is invalid")
 		return
-
 	var path := GameState.get_briefcase_texture_path("forest")
 	print("[ForestHub] Forest briefcase path: ", path)
-
 	var texture: Texture2D = GameState.get_briefcase_texture("forest")
-
 	if texture == null:
 		push_warning("[ForestHub] Forest briefcase texture is null for path: " + path)
 		briefcase_display.visible = false
 		return
-
 	briefcase_display.texture = texture
 	briefcase_display.visible = true
 
@@ -826,7 +832,7 @@ func _setup_zone_completion_indicators() -> void:
 			if finish_zone_indicator.has_method("show_indicator"):
 				finish_zone_indicator.show_indicator(zone_name)
 			if enter_button:
-				enter_button.visible  = false
+				enter_button.visible = false
 				enter_button.disabled = true
 		else:
 			if finish_zone_indicator.has_method("hide_indicator"):
@@ -843,6 +849,92 @@ func _on_zone_completed(completed_zone: String) -> void:
 			finish_zone_indicator.show_indicator(completed_zone)
 		var enter_button := portal.get_node_or_null("EnterButton")
 		if enter_button:
-			enter_button.visible  = false
+			enter_button.visible = false
 			enter_button.disabled = true
 		break
+
+
+# ─── DIALOGUE ────────────────────────────────────────────────────────────────
+
+func _run_forest_dialogue() -> void:
+	# FOREST_PLAYERS_SPAWN
+	await _say_auto("Sidekick", "Whoa. Okay. That was... not a normal elevator ride.", 1.0)
+	await _say_auto("Sidekick", "One second we're looking at Grandma's fading book,", 1.0)
+	await _say_auto("Sidekick", "and the next we're here.", 1.0)
+	await _say_auto("Detective", "Stay sharp, partner. We aren't just in a forest.", 1.0)
+	await _say_auto("Detective", "We've been pulled into the book.", 1.0)
+	await _say_auto("Detective", "And if Grandma was right, the story is actively dying around us.", 1.0)
+	await _say_auto("Sidekick", "It feels empty. Like life has been sucked out of it.", 1.0)
+
+	# FOREST_PLAYERS_WALK
+	await _say_auto("Sidekick", "So, what's the plan? We just walk around until we find her?", 1.0)
+	await _say_auto("aDetective", "No. We look for the evidence. The story is fragmented.", 1.0)
+	await _say_auto("Detective", "To understand the truth, we need to find five specific things scattered across this forest.", 1.0)
+	await _say_auto("Sidekick", "Five things? Like clues?", 1.0)
+	await _say_auto("Detective", "Artifacts. A Tiara. A Ladle. A Scroll. A Pineapple. And... an Eye.", 1.0)
+	await _say_auto("Sidekick", "An eye? That's creepy. And a pineapple?", 1.0)
+	await _say_auto("Sidekick", "What does fruit have to do with a missing girl?", 1.0)
+	await _say_auto("Detective", "That's the question, isn't it? The old legend mentions a mother's frustration.", 1.0)
+	await _say_auto("Sidekick", "Grandma mentioned that. Something about 'a thousand eyes'?", 1.0)
+	await _say("Detective", "Exactly. 'I wish you would grow a thousand eyes so you could find what you're looking for.'")
+	await _say("Detective", "We need to find out if that was just a figure of speech... or if it's the key to everything.")
+	_clear_dialogue()
+
+
+func _say(speaker: String, text: String) -> void:
+	_skip_pressed = false
+	speaker_label.text = speaker
+	dialogue_label.text = ""
+	dialogue_panel.modulate.a = 1.0
+	dialogue_panel.visible = true
+	var char_index: int = 0
+	var elapsed: float = 0.0
+	var length: int = text.length()
+	while char_index <= length:
+		if _skip_pressed:
+			dialogue_label.text = text
+			_skip_pressed = false
+			break
+		elapsed += get_process_delta_time()
+		if elapsed >= DIALOGUE_SPEED:
+			elapsed -= DIALOGUE_SPEED
+			char_index += 1
+			dialogue_label.text = text.substr(0, char_index)
+		await get_tree().process_frame
+	dialogue_panel.visible = false
+
+
+func _say_auto(speaker: String, text: String, hold: float) -> void:
+	_skip_pressed = false
+	speaker_label.text = speaker
+	dialogue_label.text = ""
+	dialogue_panel.modulate.a = 1.0
+	dialogue_panel.visible = true
+	var char_index: int = 0
+	var elapsed: float = 0.0
+	var length: int = text.length()
+	while char_index <= length:
+		elapsed += get_process_delta_time()
+		if elapsed >= DIALOGUE_SPEED:
+			elapsed -= DIALOGUE_SPEED
+			char_index += 1
+			dialogue_label.text = text.substr(0, char_index)
+		await get_tree().process_frame
+	await _wait(hold)
+
+
+func _on_skip_pressed() -> void:
+	_skip_pressed = true
+
+
+func _wait(seconds: float) -> void:
+	var elapsed: float = 0.0
+	while elapsed < seconds:
+		elapsed += get_process_delta_time()
+		await get_tree().process_frame
+
+
+func _clear_dialogue() -> void:
+	dialogue_label.text = ""
+	speaker_label.text = ""
+	dialogue_panel.visible = false
