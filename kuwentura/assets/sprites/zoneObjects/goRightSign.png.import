@@ -2,22 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1c2h4nc7u3fw"
-path.s3tc="res://.godot/imported/detective_idle.png-6b4912007aac9f7b6e3e8261dbc466bb.s3tc.ctex"
-path.etc2="res://.godot/imported/detective_idle.png-6b4912007aac9f7b6e3e8261dbc466bb.etc2.ctex"
+uid="uid://dq6djmh3qakla"
+path="res://.godot/imported/goRightSign.png-be148fd53721a446771cbed81647c679.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/detective/detective_idle.png"
-dest_files=["res://.godot/imported/detective_idle.png-6b4912007aac9f7b6e3e8261dbc466bb.s3tc.ctex", "res://.godot/imported/detective_idle.png-6b4912007aac9f7b6e3e8261dbc466bb.etc2.ctex"]
+source_file="res://assets/sprites/zoneObjects/goRightSign.png"
+dest_files=["res://.godot/imported/goRightSign.png-be148fd53721a446771cbed81647c679.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
