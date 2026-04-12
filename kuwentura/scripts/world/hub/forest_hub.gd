@@ -53,14 +53,16 @@ const BRIEFCASE_OPEN_SCALE: Vector2 = Vector2(1.0, 1.0)
 const BRIEFCASE_CLOSED_SCALE: Vector2 = Vector2(1.0, 0.1)
 const SCENE_MAIN_MENU := "res://scenes/mainMenu/MainMenu.tscn"
 const SETTINGS_FILE := "user://settings.json"
+const FIND_PARTNER_DURATION: float = 1.2
+const FIND_PARTNER_HOLD: float = 2.0
 
 var _spawned_players: Dictionary = {}
+var _is_finding_partner: bool = false
 var _current_open_panel: String = ""
 var _is_animating: bool = false
 var _ledger_pages: Array[Dictionary] = []
 var _current_ledger_page: int = 0
 var _ledger_page_animating: bool = false
-var _skip_pressed: bool = false
 
 
 func _ready() -> void:
@@ -76,6 +78,7 @@ func _ready() -> void:
 	_connect_portal_signals()
 	_setup_zone_completion_indicators()
 	_refresh_briefcase_display()
+	_animate_location_diamond()
 
 	if briefcase_panel:
 		briefcase_panel.visible = false
@@ -496,6 +499,18 @@ func _setup_ui_controls() -> void:
 	else:
 		push_error("[ForestHub] Briefcase button not found inside TouchControls")
 
+	var find_partner_btn = touch_controls.get_node_or_null("FindPartner")
+	if find_partner_btn:
+		find_partner_btn.text = "Find Partner"
+		find_partner_btn.visible = true
+		if not find_partner_btn.pressed.is_connected(_on_find_partner_pressed):
+			find_partner_btn.pressed.connect(_on_find_partner_pressed)
+
+# Hide jump button in forest hub
+	var jump_btn = touch_controls.get_node_or_null("Jump")  # adjust name if different
+	if jump_btn:
+		jump_btn.visible = false
+
 	_close_all_panels(false)
 
 
@@ -882,7 +897,6 @@ func _run_forest_dialogue() -> void:
 
 
 func _say(speaker: String, text: String) -> void:
-	_skip_pressed = false
 	speaker_label.text = speaker
 	dialogue_label.text = ""
 	dialogue_panel.modulate.a = 1.0
@@ -891,10 +905,6 @@ func _say(speaker: String, text: String) -> void:
 	var elapsed: float = 0.0
 	var length: int = text.length()
 	while char_index <= length:
-		if _skip_pressed:
-			dialogue_label.text = text
-			_skip_pressed = false
-			break
 		elapsed += get_process_delta_time()
 		if elapsed >= DIALOGUE_SPEED:
 			elapsed -= DIALOGUE_SPEED
@@ -905,7 +915,6 @@ func _say(speaker: String, text: String) -> void:
 
 
 func _say_auto(speaker: String, text: String, hold: float) -> void:
-	_skip_pressed = false
 	speaker_label.text = speaker
 	dialogue_label.text = ""
 	dialogue_panel.modulate.a = 1.0
@@ -923,10 +932,6 @@ func _say_auto(speaker: String, text: String, hold: float) -> void:
 	await _wait(hold)
 
 
-func _on_skip_pressed() -> void:
-	_skip_pressed = true
-
-
 func _wait(seconds: float) -> void:
 	var elapsed: float = 0.0
 	while elapsed < seconds:
@@ -938,3 +943,89 @@ func _clear_dialogue() -> void:
 	dialogue_label.text = ""
 	speaker_label.text = ""
 	dialogue_panel.visible = false
+
+func _on_find_partner_pressed() -> void:
+	if _is_finding_partner:
+		return
+
+	var my_id := multiplayer.get_unique_id()
+	var partner_id: int = -1
+
+	for peer_id in _spawned_players.keys():
+		if peer_id != my_id:
+			partner_id = peer_id
+			break
+
+	if partner_id == -1:
+		push_warning("[ForestHub] No partner found to locate.")
+		return
+
+	var partner_pos: Vector2
+	var state := NetworkManager.get_partner_state(partner_id)
+
+	if not state.is_empty() and state.has("position"):
+		partner_pos = state.get("position", Vector2.ZERO)
+	else:
+		var partner_node := get_node_or_null(str(partner_id)) as CharacterBody2D
+		if not is_instance_valid(partner_node):
+			push_warning("[ForestHub] Partner state and node both unavailable.")
+			return
+		partner_pos = partner_node.global_position
+
+	_slide_camera_to_partner(partner_pos)
+
+
+func _slide_camera_to_partner(target_pos: Vector2) -> void:
+	var my_id := multiplayer.get_unique_id()
+	var my_player := get_node_or_null(str(my_id)) as CharacterBody2D
+	if not is_instance_valid(my_player):
+		push_warning("[ForestHub] Local player node not found.")
+		return
+
+	var cam := my_player.get_node_or_null("Camera2D") as Camera2D
+	if not cam:
+		push_warning("[ForestHub] Camera2D not found on local player.")
+		return
+
+	# Prevent double trigger
+	_is_finding_partner = true
+
+	# Detach camera so we can move it freely
+	cam.set_as_top_level(true)
+	cam.global_position = my_player.global_position  # anchor it here immediately after detach
+
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+
+	# Slide to partner
+	tween.tween_property(cam, "global_position", target_pos, FIND_PARTNER_DURATION)
+
+	# Hold
+	tween.tween_interval(FIND_PARTNER_HOLD)
+
+	# Slide back to player's CURRENT position (not stale start_pos)
+	tween.tween_method(func(_t: float):
+		if is_instance_valid(cam) and is_instance_valid(my_player):
+			cam.global_position = cam.global_position.lerp(my_player.global_position, 0.15)
+	, 0.0, 1.0, FIND_PARTNER_DURATION)
+
+	# Reattach
+	tween.tween_callback(func():
+		if not is_instance_valid(cam) or not is_instance_valid(my_player):
+			_is_finding_partner = false
+			return
+		cam.set_as_top_level(false)
+		cam.position = Vector2.ZERO
+		_is_finding_partner = false
+	)
+
+func _animate_location_diamond() -> void:
+	var diamond := get_node_or_null("LocationDiamond")
+	if not diamond:
+		return
+	var tween := create_tween().set_loops()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(diamond, "modulate:a", 0.4, 0.8)
+	tween.tween_property(diamond, "modulate:a", 1.0, 0.8)

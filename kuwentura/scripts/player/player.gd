@@ -22,6 +22,7 @@ const GROUNDING_VELOCITY := 100.0
 
 # NODE REFERENCES
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var location_diamond: Node = $LocationDiamond
 
 # EXPORTS
 @export var speed: float = 350.0
@@ -45,6 +46,11 @@ var _intended_x_position: float = 0.0
 # LIFECYCLE
 func _ready() -> void:
 	_is_in_lobby = get_parent() is Control
+	
+	# Hide the diamond when displayed in lobby
+	if _is_in_lobby:
+		if is_instance_valid(location_diamond):
+			location_diamond.visible = false
 
 	if multiplayer.has_multiplayer_peer():
 		z_index = 10 if is_multiplayer_authority() else 0

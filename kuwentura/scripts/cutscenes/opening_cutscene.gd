@@ -225,9 +225,10 @@ func _scene3() -> void:
 	await _say3_auto("", "Only those who seek the truth can restore the lost story.", 1.5)
 	await _say3_auto("", "The legend of Pina has been forgotten.", 1.5)
 	await _say3_auto("", "Find the truth behind her disappearance.", 1.5)
-	await _say3("", "Restore the missing pieces of the tale.")
+	await _say3_auto("", "Restore the missing pieces of the tale.", 1.5)
 	
 	_clear_dialogue(dialogue_label3, name_label3)
+	dialogue_box.visible = false
 	players_pull.visible = true
 	_play_anim(players_pull, "players_pull")
 	await _wait(players_pull.sprite_frames.get_frame_count("players_pull") * (1.0 / players_pull.sprite_frames.get_animation_speed("players_pull")))
