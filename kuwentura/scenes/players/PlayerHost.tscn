@@ -1,9 +1,9 @@
-[gd_scene load_steps=21 format=3 uid="uid://2ktjes4bfwlo"]
+[gd_scene load_steps=22 format=3 uid="uid://2ktjes4bfwlo"]
 
 [ext_resource type="Script" uid="uid://bwa5cliuua5sb" path="res://scripts/player/player.gd" id="1_f4ao3"]
 [ext_resource type="Texture2D" uid="uid://1c2h4nc7u3fw" path="res://assets/sprites/players/detective/detective_idle.png" id="2_hej0o"]
 [ext_resource type="Texture2D" uid="uid://mttlik5nsegf" path="res://assets/sprites/players/detective/detective_walk.png" id="3_363fc"]
-
+[ext_resource type="Texture2D" uid="uid://5jrpcrsfso1p" path="res://assets/sprites/players/diamond.png" id="4_363fc"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kbjpn"]
 atlas = ExtResource("2_hej0o")
@@ -150,3 +150,8 @@ limit_top = 0
 limit_right = 8000
 limit_bottom = 648
 position_smoothing_enabled = true
+
+[node name="LocationDiamond" type="Sprite2D" parent="."]
+position = Vector2(-2.9999962, -570)
+scale = Vector2(0.74, 0.74)
+texture = ExtResource("4_363fc")
