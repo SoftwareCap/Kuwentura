@@ -84,6 +84,7 @@ const PUZZLE_ZONE_ORDER := [
 var ledger_entries: Array = []
 var climax_triggered: bool = false
 var game_completed: bool = false
+var forest_intro_played: bool = false
 var nightfall_attempts: int = 0
 var max_nightfall_attempts: int = 3
 var saved_spawn_positions: Dictionary = {}
@@ -246,6 +247,7 @@ func reset_game_after_nightfall() -> void:
 	current_zone = "forest_hub"
 	climax_triggered = false
 	solved_puzzles.clear()
+	forest_intro_played = false
 	game_reset.emit()
 	_save_progress("nightfall_reset")
 
@@ -334,6 +336,7 @@ func get_save_data() -> Dictionary:
 		"current_zone":             current_zone,
 		"climax_triggered":         climax_triggered,
 		"game_completed":           game_completed,
+		"forest_intro_played":      forest_intro_played,
 		"attempt_count":            attempt_count,
 		"nightfall_attempts":       nightfall_attempts,
 		"ledger_entries":           ledger_entries.duplicate(true),
@@ -352,6 +355,7 @@ func load_save_data(data: Dictionary) -> void:
 	if data.has("current_zone"):             current_zone                = data["current_zone"]
 	if data.has("climax_triggered"):         climax_triggered            = data["climax_triggered"]
 	if data.has("game_completed"):           game_completed              = data["game_completed"]
+	if data.has("forest_intro_played"): forest_intro_played = data["forest_intro_played"]
 	if data.has("attempt_count"):            attempt_count               = data["attempt_count"]
 	if data.has("nightfall_attempts"):       nightfall_attempts          = data["nightfall_attempts"]
 	if data.has("ledger_entries"):           ledger_entries              = data["ledger_entries"].duplicate(true)
@@ -516,6 +520,7 @@ func reset_all_progress() -> void:
 	reset_costume_selections()
 	if LocalSaveManager:
 		LocalSaveManager.delete_save()
+	forest_intro_played = false
 	game_reset.emit()
 
 

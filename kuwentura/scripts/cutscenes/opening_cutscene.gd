@@ -163,7 +163,7 @@ func _scene2() -> void:
 	# GrandmaFlipping plays over scene1 background (still visible)
 	_play_anim(grandma_flip, "sitting_flipping")
 	await _say2_auto("Grandmother", "What is happening to this book?", 1.2)
-	await _say2("Grandmother", "The story is fading.")
+	await _say2_auto("Grandmother", "The story is fading.", 1.2)
 
 	# GrandmaFlipping hides, GrandmaLightEmerge takes over
 	grandma_flip.get_parent().visible  = false

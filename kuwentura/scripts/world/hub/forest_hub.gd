@@ -2,12 +2,18 @@ extends Node2D
 
 ## Forest Hub - Main world scene with zone portals and player spawning.
 
+# ─── PRELOADS ────────────────────────────────────────────────────────────────
+
 @onready var player_host_scene: PackedScene = preload("res://scenes/players/PlayerHost.tscn")
 @onready var player_sidekick_scene: PackedScene = preload("res://scenes/players/PlayerSidekick.tscn")
+
+# ─── EXPORTS ─────────────────────────────────────────────────────────────────
 
 @export var detective_scale: Vector2 = Vector2(0.2, 0.2)
 @export var sidekick_scale: Vector2 = Vector2(0.2, 0.2)
 @export var ground_y: float = 750.0
+
+# ─── NODE REFERENCES ─────────────────────────────────────────────────────────
 
 @onready var dialogue_panel: Panel = $DialogueLayer/DialoguePanel
 @onready var speaker_label: Label = $DialogueLayer/DialoguePanel/SpeakerLabel
@@ -40,12 +46,20 @@ extends Node2D
 @onready var map_layer: CanvasLayer = $MapLayer
 @onready var map_panel: Panel = $MapLayer/Map
 @onready var portals: Node2D = $"Zone Portals"
-@onready var pinas_house_door: Sprite2D = $"Zone Portals/PortalPinasHouse/DoorOpen"
+@onready var pinas_house_door: Sprite2D = $"Zone Portals/PortalPinasHouse/PinasHouseDoorOpen"
+@onready var storage_hut_door: Sprite2D = $"Zone Portals/StorageHut/StorageHutDoorOpen"
+@onready var abandoned_house_door: Sprite2D = $"Zone Portals/AbandonedHouse/AbandonedHouseDoorOpen"
+
+# ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
 const PANEL_ANIMATION_DURATION: float = 0.4
 const DIALOGUE_SPEED: float = 0.04
 const LEDGER_PAGE_TURN_DURATION: float = 0.16
 const DOOR_ANIMATION_DURATION: float = 0.5
+const FIND_PARTNER_DURATION: float = 1.2
+const FIND_PARTNER_HOLD: float = 2.0
+const ZONE_THOUGHT_HOLD: float = 2.0
+
 const LEDGER_EMPTY_TEXT := "Solve a zone puzzle to unlock \nledger notes in the forest."
 const LEDGER_OPEN_SCALE: Vector2 = Vector2(1.0, 1.0)
 const LEDGER_CLOSED_SCALE: Vector2 = Vector2(0.1, 1.0)
@@ -53,8 +67,34 @@ const BRIEFCASE_OPEN_SCALE: Vector2 = Vector2(1.0, 1.0)
 const BRIEFCASE_CLOSED_SCALE: Vector2 = Vector2(1.0, 0.1)
 const SCENE_MAIN_MENU := "res://scenes/mainMenu/MainMenu.tscn"
 const SETTINGS_FILE := "user://settings.json"
-const FIND_PARTNER_DURATION: float = 1.2
-const FIND_PARTNER_HOLD: float = 2.0
+
+## Zone thought lines: zone_name → { true: [speaker, line], false: [speaker, line] }
+## true = detective, false = sidekick.
+## zone_name must exactly match portal.zone_name in the Inspector.
+const ZONE_THOUGHTS: Dictionary = {
+	"pinas_house": {
+		true:  ["Detective", "Pina's place... I sense an artifact inside."],
+		false: ["Sidekick",  "Lights are on! I bet there's an artifact."]
+	},
+	"old_well": {
+		true:  ["Detective", "The well is deep. An artifact lies below."],
+		false: ["Sidekick",  "Something's in the well wall! Help me look."]
+	},
+	"backyard_path": {
+		true:  ["Detective", "Tracks lead this way. An artifact must be here."],
+		false: ["Sidekick",  "The path is clear! Let's find that artifact."]
+	},
+	"storage_hut": {
+		true:  ["Detective", "The hut is unlocked. A. artifact awaits."],
+		false: ["Sidekick",  "It's small, but I bet there's an artifact!"]
+	},
+	"abandoned_house": {
+		true:  ["Detective", "Eerie... but there is an artifact within."],
+		false: ["Sidekick",  "Spooky! I'm not going in for that artifact alone."]
+	},
+}
+
+# ─── STATE ───────────────────────────────────────────────────────────────────
 
 var _spawned_players: Dictionary = {}
 var _is_finding_partner: bool = false
@@ -64,6 +104,7 @@ var _ledger_pages: Array[Dictionary] = []
 var _current_ledger_page: int = 0
 var _ledger_page_animating: bool = false
 
+# ─── LIFECYCLE ───────────────────────────────────────────────────────────────
 
 func _ready() -> void:
 	_ensure_spawn_points()
@@ -90,6 +131,7 @@ func _ready() -> void:
 	for peer_id in multiplayer.get_peers():
 		if peer_id != multiplayer.get_unique_id() and not _spawned_players.has(peer_id):
 			_spawn_player_for_peer(peer_id)
+
 	if multiplayer.is_server():
 		await get_tree().process_frame
 		var host_pos := GameState.get_spawn_position(1)
@@ -106,31 +148,23 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
-	var signal_pairs := [
-		[NetworkManager.player_connected, _on_player_connected],
-		[NetworkManager.player_disconnected, _on_player_disconnected],
-		[NetworkManager.partner_disconnected, _on_partner_disconnected],
-		[NetworkManager.spawn_player_requested, _on_spawn_player_requested],
+	_disconnect_network_signals()
+
+# ─── SIGNAL WIRING ───────────────────────────────────────────────────────────
+
+func _get_network_signal_pairs() -> Array:
+	return [
+		[NetworkManager.player_connected,         _on_player_connected],
+		[NetworkManager.player_disconnected,      _on_player_disconnected],
+		[NetworkManager.partner_disconnected,     _on_partner_disconnected],
+		[NetworkManager.spawn_player_requested,   _on_spawn_player_requested],
 		[NetworkManager.despawn_player_requested, _on_despawn_player_requested],
-		[NetworkManager.rejoin_game_requested, _on_rejoin_game_requested],
+		[NetworkManager.rejoin_game_requested,    _on_rejoin_game_requested],
 	]
-	for pair in signal_pairs:
-		var sig: Signal = pair[0]
-		var cb: Callable = pair[1]
-		if sig.is_connected(cb):
-			sig.disconnect(cb)
 
 
 func _connect_signals() -> void:
-	var signal_pairs := [
-		[NetworkManager.player_connected, _on_player_connected],
-		[NetworkManager.player_disconnected, _on_player_disconnected],
-		[NetworkManager.partner_disconnected, _on_partner_disconnected],
-		[NetworkManager.spawn_player_requested, _on_spawn_player_requested],
-		[NetworkManager.despawn_player_requested, _on_despawn_player_requested],
-		[NetworkManager.rejoin_game_requested, _on_rejoin_game_requested],
-	]
-	for pair in signal_pairs:
+	for pair in _get_network_signal_pairs():
 		var sig: Signal = pair[0]
 		var cb: Callable = pair[1]
 		if not sig.is_connected(cb):
@@ -139,10 +173,19 @@ func _connect_signals() -> void:
 		GameState.zone_completed.connect(_on_zone_completed)
 	if not GameState.briefcase_updated.is_connected(_on_briefcase_updated):
 		GameState.briefcase_updated.connect(_on_briefcase_updated)
-	if touch_controls:
-		if touch_controls.has_signal("pause_pressed") and not touch_controls.pause_pressed.is_connected(_on_pause_button_pressed):
+	if touch_controls and touch_controls.has_signal("pause_pressed"):
+		if not touch_controls.pause_pressed.is_connected(_on_pause_button_pressed):
 			touch_controls.pause_pressed.connect(_on_pause_button_pressed)
 
+
+func _disconnect_network_signals() -> void:
+	for pair in _get_network_signal_pairs():
+		var sig: Signal = pair[0]
+		var cb: Callable = pair[1]
+		if sig.is_connected(cb):
+			sig.disconnect(cb)
+
+# ─── SPAWN POINTS ────────────────────────────────────────────────────────────
 
 func _ensure_spawn_points() -> void:
 	if spawn_points:
@@ -157,6 +200,7 @@ func _ensure_spawn_points() -> void:
 		m.position = cfg[1]
 		spawn_points.add_child(m)
 
+# ─── ROOM CODE ───────────────────────────────────────────────────────────────
 
 func _setup_room_code_label() -> void:
 	if not room_code_label:
@@ -168,6 +212,7 @@ func _setup_room_code_label() -> void:
 	else:
 		room_code_label.visible = false
 
+# ─── PAUSE ───────────────────────────────────────────────────────────────────
 
 func _setup_pause_panel() -> void:
 	if not in_game_pause_panel:
@@ -242,10 +287,10 @@ func _save_settings() -> void:
 		file.store_string(JSON.stringify({"volume": MusicController.get_volume()}))
 		file.close()
 
+# ─── PLAYER SPAWNING ─────────────────────────────────────────────────────────
 
 func _on_spawn_player_requested(peer_id: int, is_detective: bool) -> void:
-	var saved_pos := GameState.get_spawn_position(peer_id)
-	_rpc_spawn_player(peer_id, is_detective, saved_pos)
+	_rpc_spawn_player(peer_id, is_detective, GameState.get_spawn_position(peer_id))
 
 
 func _on_despawn_player_requested(peer_id: int) -> void:
@@ -471,6 +516,7 @@ func _sync_player_position_to_all(peer_id: int, pos: Vector2) -> void:
 		player_node.global_position = pos
 		player_node.velocity = Vector2.ZERO
 
+# ─── UI CONTROLS ─────────────────────────────────────────────────────────────
 
 func _setup_ui_controls() -> void:
 	var is_sidekick := (NetworkManager.get_my_role() != "detective")
@@ -479,40 +525,30 @@ func _setup_ui_controls() -> void:
 		push_error("[ForestHub] TouchControls not found")
 		return
 
-	var map_btn: TouchScreenButton = touch_controls.get_node_or_null("Map")
-	if map_btn:
-		map_btn.visible = true
-		if not map_btn.pressed.is_connected(_on_map_button_pressed):
-			map_btn.pressed.connect(_on_map_button_pressed)
+	## [node_name, visible, handler] — Callable() means visible-only, no signal
+	var button_configs := [
+		["Map",         true,        _on_map_button_pressed],
+		["Ledger",      is_sidekick, _on_ledger_button_pressed],
+		["Briefcase",   is_sidekick, _on_briefcase_button_pressed],
+		["FindPartner", true,        _on_find_partner_pressed],
+		["Jump",        false,       Callable()],
+	]
 
-	var ledger_btn: TouchScreenButton = touch_controls.get_node_or_null("Ledger")
-	if ledger_btn:
-		ledger_btn.visible = is_sidekick
-		if not ledger_btn.pressed.is_connected(_on_ledger_button_pressed):
-			ledger_btn.pressed.connect(_on_ledger_button_pressed)
-
-	var briefcase_btn: TouchScreenButton = touch_controls.get_node_or_null("Briefcase")
-	if briefcase_btn:
-		briefcase_btn.visible = is_sidekick
-		if not briefcase_btn.pressed.is_connected(_on_briefcase_button_pressed):
-			briefcase_btn.pressed.connect(_on_briefcase_button_pressed)
-	else:
-		push_error("[ForestHub] Briefcase button not found inside TouchControls")
-
-	var find_partner_btn = touch_controls.get_node_or_null("FindPartner")
-	if find_partner_btn:
-		find_partner_btn.text = "Find Partner"
-		find_partner_btn.visible = true
-		if not find_partner_btn.pressed.is_connected(_on_find_partner_pressed):
-			find_partner_btn.pressed.connect(_on_find_partner_pressed)
-
-# Hide jump button in forest hub
-	var jump_btn = touch_controls.get_node_or_null("Jump")  # adjust name if different
-	if jump_btn:
-		jump_btn.visible = false
+	for cfg in button_configs:
+		var btn_name: String = cfg[0]
+		var btn_visible: bool = cfg[1]
+		var handler: Callable = cfg[2]
+		var btn = touch_controls.get_node_or_null(btn_name)
+		if not btn:
+			push_warning("[ForestHub] Button not found in TouchControls: " + btn_name)
+			continue
+		btn.visible = btn_visible
+		if handler.is_valid() and btn.has_signal("pressed") and not btn.pressed.is_connected(handler):
+			btn.pressed.connect(handler)
 
 	_close_all_panels(false)
 
+# ─── PANEL MANAGEMENT ────────────────────────────────────────────────────────
 
 func _toggle_panel(panel_name: String) -> void:
 	if _is_animating:
@@ -531,14 +567,13 @@ func _on_ledger_button_pressed() -> void:
 	_toggle_panel("ledger")
 
 func _on_briefcase_button_pressed() -> void:
-	print("[ForestHub] Briefcase button pressed")
 	_toggle_panel("briefcase")
 
 
 func _open_panel(panel_name: String) -> void:
 	match panel_name:
-		"map": _open_map()
-		"ledger": _open_ledger()
+		"map":       _open_map()
+		"ledger":    _open_ledger()
 		"briefcase": _open_briefcase()
 	_current_open_panel = panel_name
 
@@ -610,11 +645,49 @@ func _close_ledger(animate: bool = true) -> void:
 		ledger_panel.scale = LEDGER_CLOSED_SCALE
 
 
+func _open_briefcase() -> void:
+	if not briefcase_panel:
+		push_error("[ForestHub] briefcase_panel is null")
+		return
+	_refresh_briefcase_display()
+	_is_animating = true
+	briefcase_panel.visible = true
+	briefcase_panel.modulate = Color(1, 1, 1, 1)
+	briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
+	briefcase_panel.pivot_offset = Vector2(briefcase_panel.size.x / 2, 0)
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_BOUNCE)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(briefcase_panel, "scale", BRIEFCASE_OPEN_SCALE, PANEL_ANIMATION_DURATION)
+	tween.tween_callback(func(): _is_animating = false)
+
+
+func _close_briefcase(animate: bool = true) -> void:
+	if not briefcase_panel or not briefcase_panel.visible:
+		return
+	if animate:
+		_is_animating = true
+		var tween := create_tween()
+		tween.set_trans(Tween.TRANS_BACK)
+		tween.set_ease(Tween.EASE_IN)
+		tween.tween_property(briefcase_panel, "scale", BRIEFCASE_CLOSED_SCALE, PANEL_ANIMATION_DURATION * 0.5)
+		tween.tween_callback(func():
+			briefcase_panel.visible = false
+			_is_animating = false)
+	else:
+		briefcase_panel.visible = false
+		briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
+
+# ─── LEDGER ──────────────────────────────────────────────────────────────────
+
 func _setup_forest_ledger_navigation() -> void:
-	if is_instance_valid(forest_prev_page_button) and not forest_prev_page_button.pressed.is_connected(_on_forest_prev_page_pressed):
-		forest_prev_page_button.pressed.connect(_on_forest_prev_page_pressed)
-	if is_instance_valid(forest_next_page_button) and not forest_next_page_button.pressed.is_connected(_on_forest_next_page_pressed):
-		forest_next_page_button.pressed.connect(_on_forest_next_page_pressed)
+	_connect_button_once(forest_prev_page_button, _on_forest_prev_page_pressed)
+	_connect_button_once(forest_next_page_button, _on_forest_next_page_pressed)
+
+
+func _connect_button_once(btn: Button, handler: Callable) -> void:
+	if is_instance_valid(btn) and not btn.pressed.is_connected(handler):
+		btn.pressed.connect(handler)
 
 
 func _refresh_forest_ledger_pages() -> void:
@@ -635,20 +708,20 @@ func _convert_entry_to_book_page(entry: Dictionary) -> Dictionary:
 	var layout: String = str(entry.get("layout", "single_body"))
 	if layout == "two_column":
 		return {
-			"title": str(entry.get("zone_name", entry.get("title", "Ledger"))),
-			"left_header": str(entry.get("left_header", "")),
-			"left_body": str(entry.get("left_body", "")),
+			"title":        str(entry.get("zone_name", entry.get("title", "Ledger"))),
+			"left_header":  str(entry.get("left_header", "")),
+			"left_body":    str(entry.get("left_body", "")),
 			"right_header": str(entry.get("right_header", "")),
-			"right_body": str(entry.get("right_body", "")),
+			"right_body":   str(entry.get("right_body", "")),
 		}
 	var body_text := str(entry.get("body", ""))
 	var split_pages := _split_body_into_book_pages(body_text)
 	return {
-		"title": str(entry.get("zone_name", entry.get("title", "Ledger"))),
-		"left_header": str(entry.get("title", "Notes")),
-		"left_body": str(split_pages.get("left", "")),
+		"title":        str(entry.get("zone_name", entry.get("title", "Ledger"))),
+		"left_header":  str(entry.get("title", "Notes")),
+		"left_body":    str(split_pages.get("left", "")),
 		"right_header": "Example" if str(split_pages.get("right", "")) != "" else "",
-		"right_body": str(split_pages.get("right", "")),
+		"right_body":   str(split_pages.get("right", "")),
 	}
 
 
@@ -698,28 +771,32 @@ func _show_forest_ledger_page(page_index: int, animate: bool = true) -> void:
 
 
 func _apply_forest_ledger_page(page_data: Dictionary) -> void:
-	if is_instance_valid(forest_ledger_title_label):
-		forest_ledger_title_label.text = str(page_data.get("title", ""))
-	if is_instance_valid(forest_ledger_left_header_label):
-		forest_ledger_left_header_label.text = str(page_data.get("left_header", ""))
-	if is_instance_valid(forest_ledger_left_body_label):
-		forest_ledger_left_body_label.text = str(page_data.get("left_body", ""))
-	if is_instance_valid(forest_ledger_right_header_label):
-		forest_ledger_right_header_label.text = str(page_data.get("right_header", ""))
-	if is_instance_valid(forest_ledger_right_body_label):
-		forest_ledger_right_body_label.text = str(page_data.get("right_body", ""))
+	var label_map := [
+		[forest_ledger_title_label,        "title"],
+		[forest_ledger_left_header_label,  "left_header"],
+		[forest_ledger_left_body_label,    "left_body"],
+		[forest_ledger_right_header_label, "right_header"],
+		[forest_ledger_right_body_label,   "right_body"],
+	]
+	for pair in label_map:
+		var lbl: Label = pair[0]
+		var key: String = pair[1]
+		if is_instance_valid(lbl):
+			lbl.text = str(page_data.get(key, ""))
 
 
 func _update_forest_ledger_navigation() -> void:
-	var total_pages := _ledger_pages.size()
+	var total := _ledger_pages.size()
 	if is_instance_valid(forest_page_indicator_label):
-		forest_page_indicator_label.text = str(_current_ledger_page + 1) + " / " + str(max(total_pages, 1))
-	if is_instance_valid(forest_prev_page_button):
-		forest_prev_page_button.visible = total_pages > 1
-		forest_prev_page_button.disabled = _current_ledger_page <= 0
-	if is_instance_valid(forest_next_page_button):
-		forest_next_page_button.visible = total_pages > 1
-		forest_next_page_button.disabled = _current_ledger_page >= total_pages - 1
+		forest_page_indicator_label.text = "%d / %d" % [_current_ledger_page + 1, max(total, 1)]
+	_set_page_button_state(forest_prev_page_button, total > 1, _current_ledger_page <= 0)
+	_set_page_button_state(forest_next_page_button, total > 1, _current_ledger_page >= total - 1)
+
+
+func _set_page_button_state(btn: Button, should_show: bool, should_disabled: bool) -> void:
+	if is_instance_valid(btn):
+		btn.visible = should_show
+		btn.disabled = should_disabled
 
 
 func _on_forest_prev_page_pressed() -> void:
@@ -731,41 +808,7 @@ func _on_forest_next_page_pressed() -> void:
 	if not _ledger_page_animating and _current_ledger_page < _ledger_pages.size() - 1:
 		_show_forest_ledger_page(_current_ledger_page + 1, true)
 
-
-func _open_briefcase() -> void:
-	if not briefcase_panel:
-		push_error("[ForestHub] briefcase_panel is null")
-		return
-	_refresh_briefcase_display()
-	_is_animating = true
-	briefcase_panel.visible = true
-	briefcase_panel.modulate = Color(1, 1, 1, 1)
-	briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
-	briefcase_panel.pivot_offset = Vector2(briefcase_panel.size.x / 2, 0)
-	print("[ForestHub] Opening briefcase panel")
-	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_BOUNCE)
-	tween.set_ease(Tween.EASE_OUT)
-	tween.tween_property(briefcase_panel, "scale", BRIEFCASE_OPEN_SCALE, PANEL_ANIMATION_DURATION)
-	tween.tween_callback(func(): _is_animating = false)
-
-
-func _close_briefcase(animate: bool = true) -> void:
-	if not briefcase_panel or not briefcase_panel.visible:
-		return
-	if animate:
-		_is_animating = true
-		var tween := create_tween()
-		tween.set_trans(Tween.TRANS_BACK)
-		tween.set_ease(Tween.EASE_IN)
-		tween.tween_property(briefcase_panel, "scale", BRIEFCASE_CLOSED_SCALE, PANEL_ANIMATION_DURATION * 0.5)
-		tween.tween_callback(func():
-			briefcase_panel.visible = false
-			_is_animating = false)
-	else:
-		briefcase_panel.visible = false
-		briefcase_panel.scale = BRIEFCASE_CLOSED_SCALE
-
+# ─── BRIEFCASE ───────────────────────────────────────────────────────────────
 
 func _on_briefcase_updated() -> void:
 	_refresh_briefcase_display()
@@ -785,21 +828,45 @@ func _refresh_briefcase_display() -> void:
 	briefcase_display.texture = texture
 	briefcase_display.visible = true
 
+# ─── PORTALS ─────────────────────────────────────────────────────────────────
 
 func _connect_portal_signals() -> void:
 	if not portals:
 		return
 	await get_tree().process_frame
 	for portal in portals.get_children():
+		# Transition signals — fire only when both players confirm entry together
 		if portal.has_signal("players_entering") and not portal.players_entering.is_connected(_on_players_entering_zone):
 			portal.players_entering.connect(_on_players_entering_zone)
 		if portal.has_signal("players_entered") and not portal.players_entered.is_connected(_on_players_entered_zone):
 			portal.players_entered.connect(_on_players_entered_zone)
 
+		# Zone thought trigger — portal IS the Area2D (see zone_portal.gd).
+		# body_entered fires per body individually; we filter to local player only.
+		if portal is Area2D:
+			var zone: String = (portal as Area2D).zone_name
+			if not portal.body_entered.is_connected(_on_zone_body_entered):
+				portal.body_entered.connect(_on_zone_body_entered.bind(zone))
 
+
+## Fires when any body enters a portal Area2D.
+## Filtered to the local player's own CharacterBody2D only.
+func _on_zone_body_entered(body: Node2D, zone_name: String) -> void:
+	if not body is CharacterBody2D:
+		return
+	if body.name != str(multiplayer.get_unique_id()):
+		return
+	if not ZONE_THOUGHTS.has(zone_name):
+		return
+	_show_zone_thought(zone_name)
+
+
+## Fires when BOTH players have confirmed entry — used only for door animation.
 func _on_players_entering_zone(zone_name: String) -> void:
-	if zone_name == "pinas_house":
-		_animate_pinas_house_door()
+	match zone_name:
+		"pinas_house": _animate_door(pinas_house_door, zone_name)
+		"storage_hut": _animate_door(storage_hut_door, zone_name)
+		"abandoned_house": _animate_door(abandoned_house_door, zone_name)
 
 
 func _on_players_entered_zone(zone_name: String) -> void:
@@ -814,44 +881,50 @@ func _on_players_entered_zone(zone_name: String) -> void:
 	target_portal.complete_zone_entry()
 
 
-func _animate_pinas_house_door() -> void:
-	if not pinas_house_door:
-		push_warning("[ForestHub] Pina's house door sprite not found!")
+func _animate_door(door_sprite: Sprite2D, zone_name: String) -> void:
+	if not door_sprite:
+		push_warning("[ForestHub] Door sprite not found for zone: " + zone_name)
 		return
-	pinas_house_door.visible = true
-	pinas_house_door.modulate.a = 0.0
+	door_sprite.visible = true
+	door_sprite.modulate.a = 0.0
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_OUT)
-	tween.tween_property(pinas_house_door, "modulate:a", 1.0, 0.5)
-	if not tree_exiting.is_connected(_on_tree_exiting_hide_door):
-		tree_exiting.connect(_on_tree_exiting_hide_door)
+	tween.tween_property(door_sprite, "modulate:a", 1.0, DOOR_ANIMATION_DURATION)
+	if not tree_exiting.is_connected(_on_tree_exiting_hide_doors):
+		tree_exiting.connect(_on_tree_exiting_hide_doors)
 
 
-func _on_tree_exiting_hide_door() -> void:
-	if pinas_house_door:
-		pinas_house_door.visible = false
+func _on_tree_exiting_hide_doors() -> void:
+	for door in [pinas_house_door, storage_hut_door, abandoned_house_door]:
+		if door:
+			door.visible = false
 
+# ─── ZONE COMPLETION INDICATORS ──────────────────────────────────────────────
 
 func _setup_zone_completion_indicators() -> void:
 	if not finish_zone_indicator:
 		push_warning("[ForestHub] FinishZoneIndicator node not found!")
 		return
 	for portal in portals.get_children():
-		var zone_name: String = portal.zone_name
-		if finish_zone_indicator.has_method("set_portal_position"):
-			finish_zone_indicator.set_portal_position(zone_name, portal.global_position)
-		var enter_button := portal.get_node_or_null("EnterButton")
-		var is_completed: bool = GameState.zones_status.get(zone_name, GameState.ZoneStatus.AVAILABLE) == GameState.ZoneStatus.COMPLETED
-		if is_completed:
-			if finish_zone_indicator.has_method("show_indicator"):
-				finish_zone_indicator.show_indicator(zone_name)
-			if enter_button:
-				enter_button.visible = false
-				enter_button.disabled = true
-		else:
-			if finish_zone_indicator.has_method("hide_indicator"):
-				finish_zone_indicator.hide_indicator(zone_name)
+		_apply_zone_indicator(portal)
+
+
+func _apply_zone_indicator(portal: Node) -> void:
+	var zone_name: String = portal.zone_name
+	if finish_zone_indicator.has_method("set_portal_position"):
+		finish_zone_indicator.set_portal_position(zone_name, portal.global_position)
+	var is_completed: bool = GameState.zones_status.get(zone_name, GameState.ZoneStatus.AVAILABLE) == GameState.ZoneStatus.COMPLETED
+	var enter_button := portal.get_node_or_null("EnterButton")
+	if is_completed:
+		if finish_zone_indicator.has_method("show_indicator"):
+			finish_zone_indicator.show_indicator(zone_name)
+		if enter_button:
+			enter_button.visible = false
+			enter_button.disabled = true
+	else:
+		if finish_zone_indicator.has_method("hide_indicator"):
+			finish_zone_indicator.hide_indicator(zone_name)
 
 
 func _on_zone_completed(completed_zone: String) -> void:
@@ -868,39 +941,59 @@ func _on_zone_completed(completed_zone: String) -> void:
 			enter_button.disabled = true
 		break
 
-
 # ─── DIALOGUE ────────────────────────────────────────────────────────────────
 
 func _run_forest_dialogue() -> void:
+	if GameState.forest_intro_played:
+		return
+	GameState.forest_intro_played = true
+	GameState._save_progress("forest_intro")
+	
+	_lock_player_movement()
 	# FOREST_PLAYERS_SPAWN
-	await _say_auto("Sidekick", "Whoa. Okay. That was... not a normal elevator ride.", 1.0)
-	await _say_auto("Sidekick", "One second we're looking at Grandma's fading book,", 1.0)
-	await _say_auto("Sidekick", "and the next we're here.", 1.0)
-	await _say_auto("Detective", "Stay sharp, partner. We aren't just in a forest.", 1.0)
-	await _say_auto("Detective", "We've been pulled into the book.", 1.0)
-	await _say_auto("Detective", "And if Grandma was right, the story is actively dying around us.", 1.0)
-	await _say_auto("Sidekick", "It feels empty. Like life has been sucked out of it.", 1.0)
+	await _say_auto("Sidekick", "Whoa. That was... not a normal elevator ride.", 0.8)
+	await _say_auto("Sidekick", "One second we're reading Grandma's fading book,", 0.8)
+	await _say_auto("Sidekick", "now we're here.", 0.8)
+	await _say_auto("Detective", "The book pulled us in. The story is dying, partner", 0.8)
+
+	_unlock_player_movement()
 
 	# FOREST_PLAYERS_WALK
-	await _say_auto("Sidekick", "So, what's the plan? We just walk around until we find her?", 1.0)
-	await _say_auto("aDetective", "No. We look for the evidence. The story is fragmented.", 1.0)
-	await _say_auto("Detective", "To understand the truth, we need to find five specific things scattered across this forest.", 1.0)
-	await _say_auto("Sidekick", "Five things? Like clues?", 1.0)
-	await _say_auto("Detective", "Artifacts. A Tiara. A Ladle. A Scroll. A Pineapple. And... an Eye.", 1.0)
-	await _say_auto("Sidekick", "An eye? That's creepy. And a pineapple?", 1.0)
-	await _say_auto("Sidekick", "What does fruit have to do with a missing girl?", 1.0)
-	await _say_auto("Detective", "That's the question, isn't it? The old legend mentions a mother's frustration.", 1.0)
-	await _say_auto("Sidekick", "Grandma mentioned that. Something about 'a thousand eyes'?", 1.0)
-	await _say("Detective", "Exactly. 'I wish you would grow a thousand eyes so you could find what you're looking for.'")
-	await _say("Detective", "We need to find out if that was just a figure of speech... or if it's the key to everything.")
+	await _say_auto("Sidekick", "So, what's the plan? We just walk around?", 0.8)
+	await _say_auto("Detective", "No. We need five artifacts:", 0.8)
+	await _say_auto("Detective", "A Tiara, Ladle, Scroll, Pineapple, and an Eye.", 0.8)
+	await _say_auto("Detective", "Search the houses, the storage, the well, and the backyard path", 0.8)
+	await _say_auto("Detective", "They're here somewhere.", 0.8)
+	await _say_auto("Sidekick", "An eye? And a pineapple?", 0.8)
+	await _say_auto("Sidekick", "What does fruit have to do with this?", 0.8)
+	await _say("Detective", "The legend says:")
+	await _say("Detective", "'I wish you would grow a thousand eyes so you could find what you're looking for.'")
+	await _say("Detective", "We need to find out if that was just a figure of speech...")
+	await _say("Detective", "or if it's the key to everything.")
 	_clear_dialogue()
 
 
-func _say(speaker: String, text: String) -> void:
+## One-time zone thought triggered when the local player walks into a portal.
+## Keys in ZONE_THOUGHTS must match portal.zone_name exactly (check Inspector).
+func _show_zone_thought(zone_name: String) -> void:
+	if not ZONE_THOUGHTS.has(zone_name):
+		return
+	var is_detective := (NetworkManager.get_my_role() == "detective")
+	var line: Array = ZONE_THOUGHTS[zone_name][is_detective]
+	await _say_auto(line[0], line[1], ZONE_THOUGHT_HOLD)
+	_clear_dialogue()
+
+
+## Sets speaker label, clears text, makes panel visible.
+func _show_dialogue_panel(speaker: String) -> void:
 	speaker_label.text = speaker
 	dialogue_label.text = ""
 	dialogue_panel.modulate.a = 1.0
 	dialogue_panel.visible = true
+
+
+## Streams text into dialogue_label character by character.
+func _typewrite(text: String) -> void:
 	var char_index: int = 0
 	var elapsed: float = 0.0
 	var length: int = text.length()
@@ -911,24 +1004,19 @@ func _say(speaker: String, text: String) -> void:
 			char_index += 1
 			dialogue_label.text = text.substr(0, char_index)
 		await get_tree().process_frame
+
+
+## Typewriter + hides panel when text finishes (manual-advance style).
+func _say(speaker: String, text: String) -> void:
+	_show_dialogue_panel(speaker)
+	await _typewrite(text)
 	dialogue_panel.visible = false
 
 
+## Typewriter + auto-dismisses after [hold] seconds.
 func _say_auto(speaker: String, text: String, hold: float) -> void:
-	speaker_label.text = speaker
-	dialogue_label.text = ""
-	dialogue_panel.modulate.a = 1.0
-	dialogue_panel.visible = true
-	var char_index: int = 0
-	var elapsed: float = 0.0
-	var length: int = text.length()
-	while char_index <= length:
-		elapsed += get_process_delta_time()
-		if elapsed >= DIALOGUE_SPEED:
-			elapsed -= DIALOGUE_SPEED
-			char_index += 1
-			dialogue_label.text = text.substr(0, char_index)
-		await get_tree().process_frame
+	_show_dialogue_panel(speaker)
+	await _typewrite(text)
 	await _wait(hold)
 
 
@@ -944,25 +1032,22 @@ func _clear_dialogue() -> void:
 	speaker_label.text = ""
 	dialogue_panel.visible = false
 
+# ─── FIND PARTNER ────────────────────────────────────────────────────────────
+
 func _on_find_partner_pressed() -> void:
 	if _is_finding_partner:
 		return
-
 	var my_id := multiplayer.get_unique_id()
 	var partner_id: int = -1
-
 	for peer_id in _spawned_players.keys():
 		if peer_id != my_id:
 			partner_id = peer_id
 			break
-
 	if partner_id == -1:
 		push_warning("[ForestHub] No partner found to locate.")
 		return
-
 	var partner_pos: Vector2
 	var state := NetworkManager.get_partner_state(partner_id)
-
 	if not state.is_empty() and state.has("position"):
 		partner_pos = state.get("position", Vector2.ZERO)
 	else:
@@ -971,7 +1056,6 @@ func _on_find_partner_pressed() -> void:
 			push_warning("[ForestHub] Partner state and node both unavailable.")
 			return
 		partner_pos = partner_node.global_position
-
 	_slide_camera_to_partner(partner_pos)
 
 
@@ -981,44 +1065,31 @@ func _slide_camera_to_partner(target_pos: Vector2) -> void:
 	if not is_instance_valid(my_player):
 		push_warning("[ForestHub] Local player node not found.")
 		return
-
 	var cam := my_player.get_node_or_null("Camera2D") as Camera2D
 	if not cam:
 		push_warning("[ForestHub] Camera2D not found on local player.")
 		return
-
-	# Prevent double trigger
 	_is_finding_partner = true
-
-	# Detach camera so we can move it freely
 	cam.set_as_top_level(true)
-	cam.global_position = my_player.global_position  # anchor it here immediately after detach
-
+	cam.global_position = my_player.global_position
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN_OUT)
-
-	# Slide to partner
 	tween.tween_property(cam, "global_position", target_pos, FIND_PARTNER_DURATION)
-
-	# Hold
 	tween.tween_interval(FIND_PARTNER_HOLD)
-
-	# Slide back to player's CURRENT position (not stale start_pos)
 	tween.tween_method(func(_t: float):
 		if is_instance_valid(cam) and is_instance_valid(my_player):
 			cam.global_position = cam.global_position.lerp(my_player.global_position, 0.15)
 	, 0.0, 1.0, FIND_PARTNER_DURATION)
-
-	# Reattach
 	tween.tween_callback(func():
 		if not is_instance_valid(cam) or not is_instance_valid(my_player):
 			_is_finding_partner = false
 			return
 		cam.set_as_top_level(false)
 		cam.position = Vector2.ZERO
-		_is_finding_partner = false
-	)
+		_is_finding_partner = false)
+
+# ─── LOCATION DIAMOND ────────────────────────────────────────────────────────
 
 func _animate_location_diamond() -> void:
 	var diamond := get_node_or_null("LocationDiamond")
@@ -1029,3 +1100,17 @@ func _animate_location_diamond() -> void:
 	tween.set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(diamond, "modulate:a", 0.4, 0.8)
 	tween.tween_property(diamond, "modulate:a", 1.0, 0.8)
+
+
+func _lock_player_movement() -> void:
+	var my_id := multiplayer.get_unique_id()
+	var player := get_node_or_null(str(my_id)) as CharacterBody2D
+	if is_instance_valid(player) and player.has_method("set_movement_locked"):
+		player.set_movement_locked(true)
+
+
+func _unlock_player_movement() -> void:
+	var my_id := multiplayer.get_unique_id()
+	var player := get_node_or_null(str(my_id)) as CharacterBody2D
+	if is_instance_valid(player) and player.has_method("set_movement_locked"):
+		player.set_movement_locked(false)

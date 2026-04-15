@@ -41,6 +41,7 @@ var _last_sent_animation: String = ""
 var _remote_animation: String = ""
 var _was_on_floor: bool = true
 var _intended_x_position: float = 0.0
+var _movement_locked: bool = false
 
 
 # LIFECYCLE
@@ -80,7 +81,16 @@ func _process(_delta: float) -> void:
 		_update_from_network_state()
 
 
+func set_movement_locked(locked: bool) -> void:
+	_movement_locked = locked
+
+
 func _physics_process(delta: float) -> void:
+	if _movement_locked:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		return
+		
 	if _is_in_lobby:
 		return
 
