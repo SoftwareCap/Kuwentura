@@ -1,4 +1,4 @@
-[gd_scene load_steps=78 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=79 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://miy70k8n04ul" path="res://assets/sprites/places/pinasHouseBackground.png" id="2_vt60f"]
@@ -38,6 +38,7 @@
 [ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="36_u6sy3"]
 [ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/clues/ladleClue.png" id="37_dcipd"]
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="39_0s51p"]
+[ext_resource type="Texture2D" uid="uid://bvn74hwrf4gx2" path="res://assets/sprites/tracker/pinasHouse/defaultPH.png" id="39_ra7mo"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_btbyq"]
 size = Vector2(321.00024, 356.50024)
@@ -1292,5 +1293,12 @@ offset_bottom = 197.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_u6sy3")
+
+[node name="ProgressTracker" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="ProgressTracker"]
+position = Vector2(272.9375, 47.499985)
+scale = Vector2(0.3271484, 0.35648146)
+texture = ExtResource("39_ra7mo")
 
 [connection signal="input_event" from="InteractiveLayer/Objects/WrongClickZone" to="." method="_on_wrong_object_input"]
