@@ -27,18 +27,23 @@ func setup(owner: Node) -> void:
 		if not zone.sidekick_board.solved.is_connected(zone._on_sidekick_solved):
 			zone.sidekick_board.solved.connect(zone._on_sidekick_solved)
 
-	apply_unsolved_text()
 	apply_close_button_visibility()
 	apply_note_interaction_gate()
 
-	if is_instance_valid(zone.sidekick_board) and zone.sidekick_board.has_method("apply_puzzle_view"):
-		zone.sidekick_board.apply_puzzle_view()
+	if zone._puzzle_data_ready:
+		apply_unsolved_text()
+		if zone.has_method("_refresh_note_puzzle_views"):
+			zone._refresh_note_puzzle_views()
 
 
 func on_note_interacted() -> void:
 	if not zone._note_phase_active and not zone._note_solved:
 		return
 
+	if not zone._puzzle_data_ready:
+		zone.show_notification("Puzzle data is still syncing...", 1.5)
+		return
+	
 	close_boards(true)
 
 	var will_play_note_dialogue := false
@@ -64,8 +69,8 @@ func on_note_interacted() -> void:
 				if zone.sidekick_board.has_method("apply_solved_view"):
 					zone.sidekick_board.apply_solved_view()
 			else:
-				if zone.sidekick_board.has_method("apply_puzzle_view"):
-					zone.sidekick_board.apply_puzzle_view()
+				if zone.has_method("_refresh_note_puzzle_views"):
+					zone._refresh_note_puzzle_views()
 				_apply_sidekick_board_input_state()
 
 	if will_play_note_dialogue:

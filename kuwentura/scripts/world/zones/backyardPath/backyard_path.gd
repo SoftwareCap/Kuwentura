@@ -7,15 +7,12 @@ const _SERVER_PEER_ID  := 1
 const SCENE_FOREST_HUB := "res://scenes/world/hub/ForestHub.tscn"
 const SCENE_MAIN_MENU  := "res://scenes/mainMenu/MainMenu.tscn"
 
+const PROGRESS_DEFAULT_TEX: Texture2D = preload("res://assets/sprites/tracker/backyardPath/defaultBY.png")
+const PROGRESS_PUZZLE1_TEX: Texture2D = preload("res://assets/sprites/tracker/backyardPath/puzzle1BY.png")
+
 const SPARKLE_MIN_SCALE   := 0.45
 const SPARKLE_MAX_SCALE   := 0.55
 const SPARKLE_PULSE_SPEED := 4.0
-
-# Backyard puzzle variations — mirrors PuzzleManager PUZZLE_DATA["backyard_path"].variations
-const _VARIATIONS := [
-	{"spirit_height_cm": 120, "plant_height_dali": 60,  "solution": 120},
-	{"spirit_height_cm": 90,  "plant_height_dali": 45,  "solution": 90},
-]
 
 @onready var role_label:          Label         = get_node_or_null("RoleLabel")
 @onready var back_button:         Button        = $BackButton
@@ -66,6 +63,8 @@ const _VARIATIONS := [
 @onready var tap_catcher:              Button      = get_node_or_null("RewardLayer/TapCatcher")
 @onready var briefcase_reveal_sprite:  TextureRect = get_node_or_null("RewardLayer/BriefcaseRevealSprite")
 @onready var sparkle:                  Sprite2D    = $RewardLayer/Sparkle
+@onready var progress_tracker: Node = get_node_or_null("ProgressTracker")
+@onready var progress_tracker_sprite: Sprite2D = get_node_or_null("ProgressTracker/Sprite2D")
 
 var _sfx_player: AudioStreamPlayer
 var _zone_completion_sfx: AudioStream = preload("res://assets/audios/ZoneCompletionSFX.mp3")
@@ -95,17 +94,20 @@ var _timer_node: Timer
 var _animation_time: float  = 0.0
 var _sparkle_animating: bool = false
 
+var _puzzle_data_ready := false
 
 func _load_puzzle_data() -> void:
-	var idx: int = GameState.get_puzzle_variation_index(ZONE_ID, _VARIATIONS.size())
-	var variation: Dictionary = _VARIATIONS[idx]
-	spirit_height_cm  = int(variation.get("spirit_height_cm", 120))
-	plant_height_dali = int(variation.get("plant_height_dali", 60))
-	solution_cm       = int(variation.get("solution", 120))
+	var puzzle: Dictionary = PuzzleManager.get_puzzle_for_zone(ZONE_ID)
+	_apply_puzzle_data(puzzle)
+
+
+func _apply_puzzle_data(puzzle: Dictionary) -> void:
+	spirit_height_cm  = int(puzzle.get("spirit_height_cm", 120))
+	plant_height_dali = int(puzzle.get("plant_height_dali", 60))
+	solution_cm       = int(puzzle.get("solution", spirit_height_cm))
 
 
 func _ready() -> void:
-	_load_puzzle_data()
 	_create_timer()
 	_connect_signals()
 
@@ -114,7 +116,6 @@ func _ready() -> void:
 
 	_setup_initial_ui()
 	_setup_role_visibility()
-	_populate_heights()
 	_populate_ledger_content()
 	_ensure_briefcase_display()
 	_refresh_briefcase_display()
@@ -131,7 +132,7 @@ func _ready() -> void:
 	_sfx_player.bus = "SFX"
 	add_child(_sfx_player)
 
-	_start_intro_dialogue_delayed()
+	_initialize_puzzle_sync()
 
 
 func _create_timer() -> void:
@@ -284,6 +285,7 @@ func _setup_initial_ui() -> void:
 	if GameState.local_role == GameState.Role.DETECTIVE:
 		if is_instance_valid(x_input):      x_input.editable       = false
 		if is_instance_valid(submit_button): submit_button.disabled = true
+	_set_progress_tracker_stage(0)
 
 
 func _setup_role_visibility() -> void:
@@ -692,6 +694,7 @@ func rpc_fail_zone(message: String) -> void:
 func rpc_puzzle_solved() -> void:
 	_puzzle_solved  = true
 	_board_unlocked = false
+	_set_progress_tracker_stage(1)
 	GameState.set_puzzle_solved(ZONE_ID, true)
 
 	if is_instance_valid(board_tap_button): board_tap_button.disabled  = true
@@ -985,3 +988,75 @@ func _hide_reward_visuals_for_briefcase() -> void:
 func _hide_revealed_clue_after_touch() -> void:
 	for node in [revealed_plant, revealed_pineapple, fruit_tap_button]:
 		if is_instance_valid(node): node.visible = false
+
+func _initialize_puzzle_sync() -> void:
+	if not multiplayer.has_multiplayer_peer():
+		_load_puzzle_data()
+		_on_puzzle_data_ready()
+		return
+
+	if multiplayer.is_server():
+		_broadcast_puzzle_data()
+	else:
+		rpc_request_puzzle_data.rpc_id(_SERVER_PEER_ID)
+
+
+func _broadcast_puzzle_data(target_peer_id: int = 0) -> void:
+	var puzzle: Dictionary = PuzzleManager.get_puzzle_for_zone(ZONE_ID)
+	var variation_index: int = int(puzzle.get("variation_index", 0))
+	var spirit_cm: int = int(puzzle.get("spirit_height_cm", 120))
+	var plant_dali: int = int(puzzle.get("plant_height_dali", 60))
+	var solution: int = int(puzzle.get("solution", spirit_cm))
+
+	GameState.force_puzzle_variation_index(ZONE_ID, variation_index)
+
+	if target_peer_id > 0:
+		rpc_sync_puzzle_data.rpc_id(target_peer_id, variation_index, spirit_cm, plant_dali, solution)
+	else:
+		rpc_sync_puzzle_data.rpc(variation_index, spirit_cm, plant_dali, solution)
+
+
+@rpc("any_peer", "reliable")
+func rpc_request_puzzle_data() -> void:
+	if multiplayer.is_server():
+		_broadcast_puzzle_data(multiplayer.get_remote_sender_id())
+
+
+@rpc("authority", "reliable", "call_local")
+func rpc_sync_puzzle_data(variation_index: int, spirit_cm: int, plant_dali: int, solution: int) -> void:
+	GameState.force_puzzle_variation_index(ZONE_ID, variation_index)
+
+	spirit_height_cm = spirit_cm
+	plant_height_dali = plant_dali
+	solution_cm = solution
+
+	_on_puzzle_data_ready()
+
+
+func _on_puzzle_data_ready() -> void:
+	_populate_heights()
+
+	if _puzzle_data_ready:
+		return
+
+	_puzzle_data_ready = true
+	_start_intro_dialogue_delayed()
+
+func _set_progress_tracker_stage(stage: int) -> void:
+	if not is_instance_valid(progress_tracker_sprite):
+		return
+
+	match stage:
+		0:
+			progress_tracker_sprite.texture = PROGRESS_DEFAULT_TEX
+		1:
+			progress_tracker_sprite.texture = PROGRESS_PUZZLE1_TEX
+		_:
+			progress_tracker_sprite.texture = PROGRESS_DEFAULT_TEX
+
+
+func _update_progress_tracker_for_current_state() -> void:
+	if _puzzle_solved:
+		_set_progress_tracker_stage(1)
+	else:
+		_set_progress_tracker_stage(0)

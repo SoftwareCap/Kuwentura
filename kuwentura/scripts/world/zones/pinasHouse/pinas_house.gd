@@ -5,6 +5,11 @@ const NoteControllerScript = preload("res://scripts/world/zones/pinasHouse/contr
 const ToolHuntControllerScript = preload("res://scripts/world/zones/pinasHouse/controllers/pinas_house_tool_hunt_controller.gd")
 const ConsequenceControllerScript = preload("res://scripts/world/zones/pinasHouse/controllers/pinas_house_consequence_controller.gd")
 
+const PROGRESS_DEFAULT_TEX: Texture2D = preload("res://assets/sprites/tracker/pinasHouse/defaultPH.png")
+const PROGRESS_PUZZLE1_TEX: Texture2D = preload("res://assets/sprites/tracker/pinasHouse/puzzle1PH.png")
+const PROGRESS_PUZZLE2_TEX: Texture2D = preload("res://assets/sprites/tracker/pinasHouse/puzzle2PH.png")
+const PROGRESS_PUZZLE3_TEX: Texture2D = preload("res://assets/sprites/tracker/pinasHouse/puzzle3PH.png")
+
 const SCENE_FOREST_HUB := "res://scenes/world/hub/ForestHub.tscn"
 
 const _SERVER_PEER_ID := 1
@@ -99,6 +104,9 @@ const NOTE_REVEAL_SHAKE_COUNT: int = 4
 @onready var cabinet_ladle_collision: CollisionShape2D = $InteractiveLayer/Cabinet/LadleInCabinet/LadleCollision
 @onready var reward_panel: Sprite2D = $RewardLayer/RewardPanel
 
+@onready var progress_tracker: Node = get_node_or_null("ProgressTracker")
+@onready var progress_tracker_sprite: Sprite2D = get_node_or_null("ProgressTracker/Sprite2D")
+
 var _animation_time: float = 0.0
 var _sparkle_animating: bool = false
 
@@ -151,6 +159,7 @@ var _shake_origin: Vector2 = Vector2.ZERO
 var _intro_ready_peers: Dictionary = {}
 
 var _puzzle_data: Dictionary = {}
+var _puzzle_data_ready: bool = false
 
 var _shadow_tex := {
 	"ladle": preload("res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Ladle.png"),
@@ -178,12 +187,6 @@ var _aswang_final_frame: Texture2D = preload("res://assets/sprites/consequences/
 
 func _ready() -> void:
 	_init_controllers()
-
-	# Only the server selects the puzzle variation — sidekick receives it via
-	# _sync_puzzle_data RPC when the note is revealed. This ensures both peers
-	# always show the same equation.
-	if multiplayer.is_server() or not multiplayer.has_multiplayer_peer():
-		_puzzle_data = PuzzleManager.get_puzzle_for_zone("pinas_house")
 
 	_connect_global_signals()
 	_setup_music()
@@ -245,7 +248,7 @@ func _ready() -> void:
 	_sfx_player.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(_sfx_player)
 
-	_start_intro_dialogue_delayed()
+	_initialize_puzzle_sync()
 
 
 func _ensure_sfx_bus() -> void:
@@ -344,13 +347,15 @@ func _prepare_initial_flow_state() -> void:
 		search_room_ui.visible = false
 	if is_instance_valid(search_room_label):
 		search_room_label.text = "Find missing tools:"
+	
+	if _puzzle_data_ready:
+		note_controller.apply_unsolved_text()
 
 	tool_hunt_controller.apply_banner_frames()
 	tool_hunt_controller.set_tools_unlocked_local(false)
 	_hide_note()
 	_hide_cabinet_reward_state()
 	note_controller.close_boards(true)
-	note_controller.apply_unsolved_text()
 	note_controller.apply_note_interaction_gate()
 	_refresh_inside_zone_buttons()
 	_reset_cabinet_clue_state()
@@ -796,27 +801,17 @@ func rpc_show_tool_feedback(message: String) -> void:
 func rpc_note_revealed() -> void:
 	if is_instance_valid(search_room_ui):
 		search_room_ui.visible = false
+
 	_tool_phase_active = false
 	_note_phase_active = true
 	_show_note()
+	_set_progress_tracker_stage(1)
+
 	note_controller.apply_note_interaction_gate()
 	note_controller.apply_close_button_visibility()
-	# Server syncs the selected puzzle variation to all peers so both
-	# detective and sidekick boards always show the same equation.
-	if multiplayer.is_server():
-		_sync_puzzle_data.rpc(
-			_puzzle_data.get("equation", ""),
-			_puzzle_data.get("solution", 0)
-		)
 
-
-@rpc("authority", "reliable")
-func _sync_puzzle_data(equation: String, solution: int) -> void:
-	# Sidekick receives the puzzle variation chosen by the server.
-	# Detective already has this from _ready() so only sidekick needs it.
-	_puzzle_data["equation"] = equation
-	_puzzle_data["solution"] = solution
-	note_controller.apply_unsolved_text()
+	if has_method("_refresh_note_puzzle_views"):
+		_refresh_note_puzzle_views()
 
 
 func _on_wrong_object_input(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
@@ -918,6 +913,8 @@ func rpc_pinas_house_solved() -> void:
 	hide_notification()
 	pulse_ledger_guidance(false)
 	_refresh_inside_zone_buttons()
+	_set_progress_tracker_stage(2)
+	await note_controller.after_note_solved()
 	await note_controller.after_note_solved()
 
 @rpc("any_peer", "reliable", "call_local")
@@ -1058,6 +1055,7 @@ func rpc_start_ladle_found_sequence() -> void:
 	_reward_active = true
 	_waiting_reward_continue = true
 	_reward_stage = 1
+	_set_progress_tracker_stage(3)
 
 	if is_instance_valid(cabinet_ladle_sprite): cabinet_ladle_sprite.visible = false
 	if is_instance_valid(cabinet_ladle_collision): cabinet_ladle_collision.disabled = true
@@ -1221,3 +1219,110 @@ func rpc_finalize_clue() -> void:
 		briefcase_reveal_sprite.texture = null
 	if is_instance_valid(reward_layer): reward_layer.visible = false
 	_return_to_forest()
+
+func _initialize_puzzle_sync() -> void:
+	if not multiplayer.has_multiplayer_peer():
+		var puzzle: Dictionary = PuzzleManager.get_puzzle_for_zone("pinas_house")
+		_apply_puzzle_data(puzzle)
+		_on_puzzle_data_ready()
+		return
+
+	if multiplayer.is_server():
+		_broadcast_puzzle_data()
+	else:
+		rpc_request_pinas_puzzle_data.rpc_id(_SERVER_PEER_ID)
+
+
+func _broadcast_puzzle_data(target_peer_id: int = 0) -> void:
+	var puzzle: Dictionary = PuzzleManager.get_puzzle_for_zone("pinas_house")
+	var variation_index: int = int(puzzle.get("variation_index", 0))
+
+	GameState.force_puzzle_variation_index("pinas_house", variation_index)
+
+	if target_peer_id > 0:
+		rpc_sync_pinas_puzzle_data.rpc_id(target_peer_id, puzzle)
+	else:
+		rpc_sync_pinas_puzzle_data.rpc(puzzle)
+
+
+@rpc("any_peer", "reliable")
+func rpc_request_pinas_puzzle_data() -> void:
+	if not multiplayer.is_server():
+		return
+	_broadcast_puzzle_data(multiplayer.get_remote_sender_id())
+
+
+@rpc("authority", "reliable", "call_local")
+func rpc_sync_pinas_puzzle_data(puzzle: Dictionary) -> void:
+	var variation_index: int = int(puzzle.get("variation_index", 0))
+	GameState.force_puzzle_variation_index("pinas_house", variation_index)
+
+	_apply_puzzle_data(puzzle)
+	_on_puzzle_data_ready()
+
+
+func _apply_puzzle_data(puzzle: Dictionary) -> void:
+	_puzzle_data = puzzle.duplicate(true)
+
+
+func _on_puzzle_data_ready() -> void:
+	if _puzzle_data_ready:
+		return
+
+	_puzzle_data_ready = true
+	_refresh_note_puzzle_views()
+	_start_intro_dialogue_delayed()
+
+
+func _refresh_note_puzzle_views() -> void:
+	if note_controller:
+		note_controller.apply_unsolved_text()
+
+	if is_instance_valid(sidekick_board):
+		if sidekick_board.has_method("set_puzzle_data"):
+			sidekick_board.set_puzzle_data(_puzzle_data.duplicate(true))
+		elif sidekick_board.has_method("set_equation_and_solution"):
+			sidekick_board.set_equation_and_solution(
+				str(_puzzle_data.get("equation", "")),
+				int(_puzzle_data.get("solution", 0))
+			)
+		else:
+			if sidekick_board.has_method("set_equation"):
+				sidekick_board.set_equation(str(_puzzle_data.get("equation", "")))
+			if sidekick_board.has_method("set_solution"):
+				sidekick_board.set_solution(int(_puzzle_data.get("solution", 0)))
+			if sidekick_board.has_method("set_answer_format"):
+				sidekick_board.set_answer_format(str(_puzzle_data.get("answer_format", "")))
+
+		if sidekick_board.has_method("apply_puzzle_view") and not _note_solved:
+			sidekick_board.apply_puzzle_view()
+
+func _update_progress_tracker_for_current_state() -> void:
+	if not is_instance_valid(progress_tracker_sprite):
+		return
+
+	if _ladle_found:
+		progress_tracker_sprite.texture = PROGRESS_PUZZLE3_TEX
+	elif _note_solved:
+		progress_tracker_sprite.texture = PROGRESS_PUZZLE2_TEX
+	elif _note_phase_active:
+		progress_tracker_sprite.texture = PROGRESS_PUZZLE1_TEX
+	else:
+		progress_tracker_sprite.texture = PROGRESS_DEFAULT_TEX
+
+
+func _set_progress_tracker_stage(stage: int) -> void:
+	if not is_instance_valid(progress_tracker_sprite):
+		return
+
+	match stage:
+		0:
+			progress_tracker_sprite.texture = PROGRESS_DEFAULT_TEX
+		1:
+			progress_tracker_sprite.texture = PROGRESS_PUZZLE1_TEX
+		2:
+			progress_tracker_sprite.texture = PROGRESS_PUZZLE2_TEX
+		3:
+			progress_tracker_sprite.texture = PROGRESS_PUZZLE3_TEX
+		_:
+			progress_tracker_sprite.texture = PROGRESS_DEFAULT_TEX
