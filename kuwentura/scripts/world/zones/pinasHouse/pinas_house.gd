@@ -5,6 +5,11 @@ const NoteControllerScript = preload("res://scripts/world/zones/pinasHouse/contr
 const ToolHuntControllerScript = preload("res://scripts/world/zones/pinasHouse/controllers/pinas_house_tool_hunt_controller.gd")
 const ConsequenceControllerScript = preload("res://scripts/world/zones/pinasHouse/controllers/pinas_house_consequence_controller.gd")
 
+const PROGRESS_DEFAULT_TEX: Texture2D = preload("res://assets/sprites/tracker/pinasHouse/defaultPH.png")
+const PROGRESS_PUZZLE1_TEX: Texture2D = preload("res://assets/sprites/tracker/pinasHouse/puzzle1PH.png")
+const PROGRESS_PUZZLE2_TEX: Texture2D = preload("res://assets/sprites/tracker/pinasHouse/puzzle2PH.png")
+const PROGRESS_PUZZLE3_TEX: Texture2D = preload("res://assets/sprites/tracker/pinasHouse/puzzle3PH.png")
+
 const SCENE_FOREST_HUB := "res://scenes/world/hub/ForestHub.tscn"
 
 const _SERVER_PEER_ID := 1
@@ -98,6 +103,9 @@ const NOTE_REVEAL_SHAKE_COUNT: int = 4
 @onready var cabinet_ladle_sprite: Sprite2D = $InteractiveLayer/Cabinet/LadleInCabinet/LadleSprite
 @onready var cabinet_ladle_collision: CollisionShape2D = $InteractiveLayer/Cabinet/LadleInCabinet/LadleCollision
 @onready var reward_panel: Sprite2D = $RewardLayer/RewardPanel
+
+@onready var progress_tracker: Node = get_node_or_null("ProgressTracker")
+@onready var progress_tracker_sprite: Sprite2D = get_node_or_null("ProgressTracker/Sprite2D")
 
 var _animation_time: float = 0.0
 var _sparkle_animating: bool = false
@@ -797,10 +805,13 @@ func rpc_note_revealed() -> void:
 	_tool_phase_active = false
 	_note_phase_active = true
 	_show_note()
+	_set_progress_tracker_stage(1)
 
 	note_controller.apply_note_interaction_gate()
 	note_controller.apply_close_button_visibility()
-	_refresh_note_puzzle_views()
+
+	if has_method("_refresh_note_puzzle_views"):
+		_refresh_note_puzzle_views()
 
 
 func _on_wrong_object_input(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
@@ -902,6 +913,8 @@ func rpc_pinas_house_solved() -> void:
 	hide_notification()
 	pulse_ledger_guidance(false)
 	_refresh_inside_zone_buttons()
+	_set_progress_tracker_stage(2)
+	await note_controller.after_note_solved()
 	await note_controller.after_note_solved()
 
 @rpc("any_peer", "reliable", "call_local")
@@ -1042,6 +1055,7 @@ func rpc_start_ladle_found_sequence() -> void:
 	_reward_active = true
 	_waiting_reward_continue = true
 	_reward_stage = 1
+	_set_progress_tracker_stage(3)
 
 	if is_instance_valid(cabinet_ladle_sprite): cabinet_ladle_sprite.visible = false
 	if is_instance_valid(cabinet_ladle_collision): cabinet_ladle_collision.disabled = true
@@ -1282,3 +1296,33 @@ func _refresh_note_puzzle_views() -> void:
 
 		if sidekick_board.has_method("apply_puzzle_view") and not _note_solved:
 			sidekick_board.apply_puzzle_view()
+
+func _update_progress_tracker_for_current_state() -> void:
+	if not is_instance_valid(progress_tracker_sprite):
+		return
+
+	if _ladle_found:
+		progress_tracker_sprite.texture = PROGRESS_PUZZLE3_TEX
+	elif _note_solved:
+		progress_tracker_sprite.texture = PROGRESS_PUZZLE2_TEX
+	elif _note_phase_active:
+		progress_tracker_sprite.texture = PROGRESS_PUZZLE1_TEX
+	else:
+		progress_tracker_sprite.texture = PROGRESS_DEFAULT_TEX
+
+
+func _set_progress_tracker_stage(stage: int) -> void:
+	if not is_instance_valid(progress_tracker_sprite):
+		return
+
+	match stage:
+		0:
+			progress_tracker_sprite.texture = PROGRESS_DEFAULT_TEX
+		1:
+			progress_tracker_sprite.texture = PROGRESS_PUZZLE1_TEX
+		2:
+			progress_tracker_sprite.texture = PROGRESS_PUZZLE2_TEX
+		3:
+			progress_tracker_sprite.texture = PROGRESS_PUZZLE3_TEX
+		_:
+			progress_tracker_sprite.texture = PROGRESS_DEFAULT_TEX
