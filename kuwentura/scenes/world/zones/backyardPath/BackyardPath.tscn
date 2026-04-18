@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://backyardpath"]
+[gd_scene load_steps=32 format=3 uid="uid://backyardpath"]
 
 [ext_resource type="Script" uid="uid://dfs4agyqe4qk4" path="res://scripts/world/zones/backyardPath/backyard_path.gd" id="1_backyardpath"]
 [ext_resource type="Texture2D" uid="uid://p1tc8ablyx3s" path="res://assets/sprites/places/backyardBackground.png" id="2_krb5t"]
@@ -16,7 +16,8 @@
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="13_y7aiq"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="15_0c5pu"]
 [ext_resource type="Texture2D" uid="uid://cuhne1u8q0p3s" path="res://assets/sprites/clues/pineappleClue.png" id="17_s7hv4"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="17_va6t2"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="17_va6t2"]
+[ext_resource type="Texture2D" uid="uid://dvkupminll3bb" path="res://assets/sprites/tracker/backyardPath/defaultBY.png" id="18_ura6l"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_krb5t"]
 bg_color = Color(0.360784, 0.215686, 0.180392, 1)
@@ -891,5 +892,12 @@ theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
+
+[node name="ProgressTracker" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="ProgressTracker"]
+position = Vector2(253, 70)
+scale = Vector2(0.28802085, 0.3236111)
+texture = ExtResource("18_ura6l")
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
