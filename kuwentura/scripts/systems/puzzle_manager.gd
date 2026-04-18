@@ -441,7 +441,6 @@ func _build_fallback_ledger_body(ledger: Dictionary) -> String:
 #------------------------------------------------------------------------------
 
 func get_puzzle_for_zone(zone_id: String) -> Dictionary:
-	"""Get complete puzzle data for a zone, selected deterministically from seed."""
 	if not PUZZLE_DATA.has(zone_id):
 		push_warning("[PuzzleManager] Unknown zone: " + zone_id)
 		return {}
@@ -453,7 +452,6 @@ func get_puzzle_for_zone(zone_id: String) -> Dictionary:
 		push_warning("[PuzzleManager] No variations found for zone: " + zone_id)
 		return {}
 
-	# Select one stable variation for this zone for the whole session
 	var variation_index: int = GameState.get_puzzle_variation_index(zone_id, variations.size())
 	var selected: Dictionary = variations[variation_index]
 
@@ -464,31 +462,31 @@ func get_puzzle_for_zone(zone_id: String) -> Dictionary:
 	var riddle_text: String = str(selected.get("riddle", ""))
 
 	return {
-	"zone_id": zone_id,
-	"type": zone_data.get("type", ""),
-	"name": zone_data.get("name", ""),
-	"theme": zone_data.get("theme", ""),
-	"narrative": zone_data.get("narrative", ""),
-	"host_view": zone_data.get("host_view", {}),
-	"sidekick_view": zone_data.get("sidekick_view", {}),
-	"ledger": zone_data.get("ledger", {}),
-	"reward": zone_data.get("reward", {}),
-	"consequence": zone_data.get("consequence", {}),
+		"zone_id": zone_id,
+		"type": zone_data.get("type", ""),
+		"name": zone_data.get("name", ""),
+		"theme": zone_data.get("theme", ""),
+		"narrative": zone_data.get("narrative", ""),
+		"host_view": zone_data.get("host_view", {}),
+		"sidekick_view": zone_data.get("sidekick_view", {}),
+		"ledger": zone_data.get("ledger", {}),
+		"reward": zone_data.get("reward", {}),
+		"consequence": zone_data.get("consequence", {}),
 
-	"variation_index": variation_index,
-	"variation_id": selected.get("id", 1),
+		"variation_index": variation_index,
+		"variation_id": int(selected.get("id", 1)),
+		"selected_variation": selected.duplicate(true),
 
-	# IMPORTANT — these are the values BackyardPath needs
-	"spirit_height_cm": selected.get("spirit_height_cm", 0),
-	"plant_height_dali": selected.get("plant_height_dali", 0),
+		"spirit_height_cm": int(selected.get("spirit_height_cm", 0)),
+		"plant_height_dali": int(selected.get("plant_height_dali", 0)),
+		"solution": int(selected.get("solution", 0)),
 
-	"difficulty": difficulty,
-	"title": selected.get("title", "Hidden Number Note"),
-	"equation": equation_text,
-	"solution": solution_x,
-	"answer_format": answer_format,
-	"riddle": riddle_text
-}
+		"difficulty": difficulty,
+		"title": selected.get("title", "Hidden Number Note"),
+		"equation": equation_text,
+		"answer_format": answer_format,
+		"riddle": riddle_text
+	}
 
 
 func _generate_conversion_puzzle(zone_id: String, _seed: int) -> Dictionary:

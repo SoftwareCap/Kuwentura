@@ -330,42 +330,59 @@ func _get_abandoned_house_briefcase_texture_path() -> String:
 
 func get_save_data() -> Dictionary:
 	return {
-		"collected_clues":          collected_clues.duplicate(true),
-		"solved_puzzles":           solved_puzzles.duplicate(true),
-		"zones_status":             zones_status.duplicate(true),
-		"current_zone":             current_zone,
-		"climax_triggered":         climax_triggered,
-		"game_completed":           game_completed,
-		"forest_intro_played":      forest_intro_played,
-		"attempt_count":            attempt_count,
-		"nightfall_attempts":       nightfall_attempts,
-		"ledger_entries":           ledger_entries.duplicate(true),
-		"puzzle_seeds":             puzzle_seeds.duplicate(true),
-		"session_seed":             _session_seed,
-		"selected_costumes":        selected_costumes.duplicate(true),
-		"_costume_confirmed_status":_costume_confirmed_status.duplicate(true),
-		"zone_inventory":           zone_inventory.duplicate(true),
+		"collected_clues":           collected_clues.duplicate(true),
+		"solved_puzzles":            solved_puzzles.duplicate(true),
+		"zones_status":              zones_status.duplicate(true),
+		"current_zone":              current_zone,
+		"climax_triggered":          climax_triggered,
+		"game_completed":            game_completed,
+		"attempt_count":             attempt_count,
+		"nightfall_attempts":        nightfall_attempts,
+		"ledger_entries":            ledger_entries.duplicate(true),
+		"puzzle_seeds":              puzzle_seeds.duplicate(true),
+		"puzzle_variation_indices":  puzzle_variation_indices.duplicate(true),
+		"session_seed":              _session_seed,
+		"selected_costumes":         selected_costumes.duplicate(true),
+		"_costume_confirmed_status": _costume_confirmed_status.duplicate(true),
+		"zone_inventory":            zone_inventory.duplicate(true),
 	}
 
-
 func load_save_data(data: Dictionary) -> void:
-	if data.has("collected_clues"):          collected_clues             = data["collected_clues"].duplicate(true)
-	if data.has("solved_puzzles"):           solved_puzzles              = data["solved_puzzles"].duplicate(true)
-	if data.has("zones_status"):             zones_status                = data["zones_status"].duplicate(true)
-	if data.has("current_zone"):             current_zone                = data["current_zone"]
-	if data.has("climax_triggered"):         climax_triggered            = data["climax_triggered"]
-	if data.has("game_completed"):           game_completed              = data["game_completed"]
-	if data.has("forest_intro_played"): forest_intro_played = data["forest_intro_played"]
-	if data.has("attempt_count"):            attempt_count               = data["attempt_count"]
-	if data.has("nightfall_attempts"):       nightfall_attempts          = data["nightfall_attempts"]
-	if data.has("ledger_entries"):           ledger_entries              = data["ledger_entries"].duplicate(true)
-	if data.has("puzzle_seeds"):             puzzle_seeds                = data["puzzle_seeds"].duplicate(true)
-	if data.has("selected_costumes"):        selected_costumes           = data["selected_costumes"].duplicate(true)
-	if data.has("_costume_confirmed_status"):_costume_confirmed_status   = data["_costume_confirmed_status"].duplicate(true)
-	if data.has("zone_inventory"):            zone_inventory              = data["zone_inventory"].duplicate(true)
+	if data.has("collected_clues"):
+		collected_clues = data["collected_clues"].duplicate(true)
+	if data.has("solved_puzzles"):
+		solved_puzzles = data["solved_puzzles"].duplicate(true)
+	if data.has("zones_status"):
+		zones_status = data["zones_status"].duplicate(true)
+	if data.has("current_zone"):
+		current_zone = data["current_zone"]
+	if data.has("climax_triggered"):
+		climax_triggered = data["climax_triggered"]
+	if data.has("game_completed"):
+		game_completed = data["game_completed"]
+	if data.has("attempt_count"):
+		attempt_count = data["attempt_count"]
+	if data.has("nightfall_attempts"):
+		nightfall_attempts = data["nightfall_attempts"]
+	if data.has("ledger_entries"):
+		ledger_entries = data["ledger_entries"].duplicate(true)
+	if data.has("selected_costumes"):
+		selected_costumes = data["selected_costumes"].duplicate(true)
+	if data.has("_costume_confirmed_status"):
+		_costume_confirmed_status = data["_costume_confirmed_status"].duplicate(true)
+	if data.has("zone_inventory"):
+		zone_inventory = data["zone_inventory"].duplicate(true)
+
 	if data.has("session_seed"):
-		_session_seed = data["session_seed"]
-		_initialize_puzzle_seeds()
+		_session_seed = int(data["session_seed"])
+
+	_initialize_puzzle_seeds()
+
+	if data.has("puzzle_seeds"):
+		puzzle_seeds = data["puzzle_seeds"].duplicate(true)
+	if data.has("puzzle_variation_indices"):
+		puzzle_variation_indices = data["puzzle_variation_indices"].duplicate(true)
+
 	data_synced.emit()
 	
 
@@ -387,11 +404,18 @@ func set_session_seed(session_seed: int) -> void:
 
 func get_puzzle_seed(zone_id: String) -> int:
 	if puzzle_seeds.has(zone_id):
-		return puzzle_seeds[zone_id]
-	if _session_seed != 0:
-		return hash(_session_seed + zone_id.hash())
-	return randi()
+		return int(puzzle_seeds[zone_id])
 
+	if _session_seed == 0:
+		_initialize_puzzle_seeds()
+
+	if puzzle_seeds.has(zone_id):
+		return int(puzzle_seeds[zone_id])
+
+	return int(hash(str(_session_seed) + ":" + zone_id))
+
+func force_puzzle_variation_index(zone_id: String, variation_index: int) -> void:
+	puzzle_variation_indices[zone_id] = variation_index
 
 func get_puzzle_variation_index(zone_id: String, variation_count: int) -> int:
 	if variation_count <= 0:
