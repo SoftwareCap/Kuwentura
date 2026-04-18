@@ -7,6 +7,9 @@ const _SERVER_PEER_ID  := 1
 const SCENE_FOREST_HUB := "res://scenes/world/hub/ForestHub.tscn"
 const SCENE_MAIN_MENU  := "res://scenes/mainMenu/MainMenu.tscn"
 
+const PROGRESS_DEFAULT_TEX: Texture2D = preload("res://assets/sprites/tracker/backyardPath/defaultBY.png")
+const PROGRESS_PUZZLE1_TEX: Texture2D = preload("res://assets/sprites/tracker/backyardPath/puzzle1BY.png")
+
 const SPARKLE_MIN_SCALE   := 0.45
 const SPARKLE_MAX_SCALE   := 0.55
 const SPARKLE_PULSE_SPEED := 4.0
@@ -60,6 +63,8 @@ const SPARKLE_PULSE_SPEED := 4.0
 @onready var tap_catcher:              Button      = get_node_or_null("RewardLayer/TapCatcher")
 @onready var briefcase_reveal_sprite:  TextureRect = get_node_or_null("RewardLayer/BriefcaseRevealSprite")
 @onready var sparkle:                  Sprite2D    = $RewardLayer/Sparkle
+@onready var progress_tracker: Node = get_node_or_null("ProgressTracker")
+@onready var progress_tracker_sprite: Sprite2D = get_node_or_null("ProgressTracker/Sprite2D")
 
 var _sfx_player: AudioStreamPlayer
 var _zone_completion_sfx: AudioStream = preload("res://assets/audios/ZoneCompletionSFX.mp3")
@@ -280,6 +285,7 @@ func _setup_initial_ui() -> void:
 	if GameState.local_role == GameState.Role.DETECTIVE:
 		if is_instance_valid(x_input):      x_input.editable       = false
 		if is_instance_valid(submit_button): submit_button.disabled = true
+	_set_progress_tracker_stage(0)
 
 
 func _setup_role_visibility() -> void:
@@ -688,6 +694,7 @@ func rpc_fail_zone(message: String) -> void:
 func rpc_puzzle_solved() -> void:
 	_puzzle_solved  = true
 	_board_unlocked = false
+	_set_progress_tracker_stage(1)
 	GameState.set_puzzle_solved(ZONE_ID, true)
 
 	if is_instance_valid(board_tap_button): board_tap_button.disabled  = true
@@ -1034,3 +1041,22 @@ func _on_puzzle_data_ready() -> void:
 
 	_puzzle_data_ready = true
 	_start_intro_dialogue_delayed()
+
+func _set_progress_tracker_stage(stage: int) -> void:
+	if not is_instance_valid(progress_tracker_sprite):
+		return
+
+	match stage:
+		0:
+			progress_tracker_sprite.texture = PROGRESS_DEFAULT_TEX
+		1:
+			progress_tracker_sprite.texture = PROGRESS_PUZZLE1_TEX
+		_:
+			progress_tracker_sprite.texture = PROGRESS_DEFAULT_TEX
+
+
+func _update_progress_tracker_for_current_state() -> void:
+	if _puzzle_solved:
+		_set_progress_tracker_stage(1)
+	else:
+		_set_progress_tracker_stage(0)
