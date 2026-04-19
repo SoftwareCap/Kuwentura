@@ -127,9 +127,21 @@ const COSTUMES: Dictionary = {
 
 const CLUE_PINAS_HOUSE   := "pinas_house"
 const CLUE_BACKYARD_PATH := "backyard_path"
+const CLUE_OLD_WELL := "old_well"
+const CLUE_ABANDONED_HOUSE := "abandoned_house"
+const CLUE_STORAGE_HUT := "storage_hut"
 
 const BRIEFCASE_ASSETS := {
-	"no_clue":                    "res://assets/sprites/briefcase/NoClue.png",
+	# Forest / global base
+	"no_clue": "res://assets/sprites/briefcase/global/NoClue.png",
+
+	# Reward reveal images (inside zones)
+	"pinas_house_reveal": "res://assets/sprites/briefcase/reveal/spoonReveal.png",
+	"backyard_path_reveal": "res://assets/sprites/briefcase/reveal/pineappleReveal.png",
+	"old_well_reveal": "res://assets/sprites/briefcase/reveal/eyeReveal.png",
+	"abandoned_house_reveal": "res://assets/sprites/briefcase/reveal/tiaraReveal.png",
+	"storage_hut_reveal": "res://assets/sprites/briefcase/reveal/scrollReveal.png",
+
 	"ladle_first_reveal":         "res://assets/sprites/briefcase/LadleFirstReveal.png",
 	"ladle_first_global":         "res://assets/sprites/briefcase/LadleFirstGlobal.png",
 	"pineapple_first_reveal":     "res://assets/sprites/briefcase/PineappleFirstReveal.png",
@@ -268,35 +280,30 @@ func get_briefcase_texture(context: String) -> Texture2D:
 func get_briefcase_texture_path(context: String) -> String:
 	match context:
 		"forest":
-			return _get_forest_briefcase_texture_path()
+			return BRIEFCASE_ASSETS["no_clue"]
 
+		# Reward sequence reveal images
 		"pinas_house_reveal":
-			var has_pineapple := has_clue(CLUE_BACKYARD_PATH)
-			return BRIEFCASE_ASSETS["ladle_with_pineapple_reveal"] if has_pineapple else BRIEFCASE_ASSETS["ladle_first_reveal"]
+			return BRIEFCASE_ASSETS["pinas_house_reveal"]
 
 		"backyard_path_reveal":
-			var has_ladle := has_clue(CLUE_PINAS_HOUSE)
-			return BRIEFCASE_ASSETS["pineapple_with_ladle_reveal"] if has_ladle else BRIEFCASE_ASSETS["pineapple_first_reveal"]
+			return BRIEFCASE_ASSETS["backyard_path_reveal"]
 
+		"old_well_reveal":
+			return BRIEFCASE_ASSETS["old_well_reveal"]
+
+		"abandoned_house_reveal":
+			return BRIEFCASE_ASSETS["abandoned_house_reveal"]
+
+		"storage_hut_reveal":
+			return BRIEFCASE_ASSETS["storage_hut_reveal"]
+
+		# Interactive/use-combine briefcase for Abandoned House
 		"abandoned_house":
 			return _get_abandoned_house_briefcase_texture_path()
 
 	return BRIEFCASE_ASSETS["no_clue"]
 	
-func _get_forest_briefcase_texture_path() -> String:
-	var has_ladle := has_clue(CLUE_PINAS_HOUSE)
-	var has_pineapple := has_clue(CLUE_BACKYARD_PATH)
-
-	if has_ladle and has_pineapple:
-		return BRIEFCASE_ASSETS["ladle_and_pineapple_global"]
-	elif has_ladle:
-		return BRIEFCASE_ASSETS["ladle_first_global"]
-	elif has_pineapple:
-		return BRIEFCASE_ASSETS["pineapple_first_global"]
-	else:
-		return BRIEFCASE_ASSETS["no_clue"]
-
-
 func _get_abandoned_house_briefcase_texture_path() -> String:
 	var has_puzzle_1_items := (
 		has_zone_item("abandoned_house", "key_fragment_1")

@@ -1,8 +1,8 @@
-[gd_scene load_steps=47 format=4 uid="uid://c65bu18udl64v"]
+[gd_scene load_steps=51 format=4 uid="uid://c65bu18udl64v"]
 
 [ext_resource type="Texture2D" uid="uid://k60h4yhhde0x" path="res://assets/backgrounds/forest.png" id="2_87r7r"]
 [ext_resource type="Texture2D" uid="uid://d06a48u2atl4o" path="res://assets/sprites/places/pinasHouseZone.png" id="2_anhpr"]
-[ext_resource type="Texture2D" uid="uid://fyaaxc6p5k04" path="res://assets/tiles/forestPathTilemap.png" id="2_k5ulr"]
+[ext_resource type="Texture2D" uid="uid://fyaaxc6p5k04" path="res://assets/tiles/ForestPathTilemap.png" id="2_k5ulr"]
 [ext_resource type="Script" uid="uid://b57klslahartq" path="res://scripts/world/hub/zone_portal.gd" id="3_dyw7g"]
 [ext_resource type="Texture2D" uid="uid://p18vin8nbajb" path="res://assets/sprites/places/oldWellZone.png" id="5_ggw0p"]
 [ext_resource type="Texture2D" uid="uid://co67v77hnrb2d" path="res://assets/sprites/places/pinasHouseOpenDoor.png" id="5_wp30c"]
@@ -28,8 +28,12 @@
 [ext_resource type="Texture2D" uid="uid://bepqi3l7fudbv" path="res://assets/sprites/clues/scrollClue.png" id="17_hp607"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="18_t6pvo"]
 [ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/clues/ladleClue.png" id="19_hdutc"]
-[ext_resource type="Texture2D" uid="uid://bua5t154w7jca" path="res://assets/sprites/briefcase/NoClue.png" id="22_8ci0b"]
 [ext_resource type="Texture2D" uid="uid://u7ubhk5misyx" path="res://assets/sprites/cutscene/dialogueBox.png" id="28_r08lv"]
+[ext_resource type="Texture2D" uid="uid://cd0fjqh8jjoqq" path="res://assets/sprites/briefcase/global/NoClue.png" id="29_f1shs"]
+[ext_resource type="Texture2D" uid="uid://bll4ox5yxxm20" path="res://assets/sprites/briefcase/global/clue_ladle.png" id="30_uoblf"]
+[ext_resource type="Texture2D" uid="uid://dvkb3cpe86fhv" path="res://assets/sprites/briefcase/global/clue_pineapple.png" id="31_srdb0"]
+[ext_resource type="Texture2D" uid="uid://w7j0od36isqk" path="res://assets/sprites/briefcase/global/clue_eyes.png" id="32_n4yeh"]
+[ext_resource type="Texture2D" uid="uid://haj5i5kcfq74" path="res://assets/sprites/briefcase/global/clue_tiara.png" id="33_j3lm3"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6nmbo"]
 size = Vector2(1.0549998, 9.77)
@@ -1804,7 +1808,6 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_8ci0b")
 
 [node name="BriefcaseDisplay" type="TextureRect" parent="SidekickLayer/Briefcase"]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -1815,9 +1818,39 @@ offset_right = 185.0
 offset_bottom = 67.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("22_8ci0b")
+texture = ExtResource("29_f1shs")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="ClueLadle" type="Sprite2D" parent="SidekickLayer/Briefcase/BriefcaseDisplay"]
+visible = false
+position = Vector2(425.50006, 251.99998)
+scale = Vector2(0.4859375, 0.50555557)
+texture = ExtResource("30_uoblf")
+
+[node name="CluePineapple" type="Sprite2D" parent="SidekickLayer/Briefcase/BriefcaseDisplay"]
+visible = false
+position = Vector2(416, 258.12497)
+scale = Vector2(0.45624992, 0.45949072)
+texture = ExtResource("31_srdb0")
+
+[node name="ClueEyes" type="Sprite2D" parent="SidekickLayer/Briefcase/BriefcaseDisplay"]
+visible = false
+position = Vector2(411.50003, 247.50003)
+scale = Vector2(0.45052087, 0.54166675)
+texture = ExtResource("32_n4yeh")
+
+[node name="ClueTiara" type="Sprite2D" parent="SidekickLayer/Briefcase/BriefcaseDisplay"]
+visible = false
+position = Vector2(412.00003, 214)
+scale = Vector2(0.40520832, 0.59074074)
+texture = ExtResource("33_j3lm3")
+
+[node name="ClueScroll" type="Sprite2D" parent="SidekickLayer/Briefcase/BriefcaseDisplay"]
+visible = false
+position = Vector2(468.50003, 393)
+scale = Vector2(0.053499985, 0.051999994)
+texture = ExtResource("17_hp607")
 
 [node name="DialogueLayer" type="CanvasLayer" parent="."]
 
