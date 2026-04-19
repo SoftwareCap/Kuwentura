@@ -2384,7 +2384,7 @@ func _show_tiara_briefcase_reveal_local() -> void:
 	if not cinematic_briefcase_reveal:
 		return
 
-	var reveal_texture: Texture2D = GameState.get_briefcase_texture("abandoned_house")
+	var reveal_texture: Texture2D = GameState.get_briefcase_texture("abandoned_house_reveal")
 	cinematic_briefcase_reveal.texture = reveal_texture
 	cinematic_briefcase_reveal.visible = reveal_texture != null
 	cinematic_briefcase_reveal.modulate = Color(1, 1, 1, 1)

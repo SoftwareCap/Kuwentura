@@ -50,6 +50,12 @@ extends Node2D
 @onready var storage_hut_door: Sprite2D = $"Zone Portals/StorageHut/StorageHutDoorOpen"
 @onready var abandoned_house_door: Sprite2D = $"Zone Portals/AbandonedHouse/AbandonedHouseDoorOpen"
 
+@onready var clue_ladle: Sprite2D = $SidekickLayer/Briefcase/BriefcaseDisplay/ClueLadle
+@onready var clue_pineapple: Sprite2D = $SidekickLayer/Briefcase/BriefcaseDisplay/CluePineapple
+@onready var clue_eyes: Sprite2D = $SidekickLayer/Briefcase/BriefcaseDisplay/ClueEyes
+@onready var clue_tiara: Sprite2D = $SidekickLayer/Briefcase/BriefcaseDisplay/ClueTiara
+@onready var clue_scroll: Sprite2D = $SidekickLayer/Briefcase/BriefcaseDisplay/ClueScroll
+
 # ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
 const PANEL_ANIMATION_DURATION: float = 0.4
@@ -149,6 +155,7 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	_disconnect_network_signals()
+	_clear_dialogue()
 
 # ─── SIGNAL WIRING ───────────────────────────────────────────────────────────
 
@@ -818,16 +825,26 @@ func _refresh_briefcase_display() -> void:
 	if not is_instance_valid(briefcase_display):
 		push_error("[ForestHub] briefcase_display is invalid")
 		return
-	var path := GameState.get_briefcase_texture_path("forest")
-	print("[ForestHub] Forest briefcase path: ", path)
-	var texture: Texture2D = GameState.get_briefcase_texture("forest")
-	if texture == null:
-		push_warning("[ForestHub] Forest briefcase texture is null for path: " + path)
-		briefcase_display.visible = false
-		return
-	briefcase_display.texture = texture
-	briefcase_display.visible = true
 
+	# State-driven
+	briefcase_display.visible = true
+	_update_forest_briefcase_clues()
+	
+func _update_forest_briefcase_clues() -> void:
+	if is_instance_valid(clue_ladle):
+		clue_ladle.visible = GameState.has_clue("pinas_house")
+
+	if is_instance_valid(clue_pineapple):
+		clue_pineapple.visible = GameState.has_clue("backyard_path")
+
+	if is_instance_valid(clue_eyes):
+		clue_eyes.visible = GameState.has_clue("old_well")
+
+	if is_instance_valid(clue_tiara):
+		clue_tiara.visible = GameState.has_clue("abandoned_house")
+
+	if is_instance_valid(clue_scroll):
+		clue_scroll.visible = GameState.has_clue("storage_hut")
 # ─── PORTALS ─────────────────────────────────────────────────────────────────
 
 func _connect_portal_signals() -> void:
@@ -986,6 +1003,11 @@ func _show_zone_thought(zone_name: String) -> void:
 
 ## Sets speaker label, clears text, makes panel visible.
 func _show_dialogue_panel(speaker: String) -> void:
+	if not is_inside_tree():
+		return
+	if not is_instance_valid(speaker_label) or not is_instance_valid(dialogue_label) or not is_instance_valid(dialogue_panel):
+		return
+
 	speaker_label.text = speaker
 	dialogue_label.text = ""
 	dialogue_panel.modulate.a = 1.0
@@ -994,43 +1016,85 @@ func _show_dialogue_panel(speaker: String) -> void:
 
 ## Streams text into dialogue_label character by character.
 func _typewrite(text: String) -> void:
+	if not is_inside_tree():
+		return
+	if not is_instance_valid(dialogue_label):
+		return
+
 	var char_index: int = 0
 	var elapsed: float = 0.0
 	var length: int = text.length()
+
 	while char_index <= length:
+		if not is_inside_tree():
+			return
+		if not is_instance_valid(dialogue_label):
+			return
+
 		elapsed += get_process_delta_time()
 		if elapsed >= DIALOGUE_SPEED:
 			elapsed -= DIALOGUE_SPEED
 			char_index += 1
 			dialogue_label.text = text.substr(0, char_index)
-		await get_tree().process_frame
+
+		var tree := get_tree()
+		if tree == null:
+			return
+		await tree.process_frame
 
 
 ## Typewriter + hides panel when text finishes (manual-advance style).
 func _say(speaker: String, text: String) -> void:
+	if not is_inside_tree():
+		return
+
 	_show_dialogue_panel(speaker)
 	await _typewrite(text)
-	dialogue_panel.visible = false
+
+	if not is_inside_tree():
+		return
+	if is_instance_valid(dialogue_panel):
+		dialogue_panel.visible = false
 
 
 ## Typewriter + auto-dismisses after [hold] seconds.
 func _say_auto(speaker: String, text: String, hold: float) -> void:
+	if not is_inside_tree():
+		return
+
 	_show_dialogue_panel(speaker)
 	await _typewrite(text)
+
+	if not is_inside_tree():
+		return
+
 	await _wait(hold)
 
 
 func _wait(seconds: float) -> void:
+	if not is_inside_tree():
+		return
+
 	var elapsed: float = 0.0
 	while elapsed < seconds:
+		if not is_inside_tree():
+			return
+
 		elapsed += get_process_delta_time()
-		await get_tree().process_frame
+
+		var tree := get_tree()
+		if tree == null:
+			return
+		await tree.process_frame
 
 
 func _clear_dialogue() -> void:
-	dialogue_label.text = ""
-	speaker_label.text = ""
-	dialogue_panel.visible = false
+	if is_instance_valid(dialogue_label):
+		dialogue_label.text = ""
+	if is_instance_valid(speaker_label):
+		speaker_label.text = ""
+	if is_instance_valid(dialogue_panel):
+		dialogue_panel.visible = false
 
 # ─── FIND PARTNER ────────────────────────────────────────────────────────────
 
