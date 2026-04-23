@@ -971,7 +971,7 @@ func _run_forest_dialogue() -> void:
 	await _say_auto("Sidekick", "Whoa. That was... not a normal elevator ride.", 0.8)
 	await _say_auto("Sidekick", "One second we're reading Grandma's fading book,", 0.8)
 	await _say_auto("Sidekick", "now we're here.", 0.8)
-	await _say_auto("Detective", "The book pulled us in. The story is dying, partner", 0.8)
+	await _say_auto("Detective", "The book pulled us in. The story is dying", 0.8)
 
 	_unlock_player_movement()
 
@@ -980,9 +980,7 @@ func _run_forest_dialogue() -> void:
 	await _say_auto("Detective", "No. We need five artifacts:", 0.8)
 	await _say_auto("Detective", "A Tiara, Ladle, Scroll, Pineapple, and an Eye.", 0.8)
 	await _say_auto("Detective", "Search the houses, the storage, the well, and the backyard path", 0.8)
-	await _say_auto("Detective", "They're here somewhere.", 0.8)
 	await _say_auto("Sidekick", "An eye? And a pineapple?", 0.8)
-	await _say_auto("Sidekick", "What does fruit have to do with this?", 0.8)
 	await _say("Detective", "The legend says:")
 	await _say("Detective", "'I wish you would grow a thousand eyes so you could find what you're looking for.'")
 	await _say("Detective", "We need to find out if that was just a figure of speech...")

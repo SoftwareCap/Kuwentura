@@ -2,9 +2,9 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b1dy4fq6ytpn6"
-path.bptc="res://.godot/imported/inventoryBoard.png-b6729ab0d2c8e41cd01e4b52ef5d286b.bptc.ctex"
-path.astc="res://.godot/imported/inventoryBoard.png-b6729ab0d2c8e41cd01e4b52ef5d286b.astc.ctex"
+uid="uid://5jrpcrsfso1p"
+path.bptc="res://.godot/imported/greenDiamond.png-5fe9d33509438a0575024f4d936b2033.bptc.ctex"
+path.astc="res://.godot/imported/greenDiamond.png-5fe9d33509438a0575024f4d936b2033.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/inventoryBoard.png"
-dest_files=["res://.godot/imported/inventoryBoard.png-b6729ab0d2c8e41cd01e4b52ef5d286b.bptc.ctex", "res://.godot/imported/inventoryBoard.png-b6729ab0d2c8e41cd01e4b52ef5d286b.astc.ctex"]
+source_file="res://assets/sprites/players/greenDiamond.png"
+dest_files=["res://.godot/imported/greenDiamond.png-5fe9d33509438a0575024f4d936b2033.bptc.ctex", "res://.godot/imported/greenDiamond.png-5fe9d33509438a0575024f4d936b2033.astc.ctex"]
 
 [params]
 

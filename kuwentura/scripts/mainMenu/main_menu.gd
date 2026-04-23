@@ -43,6 +43,12 @@ var is_joining: bool = false
 # LIFECYCLE
 func _ready() -> void:
 	MusicController.play_track(MusicController.MusicTrack.MAIN_MENU)
+	
+		# Force hide settings on startup
+	if settings_panel:
+		settings_panel.get_parent().visible = false
+		settings_panel.visible = false
+		
 	_load_settings()
 	_setup_main_buttons()
 	_connect_signals()
@@ -156,6 +162,7 @@ func _on_button_up(button: TextureButton) -> void:
 func _on_settings_pressed() -> void:
 	_set_input_blocked(true)
 	if settings_panel:
+		settings_panel.get_parent().visible = true
 		settings_panel.visible = true
 		if user_section:
 			user_section.visible = false
@@ -171,6 +178,7 @@ func _on_settings_pressed() -> void:
 
 func _on_back_settings_pressed() -> void:
 	if settings_panel:
+		settings_panel.get_parent().visible = false
 		settings_panel.visible = false
 	_set_input_blocked(false)
 	if settings_control:
