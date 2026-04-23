@@ -135,7 +135,7 @@ func _scene1() -> void:
 	words_fading.visible = false
 	_set_flipping_mode(true)
 	await _say1("Grandmother", "No… no… this can't be happening.")
-	await _say1("Grandmother", "How can I tell the story if the words are gone?")
+	await _say1_auto("Grandmother", "How can I tell the story if the words are gone?", 1.2)
 
 	_clear_dialogue(dialogue_label1, name_label1)
 

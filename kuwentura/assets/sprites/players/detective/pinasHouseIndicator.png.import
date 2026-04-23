@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://kwvyrjpwy4pr"
-path="res://.godot/imported/pinasHouseInteraction.png-b3c1f6ac1e8f163645bb0f1ede85a3d2.ctex"
+uid="uid://bmhp4hxk4hrxe"
+path="res://.godot/imported/pinasHouseIndicator.png-84e4dcb69a9b25bb68a8132745d42104.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/places/pinasHouseInteraction.png"
-dest_files=["res://.godot/imported/pinasHouseInteraction.png-b3c1f6ac1e8f163645bb0f1ede85a3d2.ctex"]
+source_file="res://assets/sprites/players/detective/pinasHouseIndicator.png"
+dest_files=["res://.godot/imported/pinasHouseIndicator.png-84e4dcb69a9b25bb68a8132745d42104.ctex"]
 
 [params]
 

@@ -25,6 +25,7 @@ enum ZoneStatus { LOCKED, AVAILABLE, COMPLETED }
 
 var local_role: Role = Role.NONE
 var is_host: bool = false
+var forest_tutorial_shown: bool = false  # ← persisted now
 
 var current_zone: String = "forest_hub"
 var zones_status: Dictionary = {
@@ -149,7 +150,7 @@ const BRIEFCASE_ASSETS := {
 	"pineapple_with_ladle_reveal":"res://assets/sprites/briefcase/PineappleWithLadleReveal.png",
 	"ladle_with_pineapple_reveal":"res://assets/sprites/briefcase/LadleWithPineappleReveal.png",
 	"ladle_and_pineapple_global": "res://assets/sprites/briefcase/LadleAndPineapple.png",
-	
+
 	# Abandoned House
 	"abandoned_house_default":    "res://assets/sprites/zoneObjects/abandonedHouseObjects/defaultBC.png",
 	"abandoned_house_puzzle_1":   "res://assets/sprites/zoneObjects/abandonedHouseObjects/puzzle1BC.png",
@@ -200,6 +201,11 @@ func _save_progress(source: String = "auto") -> void:
 		LocalSaveManager.save_game(get_save_data())
 	if FirebaseManager and FirebaseManager.is_cloud_available():
 		FirebaseManager.sync_to_cloud()
+
+
+func mark_tutorial_shown() -> void:
+	forest_tutorial_shown = true
+	_save_progress("tutorial_shown")
 
 
 func assign_role(role: Role) -> void:
@@ -260,6 +266,7 @@ func reset_game_after_nightfall() -> void:
 	climax_triggered = false
 	solved_puzzles.clear()
 	forest_intro_played = false
+	# ← Do NOT reset forest_tutorial_shown here — tutorial only shows once ever
 	game_reset.emit()
 	_save_progress("nightfall_reset")
 
@@ -281,40 +288,30 @@ func get_briefcase_texture_path(context: String) -> String:
 	match context:
 		"forest":
 			return BRIEFCASE_ASSETS["no_clue"]
-
-		# Reward sequence reveal images
 		"pinas_house_reveal":
 			return BRIEFCASE_ASSETS["pinas_house_reveal"]
-
 		"backyard_path_reveal":
 			return BRIEFCASE_ASSETS["backyard_path_reveal"]
-
 		"old_well_reveal":
 			return BRIEFCASE_ASSETS["old_well_reveal"]
-
 		"abandoned_house_reveal":
 			return BRIEFCASE_ASSETS["abandoned_house_reveal"]
-
 		"storage_hut_reveal":
 			return BRIEFCASE_ASSETS["storage_hut_reveal"]
-
-		# Interactive/use-combine briefcase for Abandoned House
 		"abandoned_house":
 			return _get_abandoned_house_briefcase_texture_path()
-
 	return BRIEFCASE_ASSETS["no_clue"]
-	
+
+
 func _get_abandoned_house_briefcase_texture_path() -> String:
 	var has_puzzle_1_items := (
 		has_zone_item("abandoned_house", "key_fragment_1")
 		or has_zone_item("abandoned_house", "card_piece")
 	)
-
 	var has_puzzle_2_items := (
 		has_zone_item("abandoned_house", "key_fragment_2")
 		or has_zone_item("abandoned_house", "light_bulb")
 	)
-
 	var has_key_fragment_3 := has_zone_item("abandoned_house", "key_fragment_3")
 	var has_full_key := has_zone_item("abandoned_house", "assembled_key")
 	var mirror_lit := is_puzzle_solved("abandoned_house_mirror_lit")
@@ -335,6 +332,7 @@ func _get_abandoned_house_briefcase_texture_path() -> String:
 	else:
 		return BRIEFCASE_ASSETS["abandoned_house_default"]
 
+
 func get_save_data() -> Dictionary:
 	return {
 		"collected_clues":           collected_clues.duplicate(true),
@@ -352,7 +350,9 @@ func get_save_data() -> Dictionary:
 		"selected_costumes":         selected_costumes.duplicate(true),
 		"_costume_confirmed_status": _costume_confirmed_status.duplicate(true),
 		"zone_inventory":            zone_inventory.duplicate(true),
+		"forest_tutorial_shown":     forest_tutorial_shown,  # ← added
 	}
+
 
 func load_save_data(data: Dictionary) -> void:
 	if data.has("collected_clues"):
@@ -379,7 +379,8 @@ func load_save_data(data: Dictionary) -> void:
 		_costume_confirmed_status = data["_costume_confirmed_status"].duplicate(true)
 	if data.has("zone_inventory"):
 		zone_inventory = data["zone_inventory"].duplicate(true)
-
+	if data.has("forest_tutorial_shown"):
+		forest_tutorial_shown = data["forest_tutorial_shown"]  # ← added
 	if data.has("session_seed"):
 		_session_seed = int(data["session_seed"])
 
@@ -391,7 +392,6 @@ func load_save_data(data: Dictionary) -> void:
 		puzzle_variation_indices = data["puzzle_variation_indices"].duplicate(true)
 
 	data_synced.emit()
-	
 
 
 func _initialize_puzzle_seeds() -> void:
@@ -412,17 +412,16 @@ func set_session_seed(session_seed: int) -> void:
 func get_puzzle_seed(zone_id: String) -> int:
 	if puzzle_seeds.has(zone_id):
 		return int(puzzle_seeds[zone_id])
-
 	if _session_seed == 0:
 		_initialize_puzzle_seeds()
-
 	if puzzle_seeds.has(zone_id):
 		return int(puzzle_seeds[zone_id])
-
 	return int(hash(str(_session_seed) + ":" + zone_id))
+
 
 func force_puzzle_variation_index(zone_id: String, variation_index: int) -> void:
 	puzzle_variation_indices[zone_id] = variation_index
+
 
 func get_puzzle_variation_index(zone_id: String, variation_count: int) -> int:
 	if variation_count <= 0:
@@ -539,19 +538,20 @@ func reset_all_progress() -> void:
 			zone_inventory[zone_id][item_id] = false
 	for zone_id in zones_status:
 		zones_status[zone_id] = ZoneStatus.AVAILABLE
-	current_zone      = "forest_hub"
-	climax_triggered  = false
-	game_completed    = false
-	attempt_count     = 0
+	current_zone       = "forest_hub"
+	climax_triggered   = false
+	game_completed     = false
+	attempt_count      = 0
 	nightfall_attempts = 0
 	ledger_entries.clear()
 	solved_puzzles.clear()
 	_session_seed = randi()
 	_initialize_puzzle_seeds()
 	reset_costume_selections()
+	forest_intro_played = false
+	forest_tutorial_shown = false  # ← reset only on full wipe, not nightfall
 	if LocalSaveManager:
 		LocalSaveManager.delete_save()
-	forest_intro_played = false
 	game_reset.emit()
 
 
@@ -560,6 +560,7 @@ func get_role_display_text() -> String:
 		Role.DETECTIVE: return "DETECTIVE (Host)"
 		Role.SIDEKICK:  return "SIDEKICK (Client)"
 		_:              return "NO ROLE ASSIGNED"
+
 
 func ensure_zone_inventory(zone_id: String) -> void:
 	if not zone_inventory.has(zone_id):
@@ -572,29 +573,22 @@ func has_zone_item(zone_id: String, item_id: String) -> bool:
 
 func grant_zone_item(zone_id: String, item_id: String, auto_save: bool = true) -> void:
 	ensure_zone_inventory(zone_id)
-
 	if bool(zone_inventory[zone_id].get(item_id, false)):
 		return
-
 	zone_inventory[zone_id][item_id] = true
 	briefcase_updated.emit()
-
 	if auto_save:
 		_save_progress("zone_item_granted")
 
 
 func grant_zone_items(zone_id: String, item_ids: Array) -> void:
 	ensure_zone_inventory(zone_id)
-
 	var changed: bool = false
-
 	for raw_item_id in item_ids:
 		var item_id: String = str(raw_item_id)
-
 		if not bool(zone_inventory[zone_id].get(item_id, false)):
 			zone_inventory[zone_id][item_id] = true
 			changed = true
-
 	if changed:
 		briefcase_updated.emit()
 		_save_progress("zone_items_granted")
