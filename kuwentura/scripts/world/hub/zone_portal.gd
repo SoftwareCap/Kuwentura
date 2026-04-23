@@ -8,6 +8,9 @@ signal players_entered(zone_name: String)
 @export var zone_name: String
 @export var scene_path: String
 
+@onready var _sprite: Sprite2D = get_node_or_null("Sprite2D")
+@onready var _hint: Node = get_node_or_null("Hint")
+
 var _detective_present: bool = false
 var _sidekick_present: bool = false
 var _detective_peer_id: int = 0
@@ -36,6 +39,8 @@ func _ready() -> void:
 		_enter_button.pressed.connect(_on_enter_button_pressed)
 	else:
 		push_warning("[ZonePortal] " + zone_name + " could not find enter button!")
+	if _hint:
+		_hint.visible = false
 
 
 func _find_enter_button() -> Button:
@@ -99,6 +104,13 @@ func _resolve_return_position(pos: Vector2, fallback_offset: Vector2) -> Vector2
 func _on_body_entered(body: Node2D) -> void:
 	if not body is CharacterBody2D:
 		return
+		
+	if body.name == str(multiplayer.get_unique_id()):
+		if _sprite:
+			_sprite.visible = false
+		if _hint:
+			_hint.visible = true
+			
 	var peer_id := int(body.name) if body.name.is_valid_int() else 0
 	if peer_id <= 0 or not _is_network_ready():
 		return
@@ -112,6 +124,13 @@ func _on_body_entered(body: Node2D) -> void:
 func _on_body_exited(body: Node2D) -> void:
 	if not body is CharacterBody2D:
 		return
+		
+	if body.name == str(multiplayer.get_unique_id()):
+		if _sprite:
+			_sprite.visible = true
+		if _hint:
+			_hint.visible = false
+		
 	var peer_id := int(body.name) if body.name.is_valid_int() else 0
 	if peer_id <= 0 or not _is_network_ready():
 		return
@@ -148,31 +167,40 @@ func _update_button_visibility() -> void:
 		if _enter_button:
 			_enter_button.visible = false
 		return
-	var both_present := _detective_present and _sidekick_present
+		
+	var my_peer_id := multiplayer.get_unique_id()
+	var i_am_present := (my_peer_id == 1 and _detective_present) or (my_peer_id != 1 and _sidekick_present)
 	if _enter_button:
-		_enter_button.visible = both_present
-	if not both_present:
+		_enter_button.visible = i_am_present
+	if not (_detective_present or _sidekick_present):
 		_detective_ready = false
 		_sidekick_ready = false
 		_detective_confirming = false
 		_sidekick_confirming = false
 		_update_button_text()
-	_sync_button_visibility.rpc(both_present, _detective_ready, _sidekick_ready)
+	_sync_button_visibility.rpc(_detective_present, _sidekick_present, _detective_ready, _sidekick_ready)
 
 
 @rpc("authority", "reliable")
-func _sync_button_visibility(button_visible: bool, detective_ready: bool, sidekick_ready: bool) -> void:
+func _sync_button_visibility(detective_present: bool, sidekick_present: bool, detective_ready: bool, sidekick_ready: bool) -> void:
 	if not is_inside_tree():
 		return
-	if _enter_button:
-		_enter_button.visible = button_visible
-	_detective_present = button_visible
-	_sidekick_present = button_visible
-	if not button_visible:
-		_detective_confirming = false
-		_sidekick_confirming = false
+
+	_detective_present = detective_present
+	_sidekick_present = sidekick_present
 	_detective_ready = detective_ready
 	_sidekick_ready = sidekick_ready
+	
+	if not detective_ready and not sidekick_ready:
+		_detective_confirming = false
+		_sidekick_confirming = false
+
+	# Each client shows the button only if THEY are present
+	var my_peer_id := multiplayer.get_unique_id()
+	var i_am_present := (my_peer_id == 1 and _detective_present) or (my_peer_id != 1 and _sidekick_present)
+	if _enter_button:
+		_enter_button.visible = i_am_present
+		
 	_update_button_text()
 
 
@@ -181,8 +209,6 @@ func _on_enter_button_pressed() -> void:
 		return
 	var my_peer_id := multiplayer.get_unique_id()
 	if multiplayer.is_server():
-		if not _detective_present:
-			return
 		var was_confirming := _detective_confirming
 		_set_player_confirming(1, not was_confirming)
 		_sync_confirming_state.rpc(_detective_confirming, _sidekick_confirming)
@@ -234,20 +260,18 @@ func _sync_confirming_state(detective_confirming: bool, sidekick_confirming: boo
 func _update_button_text() -> void:
 	if not _enter_button or not is_inside_tree() or multiplayer == null:
 		return
-	if not (_detective_present and _sidekick_present):
-		_enter_button.text = _base_button_text
-		return
+		
 	var is_detective := (multiplayer.get_unique_id() == 1)
 	var local_confirming := _detective_confirming if is_detective else _sidekick_confirming
+	var both_present := _detective_present and _sidekick_present
+
 	if local_confirming:
-		_enter_button.text = "Cancel"
+		# Only one player present or waiting for the other to confirm
+		_enter_button.text = "Waiting for another player... \n Tap again to Cancel"
 		return
-	if _detective_ready and _sidekick_ready:
+
+	if both_present and _detective_ready and _sidekick_ready:
 		_enter_button.text = _base_button_text + " (Entering...)"
-	elif is_detective and _detective_ready:
-		_enter_button.text = _base_button_text + " (Waiting for Sidekick...)"
-	elif not is_detective and _sidekick_ready:
-		_enter_button.text = _base_button_text + " (Waiting for Detective...)"
 	else:
 		_enter_button.text = _base_button_text
 

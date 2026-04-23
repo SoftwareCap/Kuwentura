@@ -79,20 +79,20 @@ const SETTINGS_FILE := "user://settings.json"
 ## zone_name must exactly match portal.zone_name in the Inspector.
 const ZONE_THOUGHTS: Dictionary = {
 	"pinas_house": {
-		true:  ["Detective", "Pina's place... I sense an artifact inside."],
-		false: ["Sidekick",  "Lights are on! I bet there's an artifact."]
+		true:  ["Detective", "Pina's place... Come with me! I sense an artifact inside."],
+		false: ["Sidekick",  "Lights are on! I bet there's an artifact. Let's go inside!"]
 	},
 	"old_well": {
-		true:  ["Detective", "The well is deep. An artifact lies below."],
+		true:  ["Detective", "The well is deep. An artifact lies below. Let's check it together!"],
 		false: ["Sidekick",  "Something's in the well wall! Help me look."]
 	},
 	"backyard_path": {
-		true:  ["Detective", "Tracks lead this way. An artifact must be here."],
-		false: ["Sidekick",  "The path is clear! Let's find that artifact."]
+		true:  ["Detective", "Tracks lead this way. Come with me!"],
+		false: ["Sidekick",  "The path is clear! Let's find that artifact together."]
 	},
 	"storage_hut": {
-		true:  ["Detective", "The hut is unlocked. A. artifact awaits."],
-		false: ["Sidekick",  "It's small, but I bet there's an artifact!"]
+		true:  ["Detective", "The hut is unlocked. Let's go inside an artifact awaits."],
+		false: ["Sidekick",  "It's small, but I bet there's an artifact inside!"]
 	},
 	"abandoned_house": {
 		true:  ["Detective", "Eerie... but there is an artifact within."],
@@ -126,6 +126,7 @@ func _ready() -> void:
 	_setup_zone_completion_indicators()
 	_refresh_briefcase_display()
 	_animate_location_diamond()
+	_setup_forest_tutorial()
 
 	if briefcase_panel:
 		briefcase_panel.visible = false
@@ -150,7 +151,6 @@ func _ready() -> void:
 						_rpc_spawn_player_with_pos.rpc_id(other_peer, peer_id, false, peer_pos)
 
 	await get_tree().process_frame
-	_run_forest_dialogue()
 
 
 func _exit_tree() -> void:
@@ -959,35 +959,6 @@ func _on_zone_completed(completed_zone: String) -> void:
 		break
 
 # ─── DIALOGUE ────────────────────────────────────────────────────────────────
-
-func _run_forest_dialogue() -> void:
-	if GameState.forest_intro_played:
-		return
-	GameState.forest_intro_played = true
-	GameState._save_progress("forest_intro")
-	
-	_lock_player_movement()
-	# FOREST_PLAYERS_SPAWN
-	await _say_auto("Sidekick", "Whoa. That was... not a normal elevator ride.", 0.8)
-	await _say_auto("Sidekick", "One second we're reading Grandma's fading book,", 0.8)
-	await _say_auto("Sidekick", "now we're here.", 0.8)
-	await _say_auto("Detective", "The book pulled us in. The story is dying", 0.8)
-
-	_unlock_player_movement()
-
-	# FOREST_PLAYERS_WALK
-	await _say_auto("Sidekick", "So, what's the plan? We just walk around?", 0.8)
-	await _say_auto("Detective", "No. We need five artifacts:", 0.8)
-	await _say_auto("Detective", "A Tiara, Ladle, Scroll, Pineapple, and an Eye.", 0.8)
-	await _say_auto("Detective", "Search the houses, the storage, the well, and the backyard path", 0.8)
-	await _say_auto("Sidekick", "An eye? And a pineapple?", 0.8)
-	await _say("Detective", "The legend says:")
-	await _say("Detective", "'I wish you would grow a thousand eyes so you could find what you're looking for.'")
-	await _say("Detective", "We need to find out if that was just a figure of speech...")
-	await _say("Detective", "or if it's the key to everything.")
-	_clear_dialogue()
-
-
 ## One-time zone thought triggered when the local player walks into a portal.
 ## Keys in ZONE_THOUGHTS must match portal.zone_name exactly (check Inspector).
 func _show_zone_thought(zone_name: String) -> void:
@@ -1176,3 +1147,58 @@ func _unlock_player_movement() -> void:
 	var player := get_node_or_null(str(my_id)) as CharacterBody2D
 	if is_instance_valid(player) and player.has_method("set_movement_locked"):
 		player.set_movement_locked(false)
+
+
+# ─── FOREST TUTORIAL ─────────────────────────────────────────────────────────
+
+func _setup_forest_tutorial() -> void:
+	var tutorial := get_node_or_null("ForestTutorial")
+
+	if GameState.forest_tutorial_shown:
+		if tutorial:
+			tutorial.visible = false
+		return
+
+	GameState.mark_tutorial_shown()
+
+	if not tutorial:
+		push_warning("[ForestHub] ForestTutorial node not found.")
+		return
+
+	if tutorial is CanvasLayer:
+		tutorial.layer = 10
+		tutorial.follow_viewport_enabled = false
+
+	var overlay := ColorRect.new()
+	overlay.name = "DimOverlay"
+	overlay.color = Color(0, 0, 0, 0.7)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	tutorial.add_child(overlay)
+	tutorial.move_child(overlay, 0)
+
+	if touch_controls:
+		touch_controls.visible = false
+
+	tutorial.process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().paused = true
+
+	var close_btn := tutorial.get_node_or_null("CloseTutorialButton")
+	if close_btn:
+		close_btn.process_mode = Node.PROCESS_MODE_ALWAYS
+		if not close_btn.pressed.is_connected(_on_tutorial_closed):
+			close_btn.pressed.connect(_on_tutorial_closed)
+	else:
+		push_warning("[ForestHub] CloseTutorialButton not found inside ForestTutorial.")
+
+
+func _on_tutorial_closed() -> void:
+	var tutorial := get_node_or_null("ForestTutorial")
+	if tutorial:
+		tutorial.queue_free()
+
+	# Restore touch controls
+	if touch_controls:
+		touch_controls.visible = true
+	
+	get_tree().paused = false
