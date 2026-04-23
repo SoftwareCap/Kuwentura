@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cdmdxcxb5qaa4"
-path="res://.godot/imported/hint.png-e0d36827c81a753912e7fab2218abad5.ctex"
+uid="uid://bppb0lkeirtvl"
+path="res://.godot/imported/sidekick.png-0363e75b83e9ba4e13fe1895c8d783be.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/abandonedHouseObjects/hint.png"
-dest_files=["res://.godot/imported/hint.png-e0d36827c81a753912e7fab2218abad5.ctex"]
+source_file="res://assets/sprites/players/detective/sidekick.png"
+dest_files=["res://.godot/imported/sidekick.png-0363e75b83e9ba4e13fe1895c8d783be.ctex"]
 
 [params]
 

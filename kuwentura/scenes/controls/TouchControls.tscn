@@ -6,8 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://bc40nmjniu431" path="res://assets/buttons/jumpButton.png" id="4_dlgvd"]
 [ext_resource type="Texture2D" uid="uid://chff8f3cdvqaf" path="res://assets/buttons/pauseButton.png" id="5_d6yqq"]
 [ext_resource type="Texture2D" uid="uid://dhs2e7weqqu13" path="res://assets/buttons/players/mapbutton.png" id="6_vwhch"]
-[ext_resource type="Texture2D" uid="uid://b4ff13vwedej7" path="res://assets/buttons/players/ledgerbutton.png" id="7_w2x6p"]
-[ext_resource type="Texture2D" uid="uid://lrijshq5upgf" path="res://assets/buttons/players/briefcasebutton.png" id="8_opfl2"]
+[ext_resource type="Texture2D" uid="uid://b67wsufrc0323" path="res://assets/buttons/players/ledgerButton.png" id="7_vwhch"]
+[ext_resource type="Texture2D" uid="uid://bx0l3llidiblf" path="res://assets/buttons/players/briefcaseButton.png" id="8_w2x6p"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_left"]
 size = Vector2(250, 250)
@@ -36,9 +36,8 @@ corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.3)
-shadow_size = 8
-shadow_offset = Vector2(0, 4)
+shadow_color = Color(0.9843137, 0.9254902, 0.7882353, 1)
+shadow_size = 2
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w2x6p"]
 bg_color = Color(0.65098, 0.439216, 0.266667, 1)
@@ -108,14 +107,14 @@ passby_press = true
 [node name="Ledger" type="TouchScreenButton" parent="."]
 position = Vector2(1118.0001, 10)
 scale = Vector2(0.06, 0.06)
-texture_normal = ExtResource("7_w2x6p")
+texture_normal = ExtResource("7_vwhch")
 shape = SubResource("RectangleShape2D_cqy2h")
 passby_press = true
 
 [node name="Briefcase" type="TouchScreenButton" parent="."]
 position = Vector2(1238, 130)
 scale = Vector2(0.06, 0.06)
-texture_normal = ExtResource("8_opfl2")
+texture_normal = ExtResource("8_w2x6p")
 shape = SubResource("RectangleShape2D_6oeic")
 passby_press = true
 

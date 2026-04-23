@@ -2,23 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://5jrpcrsfso1p"
-path.bptc="res://.godot/imported/diamond.png-39298f7a3fb9c6d2ec774acdc144a9d3.bptc.ctex"
-path.astc="res://.godot/imported/diamond.png-39298f7a3fb9c6d2ec774acdc144a9d3.astc.ctex"
+uid="uid://bsqdoe81d60lw"
+path="res://.godot/imported/abandonedHouseBackground.png-c3c39ec02f33e62c2138cc0142489945.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/diamond.png"
-dest_files=["res://.godot/imported/diamond.png-39298f7a3fb9c6d2ec774acdc144a9d3.bptc.ctex", "res://.godot/imported/diamond.png-39298f7a3fb9c6d2ec774acdc144a9d3.astc.ctex"]
+source_file="res://assets/sprites/places/abandonedHouseBackground.png"
+dest_files=["res://.godot/imported/abandonedHouseBackground.png-c3c39ec02f33e62c2138cc0142489945.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

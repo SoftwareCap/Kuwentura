@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ceibr3syftkyh"
-path="res://.godot/imported/Tiara Clue.png-c7d2bbc864f55f8a26f0f280b1c84d5d.ctex"
+uid="uid://dvki04mql22vk"
+path="res://.godot/imported/detective.png-eaa8b707b2962aa2626c131a857c1ba4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/abandonedHouseObjects/Tiara Clue.png"
-dest_files=["res://.godot/imported/Tiara Clue.png-c7d2bbc864f55f8a26f0f280b1c84d5d.ctex"]
+source_file="res://scenes/world/zones/abandonedHouse/detective.png"
+dest_files=["res://.godot/imported/detective.png-eaa8b707b2962aa2626c131a857c1ba4.ctex"]
 
 [params]
 
