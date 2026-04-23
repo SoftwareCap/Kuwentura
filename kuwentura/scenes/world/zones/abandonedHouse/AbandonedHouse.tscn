@@ -1,60 +1,29 @@
-[gd_scene load_steps=68 format=3 uid="uid://bandonedhouse"]
+[gd_scene load_steps=48 format=3 uid="uid://bandonedhouse"]
 
 [ext_resource type="Script" uid="uid://ftv8j2b15oka" path="res://scripts/world/zones/abandonedHouse/abandoned_house.gd" id="1_abandonedhouse"]
-[ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
-[ext_resource type="Texture2D" uid="uid://sq3ea80pg5xq" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/AbandonedHouse.png" id="2_kosje"]
-[ext_resource type="Texture2D" uid="uid://bwccumnrc00pr" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-1.png" id="2_pocdh"]
-[ext_resource type="Texture2D" uid="uid://cyyv53bejmfyj" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key-2.png" id="2_w3m7o"]
-[ext_resource type="Texture2D" uid="uid://cxoud0qppj31f" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-2.png" id="3_ctgii"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="3_fnsr3"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
-[ext_resource type="Texture2D" uid="uid://ddpsrg1yqwx22" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Lighter.png" id="3_tdxjt"]
-[ext_resource type="Texture2D" uid="uid://dpuo3g1804rtj" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-3.png" id="4_cvcyb"]
+[ext_resource type="Texture2D" uid="uid://cgtl3fi4ldvqd" path="res://assets/sprites/players/detective/detective.png" id="4_w3m7o"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="5_54qax"]
-[ext_resource type="Texture2D" uid="uid://dlqjo7cag3o4b" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-4.png" id="5_ctgii"]
+[ext_resource type="Texture2D" uid="uid://bppb0lkeirtvl" path="res://assets/sprites/players/detective/sidekick.png" id="5_tdxjt"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="6_pocdh"]
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="7_ctgii"]
-[ext_resource type="Texture2D" uid="uid://6m1iqxkimf78" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-1.png" id="7_elib0"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="8_cvcyb"]
-[ext_resource type="Texture2D" uid="uid://cfw80tqeia5bl" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-2.png" id="8_mdwg5"]
-[ext_resource type="Texture2D" uid="uid://beapwr3xemxnh" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-3.png" id="9_w3m7o"]
-[ext_resource type="Texture2D" uid="uid://br84avkbblw6y" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-4.png" id="10_tdxjt"]
-[ext_resource type="Texture2D" uid="uid://0d84bdd88kfv" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-5.png" id="11_th3vv"]
-[ext_resource type="Texture2D" uid="uid://c84gh5aa58ihx" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-6.png" id="12_ogtg4"]
 [ext_resource type="Texture2D" uid="uid://ym75irc4dtcy" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key-1.png" id="14_wp1ru"]
 [ext_resource type="Texture2D" uid="uid://b41p3mhe6dips" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card.png" id="15_qwlxc"]
-[ext_resource type="Texture2D" uid="uid://degoflxfd7bdw" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/LightedWithFP.png" id="17_tgdgo"]
-[ext_resource type="Texture2D" uid="uid://brd17cn6m77du" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/LightedNoFP.png" id="18_lju7o"]
-[ext_resource type="Texture2D" uid="uid://q7i5a6xreg50" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/LightedRoom.png" id="19_ybixs"]
 [ext_resource type="Texture2D" uid="uid://dijf4b80h348s" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/drawer.png" id="20_xk67h"]
-[ext_resource type="Texture2D" uid="uid://k5wjdcp4wtoh" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/openDrawer.png" id="21_a471t"]
 [ext_resource type="Texture2D" uid="uid://b8ax73bis06aa" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock.png" id="22_4qfmh"]
-[ext_resource type="Texture2D" uid="uid://cq6xkjlyyjaad" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-0.png" id="23_h53ye"]
-[ext_resource type="Texture2D" uid="uid://bbpfxdeqmsaee" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-1.png" id="24_nxkqi"]
 [ext_resource type="Texture2D" uid="uid://dge111yp5pl1p" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/NotLighted.png" id="24_tdxjt"]
-[ext_resource type="Texture2D" uid="uid://dq3y7iuv8qqdn" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-2.png" id="25_c5hd3"]
-[ext_resource type="Texture2D" uid="uid://8rdt6i74pdjm" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-3.png" id="26_ubkn4"]
-[ext_resource type="Texture2D" uid="uid://06vpn4oxfkku" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-4.png" id="27_to5f4"]
-[ext_resource type="Texture2D" uid="uid://cqlkdg4x5juic" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-5.png" id="28_hx2gr"]
-[ext_resource type="Texture2D" uid="uid://bsp743owfiqyb" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-6.png" id="29_sofx5"]
-[ext_resource type="Texture2D" uid="uid://b4n0jejrrwavg" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-7.png" id="30_0yu24"]
-[ext_resource type="Texture2D" uid="uid://cf7hbudmlovmc" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-8.png" id="31_1767a"]
-[ext_resource type="Texture2D" uid="uid://crc54hjbsog7g" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-9.png" id="32_fs4kb"]
 [ext_resource type="Texture2D" uid="uid://6pufhlohb4lw" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/closeCabinet.png" id="33_c5hd3"]
-[ext_resource type="Texture2D" uid="uid://d31y5d40mxvea" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/openedCabinet.png" id="34_ubkn4"]
-[ext_resource type="Texture2D" uid="uid://hgococp5rux5" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/finalboxClose.png" id="35_hx2gr"]
-[ext_resource type="Texture2D" uid="uid://bqq2mplpu2rrg" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/finalboxOpen.png" id="36_sofx5"]
 [ext_resource type="Texture2D" uid="uid://ujja3u0qopw2" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/defaultProgress.png" id="38_8h2lu"]
-[ext_resource type="Texture2D" uid="uid://cdmdxcxb5qaa4" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/hint.png" id="39_fs4kb"]
-[ext_resource type="Texture2D" uid="uid://cgxab0me07u3a" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/2-Puzzle.png" id="39_xh6nx"]
 [ext_resource type="Texture2D" uid="uid://hjocro1muuep" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/poster.png" id="40_1s7m6"]
-[ext_resource type="Texture2D" uid="uid://dx6jxm6y4tmpl" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/3-puzzle.png" id="40_26k5c"]
-[ext_resource type="Texture2D" uid="uid://bxlujvsxrpxi4" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/4-puzzle.png" id="41_ig5qe"]
-[ext_resource type="Texture2D" uid="uid://r1wfhe71cjda" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/5-puzzle.png" id="42_60uqn"]
+[ext_resource type="Texture2D" uid="uid://mn5xegdioqrn" path="res://assets/sprites/zoneObjects/notification.png" id="42_5rk6e"]
+[ext_resource type="Texture2D" uid="uid://bsqdoe81d60lw" path="res://assets/sprites/places/abandonedHouseBackground.png" id="43_8h2lu"]
+[ext_resource type="Texture2D" uid="uid://dwymeh76j8r8p" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/glowHint.png" id="44_5rk6e"]
 [ext_resource type="Texture2D" uid="uid://bn3lo7ofeh8ui" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key-3.png" id="45_sofx5"]
-[ext_resource type="Texture2D" uid="uid://ceibr3syftkyh" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Tiara Clue.png" id="46_0yu24"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="47_1767a"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="48_fs4kb"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="48_fs4kb"]
+[ext_resource type="Texture2D" uid="uid://baylpfjefdeqo" path="res://assets/buttons/backWordButton.png" id="52_8h2lu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wp1ru"]
 size = Vector2(168.5, 86)
@@ -69,7 +38,7 @@ size = Vector2(146, 112)
 size = Vector2(196, 37)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iaen7"]
-size = Vector2(219.5, 177)
+size = Vector2(219.5, 330)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m0tg4"]
 bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
@@ -90,6 +59,77 @@ thickness = 20
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_mdwg5"]
 color = Color(0.6509804, 0.4392157, 0.26666668, 1)
 thickness = 20
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xh6nx"]
+size = Vector2(1500, 500)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_60uqn"]
+bg_color = Color(0.360784, 0.215686, 0.180392, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fnmj2"]
+bg_color = Color(0.65098, 0.439216, 0.266667, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y3lts"]
+bg_color = Color(0.752941, 0.505882, 0.329412, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ycnxk"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_xh6nx"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8h2lu"]
+bg_color = Color(0.360784, 0.215686, 0.180392, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xh6nx"]
+bg_color = Color(0.65098, 0.439216, 0.266667, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_26k5c"]
+bg_color = Color(0.752941, 0.505882, 0.329412, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ig5qe"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_emdfy"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1s7m6"]
 content_margin_top = 10.0
@@ -137,46 +177,42 @@ shadow_offset = Vector2(0, 3.41)
 
 [node name="AbandonedHouse" type="Node2D"]
 script = ExtResource("1_abandonedhouse")
-key_fragment_2_texture = ExtResource("2_w3m7o")
-lighter_texture = ExtResource("3_tdxjt")
-book_1_texture = ExtResource("2_pocdh")
-book_2_texture = ExtResource("3_ctgii")
-book_3_texture = ExtResource("4_cvcyb")
-book_4_texture = ExtResource("5_ctgii")
-memory_card_back_texture = ExtResource("15_qwlxc")
-memory_card_1_texture = ExtResource("7_elib0")
-memory_card_2_texture = ExtResource("8_mdwg5")
-memory_card_3_texture = ExtResource("9_w3m7o")
-memory_card_4_texture = ExtResource("10_tdxjt")
-memory_card_5_texture = ExtResource("11_th3vv")
-memory_card_6_texture = ExtResource("12_ogtg4")
-key_fragment_1_texture = ExtResource("14_wp1ru")
-card_piece_texture = ExtResource("15_qwlxc")
-mirror_not_lighted_texture = ExtResource("24_tdxjt")
-mirror_lighted_with_fp_texture = ExtResource("17_tgdgo")
-mirror_lighted_no_fp_texture = ExtResource("18_lju7o")
-lighted_room_texture = ExtResource("19_ybixs")
-drawer_closed_texture = ExtResource("20_xk67h")
-drawer_open_texture = ExtResource("21_a471t")
-drawer_lock_zoom_texture = ExtResource("22_4qfmh")
-lock_digit_textures = Array[Texture2D]([ExtResource("23_h53ye"), ExtResource("24_nxkqi"), ExtResource("25_c5hd3"), ExtResource("26_ubkn4"), ExtResource("27_to5f4"), ExtResource("28_hx2gr"), ExtResource("29_sofx5"), ExtResource("30_0yu24"), ExtResource("31_1767a"), ExtResource("32_fs4kb")])
-cabinet_closed_texture = ExtResource("33_c5hd3")
-cabinet_opened_texture = ExtResource("34_ubkn4")
-final_box_closed_texture = ExtResource("35_hx2gr")
-final_box_opened_texture = ExtResource("36_sofx5")
-tiara_clue_texture = ExtResource("46_0yu24")
-progress_default_texture = ExtResource("38_8h2lu")
-progress_2_texture = ExtResource("39_xh6nx")
-progress_3_texture = ExtResource("40_26k5c")
-progress_4_texture = ExtResource("41_ig5qe")
-progress_5_texture = ExtResource("42_60uqn")
+
+[node name="Notification" type="CanvasLayer" parent="."]
+layer = 200
+
+[node name="Sprite2D" type="Sprite2D" parent="Notification"]
+position = Vector2(693, 66.00001)
+scale = Vector2(0.42129624, 0.4212962)
+texture = ExtResource("42_5rk6e")
+
+[node name="NotificationLabel" type="Label" parent="Notification"]
+offset_left = 388.0
+offset_top = 28.0
+offset_right = 1053.0
+offset_bottom = 105.0
+horizontal_alignment = 1
+autowrap_mode = 3
 
 [node name="BackgroundLayer" type="Node2D" parent="."]
 
 [node name="BedroomBackground" type="Sprite2D" parent="BackgroundLayer"]
+z_index = -1
 position = Vector2(735, 373)
 scale = Vector2(1.0704942, 0.984375)
-texture = ExtResource("2_kosje")
+texture = ExtResource("43_8h2lu")
+
+[node name="Players" type="Node2D" parent="."]
+
+[node name="Detective" type="Sprite2D" parent="Players"]
+position = Vector2(99, 603)
+scale = Vector2(0.98, 0.98)
+texture = ExtResource("4_w3m7o")
+
+[node name="Sidekick" type="Sprite2D" parent="Players"]
+position = Vector2(99, 603)
+scale = Vector2(0.98, 0.98)
+texture = ExtResource("5_tdxjt")
 
 [node name="InteractiveLayer" type="Node2D" parent="."]
 
@@ -187,18 +223,15 @@ position = Vector2(575.75, 250)
 shape = SubResource("RectangleShape2D_wp1ru")
 
 [node name="HintMarker" type="Sprite2D" parent="InteractiveLayer/BooksArea"]
-position = Vector2(562, 251.5)
-scale = Vector2(0.19074078, 0.15277776)
-texture = ExtResource("39_fs4kb")
+position = Vector2(578.00006, 256.00003)
+scale = Vector2(0.6716666, 0.6716666)
+texture = ExtResource("44_5rk6e")
 
 [node name="MirrorArea" type="Area2D" parent="InteractiveLayer"]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractiveLayer/MirrorArea"]
 position = Vector2(1162, 331.5)
 shape = SubResource("RectangleShape2D_qwlxc")
-
-[node name="HintMarker" type="Sprite2D" parent="InteractiveLayer/MirrorArea/CollisionShape2D"]
-position = Vector2(-1162, -331.5)
 
 [node name="PuzzleArea" type="Area2D" parent="InteractiveLayer"]
 
@@ -218,15 +251,11 @@ texture = ExtResource("40_1s7m6")
 position = Vector2(1121, 474.5)
 shape = SubResource("RectangleShape2D_dfcwo")
 
-[node name="HintMarker" type="Sprite2D" parent="InteractiveLayer/DrawerArea"]
-
 [node name="CabinetArea" type="Area2D" parent="InteractiveLayer"]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractiveLayer/CabinetArea"]
-position = Vector2(1364.25, 402.5)
+position = Vector2(1364.25, 342)
 shape = SubResource("RectangleShape2D_iaen7")
-
-[node name="HintMarker" type="Sprite2D" parent="InteractiveLayer/CabinetArea"]
 
 [node name="InsideZoneControl" parent="." instance=ExtResource("3_fnsr3")]
 
@@ -453,50 +482,6 @@ text = "80%"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Background" type="Sprite2D" parent="."]
-visible = false
-position = Vector2(768, 320)
-texture = ExtResource("2_bg")
-
-[node name="TestLabel" type="Label" parent="."]
-visible = false
-offset_left = 185.0
-offset_top = 196.0
-offset_right = 1221.0
-offset_bottom = 296.0
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 64
-text = "ABANDONED HOUSE TEST ZONE"
-horizontal_alignment = 1
-
-[node name="RoleLabel" type="Label" parent="."]
-unique_name_in_owner = true
-visible = false
-offset_left = 305.0
-offset_top = 284.0
-offset_right = 1105.0
-offset_bottom = 344.0
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 48
-text = "Waiting for role..."
-horizontal_alignment = 1
-
-[node name="BackButton" type="Button" parent="."]
-visible = false
-offset_left = 50.0
-offset_top = 50.0
-offset_right = 326.0
-offset_bottom = 120.0
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 32
-text = "← Back to Forest"
-
-[node name="NotificationLabel" type="Label" parent="."]
-visible = false
-offset_right = 1473.0
-offset_bottom = 23.0
-horizontal_alignment = 1
-
 [node name="PuzzleCanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="Dimmer" type="ColorRect" parent="PuzzleCanvasLayer"]
@@ -510,7 +495,6 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.6627451)
 
 [node name="BooksPuzzlePanel" type="PanelContainer" parent="PuzzleCanvasLayer/Dimmer"]
-visible = false
 custom_minimum_size = Vector2(860, 500)
 layout_mode = 1
 anchors_preset = 8
@@ -532,28 +516,31 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 20
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer"]
+[node name="Puzzle" type="VBoxContainer" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer"]
 custom_minimum_size = Vector2(1200, 420)
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="TitleLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/VBoxContainer"]
+[node name="BookPuzzleInstruction" type="Label" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/Puzzle"]
+custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
-
-[node name="InstructionLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
 text = "Narrowest should be on top and widest should be at the bottom."
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 3
 
-[node name="PuzzleBoard" type="Control" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/VBoxContainer"]
+[node name="PuzzleBoard" type="Control" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/Puzzle"]
 custom_minimum_size = Vector2(760, 240)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ClosePuzzleButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "BACK"
+[node name="ClosePuzzleButton" type="TouchScreenButton" parent="PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/Puzzle"]
+position = Vector2(575.00006, 634)
+scale = Vector2(0.09333332, 0.09333332)
+texture_normal = ExtResource("52_8h2lu")
+shape = SubResource("RectangleShape2D_xh6nx")
 
 [node name="MemoryPuzzlePanel" type="PanelContainer" parent="PuzzleCanvasLayer/Dimmer"]
 visible = false
@@ -567,22 +554,21 @@ layout_mode = 2
 [node name="VBoxContainer" type="Control" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer"]
 layout_mode = 2
 
-[node name="TitleLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer"]
-layout_mode = 0
-offset_right = 140.0
-offset_bottom = 23.0
-
 [node name="InstructionLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer"]
 layout_mode = 0
-offset_top = 27.0
-offset_right = 140.0
-offset_bottom = 50.0
+offset_left = 397.0
+offset_top = 21.0
+offset_right = 1062.0
+offset_bottom = 111.0
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="MissingRow" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer"]
 layout_mode = 0
-offset_top = 54.0
-offset_right = 140.0
-offset_bottom = 254.0
+offset_top = 94.0
+offset_right = 1474.0
+offset_bottom = 294.0
 
 [node name="MissingCardPreview" type="TextureRect" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer/MissingRow"]
 custom_minimum_size = Vector2(140, 200)
@@ -590,39 +576,18 @@ layout_mode = 2
 
 [node name="MemoryGrid" type="GridContainer" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer"]
 layout_mode = 0
-offset_top = 258.0
-offset_right = 140.0
-offset_bottom = 258.0
+offset_top = 298.0
+offset_right = 1474.0
+offset_bottom = 298.0
 theme_override_constants/h_separation = 2
 theme_override_constants/v_separation = 2
 columns = 4
 
 [node name="CloseMemoryButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer"]
 layout_mode = 0
-offset_top = 262.0
-offset_right = 140.0
-offset_bottom = 270.0
-
-[node name="BriefcasePanel" type="Control" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer"]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="BriefcaseTexture" type="TextureRect" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer/BriefcasePanel"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="ButtonsRow" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer/BriefcasePanel"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="UseButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer/BriefcasePanel/ButtonsRow"]
-layout_mode = 2
-
-[node name="CombineButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer/BriefcasePanel/ButtonsRow"]
-layout_mode = 2
+offset_top = 302.0
+offset_right = 1474.0
+offset_bottom = 310.0
 
 [node name="MirrorPuzzlePanel" type="PanelContainer" parent="PuzzleCanvasLayer/Dimmer"]
 visible = false
@@ -652,16 +617,15 @@ custom_minimum_size = Vector2(1200, 420)
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="TitleLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Mirror"
-horizontal_alignment = 1
-
 [node name="InstructionLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
 text = "Inspect the mirror"
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="MirrorHolder" type="Control" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 240)
@@ -689,20 +653,11 @@ offset_top = 223.0
 offset_right = 886.0
 offset_bottom = 401.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 200)
-layout_mode = 2
-mouse_filter = 2
-
-[node name="BottomBar" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-alignment = 1
-
-[node name="CloseMirrorButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer/BottomBar"]
-custom_minimum_size = Vector2(140, 42)
-layout_mode = 2
-text = "BACK"
+[node name="CloseMirrorButton" type="TouchScreenButton" parent="PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer"]
+position = Vector2(575.00006, 634)
+scale = Vector2(0.09333332, 0.09333332)
+texture_normal = ExtResource("52_8h2lu")
+shape = SubResource("RectangleShape2D_xh6nx")
 
 [node name="DrawerPanel" type="PanelContainer" parent="PuzzleCanvasLayer/Dimmer"]
 visible = false
@@ -732,17 +687,15 @@ custom_minimum_size = Vector2(1200, 420)
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="TitleLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Drawer
-"
-horizontal_alignment = 1
-
 [node name="InstructionLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
 text = "Inspect the drawer."
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="DrawerHolder" type="Control" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 240)
@@ -765,13 +718,12 @@ stretch_mode = 5
 
 [node name="DrawerLockHotspot" type="TextureButton" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/DrawerHolder"]
 layout_mode = 0
-offset_left = 403.0
-offset_top = 223.0
-offset_right = 647.0
-offset_bottom = 320.0
+offset_left = 381.0
+offset_top = 249.0
+offset_right = 625.0
+offset_bottom = 346.0
 
 [node name="KeyFragmentHotspot" type="TextureButton" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/DrawerHolder"]
-visible = false
 layout_mode = 0
 offset_left = 702.0
 offset_top = 186.0
@@ -781,7 +733,6 @@ focus_mode = 0
 disabled = true
 
 [node name="KeyFragmentImage" type="TextureRect" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/DrawerHolder"]
-visible = false
 layout_mode = 0
 offset_left = 717.0
 offset_top = 184.0
@@ -791,20 +742,16 @@ mouse_filter = 2
 texture = ExtResource("45_sofx5")
 expand_mode = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 200)
-layout_mode = 2
-mouse_filter = 2
-
 [node name="BottomBar" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 alignment = 1
 
-[node name="CloseDrawerButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/BottomBar"]
-custom_minimum_size = Vector2(140, 42)
-layout_mode = 2
-text = "BACK"
+[node name="CloseDrawerButton" type="TouchScreenButton" parent="PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/BottomBar"]
+position = Vector2(575.00006, 281)
+scale = Vector2(0.09333332, 0.09333332)
+texture_normal = ExtResource("52_8h2lu")
+shape = SubResource("RectangleShape2D_xh6nx")
 
 [node name="DrawerLockPanel" type="PanelContainer" parent="PuzzleCanvasLayer/Dimmer"]
 visible = false
@@ -834,16 +781,15 @@ custom_minimum_size = Vector2(1200, 420)
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="TitleLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Drawer Lock"
-horizontal_alignment = 1
-
 [node name="InstructionLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
 text = "Inspect the lock."
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="LockHolder" type="Control" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 240)
@@ -885,20 +831,16 @@ offset_top = 138.0
 offset_right = 1010.0
 offset_bottom = 355.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 200)
-layout_mode = 2
-mouse_filter = 2
-
 [node name="BottomBar" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 alignment = 1
 
-[node name="CloseDrawerLockButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/BottomBar"]
-custom_minimum_size = Vector2(140, 42)
-layout_mode = 2
-text = "BACK"
+[node name="CloseDrawerLockButton" type="TouchScreenButton" parent="PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/BottomBar"]
+position = Vector2(575.00006, 282)
+scale = Vector2(0.09333332, 0.09333332)
+texture_normal = ExtResource("52_8h2lu")
+shape = SubResource("RectangleShape2D_xh6nx")
 
 [node name="CabinetPuzzlePanel" type="PanelContainer" parent="PuzzleCanvasLayer/Dimmer"]
 visible = false
@@ -928,16 +870,15 @@ custom_minimum_size = Vector2(1200, 420)
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="TitleLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/CabinetPuzzlePanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Cabinet"
-horizontal_alignment = 1
-
 [node name="InstructionLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/CabinetPuzzlePanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
 text = "Inspect the cabinet."
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="CabinetHolder" type="Control" parent="PuzzleCanvasLayer/Dimmer/CabinetPuzzlePanel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 240)
@@ -972,20 +913,16 @@ offset_top = 133.0
 offset_right = 742.0
 offset_bottom = 271.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/CabinetPuzzlePanel/MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 200)
-layout_mode = 2
-mouse_filter = 2
-
 [node name="BottomBar" type="HBoxContainer" parent="PuzzleCanvasLayer/Dimmer/CabinetPuzzlePanel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 alignment = 1
 
-[node name="CloseCabinetButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/CabinetPuzzlePanel/MarginContainer/VBoxContainer/BottomBar"]
-custom_minimum_size = Vector2(140, 42)
-layout_mode = 2
-text = "BACK"
+[node name="CloseCabinetButton" type="TouchScreenButton" parent="PuzzleCanvasLayer/Dimmer/CabinetPuzzlePanel/MarginContainer/VBoxContainer/BottomBar"]
+position = Vector2(575.00006, 283)
+scale = Vector2(0.09333332, 0.09333332)
+texture_normal = ExtResource("52_8h2lu")
+shape = SubResource("RectangleShape2D_xh6nx")
 
 [node name="FinalBoxPanel" type="PanelContainer" parent="PuzzleCanvasLayer/Dimmer"]
 visible = false
@@ -1015,13 +952,10 @@ custom_minimum_size = Vector2(1200, 420)
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="TitleLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Cabinet"
-horizontal_alignment = 1
-
 [node name="InstructionLabel" type="Label" parent="PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
+size_flags_horizontal = 4
 text = "Inspect the cabinet."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1068,9 +1002,24 @@ alignment = 1
 expand_to_text_length = true
 
 [node name="SubmitAnswerButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BoxHolder/SidekickInputRow"]
+z_index = 1
+custom_minimum_size = Vector2(125, 30)
 layout_mode = 2
-text = "Submit
-"
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_60uqn")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_fnmj2")
+theme_override_styles/hover = SubResource("StyleBoxFlat_y3lts")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_fnmj2")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ycnxk")
+action_mode = 0
+text = "Submit"
 
 [node name="TiaraImage" type="TextureRect" parent="PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BoxHolder"]
 layout_mode = 0
@@ -1079,11 +1028,10 @@ offset_top = 48.0
 offset_right = 913.0
 offset_bottom = 488.0
 mouse_filter = 2
-texture = ExtResource("46_0yu24")
+texture = SubResource("CompressedTexture2D_xh6nx")
 expand_mode = 1
 
 [node name="TiaraHotspot" type="TextureButton" parent="PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BoxHolder"]
-visible = false
 layout_mode = 0
 offset_left = 593.0
 offset_top = 211.0
@@ -1101,82 +1049,103 @@ custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 alignment = 1
 
-[node name="CloseFinalBoxButton" type="Button" parent="PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BottomBar"]
-custom_minimum_size = Vector2(140, 42)
-layout_mode = 2
-text = "BACK"
+[node name="CloseFinalBoxButton" type="TouchScreenButton" parent="PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BottomBar"]
+position = Vector2(575.00006, 634)
+scale = Vector2(0.09333332, 0.09333332)
+texture_normal = ExtResource("52_8h2lu")
+shape = SubResource("RectangleShape2D_xh6nx")
 
 [node name="RewardCanvasLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="RewardDimmer" type="ColorRect" parent="RewardCanvasLayer"]
-visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 234.0
+offset_bottom = 119.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.003921569, 0.003921569, 0.003921569, 0.5372549)
 
-[node name="RewardPanel" type="PanelContainer" parent="RewardCanvasLayer"]
-visible = false
-custom_minimum_size = Vector2(620, 420)
-anchors_preset = 8
+[node name="Panel" type="Panel" parent="RewardCanvasLayer"]
+anchors_preset = 5
 anchor_left = 0.5
-anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -990.0
-offset_top = -584.5
-offset_right = 990.0
-offset_bottom = 584.5
 grow_horizontal = 2
-grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="RewardCanvasLayer/RewardPanel"]
-layout_mode = 2
+[node name="Reward" type="VBoxContainer" parent="RewardCanvasLayer/Panel"]
+layout_mode = 0
+offset_left = -234.0
+offset_top = 20.0
+offset_right = 431.0
+offset_bottom = 172.0
 size_flags_horizontal = 4
 size_flags_vertical = 4
+theme_override_constants/separation = 25
 
-[node name="VBoxContainer" type="VBoxContainer" parent="RewardCanvasLayer/RewardPanel/MarginContainer"]
+[node name="RewardTitleLabel" type="Label" parent="RewardCanvasLayer/Panel/Reward"]
+custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
 size_flags_horizontal = 4
-size_flags_vertical = 4
-
-[node name="RewardTitleLabel" type="Label" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
+theme_override_font_sizes/font_size = 30
 text = "Puzzle Solved"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
-[node name="RewardBodyLabel" type="Label" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer"]
+[node name="RewardBodyLabel" type="Label" parent="RewardCanvasLayer/Panel/Reward"]
+custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
 text = "You found Key Fragment 1 and the Card Piece."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
-[node name="RewardItemsRow" type="HBoxContainer" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer"]
+[node name="RewardItemsRow" type="HBoxContainer" parent="RewardCanvasLayer/Panel/Reward"]
 layout_mode = 2
+size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="KeyItem" type="VBoxContainer" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow"]
-layout_mode = 2
-
-[node name="KeyTexture" type="TextureRect" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow/KeyItem"]
+[node name="KeyTexture" type="TextureRect" parent="RewardCanvasLayer/Panel/Reward/RewardItemsRow"]
 custom_minimum_size = Vector2(180, 120)
 layout_mode = 2
 texture = ExtResource("14_wp1ru")
+expand_mode = 5
 stretch_mode = 5
 
-[node name="CardItem" type="VBoxContainer" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow"]
-layout_mode = 2
-
-[node name="CardTexture" type="TextureRect" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow/CardItem"]
+[node name="CardTexture" type="TextureRect" parent="RewardCanvasLayer/Panel/Reward/RewardItemsRow"]
 custom_minimum_size = Vector2(180, 180)
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 texture = ExtResource("15_qwlxc")
+expand_mode = 5
 stretch_mode = 5
 
-[node name="CollectClueButton" type="Button" parent="RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer"]
+[node name="CollectClueButton" type="Button" parent="RewardCanvasLayer/Panel/Reward"]
+custom_minimum_size = Vector2(150, 40)
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_8h2lu")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_xh6nx")
+theme_override_styles/hover = SubResource("StyleBoxFlat_26k5c")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_xh6nx")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ig5qe")
+action_mode = 0
 text = "Collect Clue"
 
 [node name="RewardLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="DarkOverlay" type="ColorRect" parent="RewardLayer"]
 modulate = Color(1, 1, 1, 0)
@@ -1190,36 +1159,29 @@ mouse_filter = 2
 color = Color(0.011087579, 0.011087578, 0.01108758, 1)
 
 [node name="Sparkle" type="Sprite2D" parent="RewardLayer"]
-visible = false
 position = Vector2(744.75, 385.5)
 scale = Vector2(0.5719907, 0.5358025)
 texture = ExtResource("47_1767a")
 
 [node name="ClueSprite" type="Sprite2D" parent="RewardLayer"]
-visible = false
 position = Vector2(712, 258)
 scale = Vector2(0.29000002, 0.29299998)
-texture = ExtResource("46_0yu24")
+texture = SubResource("CompressedTexture2D_emdfy")
 
 [node name="BannerLabel" type="Label" parent="RewardLayer"]
 anchors_preset = -1
-anchor_left = -0.029618787
-anchor_right = -0.029618787
-offset_left = 32.753967
-offset_top = 66.66298
-offset_right = 1447.7273
-offset_bottom = 160.59502
+anchor_left = -0.22961879
+anchor_right = -0.22961879
+offset_left = 598.75397
+offset_top = 21.0
+offset_right = 1334.7273
+offset_bottom = 111.0
 theme_override_font_sizes/font_size = 45
 text = "CLUE FOUND!"
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 3
 metadata/_edit_use_anchors_ = true
-
-[node name="RewardBanner" type="Sprite2D" parent="RewardLayer"]
-visible = false
-position = Vector2(732.5, 41.750008)
-scale = Vector2(0.27175924, 0.20864198)
-texture = ExtResource("48_fs4kb")
 
 [node name="TapInstruction" type="Label" parent="RewardLayer"]
 offset_left = 483.0
@@ -1249,11 +1211,10 @@ autowrap_mode = 2
 
 [node name="CollectButton" type="Button" parent="RewardLayer"]
 process_mode = 3
-visible = false
 offset_left = 595.9999
 offset_top = 499.00003
-offset_right = 813.9999
-offset_bottom = 552.0
+offset_right = 809.9999
+offset_bottom = 561.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_1s7m6")
@@ -1276,7 +1237,6 @@ action_mode = 0
 flat = true
 
 [node name="BriefcaseRevealSprite" type="TextureRect" parent="RewardLayer"]
-visible = false
 offset_left = 226.0
 offset_top = 35.0
 offset_right = 2510.7493
@@ -1286,11 +1246,8 @@ mouse_filter = 2
 expand_mode = 1
 
 [node name="ProgressTracker" type="Node2D" parent="."]
-visible = false
 
-[node name="Tracker" type="Sprite2D" parent="ProgressTracker"]
+[node name="TiaraTracker" type="Sprite2D" parent="ProgressTracker"]
 position = Vector2(237.99998, 53)
 scale = Vector2(0.26158854, 0.2900463)
 texture = ExtResource("38_8h2lu")
-
-[connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]

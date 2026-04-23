@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cycjiii4u2x6h"
-path.s3tc="res://.godot/imported/Detective_hide.png-f9a683cdf16e8b39c23880cb1e9db73c.s3tc.ctex"
-path.etc2="res://.godot/imported/Detective_hide.png-f9a683cdf16e8b39c23880cb1e9db73c.etc2.ctex"
+path.s3tc="res://.godot/imported/Detective_hide.png-9894ab8423f86740dfc05fc8c92ef67f.s3tc.ctex"
+path.etc2="res://.godot/imported/Detective_hide.png-9894ab8423f86740dfc05fc8c92ef67f.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/players/Detective/Detective_hide.png"
-dest_files=["res://.godot/imported/Detective_hide.png-f9a683cdf16e8b39c23880cb1e9db73c.s3tc.ctex", "res://.godot/imported/Detective_hide.png-f9a683cdf16e8b39c23880cb1e9db73c.etc2.ctex"]
+source_file="res://assets/sprites/players/detective/Detective_hide.png"
+dest_files=["res://.godot/imported/Detective_hide.png-9894ab8423f86740dfc05fc8c92ef67f.s3tc.ctex", "res://.godot/imported/Detective_hide.png-9894ab8423f86740dfc05fc8c92ef67f.etc2.ctex"]
 
 [params]
 

@@ -456,7 +456,7 @@ func get_puzzle_for_zone(zone_id: String) -> Dictionary:
 	var selected: Dictionary = variations[variation_index]
 
 	var equation_text: String = str(selected.get("equation", "x = ?"))
-	var solution_x: int = int(selected.get("solution", 0))
+	var _solution_x: int = int(selected.get("solution", 0))
 	var difficulty: String = str(selected.get("difficulty", "Easy"))
 	var answer_format: String = str(selected.get("answer_format", "x=0"))
 	var riddle_text: String = str(selected.get("riddle", ""))
