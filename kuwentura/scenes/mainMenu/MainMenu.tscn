@@ -2,12 +2,12 @@
 
 [ext_resource type="Script" uid="uid://ba7x4f4qnudae" path="res://scripts/mainMenu/main_menu.gd" id="1_bkukm"]
 [ext_resource type="Texture2D" uid="uid://c1y03w2wn6cx5" path="res://assets/backgrounds/mainMenu.png" id="2_40cj7"]
-[ext_resource type="Texture2D" uid="uid://cu1ojlw72jgih" path="res://assets/buttons/hostGame.png" id="3_8bsd5"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_w35ku"]
+[ext_resource type="Texture2D" uid="uid://fh1iq52t2h1t" path="res://assets/buttons/detectiveButton.png" id="4_2oq2w"]
 [ext_resource type="FontFile" uid="uid://bpff8oqdskuog" path="res://assets/fonts/Pixeled.ttf" id="4_8bsd5"]
 [ext_resource type="PackedScene" uid="uid://cmsvb2etjodsk" path="res://scenes/controls/SettingsControl.tscn" id="5_2oq2w"]
+[ext_resource type="Texture2D" uid="uid://j5eo31mou4x3" path="res://assets/buttons/sidekickButton.png" id="5_r2guf"]
 [ext_resource type="Script" uid="uid://b7hu8uq82xslq" path="res://scripts/controls/settings_control.gd" id="6_r2guf"]
-[ext_resource type="Texture2D" uid="uid://c2w32odtn3c80" path="res://assets/buttons/joinGame.png" id="8_join"]
 [ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/closeButton.png" id="9_2oq2w"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="10_r2guf"]
 [ext_resource type="Texture2D" uid="uid://bbdlqfcqkbbwk" path="res://assets/sprites/userIcon.png" id="11_2oq2w"]
@@ -160,14 +160,14 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -506.0
-offset_top = -61.5
-offset_right = -11.0
-offset_bottom = 284.5
+offset_left = -684.0
+offset_top = -94.0
+offset_right = 127.17053
+offset_bottom = 473.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
-texture_normal = ExtResource("3_8bsd5")
+texture_normal = ExtResource("4_2oq2w")
 ignore_texture_size = true
 stretch_mode = 5
 
@@ -178,14 +178,14 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 8.0
-offset_top = -62.0
-offset_right = 503.0
-offset_bottom = 285.0
+offset_left = -132.0
+offset_top = -93.0
+offset_right = 675.40625
+offset_bottom = 473.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
-texture_normal = ExtResource("8_join")
+texture_normal = ExtResource("5_r2guf")
 ignore_texture_size = true
 stretch_mode = 5
 
@@ -317,10 +317,10 @@ color = Color(0, 0, 0, 0)
 script = ExtResource("6_r2guf")
 
 [node name="SettingsLayer" type="CanvasLayer" parent="."]
-layer = 60
+layer = 61
+visible = false
 
 [node name="SettingsPanel" type="Panel" parent="SettingsLayer"]
-visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5

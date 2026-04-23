@@ -2,23 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b4ff13vwedej7"
-path.bptc="res://.godot/imported/ledgerbutton.png-02ec0b6122f16e05fb07e43f10acee7b.bptc.ctex"
-path.astc="res://.godot/imported/ledgerbutton.png-02ec0b6122f16e05fb07e43f10acee7b.astc.ctex"
+uid="uid://b67wsufrc0323"
+path="res://.godot/imported/ledgerbutton.png-02ec0b6122f16e05fb07e43f10acee7b.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://assets/buttons/players/ledgerbutton.png"
-dest_files=["res://.godot/imported/ledgerbutton.png-02ec0b6122f16e05fb07e43f10acee7b.bptc.ctex", "res://.godot/imported/ledgerbutton.png-02ec0b6122f16e05fb07e43f10acee7b.astc.ctex"]
+dest_files=["res://.godot/imported/ledgerbutton.png-02ec0b6122f16e05fb07e43f10acee7b.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

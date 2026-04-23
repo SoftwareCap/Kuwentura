@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c7ovr6oox2jvd"
-path.bptc="res://.godot/imported/Ladle.png-32eccba19b63f9862532724752116e9d.bptc.ctex"
-path.astc="res://.godot/imported/Ladle.png-32eccba19b63f9862532724752116e9d.astc.ctex"
+path.bptc="res://.godot/imported/ladle.png-af5e4dd40b270716b97a891de659bb98.bptc.ctex"
+path.astc="res://.godot/imported/ladle.png-af5e4dd40b270716b97a891de659bb98.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/Ladle.png"
-dest_files=["res://.godot/imported/Ladle.png-32eccba19b63f9862532724752116e9d.bptc.ctex", "res://.godot/imported/Ladle.png-32eccba19b63f9862532724752116e9d.astc.ctex"]
+source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/ladle.png"
+dest_files=["res://.godot/imported/ladle.png-af5e4dd40b270716b97a891de659bb98.bptc.ctex", "res://.godot/imported/ladle.png-af5e4dd40b270716b97a891de659bb98.astc.ctex"]
 
 [params]
 

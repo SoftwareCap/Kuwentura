@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://sq3ea80pg5xq"
-path="res://.godot/imported/AbandonedHouse.png-69106fec1b55894edb50f03ba394daf5.ctex"
+uid="uid://bq2y5t3d07gmy"
+path="res://.godot/imported/forestTutorial.png-7b3cb2e8dbb88e3114a510e006d15205.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/abandonedHouseObjects/AbandonedHouse.png"
-dest_files=["res://.godot/imported/AbandonedHouse.png-69106fec1b55894edb50f03ba394daf5.ctex"]
+source_file="res://assets/tutorials/forestTutorial.png"
+dest_files=["res://.godot/imported/forestTutorial.png-7b3cb2e8dbb88e3114a510e006d15205.ctex"]
 
 [params]
 
