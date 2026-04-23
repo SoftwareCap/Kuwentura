@@ -16,7 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="13_y7aiq"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="15_0c5pu"]
 [ext_resource type="Texture2D" uid="uid://cuhne1u8q0p3s" path="res://assets/sprites/clues/pineappleClue.png" id="17_s7hv4"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="17_va6t2"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="17_va6t2"]
 [ext_resource type="Texture2D" uid="uid://dvkupminll3bb" path="res://assets/sprites/tracker/backyardPath/defaultBY.png" id="18_ura6l"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_krb5t"]
@@ -168,7 +168,6 @@ offset_left = 618.0
 offset_top = 130.0
 offset_right = 763.0
 offset_bottom = 162.0
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 25
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -206,7 +205,6 @@ offset_left = 473.0
 offset_top = 209.0
 offset_right = 618.0
 offset_bottom = 241.0
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 25
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -286,7 +284,6 @@ grow_horizontal = 2
 grow_vertical = 2
 rotation = 0.05235988
 theme_override_colors/font_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 28
 text = "PINA"
 horizontal_alignment = 1
@@ -308,7 +305,6 @@ grow_horizontal = 2
 grow_vertical = 2
 rotation = 0.05235988
 theme_override_colors/font_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 28
 text = "PLANT"
 horizontal_alignment = 1
@@ -321,7 +317,6 @@ offset_top = 457.0
 offset_right = 1009.0
 offset_bottom = 516.0
 rotation = 0.05235988
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -444,7 +439,6 @@ offset_right = 431.0
 offset_bottom = 251.0
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 23
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -457,7 +451,6 @@ offset_right = 446.0
 offset_bottom = 482.0
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 21
 horizontal_alignment = 1
 
@@ -469,7 +462,6 @@ offset_right = 433.0
 offset_bottom = 330.0
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 19
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -482,7 +474,6 @@ offset_right = 446.0
 offset_bottom = 482.0
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 
@@ -494,7 +485,6 @@ offset_right = 753.0
 offset_bottom = 276.0
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 19
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -507,7 +497,6 @@ offset_right = 739.0
 offset_bottom = 492.0
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 
@@ -528,9 +517,9 @@ theme_override_styles/panel = SubResource("StyleBoxEmpty_f85bs")
 [node name="PauseCanvasLayer" type="CanvasLayer" parent="."]
 process_mode = 3
 layer = 110
+visible = false
 
 [node name="InGamePausePanel" type="Panel" parent="PauseCanvasLayer"]
-visible = false
 top_level = true
 z_index = 10
 anchors_preset = 8
@@ -781,7 +770,6 @@ offset_left = 32.753967
 offset_top = 66.66298
 offset_right = 1447.7273
 offset_bottom = 160.59502
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 45
 text = "CLUE FOUND!"
 horizontal_alignment = 1
@@ -799,7 +787,6 @@ offset_left = 483.0
 offset_top = 416.0
 offset_right = 937.0
 offset_bottom = 458.0
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 20
 text = "Tap anywhere to continue."
 horizontal_alignment = 1
@@ -816,7 +803,6 @@ offset_top = 316.271
 offset_right = 714.3307
 offset_bottom = 412.72888
 theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 35
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -887,7 +873,6 @@ offset_right = 411.5
 offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 vertical_alignment = 1
