@@ -43,8 +43,20 @@ extends Node2D
 @onready var ledger_panel: Panel = $SidekickLayer/Ledger
 @onready var briefcase_panel: Panel = $SidekickLayer/Briefcase
 @onready var briefcase_display: TextureRect = $SidekickLayer/Briefcase/BriefcaseDisplay
+
 @onready var map_layer: CanvasLayer = $MapLayer
 @onready var map_panel: Sprite2D = $MapLayer/Map
+@onready var map_ph_marker: Sprite2D = $MapLayer/MapPH
+@onready var map_ow_marker: Sprite2D = $MapLayer/MapOW
+@onready var map_bp_marker: Sprite2D = $MapLayer/MapBP
+@onready var map_sh_marker: Sprite2D = $MapLayer/MapSH
+@onready var map_ah_marker: Sprite2D = $MapLayer/MapAH
+@onready var art_ladle_marker: Sprite2D = $MapLayer/ArtLadle
+@onready var art_eye_marker: Sprite2D = $MapLayer/ArtEye
+@onready var art_pineapple_marker: Sprite2D = $MapLayer/ArtPineapple
+@onready var art_scroll_marker: Sprite2D = $MapLayer/ArtScroll
+@onready var art_tiara_marker: Sprite2D = $MapLayer/ArtTiara
+
 @onready var portals: Node2D = $"Zone Portals"
 @onready var pinas_house_door: Sprite2D = $"Zone Portals/PortalPinasHouse/PinasHouseDoorOpen"
 @onready var storage_hut_door: Sprite2D = $"Zone Portals/StorageHut/StorageHutDoorOpen"
@@ -117,6 +129,8 @@ var _current_ledger_page: int = 0
 var _ledger_page_animating: bool = false
 var _quest_objective_labels: Dictionary = {}
 var _quest_objective_texts: Dictionary = {}
+var _map_zone_markers: Dictionary = {}
+var _map_artifact_markers: Dictionary = {}
 
 # ─── LIFECYCLE ───────────────────────────────────────────────────────────────
 
@@ -188,6 +202,8 @@ func _connect_signals() -> void:
 			sig.connect(cb)
 	if not GameState.zone_completed.is_connected(_on_zone_completed):
 		GameState.zone_completed.connect(_on_zone_completed)
+	if not GameState.zone_visited.is_connected(_on_zone_visited):
+		GameState.zone_visited.connect(_on_zone_visited)
 	if not GameState.briefcase_updated.is_connected(_on_briefcase_updated):
 		GameState.briefcase_updated.connect(_on_briefcase_updated)
 	if touch_controls and touch_controls.has_signal("pause_pressed"):
@@ -608,6 +624,7 @@ func _open_map() -> void:
 		return
 
 	_refresh_quest_objectives()
+	_refresh_map_progress()
 
 	map_layer.visible = true
 
@@ -893,13 +910,19 @@ func _on_players_entering_zone(zone_name: String) -> void:
 
 func _on_players_entered_zone(zone_name: String) -> void:
 	var target_portal: Node = null
+
 	for portal in portals.get_children():
 		if portal.zone_name == zone_name:
 			target_portal = portal
 			break
+
 	if not target_portal:
 		push_warning("[ForestHub] Could not find portal for zone: " + zone_name)
 		return
+
+	GameState.mark_zone_visited(zone_name)
+	_refresh_map_progress()
+
 	target_portal.complete_zone_entry()
 
 
@@ -964,6 +987,7 @@ func _on_zone_completed(completed_zone: String) -> void:
 		break
 
 	_refresh_quest_objectives()
+	_refresh_map_progress()
 # ─── DIALOGUE ────────────────────────────────────────────────────────────────
 ## One-time zone thought triggered when the local player walks into a portal.
 ## Keys in ZONE_THOUGHTS must match portal.zone_name exactly (check Inspector).
@@ -1220,8 +1244,51 @@ func _setup_map_layer() -> void:
 		map_panel.visible = true
 		map_panel.modulate = Color(1, 1, 1, 1)
 
-	else:
-		push_warning("[ForestHub] CloseMapButton not found!")
+	_setup_map_progress_markers()
+	
+func _setup_map_progress_markers() -> void:
+	_map_zone_markers = {
+		"pinas_house": map_ph_marker,
+		"backyard_path": map_bp_marker,
+		"old_well": map_ow_marker,
+		"storage_hut": map_sh_marker,
+		"abandoned_house": map_ah_marker,
+	}
+
+	_map_artifact_markers = {
+		"pinas_house": art_ladle_marker,
+		"backyard_path": art_pineapple_marker,
+		"old_well": art_eye_marker,
+		"storage_hut": art_scroll_marker,
+		"abandoned_house": art_tiara_marker,
+	}
+
+	_refresh_map_progress()
+
+
+func _refresh_map_progress() -> void:
+	for zone_name in _map_zone_markers.keys():
+		var zone_marker: Sprite2D = _map_zone_markers.get(zone_name, null) as Sprite2D
+
+		if is_instance_valid(zone_marker):
+			zone_marker.visible = GameState.has_zone_visited(zone_name)
+
+	for zone_name in _map_artifact_markers.keys():
+		var artifact_marker: Sprite2D = _map_artifact_markers.get(zone_name, null) as Sprite2D
+
+		if not is_instance_valid(artifact_marker):
+			continue
+
+		var is_completed: bool = (
+			GameState.has_clue(zone_name)
+			or GameState.zones_status.get(zone_name, GameState.ZoneStatus.AVAILABLE) == GameState.ZoneStatus.COMPLETED
+		)
+
+		artifact_marker.visible = is_completed
+
+
+func _on_zone_visited(_zone_name: String) -> void:
+	_refresh_map_progress()
 		
 func _on_close_map_button_pressed() -> void:
 	_close_all_panels(false)
