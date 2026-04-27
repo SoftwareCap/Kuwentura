@@ -107,6 +107,8 @@ const NOTE_REVEAL_SHAKE_COUNT: int = 4
 @onready var progress_tracker: Node = get_node_or_null("ProgressTracker")
 @onready var progress_tracker_sprite: Sprite2D = get_node_or_null("ProgressTracker/Sprite2D")
 
+@onready var ending_cutscene: VideoStreamPlayer = $Cutscene/EndingCutscene
+
 var _animation_time: float = 0.0
 var _sparkle_animating: bool = false
 
@@ -241,7 +243,14 @@ func _ready() -> void:
 		back_button.pressed.connect(_on_back_pressed)
 	if is_instance_valid(collect_button) and not collect_button.pressed.is_connected(_on_collect_clue_pressed):
 		collect_button.pressed.connect(_on_collect_clue_pressed)
-
+		
+	if is_instance_valid(ending_cutscene):
+		ending_cutscene.visible = false
+		ending_cutscene.expand = true
+		ending_cutscene.anchors_preset = Control.PRESET_FULL_RECT 
+		ending_cutscene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		ending_cutscene.finished.connect(_on_cutscene_finished)
+		
 	_ensure_sfx_bus()
 	_sfx_player = AudioStreamPlayer.new()
 	_sfx_player.bus = "SFX"
@@ -1218,7 +1227,7 @@ func rpc_finalize_clue() -> void:
 		briefcase_reveal_sprite.visible = false
 		briefcase_reveal_sprite.texture = null
 	if is_instance_valid(reward_layer): reward_layer.visible = false
-	_return_to_forest()
+	_play_ending_cutscene()
 
 func _initialize_puzzle_sync() -> void:
 	if not multiplayer.has_multiplayer_peer():
@@ -1326,3 +1335,23 @@ func _set_progress_tracker_stage(stage: int) -> void:
 			progress_tracker_sprite.texture = PROGRESS_PUZZLE3_TEX
 		_:
 			progress_tracker_sprite.texture = PROGRESS_DEFAULT_TEX
+
+
+func _play_ending_cutscene() -> void:
+	if not is_instance_valid(ending_cutscene):
+		_return_to_forest()
+		return
+	ending_cutscene.visible = true
+	ending_cutscene.play()
+
+
+func _on_cutscene_finished() -> void:
+	ending_cutscene.visible = false
+	_return_to_forest()
+
+
+func _input(event: InputEvent) -> void:
+	if is_instance_valid(ending_cutscene) and ending_cutscene.visible:
+		if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
+			ending_cutscene.stop()
+			_on_cutscene_finished()

@@ -1,4 +1,4 @@
-[gd_scene load_steps=79 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=80 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://miy70k8n04ul" path="res://assets/sprites/places/pinasHouseBackground.png" id="2_vt60f"]
@@ -39,6 +39,7 @@
 [ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/clues/ladleClue.png" id="37_dcipd"]
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="39_0s51p"]
 [ext_resource type="Texture2D" uid="uid://bvn74hwrf4gx2" path="res://assets/sprites/tracker/pinasHouse/defaultPH.png" id="39_ra7mo"]
+[ext_resource type="VideoStream" uid="uid://cf0vo7ifmgiha" path="res://assets/sprites/cutscene/zoneEnding/pinasHouse.ogv" id="40_fvin0"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_btbyq"]
 size = Vector2(321.00024, 356.50024)
@@ -743,9 +744,9 @@ vertical_alignment = 1
 [node name="XInput" type="LineEdit" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
 layout_mode = 0
 offset_left = 402.0
-offset_top = 559.0
+offset_top = 580.0
 offset_right = 538.0
-offset_bottom = 632.0
+offset_bottom = 653.0
 theme_override_colors/font_color = Color(0.9650678, 0.9650869, 0.9614435, 1)
 theme_override_colors/font_selected_color = Color(0.04755766, 0.047557645, 0.047557645, 1)
 theme_override_colors/caret_color = Color(0.014275194, 0.014275219, 0.014275289, 1)
@@ -1287,5 +1288,19 @@ theme_override_styles/panel = SubResource("StyleBoxEmpty_u6sy3")
 position = Vector2(272.9375, 47.499985)
 scale = Vector2(0.3271484, 0.35648146)
 texture = ExtResource("39_ra7mo")
+
+[node name="Cutscene" type="CanvasLayer" parent="."]
+
+[node name="EndingCutscene" type="VideoStreamPlayer" parent="Cutscene"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1240.0
+offset_bottom = -648.0
+grow_horizontal = 2
+grow_vertical = 2
+stream = ExtResource("40_fvin0")
+speed_scale = 0.4
+expand = true
 
 [connection signal="input_event" from="InteractiveLayer/Objects/WrongClickZone" to="." method="_on_wrong_object_input"]

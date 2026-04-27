@@ -267,7 +267,7 @@ func _update_button_text() -> void:
 
 	if local_confirming:
 		# Only one player present or waiting for the other to confirm
-		_enter_button.text = "Waiting for another player... \n Tap again to Cancel"
+		_enter_button.text = "Waiting for another player..."
 		return
 
 	if both_present and _detective_ready and _sidekick_ready:

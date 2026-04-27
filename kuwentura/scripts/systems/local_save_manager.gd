@@ -73,12 +73,23 @@ func save_game(data: Dictionary = {}) -> bool:
 
 	file.store_string(JSON.stringify(enriched_data, "\t"))
 	file.close()
+	
+	# Delete existing save before renaming temp file (required on Windows)
+	if FileAccess.file_exists(SAVE_FILE_NAME):
+		DirAccess.remove_absolute(SAVE_FILE_NAME)
 
 	var rename_error := DirAccess.rename_absolute(temp_path, SAVE_FILE_NAME)
 	if rename_error != OK:
-		push_error("[LocalSaveManager] Failed to rename temp file: " + str(rename_error))
-		save_completed.emit(false, "Failed to finalize save")
-		return false
+		# Fallback: try direct write instead
+		push_warning("[LocalSaveManager] Rename failed, trying direct write...")
+		var fallback := FileAccess.open(SAVE_FILE_NAME, FileAccess.WRITE)
+		if fallback:
+			fallback.store_string(JSON.stringify(enriched_data, "\t"))
+			fallback.close()
+		else:
+			push_error("[LocalSaveManager] Failed to rename temp file: " + str(rename_error))
+			save_completed.emit(false, "Failed to finalize save")
+			return false
 
 	last_save_time = int(Time.get_unix_time_from_system())
 	total_saves += 1
