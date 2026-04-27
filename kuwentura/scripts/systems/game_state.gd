@@ -9,6 +9,8 @@ extends Node
 ##
 ## Save system: LocalSaveManager (primary) → FirebaseManager (cloud backup)
 
+signal zone_visited(zone_id: String)
+
 signal clue_collected(zone_id: String, clue_data: Dictionary)
 signal zone_completed(zone_id: String)
 signal all_clues_collected
@@ -34,6 +36,14 @@ var zones_status: Dictionary = {
 	"old_well":         ZoneStatus.AVAILABLE,
 	"storage_hut":      ZoneStatus.AVAILABLE,
 	"abandoned_house":  ZoneStatus.AVAILABLE,
+}
+
+var visited_zones: Dictionary = {
+	"pinas_house": false,
+	"backyard_path": false,
+	"old_well": false,
+	"storage_hut": false,
+	"abandoned_house": false,
 }
 
 var collected_clues: Dictionary = {
@@ -226,6 +236,10 @@ func collect_clue(zone_id: String) -> bool:
 		"timestamp": int(Time.get_unix_time_from_system()),
 	})
 	zones_status[zone_id] = ZoneStatus.COMPLETED
+	
+	if visited_zones.has(zone_id):
+		visited_zones[zone_id] = true
+	
 	clue_collected.emit(zone_id, clue_data)
 	zone_completed.emit(zone_id)
 	briefcase_updated.emit()
@@ -260,6 +274,7 @@ func reset_game_after_nightfall() -> void:
 	attempt_count += 1
 	nightfall_attempts += 1
 	_reset_clues()
+	_reset_visited_zones()
 	_session_seed = randi()
 	_initialize_puzzle_seeds()
 	current_zone = "forest_hub"
@@ -276,6 +291,38 @@ func has_clue(zone_id: String) -> bool:
 		return false
 	return bool(collected_clues[zone_id].get("collected", false))
 
+func mark_zone_visited(zone_id: String) -> bool:
+	if not visited_zones.has(zone_id):
+		push_warning("[GameState] Unknown zone visited: " + zone_id)
+		return false
+
+	var was_already_visited: bool = bool(visited_zones.get(zone_id, false))
+
+	visited_zones[zone_id] = true
+	current_zone = zone_id
+
+	if not was_already_visited:
+		zone_visited.emit(zone_id)
+		_save_progress("zone_visited")
+
+	return true
+
+
+func has_zone_visited(zone_id: String) -> bool:
+	if bool(visited_zones.get(zone_id, false)):
+		return true
+
+	# For old saves: if the zone was already completed before this feature existed,
+	# still show the zone marker on the map.
+	if has_clue(zone_id):
+		return true
+
+	return GameState.zones_status.get(zone_id, GameState.ZoneStatus.AVAILABLE) == GameState.ZoneStatus.COMPLETED
+
+
+func _reset_visited_zones() -> void:
+	for zone_id in visited_zones.keys():
+		visited_zones[zone_id] = false
 
 func get_briefcase_texture(context: String) -> Texture2D:
 	var path := get_briefcase_texture_path(context)
@@ -336,6 +383,7 @@ func _get_abandoned_house_briefcase_texture_path() -> String:
 func get_save_data() -> Dictionary:
 	return {
 		"collected_clues":           collected_clues.duplicate(true),
+		"visited_zones": 			 visited_zones.duplicate(true),
 		"solved_puzzles":            solved_puzzles.duplicate(true),
 		"zones_status":              zones_status.duplicate(true),
 		"current_zone":              current_zone,
@@ -363,6 +411,10 @@ func load_save_data(data: Dictionary) -> void:
 		zones_status = data["zones_status"].duplicate(true)
 	if data.has("current_zone"):
 		current_zone = data["current_zone"]
+	if data.has("visited_zones"):
+		var saved_visited_zones: Dictionary = data["visited_zones"]
+		for zone_id in visited_zones.keys():
+			visited_zones[zone_id] = bool(saved_visited_zones.get(zone_id, false))
 	if data.has("climax_triggered"):
 		climax_triggered = data["climax_triggered"]
 	if data.has("game_completed"):
@@ -533,6 +585,7 @@ func _report_position_to_host_rpc(peer_id: int, pos: Vector2) -> void:
 
 func reset_all_progress() -> void:
 	_reset_clues()
+	_reset_visited_zones()
 	for zone_id in zone_inventory:
 		for item_id in zone_inventory[zone_id]:
 			zone_inventory[zone_id][item_id] = false
@@ -592,3 +645,32 @@ func grant_zone_items(zone_id: String, item_ids: Array) -> void:
 	if changed:
 		briefcase_updated.emit()
 		_save_progress("zone_items_granted")
+
+func remove_zone_item(zone_id: String, item_id: String, auto_save: bool = true) -> void:
+	ensure_zone_inventory(zone_id)
+
+	if not bool(zone_inventory[zone_id].get(item_id, false)):
+		return
+
+	zone_inventory[zone_id][item_id] = false
+	briefcase_updated.emit()
+
+	if auto_save:
+		_save_progress("zone_item_removed")
+
+
+func remove_zone_items(zone_id: String, item_ids: Array) -> void:
+	ensure_zone_inventory(zone_id)
+
+	var changed: bool = false
+
+	for raw_item_id in item_ids:
+		var item_id: String = str(raw_item_id)
+
+		if bool(zone_inventory[zone_id].get(item_id, false)):
+			zone_inventory[zone_id][item_id] = false
+			changed = true
+
+	if changed:
+		briefcase_updated.emit()
+		_save_progress("zone_items_removed")

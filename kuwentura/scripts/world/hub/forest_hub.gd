@@ -43,8 +43,20 @@ extends Node2D
 @onready var ledger_panel: Panel = $SidekickLayer/Ledger
 @onready var briefcase_panel: Panel = $SidekickLayer/Briefcase
 @onready var briefcase_display: TextureRect = $SidekickLayer/Briefcase/BriefcaseDisplay
+
 @onready var map_layer: CanvasLayer = $MapLayer
-@onready var map_panel: Panel = $MapLayer/Map
+@onready var map_panel: Sprite2D = $MapLayer/Map
+@onready var map_ph_marker: Sprite2D = $MapLayer/MapPH
+@onready var map_ow_marker: Sprite2D = $MapLayer/MapOW
+@onready var map_bp_marker: Sprite2D = $MapLayer/MapBP
+@onready var map_sh_marker: Sprite2D = $MapLayer/MapSH
+@onready var map_ah_marker: Sprite2D = $MapLayer/MapAH
+@onready var art_ladle_marker: Sprite2D = $MapLayer/ArtLadle
+@onready var art_eye_marker: Sprite2D = $MapLayer/ArtEye
+@onready var art_pineapple_marker: Sprite2D = $MapLayer/ArtPineapple
+@onready var art_scroll_marker: Sprite2D = $MapLayer/ArtScroll
+@onready var art_tiara_marker: Sprite2D = $MapLayer/ArtTiara
+
 @onready var portals: Node2D = $"Zone Portals"
 @onready var pinas_house_door: Sprite2D = $"Zone Portals/PortalPinasHouse/PinasHouseDoorOpen"
 @onready var storage_hut_door: Sprite2D = $"Zone Portals/StorageHut/StorageHutDoorOpen"
@@ -55,6 +67,12 @@ extends Node2D
 @onready var clue_eyes: Sprite2D = $SidekickLayer/Briefcase/BriefcaseDisplay/ClueEyes
 @onready var clue_tiara: Sprite2D = $SidekickLayer/Briefcase/BriefcaseDisplay/ClueTiara
 @onready var clue_scroll: Sprite2D = $SidekickLayer/Briefcase/BriefcaseDisplay/ClueScroll
+
+@onready var objective_label_1: Label = $MapLayer/Quest/Objective/ObjectiveLabel1
+@onready var objective_label_2: Label = $MapLayer/Quest/Objective/ObjectiveLabel2
+@onready var objective_label_3: Label = $MapLayer/Quest/Objective/ObjectiveLabel3
+@onready var objective_label_4: Label = $MapLayer/Quest/Objective/ObjectiveLabel4
+@onready var objective_label_5: Label = $MapLayer/Quest/Objective/ObjectiveLabel5
 
 # ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
@@ -109,6 +127,10 @@ var _is_animating: bool = false
 var _ledger_pages: Array[Dictionary] = []
 var _current_ledger_page: int = 0
 var _ledger_page_animating: bool = false
+var _quest_objective_labels: Dictionary = {}
+var _quest_objective_texts: Dictionary = {}
+var _map_zone_markers: Dictionary = {}
+var _map_artifact_markers: Dictionary = {}
 
 # ─── LIFECYCLE ───────────────────────────────────────────────────────────────
 
@@ -120,6 +142,8 @@ func _ready() -> void:
 	_setup_pause_panel()
 	_spawn_local_player()
 	_setup_ui_controls()
+	_setup_map_layer()
+	_setup_quest_objectives()
 	_setup_forest_ledger_navigation()
 	_refresh_forest_ledger_pages()
 	_connect_portal_signals()
@@ -178,6 +202,8 @@ func _connect_signals() -> void:
 			sig.connect(cb)
 	if not GameState.zone_completed.is_connected(_on_zone_completed):
 		GameState.zone_completed.connect(_on_zone_completed)
+	if not GameState.zone_visited.is_connected(_on_zone_visited):
+		GameState.zone_visited.connect(_on_zone_visited)
 	if not GameState.briefcase_updated.is_connected(_on_briefcase_updated):
 		GameState.briefcase_updated.connect(_on_briefcase_updated)
 	if touch_controls and touch_controls.has_signal("pause_pressed"):
@@ -593,30 +619,26 @@ func _close_all_panels(animate: bool = true) -> void:
 
 
 func _open_map() -> void:
-	if not map_panel:
+	if not map_layer:
+		push_error("[ForestHub] Cannot open map — MapLayer is null!")
 		return
-	map_panel.visible = true
-	map_panel.modulate = Color(1, 1, 1, 0)
-	map_panel.scale = Vector2(0.8, 0.8)
-	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_BACK)
-	tween.set_ease(Tween.EASE_OUT)
-	tween.tween_property(map_panel, "modulate", Color(1, 1, 1, 1), PANEL_ANIMATION_DURATION)
-	tween.parallel().tween_property(map_panel, "scale", Vector2.ONE, PANEL_ANIMATION_DURATION)
+
+	_refresh_quest_objectives()
+	_refresh_map_progress()
+
+	map_layer.visible = true
+
+	if map_panel:
+		map_panel.visible = true
+		map_panel.modulate = Color(1, 1, 1, 1)
 
 
-func _close_map(animate: bool = true) -> void:
-	if not map_panel or not map_panel.visible:
+
+func _close_map(_animate: bool = true) -> void:
+	if not map_layer:
 		return
-	if animate:
-		var tween := create_tween()
-		tween.set_trans(Tween.TRANS_BACK)
-		tween.set_ease(Tween.EASE_IN)
-		tween.tween_property(map_panel, "modulate", Color(1, 1, 1, 0), PANEL_ANIMATION_DURATION * 0.5)
-		tween.parallel().tween_property(map_panel, "scale", Vector2(0.8, 0.8), PANEL_ANIMATION_DURATION * 0.5)
-		tween.tween_callback(func(): map_panel.visible = false)
-	else:
-		map_panel.visible = false
+
+	map_layer.visible = false
 
 
 func _open_ledger() -> void:
@@ -888,13 +910,19 @@ func _on_players_entering_zone(zone_name: String) -> void:
 
 func _on_players_entered_zone(zone_name: String) -> void:
 	var target_portal: Node = null
+
 	for portal in portals.get_children():
 		if portal.zone_name == zone_name:
 			target_portal = portal
 			break
+
 	if not target_portal:
 		push_warning("[ForestHub] Could not find portal for zone: " + zone_name)
 		return
+
+	GameState.mark_zone_visited(zone_name)
+	_refresh_map_progress()
+
 	target_portal.complete_zone_entry()
 
 
@@ -958,6 +986,8 @@ func _on_zone_completed(completed_zone: String) -> void:
 			enter_button.disabled = true
 		break
 
+	_refresh_quest_objectives()
+	_refresh_map_progress()
 # ─── DIALOGUE ────────────────────────────────────────────────────────────────
 ## One-time zone thought triggered when the local player walks into a portal.
 ## Keys in ZONE_THOUGHTS must match portal.zone_name exactly (check Inspector).
@@ -1202,3 +1232,117 @@ func _on_tutorial_closed() -> void:
 		touch_controls.visible = true
 	
 	get_tree().paused = false
+
+func _setup_map_layer() -> void:
+	if not map_layer:
+		push_error("[ForestHub] MapLayer not found!")
+		return
+
+	map_layer.visible = false
+
+	if map_panel:
+		map_panel.visible = true
+		map_panel.modulate = Color(1, 1, 1, 1)
+
+	_setup_map_progress_markers()
+	
+func _setup_map_progress_markers() -> void:
+	_map_zone_markers = {
+		"pinas_house": map_ph_marker,
+		"backyard_path": map_bp_marker,
+		"old_well": map_ow_marker,
+		"storage_hut": map_sh_marker,
+		"abandoned_house": map_ah_marker,
+	}
+
+	_map_artifact_markers = {
+		"pinas_house": art_ladle_marker,
+		"backyard_path": art_pineapple_marker,
+		"old_well": art_eye_marker,
+		"storage_hut": art_scroll_marker,
+		"abandoned_house": art_tiara_marker,
+	}
+
+	_refresh_map_progress()
+
+
+func _refresh_map_progress() -> void:
+	for zone_name in _map_zone_markers.keys():
+		var zone_marker: Sprite2D = _map_zone_markers.get(zone_name, null) as Sprite2D
+
+		if is_instance_valid(zone_marker):
+			zone_marker.visible = GameState.has_zone_visited(zone_name)
+
+	for zone_name in _map_artifact_markers.keys():
+		var artifact_marker: Sprite2D = _map_artifact_markers.get(zone_name, null) as Sprite2D
+
+		if not is_instance_valid(artifact_marker):
+			continue
+
+		var is_completed: bool = (
+			GameState.has_clue(zone_name)
+			or GameState.zones_status.get(zone_name, GameState.ZoneStatus.AVAILABLE) == GameState.ZoneStatus.COMPLETED
+		)
+
+		artifact_marker.visible = is_completed
+
+
+func _on_zone_visited(_zone_name: String) -> void:
+	_refresh_map_progress()
+		
+func _on_close_map_button_pressed() -> void:
+	_close_all_panels(false)
+
+func _setup_quest_objectives() -> void:
+	_quest_objective_labels = {
+		"pinas_house": objective_label_1,
+		"backyard_path": objective_label_2,
+		"old_well": objective_label_3,
+		"storage_hut": objective_label_4,
+		"abandoned_house": objective_label_5,
+	}
+
+	for zone_name in _quest_objective_labels.keys():
+		var label: Label = _quest_objective_labels[zone_name]
+		if is_instance_valid(label):
+			_quest_objective_texts[zone_name] = label.text
+
+	_refresh_quest_objectives()
+
+
+func _refresh_quest_objectives() -> void:
+	for zone_name in _quest_objective_labels.keys():
+		var label: Label = _quest_objective_labels[zone_name]
+		if not is_instance_valid(label):
+			continue
+
+		var original_text: String = str(_quest_objective_texts.get(zone_name, label.text))
+		var completed := _is_quest_zone_completed(zone_name)
+
+		if completed:
+			label.text = "✓ " + _make_strikethrough(original_text)
+			label.modulate = Color(0.6, 0.6, 0.6, 1.0)
+		else:
+			label.text = "• " + original_text
+			label.modulate = Color(1, 1, 1, 1)
+
+
+func _is_quest_zone_completed(zone_name: String) -> bool:
+	if GameState.has_clue(zone_name):
+		return true
+
+	return GameState.zones_status.get(zone_name, GameState.ZoneStatus.AVAILABLE) == GameState.ZoneStatus.COMPLETED
+
+
+func _make_strikethrough(text: String) -> String:
+	var result := ""
+
+	for i in range(text.length()):
+		var character := text.substr(i, 1)
+
+		if character == " ":
+			result += character
+		else:
+			result += character + "\u0336"
+
+	return result
