@@ -1,4 +1,4 @@
-[gd_scene load_steps=60 format=4 uid="uid://c65bu18udl64v"]
+[gd_scene load_steps=70 format=4 uid="uid://c65bu18udl64v"]
 
 [ext_resource type="Texture2D" uid="uid://k60h4yhhde0x" path="res://assets/backgrounds/forest.png" id="2_87r7r"]
 [ext_resource type="Texture2D" uid="uid://d06a48u2atl4o" path="res://assets/sprites/places/pinasHouseZone.png" id="2_anhpr"]
@@ -43,6 +43,16 @@
 [ext_resource type="Texture2D" uid="uid://c2qgeyutd7erm" path="res://assets/sprites/maps/Village Map.png" id="39_o1ijy"]
 [ext_resource type="Texture2D" uid="uid://u7ubhk5misyx" path="res://assets/sprites/cutscene/dialogueBox.png" id="41_a4hjh"]
 [ext_resource type="Texture2D" uid="uid://0if744xevh7h" path="res://assets/sprites/quest/questBoard.png" id="43_je0uy"]
+[ext_resource type="Texture2D" uid="uid://ym51o87tsrva" path="res://assets/sprites/maps/PH.png" id="44_jxga6"]
+[ext_resource type="Texture2D" uid="uid://dorg61q5t76h3" path="res://assets/sprites/maps/OW.png" id="45_jgx02"]
+[ext_resource type="Texture2D" uid="uid://40t5amyd6788" path="res://assets/sprites/maps/BP.png" id="46_54y0r"]
+[ext_resource type="Texture2D" uid="uid://bfr6o4jssi51j" path="res://assets/sprites/maps/AH.png" id="47_oimj8"]
+[ext_resource type="Texture2D" uid="uid://db2qf3h7g63l4" path="res://assets/sprites/maps/SH.png" id="48_812jd"]
+[ext_resource type="Texture2D" uid="uid://cjh5h6x006ljk" path="res://assets/sprites/quest/yellow_ladle.png" id="49_ek76p"]
+[ext_resource type="Texture2D" uid="uid://cjkxl583s3q2a" path="res://assets/sprites/quest/yellow_eyes.png" id="50_npmgd"]
+[ext_resource type="Texture2D" uid="uid://bqjfuyc087ve0" path="res://assets/sprites/quest/yellow_pineapple.png" id="51_ovw54"]
+[ext_resource type="Texture2D" uid="uid://njvnr2nw6os8" path="res://assets/sprites/quest/yellow_scroll.png" id="52_7fj6x"]
+[ext_resource type="Texture2D" uid="uid://c188o656x7dju" path="res://assets/sprites/quest/yellow_tiara.png" id="53_nt1ne"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6nmbo"]
 size = Vector2(1.0549998, 9.77)
@@ -2012,6 +2022,76 @@ theme_override_font_sizes/font_size = 35
 text = "Enter the Abandoned 
 House and uncover the final clue"
 horizontal_alignment = 1
+
+[node name="MapPH" type="Sprite2D" parent="MapLayer"]
+visible = false
+z_index = 55
+position = Vector2(563.31256, 165.5)
+scale = Vector2(0.4897641, 0.53799397)
+texture = ExtResource("44_jxga6")
+
+[node name="MapOW" type="Sprite2D" parent="MapLayer"]
+visible = false
+z_index = 55
+position = Vector2(791.99994, 183)
+scale = Vector2(0.4868235, 0.5300353)
+texture = ExtResource("45_jgx02")
+
+[node name="MapBP" type="Sprite2D" parent="MapLayer"]
+visible = false
+z_index = 55
+position = Vector2(1024.25, 203.99998)
+scale = Vector2(0.42809737, 0.45818186)
+texture = ExtResource("46_54y0r")
+
+[node name="MapAH" type="Sprite2D" parent="MapLayer"]
+visible = false
+z_index = 55
+position = Vector2(660, 297)
+scale = Vector2(0.5250738, 0.5590063)
+texture = ExtResource("47_oimj8")
+
+[node name="MapSH" type="Sprite2D" parent="MapLayer"]
+visible = false
+z_index = 55
+position = Vector2(884.99994, 293)
+scale = Vector2(0.4789356, 0.4807693)
+texture = ExtResource("48_812jd")
+
+[node name="ArtLadle" type="Sprite2D" parent="MapLayer"]
+visible = false
+z_index = 55
+position = Vector2(725, 444)
+scale = Vector2(0.20044646, 0.20373683)
+texture = ExtResource("49_ek76p")
+
+[node name="ArtEye" type="Sprite2D" parent="MapLayer"]
+visible = false
+z_index = 55
+position = Vector2(809, 443)
+scale = Vector2(0.19322252, 0.18855137)
+texture = ExtResource("50_npmgd")
+
+[node name="ArtPineapple" type="Sprite2D" parent="MapLayer"]
+visible = false
+z_index = 55
+position = Vector2(892, 440.99997)
+scale = Vector2(0.21617654, 0.22373952)
+texture = ExtResource("51_ovw54")
+
+[node name="ArtScroll" type="Sprite2D" parent="MapLayer"]
+visible = false
+z_index = 55
+position = Vector2(969, 439.99997)
+scale = Vector2(0.2907124, 0.27108446)
+texture = ExtResource("52_7fj6x")
+
+[node name="ArtTiara" type="Sprite2D" parent="MapLayer"]
+visible = false
+z_index = 55
+position = Vector2(1054, 444)
+scale = Vector2(0.3012503, 0.3111111)
+texture = ExtResource("53_nt1ne")
 
 [connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/Resume_PlayButton" to="." method="_on_resume_play_button_pressed"]
 [connection signal="pressed" from="PauseCanvasLayer/InGamePausePanel/OptionButton" to="." method="_on_option_button_pressed"]

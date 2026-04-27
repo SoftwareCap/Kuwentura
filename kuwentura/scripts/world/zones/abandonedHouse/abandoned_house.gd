@@ -52,6 +52,7 @@ const BOOK_CROP_REGIONS := {
 @export var card_piece_texture: Texture2D
 
 @export var key_fragment_3_texture: Texture2D
+@export var assembled_key_texture: Texture2D
 
 @export var mirror_not_lighted_texture: Texture2D
 @export var mirror_lighted_with_fp_texture: Texture2D
@@ -75,7 +76,7 @@ const DRAWER_CORRECT_CODE := [3, 5, 4]
 @onready var cabinet_instruction_label: Label = $PuzzleCanvasLayer/Dimmer/CabinetPuzzlePanel/MarginContainer/VBoxContainer/InstructionLabel
 @onready var cabinet_texture_rect: TextureRect = $PuzzleCanvasLayer/Dimmer/CabinetPuzzlePanel/MarginContainer/VBoxContainer/CabinetHolder/CabinetTexture
 @onready var cabinet_lock_hotspot: TextureButton = $PuzzleCanvasLayer/Dimmer/CabinetPuzzlePanel/MarginContainer/VBoxContainer/CabinetHolder/CabinetLockHotspot
-@onready var close_cabinet_button: Button = $PuzzleCanvasLayer/Dimmer/CabinetPuzzlePanel/MarginContainer/VBoxContainer/BottomBar/CloseCabinetButton
+@onready var close_cabinet_button: TouchScreenButton = $PuzzleCanvasLayer/Dimmer/CabinetPuzzlePanel/MarginContainer/VBoxContainer/BottomBar/CloseCabinetButton
 
 @onready var drawer_area: Area2D = $InteractiveLayer/DrawerArea
 
@@ -86,7 +87,7 @@ const DRAWER_CORRECT_CODE := [3, 5, 4]
 @onready var drawer_instruction_label: Label = $PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/InstructionLabel
 @onready var drawer_texture_rect: TextureRect = $PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/DrawerHolder/DrawerTexture
 @onready var drawer_lock_hotspot: TextureButton = $PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/DrawerHolder/DrawerLockHotspot
-@onready var close_drawer_button: Button = $PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/BottomBar/CloseDrawerButton
+@onready var close_drawer_button: TouchScreenButton = $PuzzleCanvasLayer/Dimmer/DrawerPanel/MarginContainer/VBoxContainer/BottomBar/CloseDrawerButton
 
 @onready var drawer_lock_panel: PanelContainer = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel
 @onready var drawer_lock_instruction_label: Label = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/InstructionLabel
@@ -94,7 +95,7 @@ const DRAWER_CORRECT_CODE := [3, 5, 4]
 @onready var digit_1_button: TextureButton = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/LockHolder/Digit1
 @onready var digit_2_button: TextureButton = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/LockHolder/Digit2
 @onready var digit_3_button: TextureButton = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/LockHolder/Digit3
-@onready var close_drawer_lock_button: Button = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/BottomBar/CloseDrawerLockButton
+@onready var close_drawer_lock_button: TouchScreenButton = $PuzzleCanvasLayer/Dimmer/DrawerLockPanel/MarginContainer/VBoxContainer/BottomBar/CloseDrawerLockButton
 
 var _drawer_unlocked: bool = false
 var _drawer_digits: Array[int] = [0, 0, 0]
@@ -109,9 +110,11 @@ var _final_box_data: Dictionary = {}
 @onready var mirror_instruction_label: Label = $PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer/InstructionLabel
 @onready var mirror_texture_rect: TextureRect = $PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer/MirrorHolder/MirrorTexture
 @onready var lamp_hotspot: TextureButton = $PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer/MirrorHolder/LampHotspot
-@onready var close_mirror_button: Button = $PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer/BottomBar/CloseMirrorButton
+@onready var close_mirror_button: TouchScreenButton = $PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer/CloseMirrorButton
 
 @onready var inside_zone_control = $InsideZoneControl
+@onready var inventory_board: Node2D = get_node_or_null("InventoryBoard") as Node2D
+@onready var inventory_area: Area2D = get_node_or_null("InventoryBoard/Area2D") as Area2D
 
 @onready var puzzle_area: Area2D = $InteractiveLayer/PuzzleArea
 
@@ -122,31 +125,32 @@ var _final_box_data: Dictionary = {}
 @onready var close_memory_button: Button = $PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer/CloseMemoryButton
 @onready var missing_row: HBoxContainer = get_node_or_null("PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer/MissingRow")
 
-@onready var role_label: Label = %RoleLabel
-@onready var back_button: Button = $BackButton
-@onready var notification_label: Label = $NotificationLabel
+@onready var role_label: Label = get_node_or_null("RoleLabel") as Label
+@onready var back_button: Button = get_node_or_null("BackButton") as Button
+@onready var notification_label: Label = $Notification/NotificationLabel
 
 @onready var books_area: Area2D = $InteractiveLayer/BooksArea
 
 @onready var dimmer: ColorRect = $PuzzleCanvasLayer/Dimmer
 @onready var books_puzzle_panel: PanelContainer = $PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel
-@onready var instruction_label: Label = $PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/VBoxContainer/InstructionLabel
-@onready var puzzle_board: Control = $PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/VBoxContainer/PuzzleBoard
-@onready var close_puzzle_button: Button = $PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/VBoxContainer/ClosePuzzleButton
+@onready var instruction_label: Label = $PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/Puzzle/BookPuzzleInstruction
+@onready var puzzle_board: Control = $PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/Puzzle/PuzzleBoard
+@onready var close_puzzle_button: TouchScreenButton = $PuzzleCanvasLayer/Dimmer/BooksPuzzlePanel/MarginContainer/Puzzle/ClosePuzzleButton
 
+@onready var reward_canvas_layer: CanvasLayer = $RewardCanvasLayer
 @onready var reward_dimmer: ColorRect = $RewardCanvasLayer/RewardDimmer
-@onready var reward_panel: PanelContainer = $RewardCanvasLayer/RewardPanel
-@onready var reward_title_label: Label = $RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardTitleLabel
-@onready var reward_body_label: Label = $RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardBodyLabel
-@onready var collect_reward_button: Button = $RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/CollectClueButton
+@onready var reward_panel: Panel = $RewardCanvasLayer/Panel
+@onready var reward_title_label: Label = $RewardCanvasLayer/Panel/Reward/RewardTitleLabel
+@onready var reward_body_label: Label = $RewardCanvasLayer/Panel/Reward/RewardBodyLabel
+@onready var collect_reward_button: Button = $RewardCanvasLayer/Panel/Reward/CollectClueButton
 
-@onready var reward_vbox: VBoxContainer = $RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer
-@onready var reward_items_row: HBoxContainer = $RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow
-@onready var key_item: VBoxContainer = $RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow/KeyItem
-@onready var key_texture_rect: TextureRect = $RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow/KeyItem/KeyTexture
-@onready var card_item: VBoxContainer = $RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow/CardItem
-@onready var card_texture_rect: TextureRect = $RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/RewardItemsRow/CardItem/CardTexture
-@onready var collect_clue_button: Button = $RewardCanvasLayer/RewardPanel/MarginContainer/VBoxContainer/CollectClueButton
+@onready var reward_vbox: VBoxContainer = $RewardCanvasLayer/Panel/Reward
+@onready var reward_items_row: HBoxContainer = $RewardCanvasLayer/Panel/Reward/RewardItemsRow
+@onready var key_item: Control = $RewardCanvasLayer/Panel/Reward/RewardItemsRow/KeyTexture
+@onready var key_texture_rect: TextureRect = $RewardCanvasLayer/Panel/Reward/RewardItemsRow/KeyTexture
+@onready var card_item: Control = $RewardCanvasLayer/Panel/Reward/RewardItemsRow/CardTexture
+@onready var card_texture_rect: TextureRect = $RewardCanvasLayer/Panel/Reward/RewardItemsRow/CardTexture
+@onready var collect_clue_button: Button = $RewardCanvasLayer/Panel/Reward/CollectClueButton
 
 const FINAL_BOX_PUZZLE_ID := "abandoned_house_final_box_opened"
 
@@ -162,7 +166,7 @@ const FINAL_BOX_PUZZLE_ID := "abandoned_house_final_box_opened"
 @onready var sidekick_input_row: VBoxContainer = $PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BoxHolder/SidekickInputRow
 @onready var answer_input: LineEdit = $PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BoxHolder/SidekickInputRow/AnswerInput
 @onready var submit_answer_button: Button = $PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BoxHolder/SidekickInputRow/SubmitAnswerButton
-@onready var close_final_box_button: Button = $PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BottomBar/CloseFinalBoxButton
+@onready var close_final_box_button: TouchScreenButton = $PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BottomBar/CloseFinalBoxButton
 
 const FINAL_BOX_REWARD_ITEMS := ["pinas_tiara"]
 
@@ -182,7 +186,7 @@ const BOOKS_PUZZLE_ID := "abandoned_house_books_solved"
 @export var progress_4_texture: Texture2D
 @export var progress_5_texture: Texture2D
 
-@onready var progress_tracker_sprite: Sprite2D = $ProgressTracker/Tracker
+@onready var progress_tracker_sprite: Sprite2D = $ProgressTracker/TiaraTracker
 
 const TIARA_SPARKLE_MIN_SCALE := 0.45
 const TIARA_SPARKLE_MAX_SCALE := 0.55
@@ -214,6 +218,27 @@ var _final_box_opened: bool = false
 
 const CABINET_PUZZLE_ID := "abandoned_house_cabinet_opened"
 const CABINET_KEY_ITEM_ID := "assembled_key"
+
+const INVENTORY_SLOT_ITEM_ORDER := [
+	"key_fragment_1",
+	"card_piece",
+	"key_fragment_2",
+	"light_bulb",
+	"key_fragment_3",
+	"assembled_key"
+]
+
+const INVENTORY_ITEM_NAMES := {
+	"key_fragment_1": "Key Fragment 1",
+	"card_piece": "Card Piece",
+	"key_fragment_2": "Key Fragment 2",
+	"light_bulb": "Lighter",
+	"key_fragment_3": "Key Fragment 3",
+	"assembled_key": "Key"
+}
+
+var _armed_inventory_item: String = ""
+var _inventory_icon_nodes: Dictionary = {}
 
 var _cabinet_opened: bool = false
 
@@ -294,6 +319,7 @@ func _ready() -> void:
 	
 	_setup_progress_tracker()
 	_refresh_progress_tracker()
+	_setup_inventory_board()
 	
 	await get_tree().process_frame
 	_resize_books_popup()
@@ -314,7 +340,8 @@ func _setup_ui() -> void:
 	if has_node("TestLabel"):
 		$TestLabel.visible = false
 
-	notification_label.visible = false
+	if notification_label:
+		notification_label.visible = false
 
 	instruction_label.text = "Drag the books to arrange them by width.\nNarrowest should be on top and widest should be at the bottom."
 
@@ -323,22 +350,87 @@ func _setup_ui() -> void:
 	dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	books_puzzle_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
+	if reward_canvas_layer:
+		reward_canvas_layer.visible = false
+		reward_canvas_layer.layer = 80
+
 	reward_dimmer.visible = false
 	reward_panel.visible = false
 	reward_items_row.visible = false
 	reward_dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	reward_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-
-func _setup_reward_preview() -> void:
+func _center_reward_panel() -> void:
 	var viewport_size: Vector2 = get_viewport_rect().size
 
-	var panel_width: float = clampf(viewport_size.x * 0.42, 480.0, 620.0)
-	var panel_height: float = clampf(viewport_size.y * 0.40, 300.0, 380.0)
+	# Make the dark overlay cover the whole screen.
+	if reward_dimmer:
+		reward_dimmer.anchor_left = 0.0
+		reward_dimmer.anchor_top = 0.0
+		reward_dimmer.anchor_right = 1.0
+		reward_dimmer.anchor_bottom = 1.0
+		reward_dimmer.offset_left = 0.0
+		reward_dimmer.offset_top = 0.0
+		reward_dimmer.offset_right = 0.0
+		reward_dimmer.offset_bottom = 0.0
 
-	reward_panel.set_anchors_preset(Control.PRESET_CENTER)
-	reward_panel.size = Vector2(panel_width, panel_height)
-	reward_panel.position = (viewport_size - reward_panel.size) * 0.5
+	# Actual popup size.
+	var panel_width: float = clampf(viewport_size.x * 0.46, 460.0, 620.0)
+	var panel_height: float = clampf(viewport_size.y * 0.48, 280.0, 380.0)
+	var panel_size := Vector2(panel_width, panel_height)
+
+	# IMPORTANT:
+	# Do not use PRESET_CENTER here.
+	# Use top-left anchors, then manually place the panel in the center.
+	if reward_panel:
+		reward_panel.anchor_left = 0.0
+		reward_panel.anchor_top = 0.0
+		reward_panel.anchor_right = 0.0
+		reward_panel.anchor_bottom = 0.0
+
+		reward_panel.offset_left = 0.0
+		reward_panel.offset_top = 0.0
+		reward_panel.offset_right = 0.0
+		reward_panel.offset_bottom = 0.0
+
+		reward_panel.size = panel_size
+		reward_panel.position = (viewport_size - panel_size) * 0.5
+		reward_panel.z_index = 100
+
+	# Make the VBox fill the centered panel.
+	if reward_vbox:
+		reward_vbox.anchor_left = 0.0
+		reward_vbox.anchor_top = 0.0
+		reward_vbox.anchor_right = 1.0
+		reward_vbox.anchor_bottom = 1.0
+
+		reward_vbox.offset_left = 24.0
+		reward_vbox.offset_top = 20.0
+		reward_vbox.offset_right = -24.0
+		reward_vbox.offset_bottom = -20.0
+
+		reward_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+		reward_vbox.add_theme_constant_override("separation", 14)
+
+	if reward_title_label:
+		reward_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		reward_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	if reward_body_label:
+		reward_body_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		reward_body_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		reward_body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+	if reward_items_row:
+		reward_items_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		reward_items_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	if collect_reward_button:
+		collect_reward_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+
+
+func _setup_reward_preview() -> void:
+	_center_reward_panel()
 
 	reward_items_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	reward_items_row.add_theme_constant_override("separation", 16)
@@ -359,10 +451,12 @@ func _setup_reward_preview() -> void:
 
 	if card_piece_texture:
 		card_texture_rect.texture = card_piece_texture
+		
+		
 
 
 func _connect_signals() -> void:
-	if not back_button.pressed.is_connected(_on_back_pressed):
+	if back_button and not back_button.pressed.is_connected(_on_back_pressed):
 		back_button.pressed.connect(_on_back_pressed)
 
 	if not books_area.input_event.is_connected(_on_books_area_input_event):
@@ -385,6 +479,14 @@ func _connect_signals() -> void:
 
 	if not close_mirror_button.pressed.is_connected(_on_close_mirror_button_pressed):
 		close_mirror_button.pressed.connect(_on_close_mirror_button_pressed)
+
+	# Lets the mirror close when the player taps outside the mirror image.
+	# We connect both the dark dimmer and the mirror panel because either one can receive the tap.
+	if dimmer and not dimmer.gui_input.is_connected(_on_puzzle_dimmer_gui_input):
+		dimmer.gui_input.connect(_on_puzzle_dimmer_gui_input)
+
+	if mirror_puzzle_panel and not mirror_puzzle_panel.gui_input.is_connected(_on_mirror_panel_gui_input):
+		mirror_puzzle_panel.gui_input.connect(_on_mirror_panel_gui_input)
 
 	if not lamp_hotspot.pressed.is_connected(_on_lamp_hotspot_pressed):
 		lamp_hotspot.pressed.connect(_on_lamp_hotspot_pressed)
@@ -451,7 +553,8 @@ func _refresh_role_label() -> void:
 		_:
 			role_text = "NO ROLE ASSIGNED"
 
-	role_label.text = "Role: " + role_text
+	if role_label:
+		role_label.text = "Role: " + role_text
 
 	if inside_zone_control and inside_zone_control.has_method("set_sidekick_ui_visible"):
 		inside_zone_control.set_sidekick_ui_visible(_is_local_sidekick())
@@ -534,10 +637,7 @@ func _on_books_area_input_event(_viewport: Node, event: InputEvent, _shape_idx: 
 func _refresh_books_panel_for_role() -> void:
 	instruction_label.visible = _is_local_detective() and not _books_solved
 
-	if _is_local_detective():
-		close_puzzle_button.text = "Back"
-	else:
-		close_puzzle_button.text = "Close"
+	# ClosePuzzleButton is a TouchScreenButton image, so no text update is needed.
 
 func _open_books_panel() -> void:
 	_set_books_panel_visible(true)
@@ -582,6 +682,10 @@ func _on_book_gui_input(event: InputEvent, book_id: String) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	# Keep this here so taps are detected even when a Control node does not pass gui_input.
+	if _try_close_mirror_from_tap(event):
+		return
+
 	if _drag_book_id == "":
 		return
 
@@ -593,7 +697,6 @@ func _input(event: InputEvent) -> void:
 		_finish_drag()
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		_finish_drag()
-
 
 func _begin_drag(book_id: String, screen_position: Vector2) -> void:
 	if not _book_nodes.has(book_id):
@@ -772,36 +875,67 @@ func _resize_books_popup() -> void:
 		maxf(180.0, board_height)
 	)
 
-func _show_books_reward_panel() -> void:
+func _show_reward_panel(title: String, body: String, item_ids: Array, texture_1: Texture2D = null, texture_2: Texture2D = null) -> void:
 	_pending_reward_items.clear()
-	_pending_reward_items.append_array(REWARD_ITEMS)
-	reward_title_label.text = "Puzzle Solved"
-	reward_body_label.text = "You found Key Fragment 1 and the Card Piece."
+	_pending_reward_items.append_array(item_ids)
+
+	# Force the whole reward canvas to show above the puzzle canvas.
+	# This fixes the issue where the puzzle closes but the reward UI does not appear.
+	if reward_canvas_layer:
+		reward_canvas_layer.visible = true
+		reward_canvas_layer.layer = 80
+		
+	_center_reward_panel()
+
+	reward_title_label.text = title
+	reward_body_label.text = body
 
 	reward_items_row.visible = true
-	key_texture_rect.visible = true
-	card_texture_rect.visible = true
 
-	if key_fragment_1_texture:
-		key_texture_rect.texture = _make_cropped_key_texture(key_fragment_1_texture)
+	key_item.visible = texture_1 != null
+	key_texture_rect.visible = texture_1 != null
+	if texture_1:
+		key_texture_rect.texture = texture_1
 
-	if card_piece_texture:
-		card_texture_rect.texture = card_piece_texture
+	card_item.visible = texture_2 != null
+	card_texture_rect.visible = texture_2 != null
+	if texture_2:
+		card_texture_rect.texture = texture_2
 
 	collect_reward_button.text = "Collect Clue"
 	collect_reward_button.visible = _is_local_sidekick()
+	collect_reward_button.disabled = not _is_local_sidekick()
 
 	reward_dimmer.visible = true
 	reward_panel.visible = true
+	
+	_center_reward_panel()
 
 	reward_dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
 	reward_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 
+
+func _show_books_reward_panel() -> void:
+	_show_reward_panel(
+		"Puzzle Solved",
+		"You found Key Fragment 1 and the Card Piece.",
+		REWARD_ITEMS,
+		_make_cropped_key_texture(key_fragment_1_texture) if key_fragment_1_texture else null,
+		card_piece_texture
+	)
+
+
 func _hide_reward_panel() -> void:
 	_pending_reward_items.clear()
+
+	if reward_canvas_layer:
+		reward_canvas_layer.visible = false
+
 	reward_dimmer.visible = false
 	reward_panel.visible = false
 	reward_items_row.visible = false
+	collect_reward_button.visible = false
+	collect_reward_button.disabled = true
 
 	reward_dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	reward_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -832,6 +966,7 @@ func _collect_reward_items_rpc(item_ids: Array) -> void:
 	if GameState and GameState.has_method("grant_zone_items"):
 		GameState.grant_zone_items(ZONE_ID, item_ids)
 
+	_refresh_inventory_board()
 	_hide_reward_panel()
 
 	# refresh drawer UI in case key_fragment_3 was just collected
@@ -839,7 +974,15 @@ func _collect_reward_items_rpc(item_ids: Array) -> void:
 		_refresh_drawer_panel_state()
 		
 	if item_ids.has("pinas_tiara"):
+		if GameState and GameState.has_method("has_clue") and GameState.has_method("collect_clue"):
+			if not GameState.has_clue(ZONE_ID):
+				GameState.collect_clue(ZONE_ID)
+
+		if GameState and GameState.has_method("set_puzzle_solved"):
+			GameState.set_puzzle_solved(ZONE_ID, true)
+
 		_refresh_final_box_clue_state()
+		_return_to_forest()
 
 @rpc("any_peer", "reliable", "call_local")
 func _collect_books_reward_rpc() -> void:
@@ -859,7 +1002,8 @@ func _show_notification(message: String, duration: float = 1.8) -> void:
 	await get_tree().create_timer(duration).timeout
 
 	if token == _notification_token and is_instance_valid(notification_label):
-		notification_label.visible = false
+		if notification_label:
+			notification_label.visible = false
 
 
 func _is_local_detective() -> bool:
@@ -1029,7 +1173,7 @@ func _refresh_memory_panel_state() -> void:
 			memory_grid.visible = true
 		return
 
-	memory_instruction_label.text = "Open the briefcase, select the Card Piece, press Use, then tap the empty slot."
+	memory_instruction_label.text = "Tap the Card Piece on the Inventory Board, then tap the empty slot."
 
 	if memory_grid:
 		memory_grid.visible = true
@@ -1228,29 +1372,14 @@ func _apply_memory_puzzle_solved() -> void:
 	_show_notification("Card puzzle solved.")
 
 func _show_memory_reward_panel() -> void:
-	_pending_reward_items.clear()
-	_pending_reward_items.append_array(MEMORY_REWARD_ITEMS)
-	reward_title_label.text = "Puzzle Solved"
-	reward_body_label.text = "You found Key Fragment 2 and the Lighter."
+	_show_reward_panel(
+		"Puzzle Solved",
+		"You found Key Fragment 2 and the Lighter.",
+		MEMORY_REWARD_ITEMS,
+		key_fragment_2_texture,
+		lighter_texture
+	)
 
-	reward_items_row.visible = true
-	key_texture_rect.visible = true
-	card_texture_rect.visible = true
-
-	if key_fragment_2_texture:
-		key_texture_rect.texture = key_fragment_2_texture
-
-	if lighter_texture:
-		card_texture_rect.texture = lighter_texture
-
-	collect_reward_button.text = "Collect Clue"
-	collect_reward_button.visible = _is_local_sidekick()
-
-	reward_dimmer.visible = true
-	reward_panel.visible = true
-
-	reward_dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
-	reward_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 
 func _on_missing_slot_pressed() -> void:
 	if _memory_unlocked or _memory_solved:
@@ -1259,15 +1388,9 @@ func _on_missing_slot_pressed() -> void:
 	if not _is_local_sidekick():
 		return
 
-	if not inside_zone_control:
-		return
-
-	if not inside_zone_control.has_method("consume_armed_item"):
-		return
-
-	var used: bool = inside_zone_control.consume_armed_item("card_piece")
+	var used: bool = _consume_armed_inventory_item("card_piece")
 	if not used:
-		_show_notification("Open the briefcase, select the Card Piece, press Use, then tap the empty slot.")
+		_show_notification("Tap the Card Piece on the Inventory Board first.")
 		return
 
 	_memory_unlocked = true
@@ -1290,6 +1413,38 @@ func _load_mirror_progress() -> void:
 		_mirror_lit = false
 
 	_refresh_room_lighting()
+
+
+func _on_puzzle_dimmer_gui_input(event: InputEvent) -> void:
+	_try_close_mirror_from_tap(event)
+
+
+func _on_mirror_panel_gui_input(event: InputEvent) -> void:
+	_try_close_mirror_from_tap(event)
+
+
+func _try_close_mirror_from_tap(event: InputEvent) -> bool:
+	if not mirror_puzzle_panel or not mirror_puzzle_panel.visible:
+		return false
+
+	if not _is_primary_press_event(event):
+		return false
+
+	var tap_position: Vector2 = _get_event_position(event)
+
+	# Keep the view open when the player taps the mirror image itself.
+	# This fixes the earlier issue because checking MirrorPuzzlePanel was too wide.
+	if mirror_texture_rect and mirror_texture_rect.get_global_rect().grow(8.0).has_point(tap_position):
+		return false
+
+	# The lamp hotspot is slightly outside the mirror image in the scene, so do not close
+	# when the Sidekick taps the lamp to use the lighter.
+	if lamp_hotspot and lamp_hotspot.visible and lamp_hotspot.get_global_rect().grow(8.0).has_point(tap_position):
+		return false
+
+	_close_mirror_panel()
+	get_viewport().set_input_as_handled()
+	return true
 
 
 func _on_mirror_area_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
@@ -1319,7 +1474,16 @@ func _close_mirror_panel() -> void:
 	mirror_puzzle_panel.visible = false
 	mirror_puzzle_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	if not books_puzzle_panel.visible and not memory_puzzle_panel.visible:
+	var any_other_panel_open := (
+		books_puzzle_panel.visible
+		or memory_puzzle_panel.visible
+		or drawer_panel.visible
+		or drawer_lock_panel.visible
+		or cabinet_puzzle_panel.visible
+		or final_box_panel.visible
+	)
+
+	if not any_other_panel_open:
 		dimmer.visible = false
 		dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -1360,13 +1524,10 @@ func _on_lamp_hotspot_pressed() -> void:
 	if not _is_local_sidekick():
 		return
 
-	if not inside_zone_control or not inside_zone_control.has_method("consume_armed_item"):
-		return
-
-	var used: bool = inside_zone_control.consume_armed_item("light_bulb")
+	var used: bool = _consume_armed_inventory_item("light_bulb")
 	if not used:
-		mirror_instruction_label.text = "Light this lamp. Open the briefcase, select the Lighter, press Use, then tap the lamp."
-		_show_notification("Light this lamp.")
+		mirror_instruction_label.text = "Tap the Lighter on the Inventory Board, then tap the lamp."
+		_show_notification("Select the Lighter first.")
 		return
 
 	if multiplayer.has_multiplayer_peer():
@@ -1675,17 +1836,14 @@ func _apply_drawer_unlocked() -> void:
 
 	_show_notification("The drawer unlocked.")
 
-	# If the player is currently viewing the lock panel,
-	# return them to the drawer panel so they can see it open.
-	if drawer_lock_panel.visible:
-		drawer_lock_panel.visible = false
-		drawer_lock_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# New flow: after solving the drawer lock, show the reward panel immediately.
+	# The Sidekick is the only one who can press Collect Clue.
+	_hide_drawer_ui()
+	if dimmer:
+		dimmer.visible = false
+		dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-		drawer_panel.visible = true
-		drawer_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-
-		dimmer.visible = true
-		dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
+	_show_drawer_reward_panel()
 
 func _has_key_fragment_3() -> bool:
 	return GameState and GameState.has_method("has_zone_item") and GameState.has_zone_item(ZONE_ID, "key_fragment_3")
@@ -1730,31 +1888,14 @@ func _show_drawer_reward_panel() -> void:
 	if _has_key_fragment_3():
 		return
 
-	_pending_reward_items.clear()
-	_pending_reward_items.append_array(DRAWER_REWARD_ITEMS)
+	_show_reward_panel(
+		"Puzzle Solved",
+		"You found Key Fragment 3.",
+		DRAWER_REWARD_ITEMS,
+		key_fragment_3_texture,
+		null
+	)
 
-	reward_title_label.text = "Item Found"
-	reward_body_label.text = "You found Key Fragment 3."
-
-	reward_items_row.visible = true
-
-	key_item.visible = true
-	card_item.visible = false
-
-	key_texture_rect.visible = true
-	card_texture_rect.visible = false
-
-	if key_fragment_3_texture:
-		key_texture_rect.texture = key_fragment_3_texture
-
-	collect_reward_button.text = "Collect Clue"
-	collect_reward_button.visible = _is_local_sidekick()
-
-	reward_dimmer.visible = true
-	reward_panel.visible = true
-
-	reward_dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
-	reward_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 
 func _setup_cabinet_ui() -> void:
 	if cabinet_puzzle_panel:
@@ -1846,13 +1987,10 @@ func _on_cabinet_lock_hotspot_pressed() -> void:
 	if not _is_local_sidekick():
 		return
 
-	if not inside_zone_control or not inside_zone_control.has_method("consume_armed_item"):
-		return
-
-	var used: bool = inside_zone_control.consume_armed_item(CABINET_KEY_ITEM_ID)
+	var used: bool = _consume_armed_inventory_item(CABINET_KEY_ITEM_ID)
 	if not used:
-		cabinet_instruction_label.text = "Open the briefcase, select the Key, press Use, then tap the cabinet lock."
-		_show_notification("Use the key on the cabinet lock.")
+		cabinet_instruction_label.text = "Tap the Key on the Inventory Board, then tap the cabinet lock."
+		_show_notification("Select the Key first.")
 		return
 
 	if multiplayer.has_multiplayer_peer():
@@ -2068,6 +2206,11 @@ func _apply_final_box_opened() -> void:
 	_refresh_final_box_panel_state()
 	_show_notification("The box opened.")
 
+	# Artifact flow: after the math puzzle is solved, show the cinematic tiara reward sequence.
+	# Do not use the normal item reward panel here because the tiara is the main artifact.
+	_close_final_box_panel()
+	rpc_show_tiara_reward()
+
 func _get_abandoned_house_variations() -> Array:
 	if not PuzzleManager:
 		push_warning("[AbandonedHouse] PuzzleManager missing.")
@@ -2144,49 +2287,225 @@ func _on_tiara_hotspot_pressed() -> void:
 		return
 
 	if multiplayer.has_multiplayer_peer():
-		rpc_show_tiara_reward.rpc()
+		_show_tiara_reward_panel_rpc.rpc()
 	else:
-		rpc_show_tiara_reward()
+		_show_tiara_reward_panel()
 
 
 @rpc("any_peer", "reliable", "call_local")
 func _show_tiara_reward_panel_rpc() -> void:
-	_show_tiara_reward_panel()
+	# This keeps the old hotspot fallback working, but it now uses the cinematic artifact sequence.
+	rpc_show_tiara_reward()
 
 
 func _show_tiara_reward_panel() -> void:
+	# Fallback if the player taps the tiara manually after the box opens.
+	# The final-box solve path calls rpc_show_tiara_reward() directly to avoid double RPC broadcasts.
 	if _has_tiara_clue():
 		return
 
-	_pending_reward_items.clear()
-	_pending_reward_items.append_array(FINAL_BOX_REWARD_ITEMS)
+	if multiplayer.has_multiplayer_peer():
+		_show_tiara_reward_panel_rpc.rpc()
+	else:
+		rpc_show_tiara_reward()
 
-	reward_title_label.text = "Clue Found"
-	reward_body_label.text = "You found Pina's Tiara."
 
-	reward_items_row.visible = true
 
-	key_item.visible = true
-	card_item.visible = false
+func _setup_inventory_board() -> void:
+	if inventory_area and not inventory_area.input_event.is_connected(_on_inventory_area_input_event):
+		inventory_area.input_event.connect(_on_inventory_area_input_event)
 
-	key_texture_rect.visible = true
-	card_texture_rect.visible = false
+	if GameState and GameState.has_signal("briefcase_updated"):
+		if not GameState.briefcase_updated.is_connected(_refresh_inventory_board):
+			GameState.briefcase_updated.connect(_refresh_inventory_board)
 
-	if tiara_clue_texture:
-		key_texture_rect.texture = tiara_clue_texture
+	_refresh_inventory_board()
 
-	collect_reward_button.text = "Collect Clue"
-	collect_reward_button.visible = _is_local_sidekick()
 
-	reward_dimmer.visible = true
-	reward_panel.visible = true
+func _refresh_inventory_board() -> void:
+	if not inventory_board or not inventory_area:
+		return
 
-	reward_dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
-	reward_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	for icon in _inventory_icon_nodes.values():
+		if is_instance_valid(icon):
+			icon.queue_free()
+	_inventory_icon_nodes.clear()
+
+	for slot_index in range(INVENTORY_SLOT_ITEM_ORDER.size()):
+		var item_id: String = INVENTORY_SLOT_ITEM_ORDER[slot_index]
+		if not _has_inventory_item(item_id):
+			continue
+
+		var texture := _get_inventory_item_texture(item_id)
+		if texture == null:
+			continue
+
+		var slot_node := inventory_area.get_node_or_null("Item%d" % (slot_index + 1)) as CollisionShape2D
+		if slot_node == null:
+			continue
+
+		var icon := Sprite2D.new()
+		icon.name = "Inventory_%s" % item_id
+		icon.texture = texture
+		icon.position = inventory_board.to_local(slot_node.global_position)
+		icon.z_index = 20
+		_fit_inventory_icon(icon, texture)
+
+		if _armed_inventory_item == item_id:
+			icon.modulate = Color(1.0, 0.92, 0.55, 1.0)
+		else:
+			icon.modulate = Color.WHITE
+
+		inventory_board.add_child(icon)
+		_inventory_icon_nodes[item_id] = icon
+
+
+func _fit_inventory_icon(icon: Sprite2D, texture: Texture2D) -> void:
+	if texture == null:
+		return
+
+	var texture_size := texture.get_size()
+	if texture_size.x <= 0.0 or texture_size.y <= 0.0:
+		return
+
+	var target_size := Vector2(72.0, 52.0)
+	var scale_factor := minf(target_size.x / texture_size.x, target_size.y / texture_size.y)
+	icon.scale = Vector2(scale_factor, scale_factor)
+
+
+func _get_inventory_item_texture(item_id: String) -> Texture2D:
+	match item_id:
+		"key_fragment_1":
+			return key_fragment_1_texture
+		"card_piece":
+			return card_piece_texture
+		"key_fragment_2":
+			return key_fragment_2_texture
+		"light_bulb":
+			return lighter_texture
+		"key_fragment_3":
+			return key_fragment_3_texture
+		"assembled_key":
+			if assembled_key_texture:
+				return assembled_key_texture
+			return key_fragment_3_texture
+	return null
+
+
+func _has_inventory_item(item_id: String) -> bool:
+	return GameState and GameState.has_method("has_zone_item") and GameState.has_zone_item(ZONE_ID, item_id)
+
+
+func _on_inventory_area_input_event(_viewport: Node, event: InputEvent, shape_idx: int) -> void:
+	if _dialogue_input_locked:
+		return
+
+	if not _is_primary_press_event(event):
+		return
+
+	if not _is_local_sidekick():
+		_show_notification("Only the Sidekick can use inventory items.")
+		return
+
+	if shape_idx < 0 or shape_idx >= INVENTORY_SLOT_ITEM_ORDER.size():
+		return
+
+	var item_id: String = INVENTORY_SLOT_ITEM_ORDER[shape_idx]
+	if not _has_inventory_item(item_id):
+		_show_notification("That inventory slot is still empty.")
+		return
+
+	if item_id in ["key_fragment_1", "key_fragment_2", "key_fragment_3"]:
+		_try_combine_key_fragments()
+		return
+
+	_arm_inventory_item(item_id)
+
+
+func _try_combine_key_fragments() -> void:
+	if _has_inventory_item(CABINET_KEY_ITEM_ID):
+		_arm_inventory_item(CABINET_KEY_ITEM_ID)
+		return
+
+	var has_all_fragments := (
+		_has_inventory_item("key_fragment_1")
+		and _has_inventory_item("key_fragment_2")
+		and _has_inventory_item("key_fragment_3")
+	)
+
+	if not has_all_fragments:
+		_show_notification("Collect all 3 key fragments first.")
+		return
+
+	if multiplayer.has_multiplayer_peer():
+		_sync_assemble_key_rpc.rpc()
+	else:
+		_apply_assemble_key()
+
+
+@rpc("any_peer", "reliable", "call_local")
+func _sync_assemble_key_rpc() -> void:
+	_apply_assemble_key()
+
+
+func _apply_assemble_key() -> void:
+	if GameState and GameState.has_method("remove_zone_items"):
+		GameState.remove_zone_items(ZONE_ID, [
+			"key_fragment_1",
+			"key_fragment_2",
+			"key_fragment_3"
+		])
+
+	if GameState and GameState.has_method("grant_zone_item"):
+		GameState.grant_zone_item(ZONE_ID, CABINET_KEY_ITEM_ID)
+
+	_armed_inventory_item = CABINET_KEY_ITEM_ID
+	_refresh_inventory_board()
+	_show_notification("The fragments formed a key. Tap the cabinet lock.")
+
+
+func _arm_inventory_item(item_id: String) -> void:
+	_armed_inventory_item = item_id
+	_refresh_inventory_board()
+	_show_notification("%s selected." % str(INVENTORY_ITEM_NAMES.get(item_id, item_id)))
+
+
+func _consume_armed_inventory_item(item_id: String) -> bool:
+	if _armed_inventory_item != item_id:
+		return false
+
+	if not _has_inventory_item(item_id):
+		_armed_inventory_item = ""
+		_refresh_inventory_board()
+		return false
+
+	if multiplayer.has_multiplayer_peer():
+		_sync_inventory_item_consumed_rpc.rpc(item_id)
+	else:
+		_apply_inventory_item_consumed(item_id)
+
+	return true
+
+
+@rpc("any_peer", "reliable", "call_local")
+func _sync_inventory_item_consumed_rpc(item_id: String) -> void:
+	_apply_inventory_item_consumed(item_id)
+
+
+func _apply_inventory_item_consumed(item_id: String) -> void:
+	if _armed_inventory_item == item_id:
+		_armed_inventory_item = ""
+
+	if GameState and GameState.has_method("remove_zone_item"):
+		GameState.remove_zone_item(ZONE_ID, item_id)
+
+	_refresh_inventory_board()
 
 func _setup_tiara_reward_layer() -> void:
 	if cinematic_reward_layer:
 		cinematic_reward_layer.visible = false
+		# Keep the artifact reward above puzzle panels and normal reward panels.
+		cinematic_reward_layer.layer = 100
 
 	if cinematic_dark_overlay:
 		cinematic_dark_overlay.visible = true
@@ -2237,13 +2556,26 @@ func rpc_show_tiara_reward() -> void:
 	_tiara_reward_stage = 1
 	_tiara_collect_sequence_started = false
 
-	# hide final box panel while cinematic reward is active
+	# Hide normal reward UI so the artifact sequence is the only reward visible.
+	if reward_canvas_layer:
+		reward_canvas_layer.visible = false
+	if reward_dimmer:
+		reward_dimmer.visible = false
+	if reward_panel:
+		reward_panel.visible = false
+
+	# Hide final box panel while cinematic reward is active.
 	if final_box_panel:
 		final_box_panel.visible = false
 		final_box_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
+	if dimmer:
+		dimmer.visible = false
+		dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 	if cinematic_reward_layer:
 		cinematic_reward_layer.visible = true
+		cinematic_reward_layer.layer = 100
 
 	if cinematic_dark_overlay:
 		cinematic_dark_overlay.modulate.a = 0.45
@@ -2301,16 +2633,16 @@ func _on_tiara_tap_catcher_pressed() -> void:
 	match _tiara_reward_stage:
 		1:
 			_tiara_reward_stage = 2
-			_show_tiara_reward_stage_text("Pina was treated like a princess at home.")
+			_show_tiara_reward_stage_text("Inside the old box, the tiara began to shine.")
 		2:
 			_tiara_reward_stage = 3
-			_show_tiara_reward_stage_text("The tiara shows how she was admired,")
+			_show_tiara_reward_stage_text("This was Pina's tiara, a sign that she was treated like a princess.")
 		3:
 			_tiara_reward_stage = 4
-			_show_tiara_reward_stage_text("but she was not taught to help herself.")
+			_show_tiara_reward_stage_text("She was loved and admired, but she still needed to learn to help herself.")
 		4:
 			_tiara_reward_stage = 5
-			_show_tiara_reward_stage_text("This clue reveals how Pina lived inside the house.")
+			_show_tiara_reward_stage_text("The tiara remembers the life Pina had before she disappeared.")
 		5:
 			_tiara_reward_stage = 6
 			_tiara_waiting_continue = false
@@ -2330,8 +2662,12 @@ func _on_tiara_tap_catcher_pressed() -> void:
 				cinematic_reward_text.text = ""
 
 			if cinematic_collect_button:
-				cinematic_collect_button.visible = _is_local_sidekick()
-				cinematic_collect_button.disabled = not _is_local_sidekick()
+				cinematic_collect_button.text = "Collect Clue"
+				# Only the Sidekick can collect the artifact in multiplayer.
+				# In single-player/debug with no peer, allow collection so you can test quickly.
+				var can_collect := _is_local_sidekick() or not multiplayer.has_multiplayer_peer()
+				cinematic_collect_button.visible = can_collect
+				cinematic_collect_button.disabled = not can_collect
 				
 func _on_tiara_collect_pressed() -> void:
 	if _tiara_collect_sequence_started:
@@ -2344,9 +2680,9 @@ func _on_tiara_collect_pressed() -> void:
 		cinematic_collect_button.disabled = true
 
 	if multiplayer.has_multiplayer_peer():
-		rpc_show_tiara_briefcase_reveal_then_finalize.rpc()
+		rpc_finalize_tiara_clue.rpc()
 	else:
-		rpc_show_tiara_briefcase_reveal_then_finalize()
+		rpc_finalize_tiara_clue()
 		
 func _hide_tiara_reward_visuals_for_briefcase() -> void:
 	_tiara_sparkle_animating = false
@@ -2404,13 +2740,18 @@ func rpc_show_tiara_briefcase_reveal_then_finalize() -> void:
 		
 @rpc("any_peer", "reliable", "call_local")
 func rpc_finalize_tiara_clue() -> void:
-	# grant the tiara clue
+	# grant the tiara item and mark the whole abandoned house zone as solved
 	if GameState and GameState.has_method("grant_zone_items"):
 		GameState.grant_zone_items(ZONE_ID, TIARA_REWARD_ITEMS)
 
-	# mark the whole abandoned house zone as solved
+	if GameState and GameState.has_method("has_clue") and GameState.has_method("collect_clue"):
+		if not GameState.has_clue(ZONE_ID):
+			GameState.collect_clue(ZONE_ID)
+
 	if GameState and GameState.has_method("set_puzzle_solved"):
 		GameState.set_puzzle_solved(ZONE_ID, true)
+
+	_refresh_inventory_board()
 
 	_tiara_reward_active = false
 	_tiara_waiting_continue = false
