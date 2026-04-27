@@ -1,28 +1,60 @@
-[gd_scene load_steps=48 format=3 uid="uid://bandonedhouse"]
+[gd_scene load_steps=81 format=3 uid="uid://bandonedhouse"]
 
 [ext_resource type="Script" uid="uid://ftv8j2b15oka" path="res://scripts/world/zones/abandonedHouse/abandoned_house.gd" id="1_abandonedhouse"]
+[ext_resource type="Texture2D" uid="uid://cyyv53bejmfyj" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key-2.png" id="2_xh6nx"]
+[ext_resource type="Texture2D" uid="uid://ddpsrg1yqwx22" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Lighter.png" id="3_26k5c"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="3_fnsr3"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
-[ext_resource type="Texture2D" uid="uid://cgtl3fi4ldvqd" path="res://assets/sprites/players/detective/detective.png" id="4_w3m7o"]
+[ext_resource type="Texture2D" uid="uid://bwccumnrc00pr" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-1.png" id="4_ig5qe"]
+[ext_resource type="Texture2D" uid="uid://cgtl3fi4ldvqd" path="res://assets/sprites/players/Detective/detective.png" id="4_w3m7o"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="5_54qax"]
-[ext_resource type="Texture2D" uid="uid://bppb0lkeirtvl" path="res://assets/sprites/players/detective/sidekick.png" id="5_tdxjt"]
+[ext_resource type="Texture2D" uid="uid://cxoud0qppj31f" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-2.png" id="5_60uqn"]
+[ext_resource type="Texture2D" uid="uid://bppb0lkeirtvl" path="res://assets/sprites/players/Detective/sidekick.png" id="5_tdxjt"]
+[ext_resource type="Texture2D" uid="uid://dpuo3g1804rtj" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-3.png" id="6_fnmj2"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="6_pocdh"]
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="7_ctgii"]
+[ext_resource type="Texture2D" uid="uid://dlqjo7cag3o4b" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-4.png" id="7_y3lts"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="8_cvcyb"]
+[ext_resource type="Texture2D" uid="uid://6m1iqxkimf78" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-1.png" id="9_ycnxk"]
+[ext_resource type="Texture2D" uid="uid://cfw80tqeia5bl" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-2.png" id="10_emdfy"]
+[ext_resource type="Texture2D" uid="uid://beapwr3xemxnh" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-3.png" id="11_cwboi"]
+[ext_resource type="Texture2D" uid="uid://br84avkbblw6y" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-4.png" id="12_th4ef"]
+[ext_resource type="Texture2D" uid="uid://0d84bdd88kfv" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-5.png" id="13_02vin"]
+[ext_resource type="Texture2D" uid="uid://c84gh5aa58ihx" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card-6.png" id="14_bnp2u"]
 [ext_resource type="Texture2D" uid="uid://ym75irc4dtcy" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key-1.png" id="14_wp1ru"]
 [ext_resource type="Texture2D" uid="uid://b41p3mhe6dips" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/card.png" id="15_qwlxc"]
+[ext_resource type="Texture2D" uid="uid://cy4guue1pjaf7" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key.png" id="17_dcipd"]
+[ext_resource type="Texture2D" uid="uid://brd17cn6m77du" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/LightedNoFP.png" id="19_yfyxj"]
+[ext_resource type="Texture2D" uid="uid://degoflxfd7bdw" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/LightedWithFP.png" id="20_88iju"]
 [ext_resource type="Texture2D" uid="uid://dijf4b80h348s" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/drawer.png" id="20_xk67h"]
+[ext_resource type="Texture2D" uid="uid://q7i5a6xreg50" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/LightedRoom.png" id="21_72erc"]
 [ext_resource type="Texture2D" uid="uid://b8ax73bis06aa" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock.png" id="22_4qfmh"]
+[ext_resource type="Texture2D" uid="uid://k5wjdcp4wtoh" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/openDrawer.png" id="23_h4qiv"]
 [ext_resource type="Texture2D" uid="uid://dge111yp5pl1p" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/NotLighted.png" id="24_tdxjt"]
+[ext_resource type="Texture2D" uid="uid://cq6xkjlyyjaad" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-0.png" id="25_ob0hd"]
+[ext_resource type="Texture2D" uid="uid://c1sta5ejherla" path="res://assets/sprites/inventory/inventoryBoard.png" id="25_th3vv"]
+[ext_resource type="Texture2D" uid="uid://bbpfxdeqmsaee" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-1.png" id="26_1llwd"]
+[ext_resource type="Texture2D" uid="uid://dq3y7iuv8qqdn" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-2.png" id="27_catq1"]
+[ext_resource type="Texture2D" uid="uid://8rdt6i74pdjm" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-3.png" id="28_g67l2"]
+[ext_resource type="Texture2D" uid="uid://06vpn4oxfkku" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-4.png" id="29_jihqn"]
+[ext_resource type="Texture2D" uid="uid://cqlkdg4x5juic" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-5.png" id="30_5agy1"]
+[ext_resource type="Texture2D" uid="uid://bsp743owfiqyb" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-6.png" id="31_usnry"]
+[ext_resource type="Texture2D" uid="uid://b4n0jejrrwavg" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-7.png" id="32_jo51t"]
 [ext_resource type="Texture2D" uid="uid://6pufhlohb4lw" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/closeCabinet.png" id="33_c5hd3"]
+[ext_resource type="Texture2D" uid="uid://cf7hbudmlovmc" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-8.png" id="33_guf3g"]
+[ext_resource type="Texture2D" uid="uid://crc54hjbsog7g" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/lock-9.png" id="34_w6w7p"]
+[ext_resource type="Texture2D" uid="uid://d31y5d40mxvea" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/openedCabinet.png" id="36_etv6w"]
+[ext_resource type="Texture2D" uid="uid://hgococp5rux5" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/finalboxClose.png" id="37_0rkmf"]
 [ext_resource type="Texture2D" uid="uid://ujja3u0qopw2" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/defaultProgress.png" id="38_8h2lu"]
+[ext_resource type="Texture2D" uid="uid://bqq2mplpu2rrg" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/finalboxOpen.png" id="38_x5fcx"]
+[ext_resource type="Texture2D" uid="uid://bp3dqrgc2d337" path="res://assets/sprites/clues/tiaraClue.png" id="39_lnpua"]
 [ext_resource type="Texture2D" uid="uid://hjocro1muuep" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/poster.png" id="40_1s7m6"]
 [ext_resource type="Texture2D" uid="uid://mn5xegdioqrn" path="res://assets/sprites/zoneObjects/notification.png" id="42_5rk6e"]
 [ext_resource type="Texture2D" uid="uid://bsqdoe81d60lw" path="res://assets/sprites/places/abandonedHouseBackground.png" id="43_8h2lu"]
 [ext_resource type="Texture2D" uid="uid://dwymeh76j8r8p" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/glowHint.png" id="44_5rk6e"]
 [ext_resource type="Texture2D" uid="uid://bn3lo7ofeh8ui" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key-3.png" id="45_sofx5"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="47_1767a"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="48_fs4kb"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="48_fs4kb"]
 [ext_resource type="Texture2D" uid="uid://baylpfjefdeqo" path="res://assets/buttons/backWordButton.png" id="52_8h2lu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wp1ru"]
@@ -175,8 +207,41 @@ shadow_offset = Vector2(0, 3.41)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nfu2f"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ogtg4"]
+size = Vector2(92, 62.5)
+
 [node name="AbandonedHouse" type="Node2D"]
 script = ExtResource("1_abandonedhouse")
+key_fragment_2_texture = ExtResource("2_xh6nx")
+lighter_texture = ExtResource("3_26k5c")
+book_1_texture = ExtResource("4_ig5qe")
+book_2_texture = ExtResource("5_60uqn")
+book_3_texture = ExtResource("6_fnmj2")
+book_4_texture = ExtResource("7_y3lts")
+memory_card_back_texture = ExtResource("15_qwlxc")
+memory_card_1_texture = ExtResource("9_ycnxk")
+memory_card_2_texture = ExtResource("10_emdfy")
+memory_card_3_texture = ExtResource("11_cwboi")
+memory_card_4_texture = ExtResource("12_th4ef")
+memory_card_5_texture = ExtResource("13_02vin")
+memory_card_6_texture = ExtResource("14_bnp2u")
+key_fragment_1_texture = ExtResource("14_wp1ru")
+card_piece_texture = ExtResource("15_qwlxc")
+key_fragment_3_texture = ExtResource("45_sofx5")
+assembled_key_texture = ExtResource("17_dcipd")
+mirror_not_lighted_texture = ExtResource("24_tdxjt")
+mirror_lighted_with_fp_texture = ExtResource("19_yfyxj")
+mirror_lighted_no_fp_texture = ExtResource("20_88iju")
+lighted_room_texture = ExtResource("21_72erc")
+drawer_closed_texture = ExtResource("20_xk67h")
+drawer_open_texture = ExtResource("23_h4qiv")
+drawer_lock_zoom_texture = ExtResource("22_4qfmh")
+lock_digit_textures = Array[Texture2D]([ExtResource("25_ob0hd"), ExtResource("26_1llwd"), ExtResource("27_catq1"), ExtResource("28_g67l2"), ExtResource("29_jihqn"), ExtResource("30_5agy1"), ExtResource("31_usnry"), ExtResource("32_jo51t"), ExtResource("33_guf3g"), ExtResource("34_w6w7p")])
+cabinet_closed_texture = ExtResource("33_c5hd3")
+cabinet_opened_texture = ExtResource("36_etv6w")
+final_box_closed_texture = ExtResource("37_0rkmf")
+final_box_opened_texture = ExtResource("38_x5fcx")
+tiara_clue_texture = ExtResource("39_lnpua")
 
 [node name="Notification" type="CanvasLayer" parent="."]
 layer = 200
@@ -203,6 +268,7 @@ scale = Vector2(1.0704942, 0.984375)
 texture = ExtResource("43_8h2lu")
 
 [node name="Players" type="Node2D" parent="."]
+visible = false
 
 [node name="Detective" type="Sprite2D" parent="Players"]
 position = Vector2(99, 603)
@@ -1251,3 +1317,36 @@ expand_mode = 1
 position = Vector2(237.99998, 53)
 scale = Vector2(0.26158854, 0.2900463)
 texture = ExtResource("38_8h2lu")
+
+[node name="InventoryBoard" type="Node2D" parent="."]
+
+[node name="Board" type="Sprite2D" parent="InventoryBoard"]
+position = Vector2(678, 574)
+scale = Vector2(0.40807292, 0.2947619)
+texture = ExtResource("25_th3vv")
+
+[node name="Area2D" type="Area2D" parent="InventoryBoard"]
+
+[node name="Item1" type="CollisionShape2D" parent="InventoryBoard/Area2D"]
+position = Vector2(412, 578.5)
+shape = SubResource("RectangleShape2D_ogtg4")
+
+[node name="Item2" type="CollisionShape2D" parent="InventoryBoard/Area2D"]
+position = Vector2(520, 579.25)
+shape = SubResource("RectangleShape2D_ogtg4")
+
+[node name="Item3" type="CollisionShape2D" parent="InventoryBoard/Area2D"]
+position = Vector2(625, 579)
+shape = SubResource("RectangleShape2D_ogtg4")
+
+[node name="Item4" type="CollisionShape2D" parent="InventoryBoard/Area2D"]
+position = Vector2(733, 579)
+shape = SubResource("RectangleShape2D_ogtg4")
+
+[node name="Item5" type="CollisionShape2D" parent="InventoryBoard/Area2D"]
+position = Vector2(839, 579)
+shape = SubResource("RectangleShape2D_ogtg4")
+
+[node name="Item6" type="CollisionShape2D" parent="InventoryBoard/Area2D"]
+position = Vector2(944, 579)
+shape = SubResource("RectangleShape2D_ogtg4")
