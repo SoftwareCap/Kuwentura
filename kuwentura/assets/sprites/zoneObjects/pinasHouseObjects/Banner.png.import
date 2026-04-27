@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d2b4d66dls22f"
-path.bptc="res://.godot/imported/Banner.png-180ddcd1f79f18733ccf26f94c0958c1.bptc.ctex"
-path.astc="res://.godot/imported/Banner.png-180ddcd1f79f18733ccf26f94c0958c1.astc.ctex"
+path.bptc="res://.godot/imported/banner.png-48b426d19dfeeafd1a2bfca2e8ebffee.bptc.ctex"
+path.astc="res://.godot/imported/banner.png-48b426d19dfeeafd1a2bfca2e8ebffee.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/Banner.png"
-dest_files=["res://.godot/imported/Banner.png-180ddcd1f79f18733ccf26f94c0958c1.bptc.ctex", "res://.godot/imported/Banner.png-180ddcd1f79f18733ccf26f94c0958c1.astc.ctex"]
+source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/banner.png"
+dest_files=["res://.godot/imported/banner.png-48b426d19dfeeafd1a2bfca2e8ebffee.bptc.ctex", "res://.godot/imported/banner.png-48b426d19dfeeafd1a2bfca2e8ebffee.astc.ctex"]
 
 [params]
 

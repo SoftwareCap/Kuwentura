@@ -897,6 +897,9 @@ func _on_zone_body_entered(body: Node2D, zone_name: String) -> void:
 		return
 	if not ZONE_THOUGHTS.has(zone_name):
 		return
+	if GameState.has_clue(zone_name):
+		_show_zone_completed_thought(zone_name)
+		return
 	_show_zone_thought(zone_name)
 
 
@@ -997,6 +1000,23 @@ func _show_zone_thought(zone_name: String) -> void:
 	var is_detective := (NetworkManager.get_my_role() == "detective")
 	var line: Array = ZONE_THOUGHTS[zone_name][is_detective]
 	await _say_auto(line[0], line[1], ZONE_THOUGHT_HOLD)
+	_clear_dialogue()
+
+
+const ZONE_DISPLAY_NAMES: Dictionary = {
+	"pinas_house": "Pina's House",
+	"old_well": "Old Well",
+	"backyard_path": "Backyard Path",
+	"storage_hut": "Storage Hut",
+	"abandoned_house": "Abandoned House",
+}
+
+func _show_zone_completed_thought(zone_name: String) -> void:
+	var is_detective := (NetworkManager.get_my_role() == "detective")
+	var speaker: String = "Detective" if is_detective else "Sidekick"
+	var display_name: String = ZONE_DISPLAY_NAMES.get(zone_name, zone_name)
+	var line: String = "We already retrieved the artifact from %s. Let's move on!" % display_name
+	await _say_auto(speaker, line, ZONE_THOUGHT_HOLD)
 	_clear_dialogue()
 
 
