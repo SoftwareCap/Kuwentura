@@ -188,9 +188,28 @@ const BOOKS_PUZZLE_ID := "abandoned_house_books_solved"
 
 @onready var progress_tracker_sprite: Sprite2D = $ProgressTracker/TiaraTracker
 
+
+@onready var quest_layer: Node2D = get_node_or_null("Quest")
+@onready var quest_title_label: Label = get_node_or_null("Quest/QuestTitle")
+@onready var quest_books_label: Label = get_node_or_null("Quest/BooksPuzzle")
+@onready var quest_memory_label: Label = get_node_or_null("Quest/MemoryPuzzle")
+@onready var quest_mirror_label: Label = get_node_or_null("Quest/MirrorPuzzle")
+@onready var quest_drawer_label: Label = get_node_or_null("Quest/DrawerLockPuzzle")
+@onready var quest_cabinet_label: Label = get_node_or_null("Quest/CabinetPuzzle")
+@onready var quest_treasure_label: Label = get_node_or_null("Quest/TreasureboxPuzzle")
+
+
 const TIARA_SPARKLE_MIN_SCALE := 0.45
 const TIARA_SPARKLE_MAX_SCALE := 0.55
 const TIARA_SPARKLE_PULSE_SPEED := 4.0
+const QUEST_PANEL_POS := Vector2(30, 245)
+const QUEST_PANEL_WIDTH := 390.0
+const QUEST_HEADER_HEIGHT := 34.0
+const QUEST_ROW_HEIGHT := 33.0
+const QUEST_ROW_GAP := 5.0
+const QUEST_TEXT_LEFT_PADDING := 12.0
+const QUEST_DONE_ALPHA := 0.45
+
 
 @onready var cinematic_reward_layer: CanvasLayer = get_node_or_null("RewardLayer")
 @onready var cinematic_dark_overlay: ColorRect = get_node_or_null("RewardLayer/DarkOverlay")
@@ -272,6 +291,126 @@ var _memory_busy: bool = false
 var _memory_unlocked: bool = false
 var _memory_solved: bool = false
 
+var _quest_style_ready: bool = false
+var _quest_labels: Array = []
+
+
+func _setup_quest_panel_style() -> void:
+	if not is_instance_valid(quest_layer):
+		return
+
+	var labels := [
+		quest_books_label,
+		quest_memory_label,
+		quest_mirror_label,
+		quest_drawer_label,
+		quest_cabinet_label,
+		quest_treasure_label
+	]
+
+	_quest_labels.clear()
+
+	var header_bar := quest_layer.get_node_or_null("QuestHeaderBar") as ColorRect
+	if not is_instance_valid(header_bar):
+		header_bar = ColorRect.new()
+		header_bar.name = "QuestHeaderBar"
+		quest_layer.add_child(header_bar)
+		quest_layer.move_child(header_bar, 0)
+
+	header_bar.position = QUEST_PANEL_POS
+	header_bar.size = Vector2(QUEST_PANEL_WIDTH, QUEST_HEADER_HEIGHT)
+	header_bar.color = Color(0.34, 0.17, 0.05, 0.95)
+	header_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	header_bar.z_index = 0
+
+	if is_instance_valid(quest_title_label):
+		quest_title_label.text = "ABANDONED HOUSE QUEST"
+		quest_title_label.position = QUEST_PANEL_POS + Vector2(10, 0)
+		quest_title_label.size = Vector2(QUEST_PANEL_WIDTH - 20.0, QUEST_HEADER_HEIGHT)
+		quest_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		quest_title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		quest_title_label.add_theme_font_size_override("font_size", 15)
+		quest_title_label.add_theme_color_override("font_color", Color.WHITE)
+		quest_title_label.add_theme_constant_override("outline_size", 2)
+		quest_title_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+		quest_title_label.z_index = 3
+
+	for i in range(labels.size()):
+		var label := labels[i] as Label
+		if not is_instance_valid(label):
+			continue
+
+		var row_pos := QUEST_PANEL_POS + Vector2(
+			0,
+			QUEST_HEADER_HEIGHT + 8.0 + float(i) * (QUEST_ROW_HEIGHT + QUEST_ROW_GAP)
+		)
+
+		var bg_name := "QuestRowBG" + str(i + 1)
+		var row_bg := quest_layer.get_node_or_null(bg_name) as ColorRect
+		if not is_instance_valid(row_bg):
+			row_bg = ColorRect.new()
+			row_bg.name = bg_name
+			quest_layer.add_child(row_bg)
+			quest_layer.move_child(row_bg, 0)
+
+		row_bg.position = row_pos
+		row_bg.size = Vector2(QUEST_PANEL_WIDTH, QUEST_ROW_HEIGHT)
+		row_bg.color = Color(0.10, 0.05, 0.02, 0.72)
+		row_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row_bg.z_index = 0
+
+		label.position = row_pos + Vector2(QUEST_TEXT_LEFT_PADDING, 0)
+		label.size = Vector2(QUEST_PANEL_WIDTH - (QUEST_TEXT_LEFT_PADDING * 2.0), QUEST_ROW_HEIGHT)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.clip_text = false
+		label.add_theme_font_size_override("font_size", 13)
+		label.add_theme_color_override("font_color", Color.WHITE)
+		label.add_theme_constant_override("outline_size", 2)
+		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+		label.z_index = 2
+
+		_quest_labels.append(label)
+
+	_quest_style_ready = true
+
+
+func _set_quest_task(index: int, text: String, done: bool) -> void:
+	if index < 0 or index >= _quest_labels.size():
+		return
+
+	var label := _quest_labels[index] as Label
+	if not is_instance_valid(label):
+		return
+
+	label.text = text
+	label.modulate = Color(1, 1, 1, QUEST_DONE_ALPHA) if done else Color.WHITE
+
+
+func _is_game_state_puzzle_solved(puzzle_id: String) -> bool:
+	return GameState and GameState.has_method("is_puzzle_solved") and GameState.is_puzzle_solved(puzzle_id)
+
+
+func _update_quest_labels() -> void:
+	if not _quest_style_ready:
+		_setup_quest_panel_style()
+
+	var books_done := _books_solved or _is_game_state_puzzle_solved(SUB_PUZZLE_ID) or _is_game_state_puzzle_solved(BOOKS_PUZZLE_ID)
+	var memory_done := _memory_solved or _is_game_state_puzzle_solved(MEMORY_PUZZLE_ID)
+	var mirror_done := _mirror_lit or _is_game_state_puzzle_solved(MIRROR_PUZZLE_ID)
+	var drawer_done := _drawer_unlocked or _is_game_state_puzzle_solved(DRAWER_PUZZLE_ID)
+	var cabinet_done := _cabinet_opened or _is_game_state_puzzle_solved(CABINET_PUZZLE_ID)
+	var treasure_done := _final_box_opened or _is_game_state_puzzle_solved(FINAL_BOX_PUZZLE_ID) or (GameState and GameState.has_method("has_clue") and GameState.has_clue(ZONE_ID))
+
+	_set_quest_task(0, "Arrange the books", books_done)
+	_set_quest_task(1, "Complete the memory cards", memory_done)
+	_set_quest_task(2, "Light the mirror", mirror_done)
+	_set_quest_task(3, "Unlock the drawer", drawer_done)
+	_set_quest_task(4, "Open the cabinet", cabinet_done)
+	_set_quest_task(5, "Open the treasure box", treasure_done)
+
+
 func _ready() -> void:
 	_book_textures = {
 		"book_1": book_1_texture,
@@ -319,6 +458,8 @@ func _ready() -> void:
 	
 	_setup_progress_tracker()
 	_refresh_progress_tracker()
+	_setup_quest_panel_style()
+	_update_quest_labels()
 	_setup_inventory_board()
 	
 	await get_tree().process_frame
@@ -337,6 +478,9 @@ func _ready() -> void:
 		books_hint_marker.visible = false
 
 func _setup_ui() -> void:
+	if is_instance_valid(quest_layer):
+		quest_layer.visible = false
+
 	if has_node("TestLabel"):
 		$TestLabel.visible = false
 
@@ -855,6 +999,7 @@ func _apply_books_puzzle_solved() -> void:
 	# We only grant them after the sidekick presses Collect Clue.
 
 	_close_books_panel()
+	_update_quest_labels()
 	_show_books_reward_panel()
 
 
@@ -1368,6 +1513,7 @@ func _apply_memory_puzzle_solved() -> void:
 
 	memory_instruction_label.text = "All pairs matched. Puzzle solved!"
 	_close_memory_panel()
+	_update_quest_labels()
 	_show_memory_reward_panel()
 	_show_notification("Card puzzle solved.")
 
@@ -1555,6 +1701,7 @@ func _apply_mirror_lit() -> void:
 
 	_refresh_room_lighting()
 	_refresh_mirror_panel_state()
+	_update_quest_labels()
 	_show_notification("The lamp is lit.")
 
 
@@ -1833,6 +1980,7 @@ func _apply_drawer_unlocked() -> void:
 	_refresh_drawer_panel_state()
 	_refresh_drawer_lock_panel_state()
 	_refresh_progress_tracker()
+	_update_quest_labels()
 
 	_show_notification("The drawer unlocked.")
 
@@ -2015,6 +2163,7 @@ func _apply_cabinet_opened() -> void:
 
 	_refresh_progress_tracker()
 	_refresh_cabinet_panel_state()
+	_update_quest_labels()
 	_show_notification("The cabinet opened.")
 
 func _hide_drawer_ui() -> void:
@@ -2204,6 +2353,7 @@ func _apply_final_box_opened() -> void:
 
 	_refresh_progress_tracker()
 	_refresh_final_box_panel_state()
+	_update_quest_labels()
 	_show_notification("The box opened.")
 
 	# Artifact flow: after the math puzzle is solved, show the cinematic tiara reward sequence.
@@ -2751,6 +2901,7 @@ func rpc_finalize_tiara_clue() -> void:
 	if GameState and GameState.has_method("set_puzzle_solved"):
 		GameState.set_puzzle_solved(ZONE_ID, true)
 
+	_update_quest_labels()
 	_refresh_inventory_board()
 
 	_tiara_reward_active = false
@@ -2892,6 +3043,9 @@ func _run_intro_sequence() -> void:
 	DialogueSystem.play("abandoned_house_intro", _get_abandoned_house_intro_dialogue())
 	await DialogueSystem.wait_finished("abandoned_house_intro")
 	_set_dialogue_input_lock(false)
+	if is_instance_valid(quest_layer):
+		quest_layer.visible = true
+	_update_quest_labels()
 	_show_books_hint()
 
 func _show_books_hint() -> void:
