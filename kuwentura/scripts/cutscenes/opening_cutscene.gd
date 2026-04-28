@@ -7,6 +7,8 @@ extends Node
 # Scene 1
 @onready var grandma : AnimatedSprite2D = $Scene1/Grandma/AnimatedSprite2D
 @onready var grandma_node : Node = $Scene1/Grandma
+@onready var detective_idle1 : AnimatedSprite2D = $Scene1/DetectiveIdle
+@onready var sidekick_idle1  : AnimatedSprite2D = $Scene1/SidekickIdle
 @onready var scene1_background : Node = $Scene1/Background
 @onready var book_scene : Node = $Scene1/BookScene
 @onready var words_fading : AnimatedSprite2D = $Scene1/BookScene/WordsFading
@@ -22,6 +24,8 @@ extends Node
 @onready var wind_anim : AnimatedSprite2D = $Scene2/WindAnimation
 @onready var dialogue_label2 : Label = $Scene2/Scene2_DialogueLabel
 @onready var name_label2 : Label = $Scene2/Scene2_NameLabel
+@onready var detective_idle2 : AnimatedSprite2D = $Scene2/DetectiveIdle
+@onready var sidekick_idle2  : AnimatedSprite2D = $Scene2/SidekickIdle
 
 # Scene 3
 @onready var scene3 : Node = $Scene3
@@ -117,6 +121,8 @@ func _run_cutscene() -> void:
 func _scene1() -> void:
 	# Grandma reads — BookScene still hidden
 	_play_anim(grandma, "sitting_idle")
+	_play_anim(detective_idle1, "default")
+	_play_anim(sidekick_idle1,  "default")
 	await _say1("Grandmother", "Long ago, in a quiet village, there lived a girl named Pina…")
 	await _say1_auto("Grandmother", "She was known for—", 1.0)
 
@@ -148,6 +154,8 @@ func _transition_to_scene2() -> void:
 	grandma_node.visible  = false
 	book_flipping.visible = false
 	book_scene.visible = false
+	detective_idle1.visible = false
+	sidekick_idle1.visible  = false
 
 	# Show scene2 immediately on top of scene1 background — no fade
 	scene2.visible = true
@@ -162,6 +170,8 @@ func _transition_to_scene2() -> void:
 func _scene2() -> void:
 	# GrandmaFlipping plays over scene1 background (still visible)
 	_play_anim(grandma_flip, "sitting_flipping")
+	_play_anim(detective_idle2, "default")
+	_play_anim(sidekick_idle2,  "default")
 	await _say2_auto("Grandmother", "What is happening to this book?", 1.2)
 	await _say2_auto("Grandmother", "The story is fading.", 1.2)
 
