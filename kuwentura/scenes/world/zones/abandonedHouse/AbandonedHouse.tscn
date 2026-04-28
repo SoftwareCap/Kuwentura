@@ -64,7 +64,7 @@ size = Vector2(168.5, 86)
 size = Vector2(152, 201)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bi0md"]
-size = Vector2(146, 112)
+size = Vector2(103, 92)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dfcwo"]
 size = Vector2(196, 37)
@@ -245,6 +245,7 @@ tiara_clue_texture = ExtResource("39_lnpua")
 
 [node name="Notification" type="CanvasLayer" parent="."]
 layer = 200
+visible = false
 
 [node name="Sprite2D" type="Sprite2D" parent="Notification"]
 position = Vector2(693, 66.00001)
@@ -303,12 +304,12 @@ shape = SubResource("RectangleShape2D_qwlxc")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractiveLayer/PuzzleArea"]
 z_index = 1
-position = Vector2(192, 295)
+position = Vector2(770.5, 286)
 shape = SubResource("RectangleShape2D_bi0md")
 
 [node name="HintMarker" type="Sprite2D" parent="InteractiveLayer/PuzzleArea"]
-position = Vector2(191, 294)
-scale = Vector2(0.11493055, 0.11414649)
+position = Vector2(771, 288)
+scale = Vector2(0.07690974, 0.092958435)
 texture = ExtResource("40_1s7m6")
 
 [node name="DrawerArea" type="Area2D" parent="InteractiveLayer"]
@@ -549,6 +550,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="PuzzleCanvasLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Dimmer" type="ColorRect" parent="PuzzleCanvasLayer"]
 anchors_preset = 15
@@ -1350,3 +1352,47 @@ shape = SubResource("RectangleShape2D_ogtg4")
 [node name="Item6" type="CollisionShape2D" parent="InventoryBoard/Area2D"]
 position = Vector2(944, 579)
 shape = SubResource("RectangleShape2D_ogtg4")
+
+[node name="Quest" type="Node2D" parent="."]
+
+[node name="BooksPuzzle" type="Label" parent="Quest"]
+offset_left = 51.0
+offset_top = 332.0
+offset_right = 373.0
+offset_bottom = 370.0
+
+[node name="MemoryPuzzle" type="Label" parent="Quest"]
+offset_left = 53.0
+offset_top = 368.0
+offset_right = 352.0
+offset_bottom = 402.0
+
+[node name="MirrorPuzzle" type="Label" parent="Quest"]
+offset_left = 54.0
+offset_top = 401.0
+offset_right = 182.0
+offset_bottom = 424.0
+
+[node name="DrawerLockPuzzle" type="Label" parent="Quest"]
+offset_left = 55.0
+offset_top = 434.0
+offset_right = 290.0
+offset_bottom = 466.0
+
+[node name="CabinetPuzzle" type="Label" parent="Quest"]
+offset_left = 53.0
+offset_top = 466.0
+offset_right = 304.0
+offset_bottom = 505.0
+
+[node name="TreasureboxPuzzle" type="Label" parent="Quest"]
+offset_left = 58.0
+offset_top = 503.0
+offset_right = 451.0
+offset_bottom = 526.0
+
+[node name="QuestTitle" type="Label" parent="Quest"]
+offset_left = 51.0
+offset_top = 296.0
+offset_right = 281.0
+offset_bottom = 319.0

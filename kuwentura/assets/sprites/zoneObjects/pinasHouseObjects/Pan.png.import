@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://3boff2bjwjx5"
-path.bptc="res://.godot/imported/pan.png-4a0a892846eac0110b471074aba82f2e.bptc.ctex"
-path.astc="res://.godot/imported/pan.png-4a0a892846eac0110b471074aba82f2e.astc.ctex"
+path.bptc="res://.godot/imported/Pan.png-d787199b4e42b3e8c0214183f72ce75b.bptc.ctex"
+path.astc="res://.godot/imported/Pan.png-d787199b4e42b3e8c0214183f72ce75b.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/pan.png"
-dest_files=["res://.godot/imported/pan.png-4a0a892846eac0110b471074aba82f2e.bptc.ctex", "res://.godot/imported/pan.png-4a0a892846eac0110b471074aba82f2e.astc.ctex"]
+source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/Pan.png"
+dest_files=["res://.godot/imported/Pan.png-d787199b4e42b3e8c0214183f72ce75b.bptc.ctex", "res://.godot/imported/Pan.png-d787199b4e42b3e8c0214183f72ce75b.astc.ctex"]
 
 [params]
 

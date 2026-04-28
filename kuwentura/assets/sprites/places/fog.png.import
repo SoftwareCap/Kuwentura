@@ -2,23 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dsd82w7fiyep8"
-path.bptc="res://.godot/imported/10.png-a98a0517a98b345d6f371527eb2181a9.bptc.ctex"
-path.astc="res://.godot/imported/10.png-a98a0517a98b345d6f371527eb2181a9.astc.ctex"
+uid="uid://wwlwrsk4makl"
+path="res://.godot/imported/fog.png-ef4f2821472fecc1ec299e50fc5c5c07.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightGoingOut/10.png"
-dest_files=["res://.godot/imported/10.png-a98a0517a98b345d6f371527eb2181a9.bptc.ctex", "res://.godot/imported/10.png-a98a0517a98b345d6f371527eb2181a9.astc.ctex"]
+source_file="res://assets/sprites/places/fog.png"
+dest_files=["res://.godot/imported/fog.png-ef4f2821472fecc1ec299e50fc5c5c07.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

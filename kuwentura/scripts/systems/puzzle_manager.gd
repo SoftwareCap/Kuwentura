@@ -161,7 +161,6 @@ const PUZZLE_DATA = {
 			"failure": "Fog becomes heavy cloud covering entire backyard"
 		}
 	},
-	
 	"old_well": {
 		"type": "coordinates",
 		"name": "Old Well",
@@ -477,9 +476,16 @@ func get_puzzle_for_zone(zone_id: String) -> Dictionary:
 		"variation_id": int(selected.get("id", 1)),
 		"selected_variation": selected.duplicate(true),
 
-		"spirit_height_cm": int(selected.get("spirit_height_cm", 0)),
-		"plant_height_dali": int(selected.get("plant_height_dali", 0)),
+		"spirit_height_cm": int(selected.get("spirit_height_cm", selected.get("solution", 0))),
+		"plant_height_dali": int(selected.get("plant_height_dali", selected.get("memory_distance_dali", 0))),
 		"solution": int(selected.get("solution", 0)),
+
+		"encoded_name": str(selected.get("encoded_name", "S L Q D")),
+		"decoded_name": str(selected.get("decoded_name", "PINA")),
+		"shift_steps": int(selected.get("shift_steps", 3)),
+		"memory_distance_dali": int(selected.get("memory_distance_dali", 60)),
+		"dali_to_cm": int(selected.get("dali_to_cm", 2)),
+		"grass_sequence": selected.get("grass_sequence", []),
 
 		"difficulty": difficulty,
 		"title": selected.get("title", "Hidden Number Note"),

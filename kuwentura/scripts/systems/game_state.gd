@@ -55,8 +55,8 @@ var collected_clues: Dictionary = {
 	},
 	"backyard_path": {
 		"collected": false,
-		"item": "Pineapple_Sapling",
-		"text": "Pina didn't run away; she became the garden.",
+		"item": "Pineapple",
+		"text": "After a few days, Aling Rosa saw a strange fruit in their yard. It had many eyes, and she felt that it was Pinang.",
 		"zone_name": "Backyard Path",
 	},
 	"old_well": {
