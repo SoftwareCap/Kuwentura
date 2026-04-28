@@ -1,11 +1,10 @@
-[gd_scene load_steps=32 format=3 uid="uid://backyardpath"]
+[gd_scene load_steps=45 format=3 uid="uid://backyardpath"]
 
 [ext_resource type="Script" uid="uid://dfs4agyqe4qk4" path="res://scripts/world/zones/backyardPath/backyard_path.gd" id="1_backyardpath"]
 [ext_resource type="Texture2D" uid="uid://p1tc8ablyx3s" path="res://assets/sprites/places/backyardBackground.png" id="2_krb5t"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 [ext_resource type="Texture2D" uid="uid://c3sfa1s0d5uam" path="res://assets/sprites/zoneObjects/backyardPathObjects/pinaGhost.png" id="5_no1tq"]
 [ext_resource type="Texture2D" uid="uid://5hqcc5yhq64a" path="res://assets/buttons/rightArrow.png" id="6_u25mc"]
-[ext_resource type="Texture2D" uid="uid://bpq0k85yh5e0p" path="res://assets/sprites/zoneObjects/backyardPathObjects/deductionboard.png" id="6_ura6l"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="9_s7hv4"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="10_4xpvc"]
 [ext_resource type="Texture2D" uid="uid://tthjtt0yqrf6" path="res://assets/sprites/zoneObjects/backyardPathObjects/pineapplePlant.png" id="10_f85bs"]
@@ -16,8 +15,16 @@
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="13_y7aiq"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="15_0c5pu"]
 [ext_resource type="Texture2D" uid="uid://cuhne1u8q0p3s" path="res://assets/sprites/clues/pineappleClue.png" id="17_s7hv4"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="17_va6t2"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="17_va6t2"]
 [ext_resource type="Texture2D" uid="uid://dvkupminll3bb" path="res://assets/sprites/tracker/backyardPath/defaultBY.png" id="18_ura6l"]
+[ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/InventoryBoard.png" id="19_ul8jb"]
+[ext_resource type="Texture2D" uid="uid://dlgforqpe1w81" path="res://assets/sprites/places/firefly.png" id="20_0c5pu"]
+[ext_resource type="Texture2D" uid="uid://dtiny4ff0gqqc" path="res://assets/sprites/places/lightedLantern.png" id="21_0vlwp"]
+[ext_resource type="Texture2D" uid="uid://wwlwrsk4makl" path="res://assets/sprites/places/fog.png" id="22_va6t2"]
+[ext_resource type="Texture2D" uid="uid://br6okt41lm7vh" path="res://assets/sprites/places/nonameNameTag.png" id="23_3ee1h"]
+[ext_resource type="Texture2D" uid="uid://dxowrwbwejr0l" path="res://assets/sprites/zoneObjects/backyardPathObjects/wnNameTag.png" id="23_ul8jb"]
+[ext_resource type="Texture2D" uid="uid://cpqyamnr583yb" path="res://assets/sprites/places/tallGrass.png" id="24_cslgv"]
+[ext_resource type="Texture2D" uid="uid://4ddhe80gqjla" path="res://assets/sprites/places/grassStone.png" id="25_sk177"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_krb5t"]
 bg_color = Color(0.360784, 0.215686, 0.180392, 1)
@@ -120,6 +127,24 @@ shadow_offset = Vector2(0, 3.41)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lieey"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_k1mle"]
+size = Vector2(347.82605, 227.93967)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6qa7e"]
+size = Vector2(363, 280.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bb53s"]
+size = Vector2(49, 30)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ul8jb"]
+size = Vector2(88, 169)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_on1j4"]
+size = Vector2(312, 122.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3lfn3"]
+size = Vector2(120, 125.75003)
+
 [node name="BackyardPath" type="Node2D"]
 script = ExtResource("1_backyardpath")
 
@@ -133,6 +158,7 @@ scale = Vector2(0.7687501, 0.66759264)
 texture = ExtResource("2_krb5t")
 
 [node name="RoleLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Control" type="Control" parent="RoleLayer"]
 layout_mode = 3
@@ -256,6 +282,7 @@ scale = Vector2(0.14697264, 0.13916017)
 texture = ExtResource("17_s7hv4")
 
 [node name="Deduction Board" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Control" type="Control" parent="Deduction Board"]
 layout_mode = 3
@@ -265,30 +292,28 @@ offset_bottom = 655.0
 mouse_filter = 2
 
 [node name="BoardSprite" type="Sprite2D" parent="Deduction Board/Control"]
-position = Vector2(1037, 408.00003)
+position = Vector2(693, 355)
 scale = Vector2(0.32031247, 0.30639648)
-texture = ExtResource("6_ura6l")
+texture = ExtResource("19_ul8jb")
 
 [node name="Pina" type="Label" parent="Deduction Board/Control"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.49762094
-anchor_top = 0.50038165
-anchor_right = 0.49762094
-anchor_bottom = 0.50038165
+anchor_left = 0.05035686
+anchor_top = 0.46068698
+anchor_right = 0.07176844
+anchor_bottom = 0.47748086
 offset_left = 471.5
-offset_top = 50.25003
+offset_top = 36.25003
 offset_right = 559.5
-offset_bottom = 78.25003
+offset_bottom = 64.25003
 grow_horizontal = 2
 grow_vertical = 2
-rotation = 0.05235988
 theme_override_colors/font_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
 theme_override_font_sizes/font_size = 28
-text = "PINA"
+text = "60 Dali ="
 horizontal_alignment = 1
 vertical_alignment = 1
-metadata/_edit_use_anchors_ = true
 
 [node name="Plant" type="Label" parent="Deduction Board/Control"]
 layout_mode = 1
@@ -297,16 +322,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 258.49994
-offset_top = 40.49997
-offset_right = 353.49994
-offset_bottom = 68.49997
+offset_left = -136.5
+offset_top = -60.5
+offset_right = 239.5
+offset_bottom = -21.5
 grow_horizontal = 2
 grow_vertical = 2
-rotation = 0.05235988
 theme_override_colors/font_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
 theme_override_font_sizes/font_size = 28
-text = "PLANT"
+text = "Convert Dali to Centimeters"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -323,11 +347,10 @@ vertical_alignment = 1
 
 [node name="XInput" type="LineEdit" parent="Deduction Board/Control"]
 layout_mode = 0
-offset_left = 1081.9999
-offset_top = 468.0
-offset_right = 1261.9999
-offset_bottom = 525.0
-rotation = 0.05235988
+offset_left = 643.0
+offset_top = 335.0
+offset_right = 823.0
+offset_bottom = 392.0
 theme_override_colors/font_color = Color(0.9650678, 0.9650869, 0.9614435, 1)
 theme_override_colors/font_selected_color = Color(0.04755766, 0.047557645, 0.047557645, 1)
 theme_override_colors/caret_color = Color(0.014275194, 0.014275219, 0.014275289, 1)
@@ -345,10 +368,10 @@ flat = true
 [node name="SubmitButton" type="Button" parent="Deduction Board/Control"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = -0.033440586
-anchor_top = -0.0122137405
-anchor_right = 0.040310405
-anchor_bottom = 0.00026389552
+anchor_left = -0.31734225
+anchor_top = -0.2091603
+anchor_right = -0.24359126
+anchor_bottom = -0.19668268
 offset_left = 967.1686
 offset_top = 563.0
 offset_right = 1090.1686
@@ -409,7 +432,6 @@ metadata/_edit_use_anchors_ = true
 [node name="SidekickLayer" type="CanvasLayer" parent="."]
 
 [node name="Ledger" type="Panel" parent="SidekickLayer"]
-visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -738,6 +760,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="RewardLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="DarkOverlay" type="ColorRect" parent="RewardLayer"]
 modulate = Color(1, 1, 1, 0)
@@ -848,6 +871,7 @@ mouse_filter = 2
 expand_mode = 1
 
 [node name="NotificationUI" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Panel" type="Panel" parent="NotificationUI"]
 anchors_preset = 5
@@ -879,10 +903,325 @@ vertical_alignment = 1
 autowrap_mode = 3
 
 [node name="ProgressTracker" type="Node2D" parent="."]
+visible = false
 
 [node name="Sprite2D" type="Sprite2D" parent="ProgressTracker"]
 position = Vector2(253, 70)
 scale = Vector2(0.28802085, 0.3236111)
 texture = ExtResource("18_ura6l")
+
+[node name="QuestLayer" type="Node2D" parent="."]
+
+[node name="QuestTitle" type="Label" parent="QuestLayer"]
+offset_left = 122.0
+offset_top = 262.0
+offset_right = 212.0
+offset_bottom = 301.0
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="QuestFirefliesLabel" type="Label" parent="QuestLayer"]
+offset_left = 53.0
+offset_top = 321.0
+offset_right = 286.0
+offset_bottom = 359.0
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="QuestLanternLabel" type="Label" parent="QuestLayer"]
+offset_left = 83.0
+offset_top = 366.0
+offset_right = 263.0
+offset_bottom = 396.0
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="QuestDecodeLabel" type="Label" parent="QuestLayer"]
+offset_left = 65.0
+offset_top = 402.0
+offset_right = 277.0
+offset_bottom = 446.0
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="QuestMemoryLabel" type="Label" parent="QuestLayer"]
+offset_left = 73.0
+offset_top = 458.0
+offset_right = 267.0
+offset_bottom = 495.0
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="QuestGrassLabel" type="Label" parent="QuestLayer"]
+offset_left = 78.0
+offset_top = 508.0
+offset_right = 261.0
+offset_bottom = 554.0
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FireflyLayer" type="Node2D" parent="."]
+
+[node name="Firefly1" type="Area2D" parent="FireflyLayer"]
+position = Vector2(459, -51)
+
+[node name="FireflySprite" type="Sprite2D" parent="FireflyLayer/Firefly1"]
+position = Vector2(172, 357)
+scale = Vector2(0.14375001, 0.18425925)
+texture = ExtResource("20_0c5pu")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FireflyLayer/Firefly1"]
+position = Vector2(171.99998, 359)
+scale = Vector2(0.14375001, 0.18425925)
+shape = SubResource("RectangleShape2D_k1mle")
+
+[node name="Firefly2" type="Area2D" parent="FireflyLayer"]
+position = Vector2(459, -51)
+
+[node name="FireflySprite" type="Sprite2D" parent="FireflyLayer/Firefly2"]
+position = Vector2(250.00002, 480.5)
+scale = Vector2(0.14375001, 0.18425925)
+texture = ExtResource("20_0c5pu")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FireflyLayer/Firefly2"]
+position = Vector2(250.00002, 482.5)
+scale = Vector2(0.14375001, 0.18425925)
+shape = SubResource("RectangleShape2D_k1mle")
+
+[node name="Firefly3" type="Area2D" parent="FireflyLayer"]
+position = Vector2(459, -51)
+
+[node name="FireflySprite" type="Sprite2D" parent="FireflyLayer/Firefly3"]
+position = Vector2(425, 423.5)
+scale = Vector2(0.14375001, 0.18425925)
+texture = ExtResource("20_0c5pu")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FireflyLayer/Firefly3"]
+position = Vector2(425, 425.5)
+scale = Vector2(0.14375001, 0.18425925)
+shape = SubResource("RectangleShape2D_k1mle")
+
+[node name="Firefly4" type="Area2D" parent="FireflyLayer"]
+position = Vector2(459, -51)
+
+[node name="FireflySprite" type="Sprite2D" parent="FireflyLayer/Firefly4"]
+position = Vector2(384, 531.5)
+scale = Vector2(0.14375001, 0.18425925)
+texture = ExtResource("20_0c5pu")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FireflyLayer/Firefly4"]
+position = Vector2(384, 533.5)
+scale = Vector2(0.14375001, 0.18425925)
+shape = SubResource("RectangleShape2D_k1mle")
+
+[node name="Firefly5" type="Area2D" parent="FireflyLayer"]
+position = Vector2(459, -51)
+
+[node name="FireflySprite" type="Sprite2D" parent="FireflyLayer/Firefly5"]
+position = Vector2(111, 503.5)
+scale = Vector2(0.14375001, 0.18425925)
+texture = ExtResource("20_0c5pu")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FireflyLayer/Firefly5"]
+position = Vector2(111, 505.5)
+scale = Vector2(0.14375001, 0.18425925)
+shape = SubResource("RectangleShape2D_k1mle")
+
+[node name="LanternLayer" type="Node2D" parent="."]
+
+[node name="NewLantern" type="Sprite2D" parent="LanternLayer"]
+visible = false
+position = Vector2(595.00006, 546)
+scale = Vector2(0.3890625, 0.3101852)
+texture = ExtResource("21_0vlwp")
+
+[node name="FogPatch" type="Area2D" parent="LanternLayer"]
+visible = false
+
+[node name="FogSprite" type="Sprite2D" parent="LanternLayer/FogPatch"]
+position = Vector2(681.00006, 377.99997)
+scale = Vector2(0.560612, 0.659375)
+texture = ExtResource("22_va6t2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LanternLayer/FogPatch"]
+position = Vector2(693.5, 363.25)
+shape = SubResource("RectangleShape2D_6qa7e")
+
+[node name="GhostLayer" type="Node2D" parent="."]
+
+[node name="PinaGhost" type="Sprite2D" parent="GhostLayer"]
+self_modulate = Color(1, 1, 1, 0.6627451)
+position = Vector2(1107, 433.00003)
+scale = Vector2(0.27949998, 0.23374997)
+texture = ExtResource("5_no1tq")
+
+[node name="NameTag" type="Area2D" parent="GhostLayer"]
+
+[node name="NameTagSprite" type="Sprite2D" parent="GhostLayer/NameTag"]
+self_modulate = Color(1, 1, 1, 0.47058824)
+position = Vector2(1120, 379)
+scale = Vector2(0.079166666, 0.07592593)
+texture = ExtResource("23_3ee1h")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GhostLayer/NameTag"]
+position = Vector2(1120, 378)
+shape = SubResource("RectangleShape2D_bb53s")
+
+[node name="GhostDialogueLabel" type="Label" parent="GhostLayer"]
+visible = false
+offset_left = 894.0
+offset_top = 144.0
+offset_right = 1320.0
+offset_bottom = 198.0
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DecodeUILayer" type="CanvasLayer" parent="."]
+
+[node name="DecodePanel" type="Panel" parent="DecodeUILayer"]
+offset_left = 460.0
+offset_top = 125.0
+offset_right = 948.0
+offset_bottom = 498.0
+
+[node name="Sprite2D" type="Sprite2D" parent="DecodeUILayer/DecodePanel"]
+position = Vector2(253, 177)
+scale = Vector2(0.69739586, 0.6805556)
+texture = ExtResource("23_3ee1h")
+
+[node name="NameInput" type="LineEdit" parent="DecodeUILayer/DecodePanel"]
+layout_mode = 0
+offset_left = 71.0
+offset_top = 161.0
+offset_right = 435.0
+offset_bottom = 254.0
+placeholder_text = "Enter Name"
+alignment = 1
+
+[node name="DecodeSubmitButton" type="Button" parent="DecodeUILayer/DecodePanel"]
+layout_mode = 0
+offset_left = 151.0
+offset_top = 331.0
+offset_right = 334.0
+offset_bottom = 362.0
+text = "Submit
+"
+
+[node name="InstructionLabel" type="Label" parent="DecodeUILayer/DecodePanel"]
+layout_mode = 0
+offset_left = 78.0
+offset_top = 83.0
+offset_right = 426.0
+offset_bottom = 120.0
+text = "Rearrange the letters to form a name."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SidekickNameTag" type="Sprite2D" parent="DecodeUILayer"]
+position = Vector2(718.5, 301.50006)
+scale = Vector2(0.70781255, 0.6916667)
+texture = ExtResource("23_ul8jb")
+
+[node name="InstructionLabel" type="Label" parent="DecodeUILayer/SidekickNameTag"]
+offset_left = -280.44147
+offset_top = -130.84346
+offset_right = 283.26715
+offset_bottom = -93.84346
+text = "Rearrange the letters to form a name."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LanternUseUILayer" type="CanvasLayer" parent="."]
+
+[node name="LanternReward" type="Label" parent="LanternUseUILayer"]
+offset_left = 530.0
+offset_top = 198.0
+offset_right = 868.0
+offset_bottom = 237.0
+theme_override_font_sizes/font_size = 19
+text = "You have a Lantern now."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Sprite2D" type="Sprite2D" parent="LanternUseUILayer"]
+position = Vector2(694, 389)
+scale = Vector2(0.39765623, 0.34421295)
+texture = ExtResource("21_0vlwp")
+
+[node name="UseLanternButton" type="Button" parent="LanternUseUILayer"]
+offset_left = 505.0
+offset_top = 521.0
+offset_right = 877.0
+offset_bottom = 576.0
+disabled = true
+text = "Use Lantern"
+
+[node name="FocusCamera" type="Camera2D" parent="."]
+position = Vector2(882, 437)
+enabled = false
+
+[node name="PineappleReveal" type="Node2D" parent="."]
+
+[node name="Area2D" type="Area2D" parent="PineappleReveal"]
+
+[node name="PineapplePlant" type="Sprite2D" parent="PineappleReveal/Area2D"]
+self_modulate = Color(1, 1, 1, 0.30588236)
+position = Vector2(870, 458.99985)
+scale = Vector2(0.14501952, 0.11230467)
+texture = ExtResource("10_f85bs")
+
+[node name="PineappleFruit" type="Sprite2D" parent="PineappleReveal/Area2D"]
+self_modulate = Color(1, 1, 1, 0.5254902)
+position = Vector2(847, 409.00003)
+scale = Vector2(0.114746116, 0.1040039)
+texture = ExtResource("17_s7hv4")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PineappleReveal/Area2D"]
+position = Vector2(849, 409)
+shape = SubResource("RectangleShape2D_ul8jb")
+
+[node name="GrassLayer" type="Node2D" parent="."]
+
+[node name="TallGrass" type="Area2D" parent="GrassLayer"]
+
+[node name="TallGrassSprite" type="Sprite2D" parent="GrassLayer/TallGrass"]
+self_modulate = Color(1, 1, 1, 0.6509804)
+position = Vector2(880, 405)
+scale = Vector2(0.24375007, 0.21550927)
+texture = ExtResource("24_cslgv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GrassLayer/TallGrass"]
+position = Vector2(863, 441.25)
+shape = SubResource("RectangleShape2D_on1j4")
+
+[node name="FallenLeaves" type="Area2D" parent="GrassLayer"]
+
+[node name="FallenLeavesSprite" type="Sprite2D" parent="GrassLayer/FallenLeaves"]
+self_modulate = Color(1, 1, 1, 0.64705884)
+position = Vector2(707, 441)
+scale = Vector2(0.209375, 0.20787032)
+texture = ExtResource("25_sk177")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GrassLayer/FallenLeaves"]
+position = Vector2(705, 455)
+shape = SubResource("RectangleShape2D_3lfn3")
+
+[node name="TangledVines" type="Area2D" parent="GrassLayer"]
+
+[node name="TangledVinesSprite" type="Sprite2D" parent="GrassLayer/TangledVines"]
+self_modulate = Color(1, 1, 1, 0.64705884)
+position = Vector2(1040, 455.24997)
+scale = Vector2(0.209375, 0.20787032)
+texture = ExtResource("25_sk177")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GrassLayer/TangledVines"]
+position = Vector2(1034, 465)
+shape = SubResource("RectangleShape2D_3lfn3")
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://5duvlotnm43p"
-path="res://.godot/imported/sidekickDialogueBox.png-ad29a05f8188895a6f952c6c74797b0c.ctex"
+path="res://.godot/imported/SidekickDialogueBox.png-f196f9aa64136ffeeb1165178f14e7d4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/sidekickDialogueBox.png"
-dest_files=["res://.godot/imported/sidekickDialogueBox.png-ad29a05f8188895a6f952c6c74797b0c.ctex"]
+source_file="res://assets/sprites/players/SidekickDialogueBox.png"
+dest_files=["res://.godot/imported/SidekickDialogueBox.png-f196f9aa64136ffeeb1165178f14e7d4.ctex"]
 
 [params]
 
