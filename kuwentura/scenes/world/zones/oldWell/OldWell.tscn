@@ -1,8 +1,49 @@
-[gd_scene load_steps=4 format=3 uid="uid://b6jvccfrna5vu"]
+[gd_scene load_steps=8 format=3 uid="uid://b6jvccfrna5vu"]
 
 [ext_resource type="Script" uid="uid://h5y0185hh34e" path="res://scripts/world/zones/oldWell/old_well.gd" id="1_oldwell"]
-[ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/Lobby.png" id="2_bg"]
-[ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
+[ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mf72o"]
+bg_color = Color(0.360784, 0.215686, 0.180392, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jlo7o"]
+bg_color = Color(0.65098, 0.439216, 0.266667, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bv3fn"]
+bg_color = Color(0.752941, 0.505882, 0.329412, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1bsgl"]
+bg_color = Color(0.65098, 0.439216, 0.266667, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_n8sim"]
 
 [node name="OldWell" type="Node2D"]
 script = ExtResource("1_oldwell")
@@ -16,7 +57,6 @@ offset_left = 304.0
 offset_top = 168.0
 offset_right = 1104.0
 offset_bottom = 268.0
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 64
 text = "OLD WELL TEST ZONE"
 horizontal_alignment = 1
@@ -27,7 +67,6 @@ offset_left = 305.0
 offset_top = 284.0
 offset_right = 1105.0
 offset_bottom = 344.0
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 48
 text = "Waiting for role..."
 horizontal_alignment = 1
@@ -37,8 +76,12 @@ offset_left = 50.0
 offset_top = 50.0
 offset_right = 300.0
 offset_bottom = 120.0
-theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = SubResource("StyleBoxFlat_mf72o")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_jlo7o")
+theme_override_styles/hover = SubResource("StyleBoxFlat_bv3fn")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_1bsgl")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_n8sim")
 text = "← Back to Forest"
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
