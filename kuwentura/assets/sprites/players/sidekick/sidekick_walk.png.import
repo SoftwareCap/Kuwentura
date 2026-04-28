@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d35eqgjkkuyn7"
-path.s3tc="res://.godot/imported/sidekick_walk.png-374862be0a29c845978dae45b4b5f06a.s3tc.ctex"
-path.etc2="res://.godot/imported/sidekick_walk.png-374862be0a29c845978dae45b4b5f06a.etc2.ctex"
+path.s3tc="res://.godot/imported/Sidekick_walk.png-b9d8ba9db618e50ecd07115e09042cf1.s3tc.ctex"
+path.etc2="res://.godot/imported/Sidekick_walk.png-b9d8ba9db618e50ecd07115e09042cf1.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/players/sidekick/sidekick_walk.png"
-dest_files=["res://.godot/imported/sidekick_walk.png-374862be0a29c845978dae45b4b5f06a.s3tc.ctex", "res://.godot/imported/sidekick_walk.png-374862be0a29c845978dae45b4b5f06a.etc2.ctex"]
+source_file="res://assets/sprites/players/Sidekick/Sidekick_walk.png"
+dest_files=["res://.godot/imported/Sidekick_walk.png-b9d8ba9db618e50ecd07115e09042cf1.s3tc.ctex", "res://.godot/imported/Sidekick_walk.png-b9d8ba9db618e50ecd07115e09042cf1.etc2.ctex"]
 
 [params]
 
