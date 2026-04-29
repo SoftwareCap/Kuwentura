@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bxbkwkkjox3dh"
-path.s3tc="res://.godot/imported/sidekick_idle.png-a7f8ff80fb34e9619b136eeb95bc2eac.s3tc.ctex"
-path.etc2="res://.godot/imported/sidekick_idle.png-a7f8ff80fb34e9619b136eeb95bc2eac.etc2.ctex"
+path.s3tc="res://.godot/imported/Sidekick_idle.png-789686c165f3314d57a9b5079ad6e57e.s3tc.ctex"
+path.etc2="res://.godot/imported/Sidekick_idle.png-789686c165f3314d57a9b5079ad6e57e.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/players/sidekick/sidekick_idle.png"
-dest_files=["res://.godot/imported/sidekick_idle.png-a7f8ff80fb34e9619b136eeb95bc2eac.s3tc.ctex", "res://.godot/imported/sidekick_idle.png-a7f8ff80fb34e9619b136eeb95bc2eac.etc2.ctex"]
+source_file="res://assets/sprites/players/Sidekick/Sidekick_idle.png"
+dest_files=["res://.godot/imported/Sidekick_idle.png-789686c165f3314d57a9b5079ad6e57e.s3tc.ctex", "res://.godot/imported/Sidekick_idle.png-789686c165f3314d57a9b5079ad6e57e.etc2.ctex"]
 
 [params]
 

@@ -30,7 +30,27 @@ const QUEST_TEXT_LEFT_PADDING := 14.0
 const QUEST_STRIKE_HEIGHT := 3.0
 
 const DECODE_INSTRUCTION_FONT_SIZE := 16
+const WORD_PUZZLE_QUESTION_FONT_SIZE := 20
+const WORD_PUZZLE_INSTRUCTION_TEXT := "Answer the clues. Each first letter spells the ghost's name."
+const FIXED_MEMORY_DISTANCE_DALI := 60
+const FIXED_DALI_TO_CM := 2
+const FIXED_MEMORY_DISTANCE_CM := 120
 
+const UI_CREAM := Color(0.98, 0.95, 0.88, 1.0)
+const UI_INK := Color(0.27, 0.16, 0.08, 1.0)
+const UI_PRIMARY := Color(0.54, 0.35, 0.16, 1.0)
+const UI_PRIMARY_HOVER := Color(0.66, 0.44, 0.20, 1.0)
+const UI_PRIMARY_PRESSED := Color(0.43, 0.26, 0.10, 1.0)
+const UI_SECONDARY := Color(0.37, 0.55, 0.24, 1.0)
+const UI_SECONDARY_HOVER := Color(0.45, 0.66, 0.30, 1.0)
+const UI_SECONDARY_PRESSED := Color(0.29, 0.43, 0.18, 1.0)
+const UI_DISABLED := Color(0.46, 0.39, 0.33, 0.92)
+const UI_PANEL := Color(0.19, 0.11, 0.05, 0.92)
+const UI_PANEL_SOFT := Color(0.35, 0.24, 0.14, 0.94)
+const UI_BORDER := Color(0.96, 0.83, 0.58, 1.0)
+const UI_SUCCESS := Color(0.53, 0.86, 0.47, 1.0)
+const UI_ERROR := Color(0.91, 0.42, 0.34, 1.0)
+const UI_INFO := Color(0.99, 0.91, 0.63, 1.0)
 @onready var role_label:          Label         = get_node_or_null("RoleLabel")
 @onready var back_button:         Button        = $BackButton
 @onready var detective_overlays:  Control       = $RoleLayer/Control/DetectiveOverlays
@@ -119,6 +139,22 @@ const DECODE_INSTRUCTION_FONT_SIZE := 16
 @onready var sidekick_name_tag: CanvasItem = get_node_or_null("DecodeUILayer/SidekickNameTag")
 @onready var sidekick_name_tag_instruction_label: Label = get_node_or_null("DecodeUILayer/SidekickNameTag/InstructionLabel")
 
+@onready var word_puzzle_layer: CanvasItem = get_node_or_null("WordPuzzleLayer")
+@onready var word_puzzle_name_tag: Sprite2D = get_node_or_null("WordPuzzleLayer/NameTag")
+@onready var word_puzzle_placeholder: Sprite2D = get_node_or_null("WordPuzzleLayer/Placholder")
+@onready var word_puzzle_answer_input: LineEdit = get_node_or_null("WordPuzzleLayer/AnswerInput")
+@onready var word_puzzle_clear_button: Button = get_node_or_null("WordPuzzleLayer/ClearButton")
+@onready var word_puzzle_submit_button: Button = get_node_or_null("WordPuzzleLayer/SubmitButton")
+@onready var word_puzzle_instruction_label: Label = get_node_or_null("WordPuzzleLayer/InstructionLabel")
+@onready var word_puzzle_question_label: Label = get_node_or_null("WordPuzzleLayer/QuestionLabel")
+@onready var word_puzzle_turn_label: Label = get_node_or_null("WordPuzzleLayer/TurnLabel")
+@onready var word_puzzle_letters: Array = [
+	get_node_or_null("WordPuzzleLayer/LetterP"),
+	get_node_or_null("WordPuzzleLayer/LetterI"),
+	get_node_or_null("WordPuzzleLayer/LetterN"),
+	get_node_or_null("WordPuzzleLayer/LetterA")
+]
+
 @onready var quest_layer: Node2D = get_node_or_null("QuestLayer")
 @onready var focus_camera: Camera2D = get_node_or_null("FocusCamera")
 @onready var grass_focus_point: Node2D = get_node_or_null("GrassFocusPoint")
@@ -166,6 +202,9 @@ var _puzzle_data_ready := false
 var _quest_style_ready := false
 var _quest_labels: Array = []
 var _quest_strike_lines: Array = []
+var _ghost_dialogue_overlay: ColorRect = null
+var _dialogue_focus_active := false
+var _grass_transition_focus_active := false
 
 enum BackyardPhase {
 	FIREFLIES,
@@ -178,23 +217,58 @@ enum BackyardPhase {
 }
 
 const REQUIRED_FIREFLIES := 5
+const WORD_PUZZLE_DETECTIVE := "detective"
+const WORD_PUZZLE_SIDEKICK := "sidekick"
+const WORD_PUZZLE_QUESTIONS := [
+	{
+		"question": "What polygon has 5 sides?",
+		"answers": ["PENTAGON"],
+		"role": WORD_PUZZLE_DETECTIVE
+	},
+	{
+		"question": "What triangle has at least two equal sides?",
+		"answers": ["ISOSCELES", "ISOSCELESTRIANGLE"],
+		"role": WORD_PUZZLE_SIDEKICK
+	},
+	{
+		"question": "What polygon has 9 sides and 9 angles?",
+		"answers": ["NONAGON", "ENNEAGON"],
+		"role": WORD_PUZZLE_DETECTIVE
+	},
+	{
+		"question": "What angle measures less than 90 degrees?",
+		"answers": ["ACUTE", "ACUTEANGLE"],
+		"role": WORD_PUZZLE_SIDEKICK
+	}
+]
 
 var _current_phase: int = BackyardPhase.FIREFLIES
 var _fireflies_collected := 0
 var _caught_fireflies: Dictionary = {}
 var _clearing_stage := 0
+var _word_puzzle_question_index := 0
+var _word_puzzle_revealed_count := 0
 
 var encoded_name := "S L Q D"
 var decoded_name := "PINA"
 var shift_steps := 3
-var memory_distance_dali := 60
-var dali_to_cm := 2
-var memory_distance_cm := 120
+var memory_distance_dali := FIXED_MEMORY_DISTANCE_DALI
+var dali_to_cm := FIXED_DALI_TO_CM
+var memory_distance_cm := FIXED_MEMORY_DISTANCE_CM
 
 
 func _load_puzzle_data() -> void:
 	var puzzle: Dictionary = PuzzleManager.get_puzzle_for_zone(ZONE_ID)
 	_apply_puzzle_data(puzzle)
+
+
+func _apply_fixed_distance_values() -> void:
+	plant_height_dali = FIXED_MEMORY_DISTANCE_DALI
+	spirit_height_cm = FIXED_MEMORY_DISTANCE_CM
+	solution_cm = FIXED_MEMORY_DISTANCE_CM
+	memory_distance_dali = FIXED_MEMORY_DISTANCE_DALI
+	memory_distance_cm = FIXED_MEMORY_DISTANCE_CM
+	dali_to_cm = FIXED_DALI_TO_CM
 
 
 func _apply_puzzle_data(puzzle: Dictionary) -> void:
@@ -204,17 +278,8 @@ func _apply_puzzle_data(puzzle: Dictionary) -> void:
 	decoded_name = str(puzzle.get("decoded_name", "PINA")).to_upper()
 	shift_steps = int(puzzle.get("shift_steps", 3))
 
-	# IMPORTANT: Use the old deterministic Backyard Path variation values.
-	# PuzzleManager already chooses one variation index for the session, so the
-	# board must use plant_height_dali + spirit_height_cm + solution from there.
-	plant_height_dali = int(puzzle.get("plant_height_dali", puzzle.get("memory_distance_dali", 60)))
-	spirit_height_cm = int(puzzle.get("spirit_height_cm", puzzle.get("solution", plant_height_dali * 2)))
-	solution_cm = int(puzzle.get("solution", spirit_height_cm))
-
-	# New gameplay aliases. These must mirror the deterministic old values.
-	memory_distance_dali = plant_height_dali
-	memory_distance_cm = solution_cm
-	dali_to_cm = int(puzzle.get("dali_to_cm", 2))
+	# Keep this specific deduction step fixed and easy to teach across peers.
+	_apply_fixed_distance_values()
 
 
 
@@ -282,10 +347,15 @@ func _play_ghost_dialogue_typewriter(text: String) -> void:
 	_ghost_dialogue_typing = true
 	ghost_dialogue_label.visible = true
 	ghost_dialogue_label.text = ""
-	ghost_dialogue_label.modulate.a = 1.0
-	ghost_dialogue_label.add_theme_font_size_override("font_size", 18)
+	ghost_dialogue_label.modulate.a = 0.0
+	ghost_dialogue_label.add_theme_font_size_override("font_size", 24)
+	ghost_dialogue_label.add_theme_color_override("font_color", UI_CREAM)
 	ghost_dialogue_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ghost_dialogue_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	ghost_dialogue_label.add_theme_constant_override("outline_size", 3)
+	ghost_dialogue_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.92))
+	_set_dialogue_focus(true)
+	_animate_ghost_dialogue_entry()
 
 	for i in range(text.length()):
 		if not _ghost_dialogue_typing or _zone_failed:
@@ -314,6 +384,7 @@ func _ready() -> void:
 	if is_instance_valid(role_label):
 		role_label.text = "Role: " + GameState.get_role_display_text()
 
+	_setup_backyard_visual_theme()
 	_setup_quest_panel_style()
 	_setup_initial_ui()
 	_setup_role_visibility()
@@ -375,6 +446,566 @@ func _sync_volume_ui() -> void:
 		volume_value_label.text = str(int(MusicController.get_volume() * 100)) + "%"
 
 
+func _make_stylebox(bg: Color, border: Color, corner_radius: int = 22, border_width: int = 3) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = bg
+	style.border_color = border
+	style.border_width_left = border_width
+	style.border_width_top = border_width
+	style.border_width_right = border_width
+	style.border_width_bottom = border_width
+	style.corner_radius_top_left = corner_radius
+	style.corner_radius_top_right = corner_radius
+	style.corner_radius_bottom_right = corner_radius
+	style.corner_radius_bottom_left = corner_radius
+	style.shadow_color = Color(0, 0, 0, 0.22)
+	style.shadow_size = 6
+	style.shadow_offset = Vector2(0, 4)
+	return style
+
+
+func _setup_backyard_visual_theme() -> void:
+	_style_notification_panel()
+	_style_back_button()
+	_style_puzzle_buttons()
+	_style_input_fields()
+	_style_text_feedback()
+	_wire_button_motion()
+
+
+func _style_notification_panel() -> void:
+	if is_instance_valid(notification_panel):
+		notification_panel.add_theme_stylebox_override("panel", _make_stylebox(UI_PANEL_SOFT, UI_BORDER, 20, 2))
+
+	if is_instance_valid(notification_label):
+		notification_label.remove_theme_font_override("font")
+		notification_label.add_theme_font_size_override("font_size", 22)
+		notification_label.add_theme_color_override("font_color", UI_CREAM)
+		notification_label.add_theme_constant_override("outline_size", 2)
+		notification_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+
+
+func _style_back_button() -> void:
+	if not is_instance_valid(back_button):
+		return
+
+	back_button.text = "BACK TO FOREST"
+	back_button.remove_theme_font_override("font")
+	back_button.add_theme_font_size_override("font_size", 24)
+	back_button.add_theme_color_override("font_color", UI_CREAM)
+	back_button.add_theme_color_override("font_hover_color", UI_CREAM)
+	back_button.add_theme_color_override("font_pressed_color", UI_CREAM)
+	back_button.add_theme_stylebox_override("normal", _make_stylebox(UI_PRIMARY, UI_BORDER))
+	back_button.add_theme_stylebox_override("hover", _make_stylebox(UI_PRIMARY_HOVER, UI_BORDER))
+	back_button.add_theme_stylebox_override("pressed", _make_stylebox(UI_PRIMARY_PRESSED, UI_BORDER))
+	back_button.add_theme_stylebox_override("disabled", _make_stylebox(UI_DISABLED, UI_BORDER))
+
+
+func _style_button(button: Button, text: String, primary: bool = true, font_size: int = 26) -> void:
+	if not is_instance_valid(button):
+		return
+
+	button.flat = false
+	button.text = text
+	button.remove_theme_font_override("font")
+	button.add_theme_font_size_override("font_size", font_size)
+	button.add_theme_color_override("font_color", UI_CREAM)
+	button.add_theme_color_override("font_hover_color", UI_CREAM)
+	button.add_theme_color_override("font_focus_color", UI_CREAM)
+	button.add_theme_color_override("font_pressed_color", UI_CREAM)
+
+	var normal_color := UI_PRIMARY if primary else UI_SECONDARY
+	var hover_color := UI_PRIMARY_HOVER if primary else UI_SECONDARY_HOVER
+	var pressed_color := UI_PRIMARY_PRESSED if primary else UI_SECONDARY_PRESSED
+
+	button.add_theme_stylebox_override("normal", _make_stylebox(normal_color, UI_BORDER))
+	button.add_theme_stylebox_override("hover", _make_stylebox(hover_color, UI_BORDER))
+	button.add_theme_stylebox_override("pressed", _make_stylebox(pressed_color, UI_BORDER))
+	button.add_theme_stylebox_override("disabled", _make_stylebox(UI_DISABLED, UI_BORDER))
+	button.add_theme_stylebox_override("focus", _make_stylebox(normal_color, UI_BORDER))
+
+
+func _style_puzzle_buttons() -> void:
+	_style_button(submit_button, "SUBMIT", true, 24)
+	_style_button(word_puzzle_submit_button, "SUBMIT", true, 22)
+	_style_button(word_puzzle_clear_button, "CLEAR", false, 22)
+	_style_button(use_lantern_button, "USE LANTERN", true, 24)
+	_style_button(collect_button, "COLLECT CLUE", false, 24)
+	_style_button(decode_submit_button, "SUBMIT", true, 20)
+
+
+func _style_input_fields() -> void:
+	for field in [x_input, word_puzzle_answer_input, name_input]:
+		if not is_instance_valid(field):
+			continue
+		field.remove_theme_font_override("font")
+		field.add_theme_color_override("font_color", UI_INK)
+		field.add_theme_color_override("font_placeholder_color", Color(UI_INK.r, UI_INK.g, UI_INK.b, 0.7))
+		field.add_theme_color_override("font_selected_color", UI_CREAM)
+		field.add_theme_color_override("selection_color", Color(0.45, 0.28, 0.11, 0.78))
+		field.add_theme_color_override("caret_color", UI_PRIMARY_PRESSED)
+		field.add_theme_stylebox_override("normal", _make_stylebox(Color(0.94, 0.87, 0.77, 1.0), UI_BORDER, 18, 2))
+		field.add_theme_stylebox_override("focus", _make_stylebox(Color(0.99, 0.93, 0.83, 1.0), UI_SUCCESS, 18, 3))
+		field.add_theme_stylebox_override("read_only", _make_stylebox(Color(0.82, 0.76, 0.68, 1.0), UI_BORDER, 18, 2))
+
+	if is_instance_valid(x_input):
+		x_input.add_theme_font_size_override("font_size", 16)
+		x_input.placeholder_text = "Type answer"
+	if is_instance_valid(word_puzzle_answer_input):
+		word_puzzle_answer_input.add_theme_font_size_override("font_size", 20)
+		word_puzzle_answer_input.placeholder_text = "Type answer"
+
+	_refresh_distance_input_visual_state()
+
+
+func _refresh_distance_input_visual_state() -> void:
+	if not is_instance_valid(x_input):
+		return
+
+	var has_content := not x_input.text.strip_edges().is_empty()
+	var use_large_font := has_content or x_input.has_focus()
+	x_input.add_theme_font_size_override("font_size", 30 if use_large_font else 16)
+
+
+func _style_text_feedback() -> void:
+	for label in [feedback_label, lantern_reward_label, ghost_dialogue_label, reward_banner_label, tap_instruction_label, word_puzzle_instruction_label, word_puzzle_turn_label, word_puzzle_question_label]:
+		if not is_instance_valid(label):
+			continue
+		label.remove_theme_font_override("font")
+		label.add_theme_color_override("font_color", UI_CREAM)
+		label.add_theme_constant_override("outline_size", 2)
+		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+
+	if is_instance_valid(feedback_label):
+		feedback_label.add_theme_font_size_override("font_size", 20)
+		feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		feedback_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		feedback_label.size = Vector2(480, 40)
+		feedback_label.position = Vector2(455, 458)
+
+	if is_instance_valid(ghost_dialogue_label):
+		ghost_dialogue_label.add_theme_font_size_override("font_size", 24)
+		ghost_dialogue_label.add_theme_color_override("font_color", UI_CREAM)
+		ghost_dialogue_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.92))
+		ghost_dialogue_label.add_theme_constant_override("outline_size", 3)
+		ghost_dialogue_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		ghost_dialogue_label.clip_text = false
+		ghost_dialogue_label.offset_left = 818.0
+		ghost_dialogue_label.offset_top = 120.0
+		ghost_dialogue_label.offset_right = 1400.0
+		ghost_dialogue_label.offset_bottom = 238.0
+
+	if is_instance_valid(lantern_reward_label):
+		lantern_reward_label.add_theme_font_size_override("font_size", 22)
+
+	if is_instance_valid(word_puzzle_question_label):
+		word_puzzle_question_label.add_theme_font_size_override("font_size", WORD_PUZZLE_QUESTION_FONT_SIZE)
+		word_puzzle_question_label.add_theme_color_override("font_color", UI_CREAM)
+		word_puzzle_question_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+
+	if is_instance_valid(word_puzzle_instruction_label):
+		word_puzzle_instruction_label.add_theme_font_size_override("font_size", 17)
+		word_puzzle_instruction_label.add_theme_color_override("font_color", Color(0.99, 0.95, 0.84, 1.0))
+		word_puzzle_instruction_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.88))
+		word_puzzle_instruction_label.add_theme_constant_override("outline_size", 2)
+		word_puzzle_instruction_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		word_puzzle_instruction_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		word_puzzle_instruction_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		word_puzzle_instruction_label.text = WORD_PUZZLE_INSTRUCTION_TEXT
+
+	if is_instance_valid(word_puzzle_turn_label):
+		word_puzzle_turn_label.add_theme_font_size_override("font_size", 18)
+		word_puzzle_turn_label.add_theme_color_override("font_color", UI_INFO)
+		word_puzzle_turn_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.88))
+		word_puzzle_turn_label.add_theme_constant_override("outline_size", 2)
+		word_puzzle_turn_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		word_puzzle_turn_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+	if is_instance_valid(reward_banner_label):
+		reward_banner_label.add_theme_font_size_override("font_size", 50)
+
+	_ensure_ghost_dialogue_overlay()
+
+
+func _ensure_ghost_dialogue_overlay() -> void:
+	if not is_instance_valid(ghost_layer) or not is_instance_valid(ghost_dialogue_label):
+		return
+
+	var old_bubble := ghost_layer.get_node_or_null("GhostDialogueBubble")
+	if old_bubble is Panel:
+		old_bubble.queue_free()
+
+	var existing_overlay := ghost_layer.get_node_or_null("GhostDialogueOverlay")
+	if existing_overlay is ColorRect:
+		_ghost_dialogue_overlay = existing_overlay
+	else:
+		var overlay := ColorRect.new()
+		overlay.name = "GhostDialogueOverlay"
+		ghost_layer.add_child(overlay)
+		ghost_layer.move_child(overlay, 0)
+		_ghost_dialogue_overlay = overlay
+
+	if is_instance_valid(_ghost_dialogue_overlay):
+		_ghost_dialogue_overlay.visible = false
+		_ghost_dialogue_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_ghost_dialogue_overlay.color = Color(0.02, 0.02, 0.03, 0.0)
+		_ghost_dialogue_overlay.offset_left = -1500.0
+		_ghost_dialogue_overlay.offset_top = -900.0
+		_ghost_dialogue_overlay.offset_right = 1500.0
+		_ghost_dialogue_overlay.offset_bottom = 900.0
+
+
+func _wire_button_motion() -> void:
+	for button in [back_button, submit_button, word_puzzle_submit_button, word_puzzle_clear_button, use_lantern_button, collect_button, decode_submit_button]:
+		if not is_instance_valid(button):
+			continue
+		if not button.has_meta("ux_motion_ready"):
+			button.button_down.connect(_on_ui_button_down.bind(button))
+			button.button_up.connect(_on_ui_button_up.bind(button))
+			button.mouse_exited.connect(_on_ui_button_up.bind(button))
+			button.set_meta("ux_motion_ready", true)
+
+
+func _on_ui_button_down(button: Button) -> void:
+	_tween_node_scale(button, Vector2(0.96, 0.96), 0.08)
+
+
+func _on_ui_button_up(button: Button) -> void:
+	_tween_node_scale(button, Vector2.ONE, 0.12)
+
+
+func _get_canvas_item_base_scale(target: CanvasItem) -> Vector2:
+	var scale_value: Variant = target.get_meta("ux_base_scale", target.get("scale"))
+	if scale_value is Vector2:
+		return scale_value
+	return Vector2.ONE
+
+
+func _get_canvas_item_base_position(target: CanvasItem) -> Vector2:
+	var position_value: Variant = target.get_meta("ux_base_position", target.get("position"))
+	if position_value is Vector2:
+		return position_value
+	return Vector2.ZERO
+
+
+func _tween_node_scale(target: CanvasItem, scale_multiplier: Vector2, duration: float = 0.14) -> void:
+	if not is_instance_valid(target):
+		return
+
+	var base_scale := _get_canvas_item_base_scale(target)
+	if not target.has_meta("ux_base_scale"):
+		target.set_meta("ux_base_scale", base_scale)
+
+	if target.has_meta("ux_scale_tween"):
+		var old_tween = target.get_meta("ux_scale_tween")
+		if old_tween is Tween:
+			old_tween.kill()
+
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(target, "scale", base_scale * scale_multiplier, duration)
+	target.set_meta("ux_scale_tween", tween)
+
+
+func _set_attention_pulse(target: CanvasItem, enabled: bool, pulse_scale: float = 1.06, duration: float = 0.7) -> void:
+	if not is_instance_valid(target):
+		return
+
+	var base_scale := _get_canvas_item_base_scale(target)
+	if not target.has_meta("ux_base_scale"):
+		target.set_meta("ux_base_scale", base_scale)
+
+	if target.has_meta("ux_pulse_tween"):
+		var old_tween = target.get_meta("ux_pulse_tween")
+		if old_tween is Tween:
+			old_tween.kill()
+		target.remove_meta("ux_pulse_tween")
+
+	target.set("scale", base_scale)
+
+	if not enabled:
+		return
+
+	var tween := create_tween()
+	tween.set_loops()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(target, "scale", base_scale * pulse_scale, duration)
+	tween.tween_property(target, "scale", base_scale, duration)
+	target.set_meta("ux_pulse_tween", tween)
+
+
+func _shake_node(target: CanvasItem, amount: float = 10.0, duration: float = 0.28) -> void:
+	if not is_instance_valid(target):
+		return
+
+	var original_position := _get_canvas_item_base_position(target)
+	if not target.has_meta("ux_base_position"):
+		target.set_meta("ux_base_position", original_position)
+
+	if target.has_meta("ux_shake_tween"):
+		var old_tween = target.get_meta("ux_shake_tween")
+		if old_tween is Tween:
+			old_tween.kill()
+
+	target.set("position", original_position)
+
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(target, "position", original_position + Vector2(-amount, 0), duration * 0.25)
+	tween.tween_property(target, "position", original_position + Vector2(amount, 0), duration * 0.35)
+	tween.tween_property(target, "position", original_position + Vector2(-amount * 0.5, 0), duration * 0.2)
+	tween.tween_property(target, "position", original_position, duration * 0.2)
+	target.set_meta("ux_shake_tween", tween)
+
+
+func _flash_label(label: Label, color: Color, text: String = "") -> void:
+	if not is_instance_valid(label):
+		return
+	if not text.is_empty():
+		label.text = text
+
+	label.add_theme_color_override("font_color", color)
+	label.modulate = Color.WHITE
+	_tween_node_scale(label, Vector2(1.04, 1.04), 0.1)
+
+	var tween := create_tween()
+	tween.tween_interval(0.18)
+	tween.tween_callback(func():
+		if is_instance_valid(label):
+			if label == ghost_dialogue_label:
+				label.add_theme_color_override("font_color", UI_CREAM)
+			else:
+				label.add_theme_color_override("font_color", UI_CREAM)
+			label.scale = _get_canvas_item_base_scale(label)
+	)
+
+
+func _animate_ghost_dialogue_entry() -> void:
+	if not is_instance_valid(ghost_dialogue_label):
+		return
+
+	var base_position_value: Variant = ghost_dialogue_label.get_meta("ux_dialogue_base_position", ghost_dialogue_label.position)
+	var base_position: Vector2 = base_position_value if base_position_value is Vector2 else ghost_dialogue_label.position
+	ghost_dialogue_label.position = base_position + Vector2(0, 18)
+	ghost_dialogue_label.set_meta("ux_dialogue_base_position", base_position)
+
+	ghost_dialogue_label.scale = Vector2(0.98, 0.98)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(ghost_dialogue_label, "modulate:a", 1.0, 0.28)
+	tween.tween_property(ghost_dialogue_label, "position", base_position, 0.32)
+	tween.tween_property(ghost_dialogue_label, "scale", Vector2.ONE, 0.32)
+
+
+func _set_dialogue_focus(active: bool) -> void:
+	_dialogue_focus_active = active
+	_refresh_focus_overlay_state()
+
+	if not is_instance_valid(_ghost_dialogue_overlay):
+		return
+
+	if active:
+		_ghost_dialogue_overlay.visible = true
+		if _ghost_dialogue_overlay.has_meta("ux_overlay_tween"):
+			var old_tween = _ghost_dialogue_overlay.get_meta("ux_overlay_tween")
+			if old_tween is Tween:
+				old_tween.kill()
+		var fade_in := create_tween()
+		fade_in.tween_property(_ghost_dialogue_overlay, "color:a", 0.78, 0.28)
+		_ghost_dialogue_overlay.set_meta("ux_overlay_tween", fade_in)
+	else:
+		if _ghost_dialogue_overlay.has_meta("ux_overlay_tween"):
+			var old_tween = _ghost_dialogue_overlay.get_meta("ux_overlay_tween")
+			if old_tween is Tween:
+				old_tween.kill()
+		var fade_out := create_tween()
+		fade_out.tween_property(_ghost_dialogue_overlay, "color:a", 0.0, 0.24)
+		fade_out.tween_callback(func():
+			if is_instance_valid(_ghost_dialogue_overlay) and not _dialogue_focus_active:
+				_ghost_dialogue_overlay.visible = false
+		)
+		_ghost_dialogue_overlay.set_meta("ux_overlay_tween", fade_out)
+
+
+func _refresh_focus_overlay_state() -> void:
+	var word_puzzle_focus := is_instance_valid(word_puzzle_layer) and word_puzzle_layer.visible
+	var board_focus := is_instance_valid(board_layer) and board_layer.visible
+	var board_sidekick_focus := board_focus and GameState.local_role == GameState.Role.SIDEKICK and not _dialogue_focus_active
+	var focus_overlay_active := _dialogue_focus_active or _grass_transition_focus_active or word_puzzle_focus or board_focus
+
+	var focus_nodes: Array = [quest_layer, progress_tracker, back_button, lantern_use_layer]
+	if not board_sidekick_focus:
+		focus_nodes.append(inside_zone_control)
+
+	for node in focus_nodes:
+		if not is_instance_valid(node):
+			continue
+
+		if focus_overlay_active:
+			if not node.has_meta("ux_focus_restore_visible"):
+				node.set_meta("ux_focus_restore_visible", node.visible)
+			node.visible = false
+		elif node.has_meta("ux_focus_restore_visible"):
+			var previous_visible: Variant = node.get_meta("ux_focus_restore_visible", false)
+			node.visible = previous_visible if previous_visible is bool else false
+			node.remove_meta("ux_focus_restore_visible")
+
+	if is_instance_valid(touch_controls):
+		if board_sidekick_focus:
+			inside_zone_control.visible = true
+			if touch_controls.has_method("set_pause_enabled"):
+				touch_controls.set_pause_enabled(false)
+			if touch_controls.has_method("set_ledger_enabled"):
+				touch_controls.set_ledger_enabled(true)
+			if touch_controls.has_method("set_briefcase_enabled"):
+				touch_controls.set_briefcase_enabled(false)
+			if touch_controls.has_method("set_sidekick_ui_visible"):
+				touch_controls.set_sidekick_ui_visible(true)
+			if is_instance_valid(ledger_touch_button):
+				ledger_touch_button.visible = true
+			if is_instance_valid(briefcase_touch_button):
+				briefcase_touch_button.visible = false
+		else:
+			if touch_controls.has_method("set_pause_enabled"):
+				touch_controls.set_pause_enabled(true)
+			if touch_controls.has_method("set_ledger_enabled"):
+				touch_controls.set_ledger_enabled(true)
+			if touch_controls.has_method("set_briefcase_enabled"):
+				touch_controls.set_briefcase_enabled(true)
+			if touch_controls.has_method("set_sidekick_ui_visible"):
+				touch_controls.set_sidekick_ui_visible(GameState.local_role == GameState.Role.SIDEKICK)
+			if is_instance_valid(ledger_touch_button):
+				ledger_touch_button.visible = GameState.local_role == GameState.Role.SIDEKICK
+			if is_instance_valid(briefcase_touch_button):
+				briefcase_touch_button.visible = GameState.local_role == GameState.Role.SIDEKICK
+
+	var puzzle_overlay_active := word_puzzle_focus or board_focus or _grass_transition_focus_active
+	if is_instance_valid(ghost_layer):
+		if puzzle_overlay_active and not _dialogue_focus_active:
+			if not ghost_layer.has_meta("ux_focus_restore_visible"):
+				ghost_layer.set_meta("ux_focus_restore_visible", ghost_layer.visible)
+			ghost_layer.visible = false
+		elif ghost_layer.has_meta("ux_focus_restore_visible"):
+			var ghost_visible: Variant = ghost_layer.get_meta("ux_focus_restore_visible", false)
+			ghost_layer.visible = ghost_visible if ghost_visible is bool else false
+			ghost_layer.remove_meta("ux_focus_restore_visible")
+
+	if is_instance_valid(_ghost_dialogue_overlay):
+		_ghost_dialogue_overlay.visible = _dialogue_focus_active or _ghost_dialogue_overlay.color.a > 0.01
+
+
+func _flash_input_state(line_edit: LineEdit, success: bool) -> void:
+	if not is_instance_valid(line_edit):
+		return
+
+	var accent := UI_SUCCESS if success else UI_ERROR
+	line_edit.add_theme_stylebox_override("focus", _make_stylebox(Color(0.99, 0.93, 0.83, 1.0), accent, 18, 3))
+	line_edit.add_theme_stylebox_override("normal", _make_stylebox(Color(0.94, 0.87, 0.77, 1.0), accent, 18, 3))
+
+	if not success:
+		_shake_node(line_edit, 8.0, 0.22)
+	else:
+		_tween_node_scale(line_edit, Vector2(1.03, 1.03), 0.1)
+
+	var tween := create_tween()
+	tween.tween_interval(0.35)
+	tween.tween_callback(func():
+		if is_instance_valid(line_edit):
+			line_edit.add_theme_stylebox_override("normal", _make_stylebox(Color(0.94, 0.87, 0.77, 1.0), UI_BORDER, 18, 2))
+			line_edit.add_theme_stylebox_override("focus", _make_stylebox(Color(0.99, 0.93, 0.83, 1.0), UI_SUCCESS, 18, 3))
+			line_edit.scale = _get_canvas_item_base_scale(line_edit)
+	)
+
+
+func _animate_panel_pop(panel_node: CanvasItem, start_scale_multiplier: float = 0.94) -> void:
+	if not is_instance_valid(panel_node):
+		return
+
+	var base_scale := _get_canvas_item_base_scale(panel_node)
+	if not panel_node.has_meta("ux_base_scale"):
+		panel_node.set_meta("ux_base_scale", base_scale)
+
+	panel_node.visible = true
+	panel_node.modulate.a = 0.0
+	panel_node.set("scale", base_scale * start_scale_multiplier)
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(panel_node, "modulate:a", 1.0, 0.2)
+	tween.tween_property(panel_node, "scale", base_scale, 0.24)
+
+
+func _animate_firefly_capture(firefly_node: CanvasItem) -> void:
+	if not is_instance_valid(firefly_node):
+		return
+
+	var sprite := firefly_node.get_node_or_null("FireflySprite")
+	if not (sprite is Sprite2D):
+		firefly_node.visible = false
+		return
+
+	var base_scale: Vector2 = _firefly_base_scales.get(firefly_node.name, sprite.scale)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(sprite, "scale", base_scale * 1.5, 0.18)
+	tween.tween_property(sprite, "modulate:a", 0.0, 0.18)
+	tween.tween_callback(func():
+		if is_instance_valid(firefly_node):
+			firefly_node.visible = false
+		if is_instance_valid(sprite):
+			sprite.scale = base_scale
+			sprite.modulate.a = 1.0
+	)
+
+
+func _animate_letter_reveal(letter: Sprite2D) -> void:
+	if not is_instance_valid(letter):
+		return
+
+	var base_scale := _get_canvas_item_base_scale(letter)
+	if not letter.has_meta("ux_base_scale"):
+		letter.set_meta("ux_base_scale", base_scale)
+
+	letter.visible = true
+	letter.modulate.a = 0.0
+	letter.scale = base_scale * 1.35
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(letter, "modulate:a", 1.0, 0.18)
+	tween.tween_property(letter, "scale", base_scale, 0.22)
+
+
+func _animate_grass_clear(grass: CanvasItem) -> void:
+	if not is_instance_valid(grass):
+		return
+
+	var sprite := grass.get_child(0) if grass.get_child_count() > 0 else null
+	if not (sprite is Sprite2D):
+		grass.visible = false
+		return
+
+	var base_scale: Vector2 = sprite.scale
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(sprite, "rotation_degrees", 10.0, 0.18)
+	tween.tween_property(sprite, "scale", base_scale * 0.82, 0.18)
+	tween.tween_property(sprite, "modulate:a", 0.0, 0.18)
+	tween.tween_callback(func():
+		if is_instance_valid(grass):
+			grass.visible = false
+		if is_instance_valid(sprite):
+			sprite.rotation_degrees = 0.0
+			sprite.scale = base_scale
+			sprite.modulate.a = 0.65
+	)
+
+
 func _connect_signals() -> void:
 	if is_instance_valid(back_button) and not back_button.pressed.is_connected(_on_back_pressed):
 		back_button.pressed.connect(_on_back_pressed)
@@ -384,6 +1015,13 @@ func _connect_signals() -> void:
 		fruit_tap_button.pressed.connect(_on_fruit_tap_pressed)
 	if is_instance_valid(submit_button) and not submit_button.pressed.is_connected(_on_submit_pressed):
 		submit_button.pressed.connect(_on_submit_pressed)
+	if is_instance_valid(x_input):
+		if not x_input.text_changed.is_connected(_on_distance_input_text_changed):
+			x_input.text_changed.connect(_on_distance_input_text_changed)
+		if not x_input.focus_entered.is_connected(_on_distance_input_focus_changed):
+			x_input.focus_entered.connect(_on_distance_input_focus_changed)
+		if not x_input.focus_exited.is_connected(_on_distance_input_focus_changed):
+			x_input.focus_exited.connect(_on_distance_input_focus_changed)
 	if is_instance_valid(collect_button) and not collect_button.pressed.is_connected(_on_collect_pressed):
 		collect_button.pressed.connect(_on_collect_pressed)
 	if is_instance_valid(tap_catcher) and not tap_catcher.pressed.is_connected(_on_reward_tap_catcher_pressed):
@@ -419,6 +1057,14 @@ func _connect_signals() -> void:
 	_connect_new_backyard_gameplay_signals()
 
 
+func _on_distance_input_text_changed(_new_text: String) -> void:
+	_refresh_distance_input_visual_state()
+
+
+func _on_distance_input_focus_changed() -> void:
+	_refresh_distance_input_visual_state()
+
+
 func _setup_initial_ui() -> void:
 	_zone_active = false
 	_board_unlocked = false
@@ -445,7 +1091,7 @@ func _setup_initial_ui() -> void:
 		x_input.visible = false
 		x_input.text = ""
 		x_input.editable = false
-		x_input.placeholder_text = "Distance in cm"
+		x_input.placeholder_text = "Type answer"
 		x_input.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
 	if is_instance_valid(submit_button):
 		submit_button.visible = false
@@ -506,6 +1152,8 @@ func _setup_initial_ui() -> void:
 	if is_instance_valid(ghost_dialogue_label):
 		ghost_dialogue_label.visible = false
 		ghost_dialogue_label.text = ""
+	if is_instance_valid(_ghost_dialogue_overlay):
+		_ghost_dialogue_overlay.visible = false
 	if is_instance_valid(ghost_name_tag):
 		_set_area_enabled(ghost_name_tag, true)
 
@@ -526,6 +1174,8 @@ func _setup_initial_ui() -> void:
 	if is_instance_valid(decode_submit_button):
 		decode_submit_button.text = "Submit"
 		decode_submit_button.disabled = true
+	_reset_word_puzzle_state()
+	_set_word_puzzle_visible(false)
 
 	if is_instance_valid(grass_layer):
 		grass_layer.visible = false
@@ -617,15 +1267,15 @@ func _populate_heights() -> void:
 
 
 func _populate_ledger_content() -> void:
-	var ledger_view: Dictionary = PuzzleManager.get_zone_ledger_display(ZONE_ID)
-	if ledger_view.is_empty():
-		return
-	if is_instance_valid(ledger_title_label): ledger_title_label.text = str(ledger_view.get("title", ""))
-	if is_instance_valid(ledger_body_label):  ledger_body_label.text  = str(ledger_view.get("body", ""))
+	if is_instance_valid(ledger_title_label):
+		ledger_title_label.text = "Memory Conversion Clue"
+	if is_instance_valid(ledger_body_label):
+		ledger_body_label.text = "The remains are 60 Dali away.\n1 Dali = 2 cm.\nTell the Detective the answer: 120 cm."
 
 
 func _set_dialogue_input_lock(locked: bool) -> void:
 	_dialogue_input_locked = locked
+	_set_dialogue_focus(locked)
 	var is_sidekick: bool  = GameState.local_role == GameState.Role.SIDEKICK
 	var dim_color   := Color(0.65, 0.65, 0.65, 1.0)
 	var normal_color := Color(1, 1, 1, 1)
@@ -643,9 +1293,11 @@ func _set_dialogue_input_lock(locked: bool) -> void:
 			x_input.editable = false
 			x_input.release_focus()
 			x_input.modulate = dim_color
+			_refresh_distance_input_visual_state()
 		else:
 			x_input.editable = _is_detective_solver() and _board_opened and _board_unlocked and not _puzzle_solved and not _zone_failed
 			x_input.modulate = normal_color
+			_refresh_distance_input_visual_state()
 
 	if is_instance_valid(submit_button):
 		submit_button.disabled = locked or not (_is_detective_solver() and _board_opened and _board_unlocked and not _puzzle_solved and not _zone_failed)
@@ -733,6 +1385,7 @@ func rpc_start_firefly_phase() -> void:
 		board_tap_button.visible = false
 		board_tap_button.disabled = true
 	_set_lantern_reward_layer_visible(false)
+	_refresh_focus_overlay_state()
 
 	show_notification("Catch all 5 fireflies to light the old lantern.", 3.0)
 	_update_quest_labels()
@@ -766,6 +1419,15 @@ func _connect_new_backyard_gameplay_signals() -> void:
 	if is_instance_valid(decode_submit_button) and not decode_submit_button.pressed.is_connected(_on_decode_submit_pressed):
 		decode_submit_button.pressed.connect(_on_decode_submit_pressed)
 
+	if is_instance_valid(word_puzzle_submit_button) and not word_puzzle_submit_button.pressed.is_connected(_on_word_puzzle_submit_pressed):
+		word_puzzle_submit_button.pressed.connect(_on_word_puzzle_submit_pressed)
+
+	if is_instance_valid(word_puzzle_clear_button) and not word_puzzle_clear_button.pressed.is_connected(_on_word_puzzle_clear_pressed):
+		word_puzzle_clear_button.pressed.connect(_on_word_puzzle_clear_pressed)
+
+	if is_instance_valid(word_puzzle_answer_input) and not word_puzzle_answer_input.text_submitted.is_connected(_on_word_puzzle_answer_submitted):
+		word_puzzle_answer_input.text_submitted.connect(_on_word_puzzle_answer_submitted)
+
 	if is_instance_valid(use_lantern_button) and not use_lantern_button.pressed.is_connected(_on_use_lantern_pressed):
 		use_lantern_button.pressed.connect(_on_use_lantern_pressed)
 
@@ -785,6 +1447,117 @@ func _is_click_event(event: InputEvent) -> bool:
 
 func _is_detective_solver() -> bool:
 	return GameState.local_role == GameState.Role.DETECTIVE or not multiplayer.has_multiplayer_peer()
+
+
+func _is_word_puzzle_local_turn() -> bool:
+	if not multiplayer.has_multiplayer_peer():
+		return true
+
+	var expected_role := _get_word_puzzle_question_role(_word_puzzle_question_index)
+	if expected_role == WORD_PUZZLE_DETECTIVE:
+		return GameState.local_role == GameState.Role.DETECTIVE
+	return GameState.local_role == GameState.Role.SIDEKICK
+
+
+func _get_word_puzzle_question_role(question_index: int) -> String:
+	if question_index < 0 or question_index >= WORD_PUZZLE_QUESTIONS.size():
+		return WORD_PUZZLE_DETECTIVE
+	return str(WORD_PUZZLE_QUESTIONS[question_index].get("role", WORD_PUZZLE_DETECTIVE))
+
+
+func _get_word_puzzle_turn_label(question_index: int) -> String:
+	var role := _get_word_puzzle_question_role(question_index)
+	if role == WORD_PUZZLE_SIDEKICK:
+		return "Sidekick"
+	return "Detective"
+
+
+func _normalize_word_puzzle_answer(answer: String) -> String:
+	var normalized := answer.strip_edges().to_upper()
+	normalized = normalized.replace(" ", "")
+	normalized = normalized.replace("-", "")
+	normalized = normalized.replace("_", "")
+	normalized = normalized.replace(".", "")
+	normalized = normalized.replace(",", "")
+	normalized = normalized.replace("'", "")
+	normalized = normalized.replace("\"", "")
+	return normalized
+
+
+func _reset_word_puzzle_state() -> void:
+	_word_puzzle_question_index = 0
+	_word_puzzle_revealed_count = 0
+	_refresh_word_puzzle_ui()
+
+
+func _set_word_puzzle_visible(should_show: bool) -> void:
+	if is_instance_valid(word_puzzle_layer):
+		word_puzzle_layer.visible = should_show
+
+	for node in [word_puzzle_name_tag, word_puzzle_placeholder, word_puzzle_instruction_label, word_puzzle_question_label, word_puzzle_turn_label, word_puzzle_answer_input, word_puzzle_clear_button, word_puzzle_submit_button]:
+		if is_instance_valid(node):
+			node.visible = should_show
+
+	_refresh_focus_overlay_state()
+	_refresh_word_puzzle_ui()
+
+
+func _refresh_word_puzzle_ui() -> void:
+	var puzzle_open := is_instance_valid(word_puzzle_layer) and word_puzzle_layer.visible
+	var puzzle_complete := _word_puzzle_revealed_count >= WORD_PUZZLE_QUESTIONS.size()
+	var local_turn := puzzle_open and not puzzle_complete and _is_word_puzzle_local_turn()
+
+	for i in range(word_puzzle_letters.size()):
+		var letter: CanvasItem = word_puzzle_letters[i] as CanvasItem
+		if is_instance_valid(letter):
+			letter.visible = puzzle_open and i < _word_puzzle_revealed_count
+
+	if is_instance_valid(word_puzzle_question_label):
+		word_puzzle_question_label.add_theme_font_size_override("font_size", WORD_PUZZLE_QUESTION_FONT_SIZE)
+		word_puzzle_question_label.add_theme_color_override("font_color", UI_CREAM)
+		word_puzzle_question_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+		word_puzzle_question_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		word_puzzle_question_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		word_puzzle_question_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+
+		if puzzle_complete:
+			word_puzzle_question_label.text = "The name is complete."
+		elif _word_puzzle_question_index < WORD_PUZZLE_QUESTIONS.size():
+			word_puzzle_question_label.text = str(WORD_PUZZLE_QUESTIONS[_word_puzzle_question_index].get("question", ""))
+		else:
+			word_puzzle_question_label.text = ""
+
+	if is_instance_valid(word_puzzle_instruction_label):
+		word_puzzle_instruction_label.text = WORD_PUZZLE_INSTRUCTION_TEXT
+
+	if is_instance_valid(word_puzzle_turn_label):
+		if not puzzle_open or puzzle_complete:
+			word_puzzle_turn_label.text = ""
+		elif local_turn:
+			word_puzzle_turn_label.text = "Your turn"
+		else:
+			word_puzzle_turn_label.text = _get_word_puzzle_turn_label(_word_puzzle_question_index) + "'s turn"
+
+	if is_instance_valid(word_puzzle_answer_input):
+		word_puzzle_answer_input.add_theme_font_size_override("font_size", 20)
+		word_puzzle_answer_input.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		word_puzzle_answer_input.placeholder_text = "Type answer"
+		word_puzzle_answer_input.editable = local_turn
+		if not puzzle_open:
+			word_puzzle_answer_input.text = ""
+		if local_turn:
+			word_puzzle_answer_input.placeholder_text = "Type answer"
+		elif not puzzle_complete:
+			word_puzzle_answer_input.placeholder_text = _get_word_puzzle_turn_label(_word_puzzle_question_index) + "'s turn"
+
+	if is_instance_valid(word_puzzle_submit_button):
+		word_puzzle_submit_button.disabled = not local_turn
+		word_puzzle_submit_button.modulate = Color.WHITE if local_turn else Color(1, 1, 1, 0.72)
+		_set_attention_pulse(word_puzzle_submit_button, local_turn)
+
+	if is_instance_valid(word_puzzle_clear_button):
+		word_puzzle_clear_button.disabled = not local_turn
+		word_puzzle_clear_button.modulate = Color.WHITE if local_turn else Color(1, 1, 1, 0.72)
 
 
 func _set_area_enabled(area: Area2D, enabled: bool) -> void:
@@ -820,7 +1593,7 @@ func _setup_quest_panel_style() -> void:
 
 	header_bar.position = QUEST_PANEL_POS
 	header_bar.size = Vector2(QUEST_PANEL_WIDTH, QUEST_HEADER_HEIGHT)
-	header_bar.color = Color(0.34, 0.17, 0.05, 0.95)
+	header_bar.color = Color(0.62, 0.40, 0.18, 0.96)
 	header_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	header_bar.z_index = 0
 
@@ -856,7 +1629,7 @@ func _setup_quest_panel_style() -> void:
 
 		row_bg.position = row_pos
 		row_bg.size = Vector2(QUEST_PANEL_WIDTH, QUEST_ROW_HEIGHT)
-		row_bg.color = Color(0.10, 0.05, 0.02, 0.72)
+		row_bg.color = Color(0.96, 0.89, 0.77, 0.94)
 		row_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row_bg.z_index = 0
 
@@ -867,9 +1640,9 @@ func _setup_quest_panel_style() -> void:
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		label.clip_text = false
 		label.add_theme_font_size_override("font_size", 15)
-		label.add_theme_color_override("font_color", Color.WHITE)
-		label.add_theme_constant_override("outline_size", 2)
-		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+		label.add_theme_color_override("font_color", UI_PRIMARY)
+		label.add_theme_constant_override("outline_size", 0)
+		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.0))
 		label.z_index = 2
 
 		_quest_labels.append(label)
@@ -893,7 +1666,7 @@ func _setup_quest_panel_style() -> void:
 	_quest_style_ready = true
 
 
-func _set_quest_task(index: int, text: String, done: bool) -> void:
+func _set_quest_task(index: int, text: String, done: bool, is_active: bool = false) -> void:
 	if index < 0 or index >= _quest_labels.size():
 		return
 
@@ -902,8 +1675,17 @@ func _set_quest_task(index: int, text: String, done: bool) -> void:
 		return
 
 	label.text = text
-	# Finished tasks are only dimmed. Do not show strike-through lines because they look messy in the UI.
-	label.modulate = Color(1, 1, 1, 0.45) if done else Color.WHITE
+	label.modulate = Color(1, 1, 1, 0.58) if done else Color.WHITE
+	label.add_theme_color_override("font_color", Color(0.30, 0.24, 0.18, 1.0) if done else UI_PRIMARY)
+
+	var row_bg := get_node_or_null("QuestLayer/QuestRowBG" + str(index + 1)) as ColorRect
+	if is_instance_valid(row_bg):
+		if done:
+			row_bg.color = Color(0.69, 0.63, 0.56, 0.68)
+		elif is_active:
+			row_bg.color = Color(0.99, 0.92, 0.79, 0.97)
+		else:
+			row_bg.color = Color(0.96, 0.89, 0.77, 0.94)
 
 	if index < _quest_strike_lines.size():
 		var strike := _quest_strike_lines[index] as ColorRect
@@ -924,31 +1706,36 @@ func _update_quest_labels() -> void:
 	_set_quest_task(
 		0,
 		"Catch fireflies: " + str(_fireflies_collected) + "/5",
-		fireflies_done
+		fireflies_done,
+		_current_phase == BackyardPhase.FIREFLIES
 	)
 
 	_set_quest_task(
 		1,
 		"Use the Firefly Lantern",
-		lantern_done
+		lantern_done,
+		_current_phase == BackyardPhase.LANTERN
 	)
 
 	_set_quest_task(
 		2,
 		"Find and decode the name tag",
-		decode_done
+		decode_done,
+		_current_phase == BackyardPhase.DECODE_NAME
 	)
 
 	_set_quest_task(
 		3,
 		"Find Pina's memory",
-		memory_done
+		memory_done,
+		_current_phase == BackyardPhase.DISTANCE
 	)
 
 	_set_quest_task(
 		4,
 		"Clear the strange plant",
-		grass_done
+		grass_done,
+		_current_phase == BackyardPhase.GRASS
 	)
 
 
@@ -976,6 +1763,11 @@ func _refresh_lantern_use_button() -> void:
 	if is_instance_valid(use_lantern_button):
 		use_lantern_button.visible = show_button
 		use_lantern_button.disabled = not show_button
+		use_lantern_button.modulate = Color.WHITE if show_button else Color(1, 1, 1, 0.72)
+		_set_attention_pulse(use_lantern_button, show_button)
+
+	if is_instance_valid(lantern_reward_sprite):
+		_set_attention_pulse(lantern_reward_sprite, in_lantern_phase, 1.03, 0.9)
 
 
 func _on_use_lantern_pressed() -> void:
@@ -1039,9 +1831,9 @@ func rpc_firefly_collected(firefly_name: String, count: int) -> void:
 
 	var firefly := get_node_or_null("FireflyLayer/" + firefly_name)
 	if is_instance_valid(firefly):
-		firefly.visible = false
 		if firefly is Area2D:
 			_set_area_enabled(firefly, false)
+		_animate_firefly_capture(firefly)
 
 	_update_quest_labels()
 	show_notification("Fireflies caught: " + str(_fireflies_collected) + "/5", 1.5)
@@ -1175,9 +1967,9 @@ func _server_open_decode_panel() -> void:
 	if _current_phase != BackyardPhase.DECODE_NAME or _zone_failed:
 		return
 	if multiplayer.has_multiplayer_peer():
-		rpc_open_decode_panel.rpc()
+		rpc_open_decode_panel.rpc(_word_puzzle_question_index, _word_puzzle_revealed_count)
 	else:
-		rpc_open_decode_panel()
+		rpc_open_decode_panel(_word_puzzle_question_index, _word_puzzle_revealed_count)
 
 func _style_decode_instruction_label(label: Label) -> void:
 	if not is_instance_valid(label):
@@ -1190,50 +1982,145 @@ func _style_decode_instruction_label(label: Label) -> void:
 	label.clip_text = false
 
 @rpc("any_peer", "reliable", "call_local")
-func rpc_open_decode_panel() -> void:
+func rpc_open_decode_panel(question_index: int = 0, revealed_count: int = 0) -> void:
 	if is_instance_valid(decode_ui_layer):
-		decode_ui_layer.visible = true
+		decode_ui_layer.visible = false
+	if is_instance_valid(decode_panel):
+		decode_panel.visible = false
+	if is_instance_valid(sidekick_name_tag):
+		sidekick_name_tag.visible = false
 
-	var detective_instruction := "Rearrange the letters to form a name."
-	var sidekick_instruction := "Rearrange the letters to form a name."
+	_word_puzzle_question_index = clampi(question_index, 0, WORD_PUZZLE_QUESTIONS.size())
+	_word_puzzle_revealed_count = clampi(revealed_count, 0, WORD_PUZZLE_QUESTIONS.size())
+	_set_word_puzzle_visible(true)
+	_animate_panel_pop(word_puzzle_layer, 0.97)
 
-	if _is_detective_solver():
-		if is_instance_valid(decode_panel):
-			decode_panel.visible = true
+	if _is_word_puzzle_local_turn() and is_instance_valid(word_puzzle_answer_input):
+		word_puzzle_answer_input.grab_focus()
+		show_notification("Answer the question to reveal the next letter.", 3.0)
+	elif _word_puzzle_question_index < WORD_PUZZLE_QUESTIONS.size():
+		show_notification(_get_word_puzzle_turn_label(_word_puzzle_question_index) + " must answer this question.", 3.0)
 
-		if is_instance_valid(sidekick_name_tag):
-			sidekick_name_tag.visible = false
 
-		if is_instance_valid(decode_instruction_label):
-			decode_instruction_label.text = detective_instruction
-			_style_decode_instruction_label(decode_instruction_label)
+func _on_word_puzzle_clear_pressed() -> void:
+	if _dialogue_input_locked or _zone_failed:
+		return
+	if _current_phase != BackyardPhase.DECODE_NAME:
+		return
+	if not _is_word_puzzle_local_turn():
+		return
+	if is_instance_valid(word_puzzle_answer_input):
+		word_puzzle_answer_input.text = ""
+		word_puzzle_answer_input.grab_focus()
 
-		if is_instance_valid(name_input):
-			name_input.text = ""
-			name_input.editable = true
-			name_input.grab_focus()
-			name_input.add_theme_font_size_override("font_size", 22)
-			name_input.placeholder_text = "Type name here"
 
-		if is_instance_valid(decode_submit_button):
-			decode_submit_button.disabled = false
-			decode_submit_button.add_theme_font_size_override("font_size", 18)
-			decode_submit_button.text = "SUBMIT"
+func _on_word_puzzle_answer_submitted(_answer: String) -> void:
+	_on_word_puzzle_submit_pressed()
 
-		show_notification("Decode the faded name and type the answer.", 3.0)
 
+func _on_word_puzzle_submit_pressed() -> void:
+	if _dialogue_input_locked or _zone_failed:
+		return
+	if _current_phase != BackyardPhase.DECODE_NAME:
+		return
+	if not _is_word_puzzle_local_turn():
+		return
+
+	var answer := ""
+	if is_instance_valid(word_puzzle_answer_input):
+		answer = word_puzzle_answer_input.text.strip_edges()
+
+	if answer.is_empty():
+		_flash_input_state(word_puzzle_answer_input, false)
+		show_notification("Enter your answer first.", 1.8)
+		return
+
+	if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
+		var sender_peer_id := _SERVER_PEER_ID
+		if multiplayer.has_multiplayer_peer():
+			sender_peer_id = multiplayer.get_unique_id()
+		_server_validate_word_puzzle_answer(answer, sender_peer_id)
 	else:
-		if is_instance_valid(decode_panel):
-			decode_panel.visible = false
+		rpc_request_validate_word_puzzle_answer.rpc_id(_SERVER_PEER_ID, answer)
 
-		if is_instance_valid(sidekick_name_tag):
-			sidekick_name_tag.visible = true
 
-		if is_instance_valid(sidekick_name_tag_instruction_label):
-			sidekick_name_tag_instruction_label.text = sidekick_instruction
-			_style_decode_instruction_label(sidekick_name_tag_instruction_label)
-			
-		show_notification("Help the Detective decode the ghost's name.", 3.0)
+@rpc("any_peer", "reliable")
+func rpc_request_validate_word_puzzle_answer(answer: String) -> void:
+	if multiplayer.is_server():
+		_server_validate_word_puzzle_answer(answer, multiplayer.get_remote_sender_id())
+
+
+func _server_validate_word_puzzle_answer(answer: String, sender_peer_id: int) -> void:
+	if _current_phase != BackyardPhase.DECODE_NAME or _zone_failed:
+		return
+	if _word_puzzle_question_index < 0 or _word_puzzle_question_index >= WORD_PUZZLE_QUESTIONS.size():
+		return
+	if not _is_word_puzzle_peer_turn(sender_peer_id, _word_puzzle_question_index):
+		return
+
+	if not _is_word_puzzle_answer_correct(answer, _word_puzzle_question_index):
+		_server_add_strike("The Tikbalang twists the answer in the fog...")
+		return
+
+	_word_puzzle_revealed_count += 1
+	_word_puzzle_question_index += 1
+
+	if multiplayer.has_multiplayer_peer():
+		rpc_word_puzzle_answer_correct.rpc(_word_puzzle_question_index, _word_puzzle_revealed_count)
+	else:
+		rpc_word_puzzle_answer_correct(_word_puzzle_question_index, _word_puzzle_revealed_count)
+
+	if _word_puzzle_revealed_count >= WORD_PUZZLE_QUESTIONS.size():
+		await get_tree().create_timer(0.8).timeout
+		if _current_phase != BackyardPhase.DECODE_NAME or _zone_failed:
+			return
+		if multiplayer.has_multiplayer_peer():
+			rpc_name_decoded.rpc()
+		else:
+			rpc_name_decoded()
+
+
+func _is_word_puzzle_peer_turn(peer_id: int, question_index: int) -> bool:
+	if not multiplayer.has_multiplayer_peer():
+		return true
+
+	var expected_role := _get_word_puzzle_question_role(question_index)
+	if expected_role == WORD_PUZZLE_DETECTIVE:
+		return peer_id == _SERVER_PEER_ID
+	return peer_id != _SERVER_PEER_ID
+
+
+func _is_word_puzzle_answer_correct(answer: String, question_index: int) -> bool:
+	var normalized := _normalize_word_puzzle_answer(answer)
+	var valid_answers: Array = WORD_PUZZLE_QUESTIONS[question_index].get("answers", [])
+	for valid_answer in valid_answers:
+		if normalized == _normalize_word_puzzle_answer(str(valid_answer)):
+			return true
+	return false
+
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_word_puzzle_answer_correct(question_index: int, revealed_count: int) -> void:
+	var revealed_index := clampi(revealed_count - 1, 0, word_puzzle_letters.size() - 1)
+	_word_puzzle_question_index = clampi(question_index, 0, WORD_PUZZLE_QUESTIONS.size())
+	_word_puzzle_revealed_count = clampi(revealed_count, 0, WORD_PUZZLE_QUESTIONS.size())
+	if is_instance_valid(word_puzzle_answer_input):
+		word_puzzle_answer_input.text = ""
+		_flash_input_state(word_puzzle_answer_input, true)
+
+	if revealed_index >= 0 and revealed_index < word_puzzle_letters.size():
+		var letter := word_puzzle_letters[revealed_index] as Sprite2D
+		_animate_letter_reveal(letter)
+
+	_refresh_word_puzzle_ui()
+
+	if _word_puzzle_revealed_count < WORD_PUZZLE_QUESTIONS.size():
+		if _is_word_puzzle_local_turn():
+			show_notification("Correct. Your turn to answer.", 2.5)
+			if is_instance_valid(word_puzzle_answer_input):
+				word_puzzle_answer_input.grab_focus()
+		else:
+			show_notification("Correct. " + _get_word_puzzle_turn_label(_word_puzzle_question_index) + "'s turn next.", 2.5)
 
 func _on_decode_submit_pressed() -> void:
 	if _dialogue_input_locked or _zone_failed:
@@ -1288,6 +2175,7 @@ func rpc_name_decoded() -> void:
 
 	if is_instance_valid(sidekick_name_tag):
 		sidekick_name_tag.visible = false
+	_set_word_puzzle_visible(false)
 
 	if is_instance_valid(name_input):
 		name_input.editable = false
@@ -1330,9 +2218,12 @@ func _open_board_local() -> void:
 func _open_distance_board_local() -> void:
 	_board_unlocked = true
 	_board_opened = true
+	_grass_transition_focus_active = false
 
 	if is_instance_valid(board_layer):
 		board_layer.visible = true
+	if is_instance_valid(board_sprite):
+		_animate_panel_pop(board_sprite, 0.95)
 	if is_instance_valid(board_tap_button):
 		board_tap_button.visible = false
 		board_tap_button.disabled = true
@@ -1349,14 +2240,19 @@ func _open_distance_board_local() -> void:
 		x_input.visible = _is_detective_solver()
 		x_input.editable = _is_detective_solver()
 		x_input.text = ""
-		x_input.placeholder_text = "Distance in cm"
+		x_input.placeholder_text = "Type answer"
 		x_input.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
+		_refresh_distance_input_visual_state()
 		if _is_detective_solver():
 			x_input.grab_focus()
 
 	if is_instance_valid(submit_button):
 		submit_button.visible = _is_detective_solver()
 		submit_button.disabled = not _is_detective_solver()
+		submit_button.modulate = Color.WHITE if _is_detective_solver() else Color(1, 1, 1, 0.72)
+		_set_attention_pulse(submit_button, _is_detective_solver())
+
+	_refresh_focus_overlay_state()
 
 	if _is_detective_solver():
 		show_notification("Convert " + str(memory_distance_dali) + " Dali to centimeters.", 3.0)
@@ -1535,11 +2431,13 @@ func _on_submit_pressed() -> void:
 	var answer_text := x_input.text.strip_edges()
 	if answer_text.is_empty():
 		if is_instance_valid(feedback_label):
-			feedback_label.text = "Enter an answer first."
+			_flash_label(feedback_label, UI_ERROR, "Enter an answer first.")
+		_flash_input_state(x_input, false)
 		return
 	if not answer_text.is_valid_int():
 		if is_instance_valid(feedback_label):
-			feedback_label.text = "Numbers only."
+			_flash_label(feedback_label, UI_ERROR, "Numbers only.")
+		_flash_input_state(x_input, false)
 		show_notification("Numbers only. Try again.", 1.8)
 		return
 
@@ -1595,7 +2493,7 @@ func _server_add_strike(message: String) -> void:
 func rpc_apply_strike(strike_count: int, strike_message: String) -> void:
 	_strikes = strike_count
 	if is_instance_valid(feedback_label):
-		feedback_label.text = strike_message
+		_flash_label(feedback_label, UI_ERROR, strike_message)
 	if is_instance_valid(fog_overlay):
 		match strike_count:
 			1:
@@ -1604,6 +2502,14 @@ func rpc_apply_strike(strike_count: int, strike_message: String) -> void:
 				fog_overlay.modulate.a = 0.66
 			_:
 				fog_overlay.modulate.a = 0.85
+	if _current_phase == BackyardPhase.DISTANCE:
+		_flash_input_state(x_input, false)
+	elif _current_phase == BackyardPhase.DECODE_NAME:
+		_flash_input_state(word_puzzle_answer_input, false)
+	if is_instance_valid(board_sprite) and board_layer.visible:
+		_shake_node(board_sprite, 12.0, 0.3)
+	elif is_instance_valid(word_puzzle_layer) and word_puzzle_layer.visible:
+		_shake_node(word_puzzle_layer, 12.0, 0.3)
 	show_notification(strike_message, 2.0)
 
 func _server_fail_zone(message: String) -> void:
@@ -1666,9 +2572,35 @@ func _zoom_camera_to_grass() -> void:
 	var target_zoom := Vector2(1.45, 1.45)
 
 	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
 	tween.set_parallel(true)
-	tween.tween_property(focus_camera, "global_position", target_pos, 0.9)
-	tween.tween_property(focus_camera, "zoom", target_zoom, 0.9)
+	tween.tween_property(focus_camera, "global_position", target_pos, 1.45)
+	tween.tween_property(focus_camera, "zoom", target_zoom, 1.45)
+	await tween.finished
+
+
+func _play_distance_to_grass_transition() -> void:
+	if is_instance_valid(board_sprite):
+		var board_tween := create_tween()
+		board_tween.set_parallel(true)
+		board_tween.tween_property(board_sprite, "modulate:a", 0.0, 0.28)
+		board_tween.tween_property(board_sprite, "scale", _get_canvas_item_base_scale(board_sprite) * 0.96, 0.28)
+		if is_instance_valid(feedback_label):
+			board_tween.tween_property(feedback_label, "modulate:a", 0.0, 0.2)
+		if is_instance_valid(x_input):
+			board_tween.tween_property(x_input, "modulate:a", 0.0, 0.2)
+		if is_instance_valid(submit_button):
+			board_tween.tween_property(submit_button, "modulate:a", 0.0, 0.2)
+		if is_instance_valid(ledger_panel):
+			board_tween.tween_property(ledger_panel, "modulate:a", 0.0, 0.22)
+		await board_tween.finished
+
+	if is_instance_valid(fog_overlay):
+		fog_overlay.visible = true
+		var fade_up := create_tween()
+		fade_up.tween_property(fog_overlay, "modulate:a", 0.82, 0.45)
+		await fade_up.finished
 
 
 func _hide_ghost_before_grass_focus() -> void:
@@ -1677,6 +2609,8 @@ func _hide_ghost_before_grass_focus() -> void:
 	if is_instance_valid(ghost_dialogue_label):
 		ghost_dialogue_label.visible = false
 		ghost_dialogue_label.text = ""
+	if is_instance_valid(_ghost_dialogue_overlay):
+		_ghost_dialogue_overlay.visible = false
 
 	if is_instance_valid(ghost_name_tag):
 		_set_area_enabled(ghost_name_tag, false)
@@ -1690,12 +2624,23 @@ func _hide_ghost_before_grass_focus() -> void:
 
 	if is_instance_valid(ghost_layer):
 		ghost_layer.visible = false
+	_refresh_focus_overlay_state()
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_distance_answered() -> void:
 	_current_phase = BackyardPhase.GRASS
 	_board_unlocked = false
 	_board_opened = false
+	_grass_transition_focus_active = true
+	hide_notification()
+	_refresh_focus_overlay_state()
+
+	if is_instance_valid(feedback_label):
+		_flash_label(feedback_label, UI_SUCCESS, "Correct! The light points to the grass.")
+	if is_instance_valid(x_input):
+		_flash_input_state(x_input, true)
+	await get_tree().create_timer(0.6).timeout
+	await _play_distance_to_grass_transition()
 
 	if is_instance_valid(board_layer):
 		board_layer.visible = false
@@ -1703,13 +2648,27 @@ func rpc_distance_answered() -> void:
 	if is_instance_valid(x_input):
 		x_input.visible = false
 		x_input.editable = false
+		x_input.modulate.a = 1.0
+		_refresh_distance_input_visual_state()
 
 	if is_instance_valid(submit_button):
 		submit_button.visible = false
 		submit_button.disabled = true
+		submit_button.modulate.a = 1.0
+
+	if is_instance_valid(feedback_label):
+		feedback_label.text = ""
+		feedback_label.modulate.a = 1.0
+
+	if is_instance_valid(board_sprite):
+		board_sprite.modulate.a = 1.0
+		board_sprite.scale = _get_canvas_item_base_scale(board_sprite)
 
 	if is_instance_valid(ledger_panel):
 		ledger_panel.visible = false
+		ledger_panel.modulate.a = 1.0
+
+	_refresh_focus_overlay_state()
 
 	# Hide Pina's spirit first so the camera focuses only on the grass patch.
 	await _hide_ghost_before_grass_focus()
@@ -1721,9 +2680,15 @@ func rpc_distance_answered() -> void:
 				child.visible = true
 				_set_area_enabled(child, true)
 
-	_zoom_camera_to_grass()
+	await _zoom_camera_to_grass()
 
-	show_notification("The lantern light stops on the grass. Clear what is covering it.", 4.0)
+	if is_instance_valid(fog_overlay):
+		var fade_down := create_tween()
+		fade_down.tween_property(fog_overlay, "modulate:a", 0.58, 0.55)
+		await fade_down.finished
+
+	_grass_transition_focus_active = false
+	_refresh_focus_overlay_state()
 	_update_quest_labels()
 
 func _on_grass_input_event(_viewport: Node, event: InputEvent, _shape_idx: int, grass_area: Area2D) -> void:
@@ -1784,9 +2749,9 @@ func rpc_grass_cleared(grass_name: String, new_stage: int) -> void:
 	_clearing_stage = new_stage
 	var grass := get_node_or_null("GrassLayer/" + grass_name)
 	if is_instance_valid(grass):
-		grass.visible = false
 		if grass is Area2D:
 			_set_area_enabled(grass, false)
+		_animate_grass_clear(grass)
 
 	match _clearing_stage:
 		1:
@@ -1899,6 +2864,9 @@ func rpc_show_reward() -> void:
 		fruit_tap_button.visible  = false
 	if is_instance_valid(reward_layer):      reward_layer.visible      = true
 	if is_instance_valid(clue_sprite):       clue_sprite.visible       = true
+	if is_instance_valid(clue_sprite):
+		clue_sprite.modulate.a = 0.0
+		clue_sprite.scale = Vector2(0.14, 0.14)
 	if is_instance_valid(sparkle):
 		sparkle.visible    = true
 		sparkle.scale      = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
@@ -1908,6 +2876,7 @@ func rpc_show_reward() -> void:
 	if is_instance_valid(reward_banner_label):
 		reward_banner_label.visible = true
 		reward_banner_label.text    = "CLUE FOUND!"
+		reward_banner_label.modulate.a = 0.0
 	if is_instance_valid(reward_text_label):   reward_text_label.text   = ""
 	if is_instance_valid(reward_panel):        reward_panel.visible      = false
 	if is_instance_valid(tap_instruction_label):
@@ -1920,6 +2889,14 @@ func rpc_show_reward() -> void:
 	if is_instance_valid(briefcase_reveal_sprite):
 		briefcase_reveal_sprite.visible = false
 		briefcase_reveal_sprite.texture = null
+
+	var reward_tween := create_tween()
+	reward_tween.set_parallel(true)
+	if is_instance_valid(clue_sprite):
+		reward_tween.tween_property(clue_sprite, "modulate:a", 1.0, 0.25)
+		reward_tween.tween_property(clue_sprite, "scale", Vector2(0.16943358, 0.14160155), 0.25)
+	if is_instance_valid(reward_banner_label):
+		reward_tween.tween_property(reward_banner_label, "modulate:a", 1.0, 0.25)
 
 
 func _on_collect_pressed() -> void:
@@ -1962,14 +2939,31 @@ func show_notification(text: String, duration: float = 2.0) -> void:
 	if not is_instance_valid(notification_panel) or not is_instance_valid(notification_label):
 		return
 	notification_label.text    = text
+	notification_panel.modulate.a = 0.0
 	notification_panel.visible = true
 	var current_id := Time.get_ticks_msec()
 	notification_panel.set_meta("msg_id", current_id)
+
+	if notification_panel.has_meta("ux_notification_tween"):
+		var existing_tween = notification_panel.get_meta("ux_notification_tween")
+		if existing_tween is Tween:
+			existing_tween.kill()
+
+	var fade_in := create_tween()
+	fade_in.tween_property(notification_panel, "modulate:a", 1.0, 0.16)
+	notification_panel.set_meta("ux_notification_tween", fade_in)
+
 	if duration <= 0.0:
 		return
 	await get_tree().create_timer(duration, true).timeout
 	if is_instance_valid(notification_panel) and notification_panel.get_meta("msg_id", -1) == current_id:
-		notification_panel.visible = false
+		var fade_out := create_tween()
+		fade_out.tween_property(notification_panel, "modulate:a", 0.0, 0.16)
+		fade_out.tween_callback(func():
+			if is_instance_valid(notification_panel) and notification_panel.get_meta("msg_id", -1) == current_id:
+				notification_panel.visible = false
+		)
+		notification_panel.set_meta("ux_notification_tween", fade_out)
 
 
 func hide_notification() -> void:
@@ -2043,6 +3037,8 @@ func _on_reward_tap_catcher_pressed() -> void:
 			if is_instance_valid(reward_text_label): reward_text_label.text    = ""
 			if is_instance_valid(collect_button):
 				collect_button.visible = GameState.local_role == GameState.Role.SIDEKICK if multiplayer.has_multiplayer_peer() else true
+				collect_button.disabled = not collect_button.visible
+				_set_attention_pulse(collect_button, collect_button.visible)
 
 
 func _show_briefcase_reveal_local() -> void:
@@ -2127,6 +3123,7 @@ func _hide_reward_visuals_for_briefcase() -> void:
 		tap_catcher.visible  = false
 		tap_catcher.disabled = true
 	if is_instance_valid(collect_button):         collect_button.visible         = false
+	_set_attention_pulse(collect_button, false)
 
 
 func _hide_revealed_clue_after_touch() -> void:
@@ -2176,22 +3173,13 @@ func rpc_request_puzzle_data() -> void:
 
 
 @rpc("authority", "reliable", "call_local")
-func rpc_sync_puzzle_data(variation_index: int, sync_encoded_name: String, sync_decoded_name: String, sync_shift_steps: int, sync_plant_dali: int, sync_dali_to_cm: int, sync_solution: int, sync_spirit_cm: int = 0) -> void:
+func rpc_sync_puzzle_data(variation_index: int, sync_encoded_name: String, sync_decoded_name: String, sync_shift_steps: int, _sync_plant_dali: int, _sync_dali_to_cm: int, _sync_solution: int, _sync_spirit_cm: int = 0) -> void:
 	GameState.force_puzzle_variation_index(ZONE_ID, variation_index)
 
 	encoded_name = sync_encoded_name
 	decoded_name = sync_decoded_name.to_upper()
 	shift_steps = sync_shift_steps
-	dali_to_cm = sync_dali_to_cm
-
-	# Apply the same deterministic values from the server-side PuzzleManager.
-	plant_height_dali = sync_plant_dali
-	spirit_height_cm = sync_spirit_cm if sync_spirit_cm > 0 else sync_solution
-	solution_cm = sync_solution
-
-	# New gameplay aliases.
-	memory_distance_dali = plant_height_dali
-	memory_distance_cm = solution_cm
+	_apply_fixed_distance_values()
 
 	_on_puzzle_data_ready()
 
