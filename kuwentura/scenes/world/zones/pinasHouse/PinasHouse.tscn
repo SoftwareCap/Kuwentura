@@ -1,11 +1,14 @@
-[gd_scene load_steps=80 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=83 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
+[ext_resource type="Texture2D" uid="uid://mn5xegdioqrn" path="res://assets/sprites/zoneObjects/notification.png" id="2_m2a4r"]
 [ext_resource type="Texture2D" uid="uid://miy70k8n04ul" path="res://assets/sprites/places/pinasHouseBackground.png" id="2_vt60f"]
 [ext_resource type="Texture2D" uid="uid://du4de733sad05" path="res://assets/sprites/zoneObjects/pinasHouseObjects/openCabinet.png" id="3_0s51p"]
+[ext_resource type="Texture2D" uid="uid://cgtl3fi4ldvqd" path="res://assets/sprites/players/detective/detective.png" id="3_cyexm"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 [ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/inventoryBoard.png" id="3_k0xpg"]
 [ext_resource type="Texture2D" uid="uid://3boff2bjwjx5" path="res://assets/sprites/zoneObjects/pinasHouseObjects/pan.png" id="4_d1egf"]
+[ext_resource type="Texture2D" uid="uid://bppb0lkeirtvl" path="res://assets/sprites/players/detective/sidekick.png" id="4_m2a4r"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="4_zonecontrols"]
 [ext_resource type="Texture2D" uid="uid://dorp3w7u7d4r6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/14.png" id="5_j1qle"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="5_play"]
@@ -255,6 +258,24 @@ texture = ExtResource("39_0s51p")
 process_mode = 1
 script = ExtResource("1_pinashouse")
 
+[node name="Notification" type="CanvasLayer" parent="."]
+layer = 200
+
+[node name="Sprite2D" type="Sprite2D" parent="Notification"]
+position = Vector2(693, 66.00001)
+scale = Vector2(0.42129624, 0.4212962)
+texture = ExtResource("2_m2a4r")
+
+[node name="NotificationLabel" type="Label" parent="Notification"]
+offset_left = 388.0
+offset_top = 28.0
+offset_right = 1053.0
+offset_bottom = 105.0
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
 [node name="BackgroundLayer" type="Node2D" parent="."]
 position = Vector2(6.1035156e-05, 6.1035156e-05)
 scale = Vector2(0.99999994, 0.99999994)
@@ -263,6 +284,19 @@ scale = Vector2(0.99999994, 0.99999994)
 position = Vector2(735.00006, 346.99997)
 scale = Vector2(0.5742188, 0.50924444)
 texture = ExtResource("2_vt60f")
+
+[node name="Players" type="Node2D" parent="."]
+z_index = 20
+
+[node name="Detective" type="Sprite2D" parent="Players"]
+position = Vector2(99, 603)
+scale = Vector2(0.98, 0.98)
+texture = ExtResource("3_cyexm")
+
+[node name="Sidekick" type="Sprite2D" parent="Players"]
+position = Vector2(99, 603)
+scale = Vector2(0.98, 0.98)
+texture = ExtResource("4_m2a4r")
 
 [node name="InteractiveLayer" type="Node2D" parent="."]
 position = Vector2(6.1035156e-05, 6.1035156e-05)
@@ -744,9 +778,9 @@ vertical_alignment = 1
 [node name="XInput" type="LineEdit" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
 layout_mode = 0
 offset_left = 402.0
-offset_top = 580.0
+offset_top = 610.0
 offset_right = 538.0
-offset_bottom = 653.0
+offset_bottom = 683.0
 theme_override_colors/font_color = Color(0.9650678, 0.9650869, 0.9614435, 1)
 theme_override_colors/font_selected_color = Color(0.04755766, 0.047557645, 0.047557645, 1)
 theme_override_colors/caret_color = Color(0.014275194, 0.014275219, 0.014275289, 1)
@@ -840,6 +874,7 @@ process_mode = 3
 layer = 110
 
 [node name="InGamePausePanel" type="Panel" parent="PauseCanvasLayer"]
+process_mode = 3
 visible = false
 top_level = true
 z_index = 10
@@ -880,6 +915,7 @@ width = 2.0
 default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
 
 [node name="Resume_PlayButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+process_mode = 3
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -913,6 +949,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OptionButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+process_mode = 3
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -948,7 +985,8 @@ text = "Option"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ExitButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+[node name="BackToForestButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+process_mode = 3
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -966,25 +1004,27 @@ texture_normal = ExtResource("7_exit")
 ignore_texture_size = true
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/ExitButton"]
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/BackToForestButton"]
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -336.0
+offset_left = -355.0
 offset_top = -20.0
+offset_right = -19.0
 offset_bottom = 20.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 40
-text = "Exit to Main Menu"
+text = "Back to Forest"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OptionSubPanel" type="Panel" parent="PauseCanvasLayer/InGamePausePanel"]
+process_mode = 3
 visible = false
 layout_mode = 0
 offset_right = 884.5
@@ -1008,6 +1048,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="BackToPrevious" type="TouchScreenButton" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+process_mode = 3
 position = Vector2(20, 10)
 scale = Vector2(0.3, 0.3)
 texture_normal = ExtResource("8_back")
@@ -1162,28 +1203,6 @@ offset_bottom = 1230.1853
 scale = Vector2(0.3947917, 0.4273148)
 mouse_filter = 2
 
-[node name="NotificationUI" type="CanvasLayer" parent="."]
-
-[node name="Panel" type="Panel" parent="NotificationUI"]
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -339.0
-offset_top = 15.0
-offset_right = 502.0
-offset_bottom = 55.0
-grow_horizontal = 2
-mouse_filter = 2
-
-[node name="Label" type="Label" parent="NotificationUI/Panel"]
-layout_mode = 0
-offset_right = 823.0
-offset_bottom = 40.0
-theme_override_font_sizes/font_size = 20
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 3
-
 [node name="SidekickLayer" type="CanvasLayer" parent="."]
 
 [node name="Ledger" type="Panel" parent="SidekickLayer"]
@@ -1290,6 +1309,15 @@ scale = Vector2(0.3271484, 0.35648146)
 texture = ExtResource("39_ra7mo")
 
 [node name="Cutscene" type="CanvasLayer" parent="."]
+
+[node name="DarkOverlay" type="ColorRect" parent="Cutscene"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.011764706, 0.011764706, 0.011764706, 1)
 
 [node name="EndingCutscene" type="VideoStreamPlayer" parent="Cutscene"]
 anchors_preset = 15

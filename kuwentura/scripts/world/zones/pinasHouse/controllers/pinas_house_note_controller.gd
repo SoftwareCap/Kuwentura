@@ -18,6 +18,7 @@ func setup(owner: Node) -> void:
 	for btn_node in [zone.detective_close, zone.sidekick_close]:
 		if is_instance_valid(btn_node) and not btn_node.pressed.is_connected(zone._close_boards):
 			btn_node.pressed.connect(zone._close_boards.bind(true))
+			btn_node.pressed.connect(_on_board_closed)
 
 	if is_instance_valid(zone.note_btn):
 		zone.note_btn.visible = false
@@ -162,23 +163,24 @@ func after_note_solved() -> void:
 	zone.pulse_ledger_guidance(false)
 	zone._enable_cabinet_interaction()
 
+	# Hide players before dialogue
+	zone._update_player_visibility(false)
+
 	if zone.multiplayer.is_server():
-		# Detective: play dialogue and await it — locks input until done
 		await zone._play_locked_dialogue("pinas_house_riddle_reveal", DialogueLibraries.PINAS_HOUSE_RIDDLE_REVEAL)
 	else:
-		# Sidekick: play dialogue locally and await it finishing.
-		# This does NOT depend on the detective so it won't freeze.
 		zone._set_dialogue_input_lock(true)
 		DialogueSystem.play("pinas_house_riddle_reveal", DialogueLibraries.PINAS_HOUSE_RIDDLE_REVEAL)
 		await DialogueSystem.wait_finished("pinas_house_riddle_reveal")
 		zone._set_dialogue_input_lock(false)
-		# Show the solved board after dialogue closes
 		if is_instance_valid(zone.sidekick_board):
 			zone.sidekick_board.visible = true
 			if zone.sidekick_board.has_method("apply_solved_view"):
 				zone.sidekick_board.apply_solved_view()
 
-	zone.show_notification("Search where the clue is hidden.", 8.0)
+	# Show players again after dialogue
+	zone._update_player_visibility(true)
+	zone.show_notification("Search where the clue is hidden.", 5.0)
 
 
 func apply_note_interaction_gate() -> void:
@@ -211,3 +213,8 @@ func _apply_sidekick_board_input_state() -> void:
 		zone.sidekick_board.set_puzzle_inputs_visible(not zone._note_solved)
 	if zone._note_solved and zone.sidekick_board.has_method("apply_solved_view"):
 		zone.sidekick_board.apply_solved_view()
+
+
+func _on_board_closed() -> void:
+	if zone._cabinet_phase_active and not zone._reward_active:
+		zone.show_notification("Search where the clue is hidden.", 5.0)

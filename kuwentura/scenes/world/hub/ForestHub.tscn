@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://k60h4yhhde0x" path="res://assets/backgrounds/forest.png" id="2_87r7r"]
 [ext_resource type="Texture2D" uid="uid://d06a48u2atl4o" path="res://assets/sprites/places/pinasHouseZone.png" id="2_anhpr"]
-[ext_resource type="Texture2D" uid="uid://fyaaxc6p5k04" path="res://assets/tiles/ForestPathTilemap.png" id="2_k5ulr"]
+[ext_resource type="Texture2D" uid="uid://fyaaxc6p5k04" path="res://assets/tiles/forestPathTilemap.png" id="2_k5ulr"]
 [ext_resource type="Script" uid="uid://b57klslahartq" path="res://scripts/world/hub/zone_portal.gd" id="3_dyw7g"]
 [ext_resource type="Texture2D" uid="uid://bhj0bkd0e3ina" path="res://assets/sprites/places/pinasHouseIndicator.png" id="5_bh328"]
 [ext_resource type="Texture2D" uid="uid://p18vin8nbajb" path="res://assets/sprites/places/oldWellZone.png" id="5_ggw0p"]

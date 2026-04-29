@@ -27,6 +27,10 @@ const NOTE_REVEAL_SHAKE_COUNT: int = 4
 
 @onready var role_label: Label = get_node_or_null("RoleLabel")
 @onready var back_button: Button = get_node_or_null("BackButton")
+@onready var players_node: Node = get_node_or_null("Players")
+@onready var detective_player: Node2D = get_node_or_null("Players/Detective")
+@onready var sidekick_player: Node2D = get_node_or_null("Players/Sidekick")
+
 @onready var inside_zone_control: CanvasLayer = $InsideZoneControl
 @onready var pause_canvas_layer: CanvasLayer = $PauseCanvasLayer
 @onready var in_game_pause_panel: Panel = $PauseCanvasLayer/InGamePausePanel
@@ -43,9 +47,9 @@ const NOTE_REVEAL_SHAKE_COUNT: int = 4
 @onready var sidekick_close: Button = $RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote/Close
 
 @onready var guidance_arrow: CanvasItem = get_node_or_null("RoleLayer/Control/GuidanceArrow")
-@onready var notification_ui: CanvasLayer = get_node_or_null("NotificationUI")
-@onready var notification_panel: Panel = get_node_or_null("NotificationUI/Panel")
-@onready var notification_label: Label = get_node_or_null("NotificationUI/Panel/Label")
+@onready var notification_ui: Node = get_node_or_null("Notification")
+@onready var notification_panel: Sprite2D = get_node_or_null("Notification/Sprite2D")
+@onready var notification_label: Label = get_node_or_null("Notification/NotificationLabel")
 
 @onready var ledger_panel: Panel = get_node_or_null("SidekickLayer/Ledger")
 @onready var briefcase_panel: Panel = get_node_or_null("SidekickLayer/Briefcase")
@@ -228,8 +232,16 @@ func _ready() -> void:
 		notification_ui.visible = true
 	if is_instance_valid(notification_panel):
 		notification_panel.visible = false
+	if is_instance_valid(notification_label):
+		notification_label.visible = false
 	if is_instance_valid(guidance_arrow):
 		guidance_arrow.visible = false
+		
+	# Hide players until search room phase ends
+	if is_instance_valid(detective_player):
+		detective_player.visible = false
+	if is_instance_valid(sidekick_player):
+		sidekick_player.visible = false
 
 	pause_controller.setup(self)
 	consequence_controller.setup(self)
@@ -247,9 +259,19 @@ func _ready() -> void:
 	if is_instance_valid(ending_cutscene):
 		ending_cutscene.visible = false
 		ending_cutscene.expand = true
-		ending_cutscene.anchors_preset = Control.PRESET_FULL_RECT 
-		ending_cutscene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		ending_cutscene.anchor_left = 0.1
+		ending_cutscene.anchor_top = 0.1
+		ending_cutscene.anchor_right = 0.9
+		ending_cutscene.anchor_bottom = 0.9
+		ending_cutscene.offset_left = 0
+		ending_cutscene.offset_top = 0
+		ending_cutscene.offset_right = 0
+		ending_cutscene.offset_bottom = 0
 		ending_cutscene.finished.connect(_on_cutscene_finished)
+		
+	var cutscene_dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	if is_instance_valid(cutscene_dark):
+		cutscene_dark.visible = false
 		
 	_ensure_sfx_bus()
 	_sfx_player = AudioStreamPlayer.new()
@@ -258,6 +280,13 @@ func _ready() -> void:
 	add_child(_sfx_player)
 
 	_initialize_puzzle_sync()
+
+
+func _update_player_visibility(spawn_players: bool) -> void:
+	if is_instance_valid(detective_player):
+		detective_player.visible = spawn_players and GameState.local_role == GameState.Role.DETECTIVE
+	if is_instance_valid(sidekick_player):
+		sidekick_player.visible = spawn_players and GameState.local_role == GameState.Role.SIDEKICK
 
 
 func _ensure_sfx_bus() -> void:
@@ -368,6 +397,11 @@ func _prepare_initial_flow_state() -> void:
 	note_controller.apply_note_interaction_gate()
 	_refresh_inside_zone_buttons()
 	_reset_cabinet_clue_state()
+	
+	if is_instance_valid(detective_player):
+		detective_player.visible = false
+	if is_instance_valid(sidekick_player):
+		sidekick_player.visible = false
 
 
 func _hide_note() -> void:
@@ -495,6 +529,9 @@ func _on_role_assigned(role: Variant) -> void:
 	update_role_visibility()
 	_update_role_label()
 	_refresh_inside_zone_buttons()
+	
+	var past_tool_phase: bool = _note_phase_active or _note_solved or _cabinet_phase_active or _reward_active
+	_update_player_visibility(past_tool_phase)
 
 
 func _update_role_label() -> void:
@@ -502,23 +539,28 @@ func _update_role_label() -> void:
 		role_label.text = "Role: " + GameState.get_role_display_text()
 
 
-func show_notification(text: String, duration: float = 2.0) -> void:
-	if not notification_panel or not notification_label:
+func show_notification(text: String, duration: float = 1.8) -> void:
+	if not is_instance_valid(notification_panel) or not is_instance_valid(notification_label):
 		return
 	notification_label.text = text
+	#notification_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	notification_panel.visible = true
+	notification_label.visible = true
 	var current_id := Time.get_ticks_msec()
 	notification_panel.set_meta("msg_id", current_id)
 	if duration <= 0.0:
 		return
 	await get_tree().create_timer(duration, true).timeout
-	if notification_panel and notification_panel.get_meta("msg_id", -1) == current_id:
+	if is_instance_valid(notification_panel) and notification_panel.get_meta("msg_id", -1) == current_id:
 		notification_panel.visible = false
+		notification_label.visible = false
 
 
 func hide_notification() -> void:
-	if notification_panel:
+	if is_instance_valid(notification_panel):
 		notification_panel.visible = false
+	if is_instance_valid(notification_label):
+		notification_label.visible = false
 
 
 func pulse_ledger_guidance(enable: bool) -> void:
@@ -553,12 +595,13 @@ func pulse_ledger_guidance(enable: bool) -> void:
 func _on_ledger_button_pressed() -> void:
 	if GameState.local_role != GameState.Role.SIDEKICK or _dialogue_input_locked:
 		return
+	var first_open: bool = not _ledger_opened_once
 	_ledger_opened_once = true
 	pulse_ledger_guidance(false)
 	_populate_ledger_content()
 	if ledger_panel:
 		ledger_panel.visible = not ledger_panel.visible
-	if _note_phase_active and not _note_solved:
+	if first_open and _note_phase_active and not _note_solved:
 		show_notification("Use the ledger steps to solve the equation.", 2.0)
 
 
@@ -748,7 +791,15 @@ func rpc_finalize_clue_collection() -> void:
 
 
 func _on_pause_button_pressed() -> void:
-	pause_controller.on_pause_button_pressed()
+	if not in_game_pause_panel:
+		return
+	in_game_pause_panel.visible = true
+	in_game_pause_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	# Add a full-screen blocker behind the panel
+	if option_sub_panel:
+		option_sub_panel.visible = false
+	get_tree().paused = true
+	MusicController.pause_music()
 
 func _on_resume_play_button_pressed() -> void:
 	pause_controller.on_resume_play_button_pressed()
@@ -760,7 +811,10 @@ func _on_in_game_option_back_pressed() -> void:
 	pause_controller.on_in_game_option_back_pressed()
 
 func _on_exit_to_main_menu_button_pressed() -> void:
-	await pause_controller.on_exit_to_main_menu_button_pressed()
+	get_tree().paused = false
+	if pause_controller:
+		pause_controller._resume_zone_systems()
+	_return_to_forest()
 
 func _on_in_game_volume_changed(value: float) -> void:
 	pause_controller.on_in_game_volume_changed(value)
@@ -821,6 +875,9 @@ func rpc_note_revealed() -> void:
 
 	if has_method("_refresh_note_puzzle_views"):
 		_refresh_note_puzzle_views()
+	
+	# Show the correct player after tool hunt completes
+	_update_player_visibility(true)
 
 
 func _on_wrong_object_input(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
@@ -924,7 +981,6 @@ func rpc_pinas_house_solved() -> void:
 	_refresh_inside_zone_buttons()
 	_set_progress_tracker_stage(2)
 	await note_controller.after_note_solved()
-	await note_controller.after_note_solved()
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_set_search_mode(enable: bool) -> void:
@@ -997,9 +1053,13 @@ func _set_dialogue_input_lock(locked: bool) -> void:
 
 func _play_locked_dialogue(dialogue_id: String, lines: Array[Dictionary]) -> void:
 	_set_dialogue_input_lock(true)
+	_update_player_visibility(false)  # hide players during dialogue
 	DialogueSystem.play(dialogue_id, lines)
 	await DialogueSystem.wait_finished(dialogue_id)
 	_set_dialogue_input_lock(false)
+	# Only show players again if we're past the tool hunt phase
+	var past_tool_phase: bool = _note_phase_active or _note_solved or _cabinet_phase_active or _reward_active
+	_update_player_visibility(past_tool_phase)
 
 
 func _reset_cabinet_clue_state() -> void:
@@ -1211,8 +1271,6 @@ func _hide_reward_visuals_for_briefcase() -> void:
 
 @rpc("authority", "reliable", "call_local")
 func rpc_finalize_clue() -> void:
-	# Server broadcasts to all peers after briefcase reveal.
-	# Both detective and sidekick run this and return to forest.
 	GameState.collect_clue("pinas_house")
 	_sparkle_animating = false
 	get_tree().paused = false
@@ -1226,8 +1284,14 @@ func rpc_finalize_clue() -> void:
 	if is_instance_valid(briefcase_reveal_sprite):
 		briefcase_reveal_sprite.visible = false
 		briefcase_reveal_sprite.texture = null
-	if is_instance_valid(reward_layer): reward_layer.visible = false
+	if is_instance_valid(reward_layer):
+		reward_layer.visible = false
+
+	# Fade out before cutscene
+	await _fade_out(0.6)
 	_play_ending_cutscene()
+	# Fade back in over the cutscene
+	await _fade_in(0.6)
 
 func _initialize_puzzle_sync() -> void:
 	if not multiplayer.has_multiplayer_peer():
@@ -1341,13 +1405,27 @@ func _play_ending_cutscene() -> void:
 	if not is_instance_valid(ending_cutscene):
 		_return_to_forest()
 		return
+	var dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	if is_instance_valid(dark):
+		dark.visible = true
 	ending_cutscene.visible = true
 	ending_cutscene.play()
 
 
 func _on_cutscene_finished() -> void:
-	ending_cutscene.visible = false
-	_return_to_forest()
+	if is_instance_valid(ending_cutscene):
+		ending_cutscene.visible = false
+		ending_cutscene.stop()
+	var dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	if is_instance_valid(dark):
+		dark.visible = false
+	# Fade to black before scene change — no flash back to zone
+	await _fade_out(0.6)
+	get_tree().paused = false
+	_stop_strike_system()
+	await get_tree().process_frame
+	if is_inside_tree():
+		get_tree().change_scene_to_file(SCENE_FOREST_HUB)
 
 
 func _input(event: InputEvent) -> void:
@@ -1355,3 +1433,26 @@ func _input(event: InputEvent) -> void:
 		if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
 			ending_cutscene.stop()
 			_on_cutscene_finished()
+
+
+func _fade_out(duration: float = 0.6) -> void:
+	var overlay := ColorRect.new()
+	overlay.name = "FadeOverlay"
+	overlay.color = Color(0, 0, 0, 0)
+	overlay.z_index = 9999
+	overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(overlay)
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(overlay, "color:a", 1.0, duration)
+	await tween.finished
+
+
+func _fade_in(duration: float = 0.6) -> void:
+	var overlay := get_node_or_null("FadeOverlay")
+	if not is_instance_valid(overlay):
+		return
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(overlay, "color:a", 0.0, duration)
+	await tween.finished
+	overlay.queue_free()

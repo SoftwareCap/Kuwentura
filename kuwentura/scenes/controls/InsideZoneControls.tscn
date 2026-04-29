@@ -15,7 +15,7 @@ script = ExtResource("1_5l088")
 
 [node name="Pause" type="TouchScreenButton" parent="."]
 z_index = 8
-position = Vector2(1253, 17)
+position = Vector2(1240, 10)
 scale = Vector2(0.4, 0.4)
 texture_normal = ExtResource("2_6v7nm")
 shape = SubResource("RectangleShape2D_0aggx")
@@ -23,8 +23,9 @@ passby_press = true
 action = "game_pause"
 
 [node name="Ledger" type="TouchScreenButton" parent="."]
-position = Vector2(1116, 6.999997)
+position = Vector2(1118, 10)
 scale = Vector2(0.06, 0.06)
 texture_normal = ExtResource("3_dfxfg")
+texture_pressed = ExtResource("3_dfxfg")
 shape = SubResource("RectangleShape2D_3mgdf")
 passby_press = true

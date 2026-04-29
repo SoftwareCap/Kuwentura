@@ -6,8 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://bc40nmjniu431" path="res://assets/buttons/jumpButton.png" id="4_dlgvd"]
 [ext_resource type="Texture2D" uid="uid://chff8f3cdvqaf" path="res://assets/buttons/pauseButton.png" id="5_d6yqq"]
 [ext_resource type="Texture2D" uid="uid://dhs2e7weqqu13" path="res://assets/buttons/players/mapbutton.png" id="6_vwhch"]
-[ext_resource type="Texture2D" uid="uid://b67wsufrc0323" path="res://assets/buttons/players/ledgerButton.png" id="7_vwhch"]
-[ext_resource type="Texture2D" uid="uid://bx0l3llidiblf" path="res://assets/buttons/players/briefcaseButton.png" id="8_w2x6p"]
+[ext_resource type="Texture2D" uid="uid://b67wsufrc0323" path="res://assets/buttons/players/ledgerbutton.png" id="7_vwhch"]
+[ext_resource type="Texture2D" uid="uid://bx0l3llidiblf" path="res://assets/buttons/players/briefcasebutton.png" id="8_w2x6p"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_left"]
 size = Vector2(250, 250)
@@ -101,6 +101,7 @@ action = "game_pause"
 position = Vector2(71, 15)
 scale = Vector2(0.04, 0.04)
 texture_normal = ExtResource("6_vwhch")
+texture_pressed = ExtResource("6_vwhch")
 shape = SubResource("RectangleShape2D_orkyw")
 passby_press = true
 
@@ -108,6 +109,7 @@ passby_press = true
 position = Vector2(1118.0001, 10)
 scale = Vector2(0.06, 0.06)
 texture_normal = ExtResource("7_vwhch")
+texture_pressed = ExtResource("7_vwhch")
 shape = SubResource("RectangleShape2D_cqy2h")
 passby_press = true
 
@@ -115,6 +117,7 @@ passby_press = true
 position = Vector2(1238, 130)
 scale = Vector2(0.06, 0.06)
 texture_normal = ExtResource("8_w2x6p")
+texture_pressed = ExtResource("8_w2x6p")
 shape = SubResource("RectangleShape2D_6oeic")
 passby_press = true
 
