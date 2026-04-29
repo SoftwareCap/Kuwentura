@@ -38,6 +38,10 @@ extends Node
 
 @onready var skip_button : Button = $SkipButton
 
+# Scene 4
+@onready var scene4 : Node = $Scene4
+@onready var zones_intro_video : VideoStreamPlayer = $Scene4/zonesIntro
+
 
 # Tunables
 const DIALOGUE_SPEED : float = 0.04
@@ -114,6 +118,10 @@ func _run_cutscene() -> void:
 	await _scene2()
 	await _transition_to_scene3()
 	await _scene3()
+	await _transition_to_scene4()
+	await _scene4()
+	MusicController.stop_music(1.5)
+	await get_tree().create_timer(1.5).timeout
 	get_tree().change_scene_to_file("res://scenes/world/hub/ForestHub.tscn")
 
 
@@ -250,6 +258,32 @@ func _scene3() -> void:
 	_clear_dialogue(dialogue_label3, name_label3)
 
 
+# TRANSITION  Scene 3 → Scene 4
+func _transition_to_scene4() -> void:
+	skip_button.visible = false
+	scene4.visible = true
+	scene4.modulate.a = 0.0
+	await _fade_node(scene4, 1.0)
+	
+
+# SCENE 4 - Zones Introduction
+func _scene4() -> void:
+	zones_intro_video.play()
+	skip_button.text = "Skip"
+	skip_button.visible = true
+	_skip_pressed = false
+
+	# Wait for either the video to finish or skip to be pressed
+	while zones_intro_video.is_playing() and not _skip_pressed:
+		await get_tree().process_frame
+
+	zones_intro_video.stop()
+	skip_button.visible = false
+
+	var dissolve := create_tween()
+	dissolve.tween_property(scene4, "modulate:a", 0.0, FADE_DURATION)
+	await dissolve.finished
+
 # HELPERS
 
 func _say1(speaker: String, text: String) -> void:
@@ -297,14 +331,13 @@ func _say(dlabel: Label, nlabel: Label, speaker: String, text: String) -> void:
 	_typing_done  = false
 	nlabel.text = speaker
 	dlabel.text = ""
-	
+
 	dialogue_box.modulate.a = 1.0
 	dialogue_box.visible = true
 	skip_button.text = "Skip"
 	skip_button.visible = true
 
 	var char_index : int = 0
-	var elapsed : float = 0.0
 	var length : int = text.length()
 
 	while char_index <= length:
@@ -312,12 +345,12 @@ func _say(dlabel: Label, nlabel: Label, speaker: String, text: String) -> void:
 			dlabel.text = text
 			_skip_pressed = false
 			break
-		elapsed += get_process_delta_time()
-		if elapsed >= DIALOGUE_SPEED:
-			elapsed -= DIALOGUE_SPEED
-			char_index += 1
-			dlabel.text = text.substr(0, char_index)
-		await get_tree().process_frame
+		await get_tree().create_timer(DIALOGUE_SPEED).timeout
+		char_index += 1
+		dlabel.text = text.substr(0, char_index)
+		if _skip_pressed:
+			dlabel.text = text
+			break
 
 	_typing_done = true
 	skip_button.text = "Click to continue..."
@@ -331,12 +364,8 @@ func _say(dlabel: Label, nlabel: Label, speaker: String, text: String) -> void:
 	_skip_pressed = false
 
 
-# Reusable wait using delta — no SceneTreeTimer objects spawned
 func _wait(seconds: float) -> void:
-	var elapsed : float = 0.0
-	while elapsed < seconds:
-		elapsed += get_process_delta_time()
-		await get_tree().process_frame
+	await get_tree().create_timer(seconds).timeout
 
 
 # Auto-advancing version of _say — no button press required
@@ -344,25 +373,20 @@ func _say_auto(dlabel: Label, nlabel: Label, speaker: String, text: String, hold
 	_skip_pressed = false
 	nlabel.text = speaker
 	dlabel.text = ""
-	
+
 	dialogue_box.modulate.a = 1.0
 	dialogue_box.visible = true
 	skip_button.visible = false
 
 	var char_index : int = 0
-	var elapsed : float = 0.0
 	var length : int = text.length()
 
 	while char_index <= length:
-		elapsed += get_process_delta_time()
-		if elapsed >= DIALOGUE_SPEED:
-			elapsed -= DIALOGUE_SPEED
-			char_index += 1
-			dlabel.text = text.substr(0, char_index)
-		await get_tree().process_frame
+		await get_tree().create_timer(DIALOGUE_SPEED).timeout
+		char_index += 1
+		dlabel.text = text.substr(0, char_index)
 
-	# Auto-advance after hold duration
-	await _wait(hold)
+	await get_tree().create_timer(hold).timeout
 
 
 func _clear_dialogue(dlabel: Label, nlabel: Label) -> void:
