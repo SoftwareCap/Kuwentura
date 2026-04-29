@@ -1,8 +1,9 @@
-[gd_scene load_steps=24 format=3 uid="uid://udt37i3bt31c"]
+[gd_scene load_steps=38 format=3 uid="uid://udt37i3bt31c"]
 
 [ext_resource type="Script" uid="uid://bwa5cliuua5sb" path="res://scripts/player/player.gd" id="1_djqfg"]
 [ext_resource type="Texture2D" uid="uid://bxbkwkkjox3dh" path="res://assets/sprites/players/sidekick/sidekick_idle.png" id="1_ig6if"]
 [ext_resource type="Texture2D" uid="uid://d35eqgjkkuyn7" path="res://assets/sprites/players/sidekick/sidekick_walk.png" id="2_djqfg"]
+[ext_resource type="Texture2D" uid="uid://dk04eksxbv4bt" path="res://assets/sprites/players/sidekick/Sidekick_jump.png" id="3_oyvdf"]
 [ext_resource type="Texture2D" uid="uid://5jrpcrsfso1p" path="res://assets/sprites/players/greenDiamond.png" id="4_7461x"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_7461x"]
@@ -40,6 +41,58 @@ region = Rect2(7000, 0, 1000, 1000)
 [sub_resource type="AtlasTexture" id="AtlasTexture_0dx7a"]
 atlas = ExtResource("1_ig6if")
 region = Rect2(8000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wm3to"]
+atlas = ExtResource("3_oyvdf")
+region = Rect2(0, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_coail"]
+atlas = ExtResource("3_oyvdf")
+region = Rect2(1144, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pfa2w"]
+atlas = ExtResource("3_oyvdf")
+region = Rect2(2288, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m145f"]
+atlas = ExtResource("3_oyvdf")
+region = Rect2(3432, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4ygd5"]
+atlas = ExtResource("3_oyvdf")
+region = Rect2(4576, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r13fx"]
+atlas = ExtResource("3_oyvdf")
+region = Rect2(5720, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bclyi"]
+atlas = ExtResource("3_oyvdf")
+region = Rect2(6864, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ic6ga"]
+atlas = ExtResource("3_oyvdf")
+region = Rect2(8008, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1df7a"]
+atlas = ExtResource("3_oyvdf")
+region = Rect2(9152, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3eiti"]
+atlas = ExtResource("3_oyvdf")
+region = Rect2(10296, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_51x3b"]
+atlas = ExtResource("3_oyvdf")
+region = Rect2(11440, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xst3x"]
+atlas = ExtResource("3_oyvdf")
+region = Rect2(12584, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_na6ay"]
+atlas = ExtResource("3_oyvdf")
+region = Rect2(13728, 0, 1144, 1108)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_52qsw"]
 atlas = ExtResource("2_djqfg")
@@ -109,6 +162,50 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_wm3to")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_coail")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pfa2w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m145f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4ygd5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r13fx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bclyi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ic6ga")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1df7a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3eiti")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_51x3b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xst3x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_na6ay")
+}],
+"loop": true,
+"name": &"jump",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_52qsw")
 }, {
 "duration": 1.0,
@@ -152,7 +249,7 @@ role = "Sidekick"
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_wm3to")
-animation = &"walk"
+animation = &"jump"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_coail")
