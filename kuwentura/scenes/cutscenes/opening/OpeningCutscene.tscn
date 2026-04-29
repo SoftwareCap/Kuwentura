@@ -1,4 +1,4 @@
-[gd_scene load_steps=450 format=3 uid="uid://cvtcyji82jmqc"]
+[gd_scene load_steps=452 format=3 uid="uid://cvtcyji82jmqc"]
 
 [ext_resource type="Script" uid="uid://cb5kt2gbakcmw" path="res://scripts/cutscenes/opening_cutscene.gd" id="1_d6xy6"]
 [ext_resource type="Texture2D" uid="uid://c3p5qn3e3uw1n" path="res://assets/sprites/cutscene/openingIntro/openingCutsceneBG.png" id="4_2u2gq"]
@@ -404,7 +404,6 @@
 [ext_resource type="Texture2D" uid="uid://bifamfvp77trv" path="res://assets/sprites/cutscene/openingIntro/sceneThree/10.png" id="401_1eune"]
 [ext_resource type="Texture2D" uid="uid://bln8lib02wtgf" path="res://assets/sprites/cutscene/openingIntro/sceneThree/11.png" id="402_7qhlb"]
 [ext_resource type="Texture2D" uid="uid://clq2sjualifv5" path="res://assets/sprites/cutscene/openingIntro/sceneThree/12.png" id="403_ce8kv"]
-[ext_resource type="VideoStream" uid="uid://cb861jn7keosp" path="res://assets/sprites/cutscene/openingIntro/zonesIntro.ogv" id="404_n24a0"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hc6bb"]
 atlas = ExtResource("30_kiegq")
@@ -1879,6 +1878,44 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="Animation" id="Animation_fade_in"]
+resource_name = "fade_in"
+length = 2.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("FadeRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0, 0, 0, 1), Color(0, 0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_fade_out"]
+resource_name = "fade_out"
+length = 2.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("FadeRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0, 0, 0, 0), Color(0, 0, 0, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_main"]
+_data = {
+&"fade_in": SubResource("Animation_fade_in"),
+&"fade_out": SubResource("Animation_fade_out")
+}
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2bykp"]
 bg_color = Color(0.360784, 0.215686, 0.180392, 1)
 corner_radius_top_left = 16
@@ -1964,7 +2001,6 @@ sprite_frames = SubResource("SpriteFrames_3s42a")
 animation = &"book_flipping"
 
 [node name="Scene2" type="Control" parent="."]
-visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -2031,7 +2067,6 @@ theme_override_font_sizes/font_size = 24
 text = "Grandmother"
 
 [node name="Scene3" type="Control" parent="."]
-visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -2106,18 +2141,10 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 24
 text = "Narrator"
 
-[node name="Scene4" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="zonesIntro" type="VideoStreamPlayer" parent="Scene4"]
-layout_mode = 0
-offset_right = 1920.0
-offset_bottom = 1080.0
-scale = Vector2(0.646, 0.646)
-stream = ExtResource("404_n24a0")
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_main")
+}
 
 [node name="DialogueBox" type="Sprite2D" parent="."]
 position = Vector2(617.99994, 525)
