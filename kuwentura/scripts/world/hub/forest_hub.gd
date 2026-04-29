@@ -905,6 +905,9 @@ func _on_zone_body_entered(body: Node2D, zone_name: String) -> void:
 
 ## Fires when BOTH players have confirmed entry — used only for door animation.
 func _on_players_entering_zone(zone_name: String) -> void:
+	if is_instance_valid(touch_controls):
+		touch_controls.visible = false
+		
 	match zone_name:
 		"pinas_house": _animate_door(pinas_house_door, zone_name)
 		"storage_hut": _animate_door(storage_hut_door, zone_name)
@@ -912,6 +915,9 @@ func _on_players_entering_zone(zone_name: String) -> void:
 
 
 func _on_players_entered_zone(zone_name: String) -> void:
+	if is_instance_valid(touch_controls):
+		touch_controls.visible = false
+		
 	var target_portal: Node = null
 
 	for portal in portals.get_children():

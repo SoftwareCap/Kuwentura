@@ -34,19 +34,35 @@ func setup(owner: Node) -> void:
 			node.process_mode = Node.PROCESS_MODE_ALWAYS
 
 	_connect_pause_buttons()
+	
+	var back_to_forest_btn: TextureButton = zone.get_node_or_null(
+		"PauseCanvasLayer/InGamePausePanel/BackToForestButton"
+	)
+	if is_instance_valid(back_to_forest_btn) and not back_to_forest_btn.pressed.is_connected(
+		zone._on_exit_to_main_menu_button_pressed
+	):
+		back_to_forest_btn.pressed.connect(zone._on_exit_to_main_menu_button_pressed)
 
 
 func _connect_pause_buttons() -> void:
 	_button_pairs = [
 		["PauseCanvasLayer/InGamePausePanel/Resume_PlayButton", zone._on_resume_play_button_pressed],
 		["PauseCanvasLayer/InGamePausePanel/OptionButton", zone._on_option_button_pressed],
-		["PauseCanvasLayer/InGamePausePanel/ExitButton", zone._on_exit_to_main_menu_button_pressed],
-		["PauseCanvasLayer/InGamePausePanel/OptionSubPanel/BackToPrevious", zone._on_in_game_option_back_pressed],
+		["PauseCanvasLayer/InGamePausePanel/BackToForestButton", zone._on_exit_to_main_menu_button_pressed],
 	]
 	for pair in _button_pairs:
-		var btn := zone.get_node_or_null(pair[0]) as Button
+		var btn := zone.get_node_or_null(pair[0]) as BaseButton
 		if is_instance_valid(btn) and not btn.pressed.is_connected(pair[1]):
 			btn.pressed.connect(pair[1])
+			btn.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	# BackToPrevious is a TouchScreenButton — handled separately
+	var back_to_prev: TouchScreenButton = zone.get_node_or_null(
+		"PauseCanvasLayer/InGamePausePanel/OptionSubPanel/BackToPrevious"
+	)
+	if is_instance_valid(back_to_prev) and not back_to_prev.pressed.is_connected(zone._on_in_game_option_back_pressed):
+		back_to_prev.pressed.connect(zone._on_in_game_option_back_pressed)
+		back_to_prev.process_mode = Node.PROCESS_MODE_ALWAYS
 
 
 func cleanup() -> void:
@@ -56,11 +72,18 @@ func cleanup() -> void:
 
 	if is_instance_valid(zone.volume_slider) and zone.volume_slider.value_changed.is_connected(zone._on_in_game_volume_changed):
 		zone.volume_slider.value_changed.disconnect(zone._on_in_game_volume_changed)
-
+			
 	for pair in _button_pairs:
-		var btn := zone.get_node_or_null(pair[0]) as Button
+		var btn := zone.get_node_or_null(pair[0]) as BaseButton
 		if is_instance_valid(btn) and btn.pressed.is_connected(pair[1]):
 			btn.pressed.disconnect(pair[1])
+	
+		# Cleanup BackToPrevious separately
+	var back_to_prev: TouchScreenButton = zone.get_node_or_null(
+		"PauseCanvasLayer/InGamePausePanel/OptionSubPanel/BackToPrevious"
+	)
+	if is_instance_valid(back_to_prev) and back_to_prev.pressed.is_connected(zone._on_in_game_option_back_pressed):
+		back_to_prev.pressed.disconnect(zone._on_in_game_option_back_pressed)
 
 
 func _sync_volume_ui() -> void:
