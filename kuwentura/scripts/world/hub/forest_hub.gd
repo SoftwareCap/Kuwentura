@@ -136,8 +136,7 @@ var _map_artifact_markers: Dictionary = {}
 
 func _ready() -> void:
 	_ensure_spawn_points()
-	MusicController.play_track(MusicController.MusicTrack.FOREST_HUB, 1.0)
-	_setup_forest_tutorial()
+	MusicController.play_track(MusicController.MusicTrack.FOREST_HUB)
 	_connect_signals()
 	_setup_room_code_label()
 	_setup_pause_panel()
@@ -151,6 +150,7 @@ func _ready() -> void:
 	_setup_zone_completion_indicators()
 	_refresh_briefcase_display()
 	_animate_location_diamond()
+	_setup_forest_tutorial()
 
 	if briefcase_panel:
 		briefcase_panel.visible = false

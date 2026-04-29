@@ -1881,14 +1881,14 @@ texture = ExtResource("17_hp607")
 [node name="ForestTutorial" type="CanvasLayer" parent="."]
 
 [node name="Sprite2D" type="Sprite2D" parent="ForestTutorial"]
-position = Vector2(669.7778, 323)
+position = Vector2(737.7778, 323)
 scale = Vector2(0.47685185, 0.47685185)
 texture = ExtResource("31_qlgbp")
 
 [node name="CloseTutorialButton" type="TextureButton" parent="ForestTutorial"]
-offset_left = 976.7778
+offset_left = 1044.7778
 offset_top = 31.0
-offset_right = 1201.7778
+offset_right = 1269.7778
 offset_bottom = 256.0
 scale = Vector2(0.5, 0.5)
 texture_normal = ExtResource("32_ynpm6")
@@ -1934,7 +1934,6 @@ vertical_alignment = 1
 autowrap_mode = 3
 
 [node name="MapLayer" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="Map" type="Sprite2D" parent="MapLayer"]
 z_index = 25
