@@ -2,23 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dsd82w7fiyep8"
-path.bptc="res://.godot/imported/10.png-a98a0517a98b345d6f371527eb2181a9.bptc.ctex"
-path.astc="res://.godot/imported/10.png-a98a0517a98b345d6f371527eb2181a9.astc.ctex"
+uid="uid://uxdvms3h1da8"
+path="res://.godot/imported/LetterP.png-7c04ec0653f9dbed4eca25fa4206ccfe.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightGoingOut/10.png"
-dest_files=["res://.godot/imported/10.png-a98a0517a98b345d6f371527eb2181a9.bptc.ctex", "res://.godot/imported/10.png-a98a0517a98b345d6f371527eb2181a9.astc.ctex"]
+source_file="res://assets/sprites/zoneObjects/backyardPathObjects/LetterP.png"
+dest_files=["res://.godot/imported/LetterP.png-7c04ec0653f9dbed4eca25fa4206ccfe.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

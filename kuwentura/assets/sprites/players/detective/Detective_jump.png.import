@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://g74l085x8k32"
-path.s3tc="res://.godot/imported/Detective_jump.png-a112cbb5691d963fc0f165a724bba810.s3tc.ctex"
-path.etc2="res://.godot/imported/Detective_jump.png-a112cbb5691d963fc0f165a724bba810.etc2.ctex"
+path.s3tc="res://.godot/imported/Detective_jump.png-268852f9ebcb744e02e003fb4bdc46fc.s3tc.ctex"
+path.etc2="res://.godot/imported/Detective_jump.png-268852f9ebcb744e02e003fb4bdc46fc.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/players/detective/Detective_jump.png"
-dest_files=["res://.godot/imported/Detective_jump.png-a112cbb5691d963fc0f165a724bba810.s3tc.ctex", "res://.godot/imported/Detective_jump.png-a112cbb5691d963fc0f165a724bba810.etc2.ctex"]
+source_file="res://assets/sprites/players/Detective/Detective_jump.png"
+dest_files=["res://.godot/imported/Detective_jump.png-268852f9ebcb744e02e003fb4bdc46fc.s3tc.ctex", "res://.godot/imported/Detective_jump.png-268852f9ebcb744e02e003fb4bdc46fc.etc2.ctex"]
 
 [params]
 

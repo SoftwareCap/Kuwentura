@@ -6,10 +6,10 @@
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="3_fnsr3"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 [ext_resource type="Texture2D" uid="uid://bwccumnrc00pr" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-1.png" id="4_ig5qe"]
-[ext_resource type="Texture2D" uid="uid://cgtl3fi4ldvqd" path="res://assets/sprites/players/detective/detective.png" id="4_w3m7o"]
+[ext_resource type="Texture2D" uid="uid://cgtl3fi4ldvqd" path="res://assets/sprites/players/Detective/detective.png" id="4_w3m7o"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="5_54qax"]
 [ext_resource type="Texture2D" uid="uid://cxoud0qppj31f" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-2.png" id="5_60uqn"]
-[ext_resource type="Texture2D" uid="uid://bppb0lkeirtvl" path="res://assets/sprites/players/detective/sidekick.png" id="5_tdxjt"]
+[ext_resource type="Texture2D" uid="uid://bppb0lkeirtvl" path="res://assets/sprites/players/Detective/sidekick.png" id="5_tdxjt"]
 [ext_resource type="Texture2D" uid="uid://dpuo3g1804rtj" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-3.png" id="6_fnmj2"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="6_pocdh"]
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="7_ctgii"]
@@ -54,7 +54,7 @@
 [ext_resource type="Texture2D" uid="uid://dwymeh76j8r8p" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/glowHint.png" id="44_5rk6e"]
 [ext_resource type="Texture2D" uid="uid://bn3lo7ofeh8ui" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key-3.png" id="45_sofx5"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="47_1767a"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="48_fs4kb"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="48_fs4kb"]
 [ext_resource type="Texture2D" uid="uid://baylpfjefdeqo" path="res://assets/buttons/backWordButton.png" id="52_8h2lu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wp1ru"]
@@ -245,6 +245,7 @@ tiara_clue_texture = ExtResource("39_lnpua")
 
 [node name="Notification" type="CanvasLayer" parent="."]
 layer = 200
+visible = false
 
 [node name="Sprite2D" type="Sprite2D" parent="Notification"]
 position = Vector2(693, 66.00001)
@@ -548,7 +549,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="PuzzleCanvasLayer" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="Dimmer" type="ColorRect" parent="PuzzleCanvasLayer"]
 anchors_preset = 15
