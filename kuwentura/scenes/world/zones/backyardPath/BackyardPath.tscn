@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=3 uid="uid://backyardpath"]
+[gd_scene load_steps=51 format=3 uid="uid://backyardpath"]
 
 [ext_resource type="Script" uid="uid://dfs4agyqe4qk4" path="res://scripts/world/zones/backyardPath/backyard_path.gd" id="1_backyardpath"]
 [ext_resource type="Texture2D" uid="uid://p1tc8ablyx3s" path="res://assets/sprites/places/backyardBackground.png" id="2_krb5t"]
@@ -25,6 +25,12 @@
 [ext_resource type="Texture2D" uid="uid://dxowrwbwejr0l" path="res://assets/sprites/zoneObjects/backyardPathObjects/wnNameTag.png" id="23_ul8jb"]
 [ext_resource type="Texture2D" uid="uid://cpqyamnr583yb" path="res://assets/sprites/places/tallGrass.png" id="24_cslgv"]
 [ext_resource type="Texture2D" uid="uid://4ddhe80gqjla" path="res://assets/sprites/places/grassStone.png" id="25_sk177"]
+[ext_resource type="Texture2D" uid="uid://cdwa8npu6elwv" path="res://assets/sprites/zoneObjects/backyardPathObjects/nameTag.png" id="26_3ee1h"]
+[ext_resource type="Texture2D" uid="uid://c5xuta02gmnv1" path="res://assets/sprites/zoneObjects/backyardPathObjects/answerPH.png" id="27_cslgv"]
+[ext_resource type="Texture2D" uid="uid://uxdvms3h1da8" path="res://assets/sprites/zoneObjects/backyardPathObjects/LetterP.png" id="30_6qa7e"]
+[ext_resource type="Texture2D" uid="uid://cig14ry2o2alb" path="res://assets/sprites/zoneObjects/backyardPathObjects/LetterI.png" id="31_bb53s"]
+[ext_resource type="Texture2D" uid="uid://ckoj68pxm4qij" path="res://assets/sprites/zoneObjects/backyardPathObjects/LetterN.png" id="32_on1j4"]
+[ext_resource type="Texture2D" uid="uid://judmu1aofcb1" path="res://assets/sprites/zoneObjects/backyardPathObjects/LetterA.png" id="33_3lfn3"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_krb5t"]
 bg_color = Color(0.360784, 0.215686, 0.180392, 1)
@@ -282,7 +288,6 @@ scale = Vector2(0.14697264, 0.13916017)
 texture = ExtResource("17_s7hv4")
 
 [node name="Deduction Board" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="Control" type="Control" parent="Deduction Board"]
 layout_mode = 3
@@ -334,17 +339,6 @@ text = "Convert Dali to Centimeters"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="PlantHeight" type="Label" parent="Deduction Board/Control"]
-layout_mode = 0
-offset_left = 838.0
-offset_top = 457.0
-offset_right = 1009.0
-offset_bottom = 516.0
-rotation = 0.05235988
-theme_override_font_sizes/font_size = 28
-horizontal_alignment = 1
-vertical_alignment = 1
-
 [node name="XInput" type="LineEdit" parent="Deduction Board/Control"]
 layout_mode = 0
 offset_left = 643.0
@@ -358,8 +352,8 @@ theme_override_colors/selection_color = Color(0.96035105, 0.96035105, 0.96035093
 theme_override_colors/clear_button_color = Color(0.021434566, 0.021434668, 0.021434598, 1)
 theme_override_colors/clear_button_color_pressed = Color(0.017732391, 0.017732391, 0.01773239, 1)
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 35
-placeholder_text = "Answer"
+theme_override_font_sizes/font_size = 16
+placeholder_text = "Type answer"
 alignment = 1
 expand_to_text_length = true
 virtual_keyboard_type = 2
@@ -794,7 +788,7 @@ offset_top = 66.66298
 offset_right = 1447.7273
 offset_bottom = 160.59502
 theme_override_font_sizes/font_size = 45
-text = "CLUE FOUND!"
+text = "ARTIFACT FOUND!"
 horizontal_alignment = 1
 vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
@@ -1083,6 +1077,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="DecodeUILayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="DecodePanel" type="Panel" parent="DecodeUILayer"]
 offset_left = 460.0
@@ -1223,5 +1218,100 @@ texture = ExtResource("25_sk177")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="GrassLayer/TangledVines"]
 position = Vector2(1034, 465)
 shape = SubResource("RectangleShape2D_3lfn3")
+
+[node name="WordPuzzleLayer" type="Node2D" parent="."]
+visible = false
+
+[node name="NameTag" type="Sprite2D" parent="WordPuzzleLayer"]
+position = Vector2(662, 261.00003)
+scale = Vector2(0.33919275, 0.29768518)
+texture = ExtResource("26_3ee1h")
+
+[node name="Placholder" type="Sprite2D" parent="WordPuzzleLayer"]
+visible = false
+position = Vector2(659.00006, 468.99997)
+scale = Vector2(0.5018229, 0.4310186)
+texture = ExtResource("27_cslgv")
+
+[node name="ClearButton" type="Button" parent="WordPuzzleLayer"]
+offset_left = 687.0
+offset_top = 521.0
+offset_right = 949.0
+offset_bottom = 575.0
+disabled = true
+text = "CLEAR"
+expand_icon = true
+
+[node name="SubmitButton" type="Button" parent="WordPuzzleLayer"]
+offset_left = 381.0
+offset_top = 516.0
+offset_right = 653.0
+offset_bottom = 577.0
+disabled = true
+text = "SUBMIT"
+expand_icon = true
+
+[node name="InstructionLabel" type="Label" parent="WordPuzzleLayer"]
+offset_left = 301.0
+offset_top = 96.0
+offset_right = 1039.0
+offset_bottom = 154.0
+theme_override_font_sizes/font_size = 17
+text = "Answer the clues. Each first letter spells the ghost's name."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="QuestionLabel" type="Label" parent="WordPuzzleLayer"]
+offset_left = 332.0
+offset_top = 382.0
+offset_right = 1008.0
+offset_bottom = 418.0
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TurnLabel" type="Label" parent="WordPuzzleLayer"]
+offset_left = 409.0
+offset_top = 414.0
+offset_right = 931.0
+offset_bottom = 443.0
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AnswerInput" type="LineEdit" parent="WordPuzzleLayer"]
+offset_left = 473.0
+offset_top = 446.0
+offset_right = 845.0
+offset_bottom = 510.0
+theme_override_font_sizes/font_size = 20
+placeholder_text = "Type answer"
+alignment = 1
+flat = true
+
+[node name="LetterP" type="Sprite2D" parent="WordPuzzleLayer"]
+visible = false
+position = Vector2(550.125, 275.5)
+scale = Vector2(0.15117188, 0.125)
+texture = ExtResource("30_6qa7e")
+
+[node name="LetterI" type="Sprite2D" parent="WordPuzzleLayer"]
+visible = false
+position = Vector2(618, 276)
+scale = Vector2(0.18020831, 0.1238426)
+texture = ExtResource("31_bb53s")
+
+[node name="LetterN" type="Sprite2D" parent="WordPuzzleLayer"]
+visible = false
+position = Vector2(690.99994, 277.00003)
+scale = Vector2(0.156901, 0.13541667)
+texture = ExtResource("32_on1j4")
+
+[node name="LetterA" type="Sprite2D" parent="WordPuzzleLayer"]
+visible = false
+position = Vector2(765, 277)
+scale = Vector2(0.14208983, 0.14386575)
+texture = ExtResource("33_3lfn3")
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
