@@ -114,6 +114,20 @@ var _final_box_data: Dictionary = {}
 @onready var close_mirror_button: TouchScreenButton = $PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer/CloseMirrorButton
 
 @onready var inside_zone_control: CanvasLayer = $InsideZoneControl
+@onready var pause_canvas_layer: CanvasLayer = get_node_or_null("PauseCanvasLayer")
+@onready var in_game_pause_panel: Panel = get_node_or_null("PauseCanvasLayer/InGamePausePanel")
+@onready var option_sub_panel: Panel = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel")
+@onready var volume_slider: HSlider = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeSlider")
+@onready var volume_value_label: Label = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeValue")
+@onready var sidekick_layer: CanvasLayer = get_node_or_null("SidekickLayer")
+@onready var ledger_panel: Panel = get_node_or_null("SidekickLayer/Ledger")
+@onready var ledger_title_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerTitle")
+@onready var ledger_body_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerBody")
+@onready var ledger_left_header_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerLeftHeader")
+@onready var ledger_left_body_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerLeftBody")
+@onready var ledger_right_header_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerRightHeader")
+@onready var ledger_right_body_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerRightBody")
+@onready var sidekick_briefcase_panel: Panel = get_node_or_null("SidekickLayer/Briefcase")
 @onready var inventory_board: Node2D = get_node_or_null("InventoryBoard") as Node2D
 @onready var inventory_board_sprite: Sprite2D = get_node_or_null("InventoryBoard/Board") as Sprite2D
 @onready var inventory_area: Area2D = get_node_or_null("InventoryBoard/Area2D") as Area2D
@@ -751,6 +765,14 @@ func _setup_ui() -> void:
 	if notification_label:
 		notification_label.visible = false
 
+	if is_instance_valid(sidekick_layer):
+		sidekick_layer.visible = true
+	if is_instance_valid(ledger_panel):
+		ledger_panel.visible = false
+	if is_instance_valid(sidekick_briefcase_panel):
+		sidekick_briefcase_panel.visible = false
+	_populate_ledger_content()
+
 	instruction_label.text = "Drag the books to arrange them by width.\nNarrowest should be on top and widest should be at the bottom."
 
 	dimmer.visible = false
@@ -969,6 +991,31 @@ func _connect_signals() -> void:
 
 	if cinematic_tap_catcher and not cinematic_tap_catcher.pressed.is_connected(_on_tiara_tap_catcher_pressed):
 		cinematic_tap_catcher.pressed.connect(_on_tiara_tap_catcher_pressed)
+
+	if inside_zone_control and inside_zone_control.has_signal("pause_pressed") and not inside_zone_control.pause_pressed.is_connected(_on_pause_button_pressed):
+		inside_zone_control.pause_pressed.connect(_on_pause_button_pressed)
+
+	if inside_zone_control and inside_zone_control.has_signal("ledger_pressed") and not inside_zone_control.ledger_pressed.is_connected(_on_ledger_pressed):
+		inside_zone_control.ledger_pressed.connect(_on_ledger_pressed)
+
+	var resume_btn: BaseButton = get_node_or_null("PauseCanvasLayer/InGamePausePanel/Resume_PlayButton")
+	if is_instance_valid(resume_btn) and not resume_btn.pressed.is_connected(_on_resume_play_button_pressed):
+		resume_btn.pressed.connect(_on_resume_play_button_pressed)
+
+	var option_btn: BaseButton = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionButton")
+	if is_instance_valid(option_btn) and not option_btn.pressed.is_connected(_on_option_button_pressed):
+		option_btn.pressed.connect(_on_option_button_pressed)
+
+	var exit_btn: BaseButton = get_node_or_null("PauseCanvasLayer/InGamePausePanel/ExitButton")
+	if is_instance_valid(exit_btn) and not exit_btn.pressed.is_connected(_on_exit_to_main_menu_button_pressed):
+		exit_btn.pressed.connect(_on_exit_to_main_menu_button_pressed)
+
+	var pause_back_btn: TouchScreenButton = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/BackToPrevious")
+	if is_instance_valid(pause_back_btn) and not pause_back_btn.pressed.is_connected(_on_in_game_option_back_pressed):
+		pause_back_btn.pressed.connect(_on_in_game_option_back_pressed)
+
+	if is_instance_valid(volume_slider) and not volume_slider.value_changed.is_connected(_on_in_game_volume_changed):
+		volume_slider.value_changed.connect(_on_in_game_volume_changed)
 		
 func _refresh_role_label() -> void:
 	var role_text := "Unknown"
@@ -986,6 +1033,9 @@ func _refresh_role_label() -> void:
 
 	if inside_zone_control and inside_zone_control.has_method("set_sidekick_ui_visible"):
 		inside_zone_control.set_sidekick_ui_visible(_is_local_sidekick())
+
+	if is_instance_valid(ledger_panel):
+		ledger_panel.visible = false
 
 	_refresh_inventory_interaction_state()
 
@@ -1065,7 +1115,21 @@ func _on_books_area_input_event(_viewport: Node, event: InputEvent, _shape_idx: 
 		_show_notification("Only the Detective can rearrange these books.")
 
 func _refresh_books_panel_for_role() -> void:
-	instruction_label.visible = _is_local_detective() and not _books_solved
+	if not is_instance_valid(instruction_label):
+		return
+
+	instruction_label.visible = not _books_solved
+	instruction_label.add_theme_font_size_override("font_size", 18)
+	instruction_label.add_theme_color_override("font_color", Color.WHITE)
+	instruction_label.add_theme_constant_override("outline_size", 4)
+	instruction_label.add_theme_color_override("font_outline_color", Color(0.12, 0.07, 0.03, 0.95))
+	instruction_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	instruction_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	instruction_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if _is_local_detective():
+		instruction_label.text = "Drag the books to arrange them by width.\nNarrowest should be on top and widest should be at the bottom."
+	else:
+		instruction_label.text = "Only the Detective can move the books."
 
 	# ClosePuzzleButton is a TouchScreenButton image, so no text update is needed.
 
@@ -1523,6 +1587,139 @@ func _get_event_position(event: InputEvent) -> Vector2:
 
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file(FOREST_HUB_SCENE_PATH)
+
+
+func _on_pause_button_pressed() -> void:
+	if is_instance_valid(pause_canvas_layer):
+		pause_canvas_layer.visible = true
+		pause_canvas_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+		_set_pause_process_mode_recursive(pause_canvas_layer)
+	if is_instance_valid(in_game_pause_panel):
+		in_game_pause_panel.visible = true
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = false
+	if is_instance_valid(inside_zone_control):
+		inside_zone_control.visible = false
+	if is_instance_valid(ledger_panel):
+		ledger_panel.visible = false
+	MusicController.pause_music()
+	get_tree().paused = true
+
+
+func _on_resume_play_button_pressed() -> void:
+	if is_instance_valid(in_game_pause_panel):
+		in_game_pause_panel.visible = false
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = false
+	if is_instance_valid(pause_canvas_layer):
+		pause_canvas_layer.visible = false
+	get_tree().paused = false
+	MusicController.resume_music()
+	if is_instance_valid(inside_zone_control):
+		inside_zone_control.visible = true
+
+
+func _on_option_button_pressed() -> void:
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = true
+	_sync_volume_ui()
+
+
+func _on_in_game_option_back_pressed() -> void:
+	if is_instance_valid(option_sub_panel):
+		option_sub_panel.visible = false
+
+
+func _on_exit_to_main_menu_button_pressed() -> void:
+	if is_instance_valid(pause_canvas_layer):
+		pause_canvas_layer.visible = false
+	get_tree().paused = false
+	MusicController.resume_music()
+	if NetworkManager.has_active_connection():
+		NetworkManager.disconnect_network()
+		await get_tree().create_timer(0.2).timeout
+	if is_inside_tree():
+		get_tree().change_scene_to_file("res://scenes/mainMenu/MainMenu.tscn")
+
+
+func _sync_volume_ui() -> void:
+	if not is_instance_valid(volume_slider):
+		return
+	var percent := 80.0
+	if MusicController.has_method("get_volume"):
+		percent = float(MusicController.get_volume()) * 100.0
+	volume_slider.value = percent
+	if is_instance_valid(volume_value_label):
+		volume_value_label.text = str(int(percent)) + "%"
+
+
+func _on_in_game_volume_changed(value: float) -> void:
+	if MusicController.has_method("set_volume"):
+		MusicController.set_volume(value / 100.0)
+	if is_instance_valid(volume_value_label):
+		volume_value_label.text = str(int(value)) + "%"
+
+
+func _set_pause_process_mode_recursive(node: Node) -> void:
+	node.process_mode = Node.PROCESS_MODE_ALWAYS
+	for child in node.get_children():
+		_set_pause_process_mode_recursive(child)
+
+
+func _populate_ledger_content() -> void:
+	if not PuzzleManager or not PuzzleManager.has_method("get_zone_ledger_display"):
+		return
+
+	var ledger_view: Dictionary = PuzzleManager.get_zone_ledger_display(ZONE_ID)
+	if ledger_view.is_empty():
+		return
+
+	var raw_ledger: Dictionary = {}
+	if PuzzleManager.has_method("get_ledger_info"):
+		raw_ledger = PuzzleManager.get_ledger_info(ZONE_ID)
+
+	if is_instance_valid(ledger_title_label):
+		ledger_title_label.text = str(ledger_view.get("title", "Ledger"))
+		ledger_title_label.position = Vector2(160.0, 188.0)
+		ledger_title_label.size = Vector2(590.0, 44.0)
+		ledger_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if is_instance_valid(ledger_body_label):
+		ledger_body_label.text = str(raw_ledger.get("formula", ledger_view.get("body", "")))
+		ledger_body_label.position = Vector2(154.0, 244.0)
+		ledger_body_label.size = Vector2(590.0, 42.0)
+		ledger_body_label.add_theme_font_size_override("font_size", 19)
+		ledger_body_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if is_instance_valid(ledger_left_header_label):
+		var left_header := str(ledger_view.get("left_header", ""))
+		ledger_left_header_label.text = left_header if not left_header.is_empty() else "How to solve"
+		ledger_left_header_label.position = Vector2(154.0, 304.0)
+		ledger_left_header_label.size = Vector2(292.0, 38.0)
+	if is_instance_valid(ledger_left_body_label):
+		ledger_left_body_label.text = str(ledger_view.get("left_body", ""))
+		ledger_left_body_label.position = Vector2(154.0, 350.0)
+		ledger_left_body_label.size = Vector2(292.0, 118.0)
+		ledger_left_body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if is_instance_valid(ledger_right_header_label):
+		var right_header := str(ledger_view.get("right_header", ""))
+		ledger_right_header_label.text = right_header if not right_header.is_empty() else "Example"
+		ledger_right_header_label.position = Vector2(478.0, 244.0)
+		ledger_right_header_label.size = Vector2(292.0, 38.0)
+	if is_instance_valid(ledger_right_body_label):
+		ledger_right_body_label.text = str(ledger_view.get("right_body", ""))
+		ledger_right_body_label.position = Vector2(478.0, 290.0)
+		ledger_right_body_label.size = Vector2(292.0, 178.0)
+		ledger_right_body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+
+func _on_ledger_pressed() -> void:
+	if _dialogue_input_locked or not _is_local_sidekick() or not is_instance_valid(ledger_panel):
+		return
+
+	_populate_ledger_content()
+	if is_instance_valid(sidekick_briefcase_panel):
+		sidekick_briefcase_panel.visible = false
+	ledger_panel.visible = not ledger_panel.visible
+
 
 func _set_book_order_from(source_order: Array) -> void:
 	_book_order.clear()
@@ -1988,18 +2185,39 @@ func _try_close_drawer_from_tap(event: InputEvent) -> bool:
 
 	var tap_position: Vector2 = _get_event_position(event)
 
-	if drawer_texture_rect and drawer_texture_rect.get_global_rect().grow(8.0).has_point(tap_position):
-		return false
-
-	if drawer_lock_hotspot and drawer_lock_hotspot.visible and drawer_lock_hotspot.get_global_rect().grow(8.0).has_point(tap_position):
-		return false
+	if _is_drawer_lock_tap(tap_position):
+		_on_drawer_lock_hotspot_pressed()
+		get_viewport().set_input_as_handled()
+		return true
 
 	if key_fragment_hotspot and key_fragment_hotspot.visible and key_fragment_hotspot.get_global_rect().grow(8.0).has_point(tap_position):
+		return false
+
+	if drawer_texture_rect and drawer_texture_rect.get_global_rect().grow(8.0).has_point(tap_position):
 		return false
 
 	_close_drawer_panel()
 	get_viewport().set_input_as_handled()
 	return true
+
+
+func _is_drawer_lock_tap(tap_position: Vector2) -> bool:
+	if not is_instance_valid(drawer_lock_hotspot) or not drawer_lock_hotspot.visible or drawer_lock_hotspot.disabled:
+		return false
+
+	if drawer_lock_hotspot.get_global_rect().grow(28.0).has_point(tap_position):
+		return true
+
+	if is_instance_valid(drawer_texture_rect):
+		var drawer_rect := drawer_texture_rect.get_global_rect()
+		var visual_lock_rect := Rect2(
+			drawer_rect.position + Vector2(drawer_rect.size.x * 0.08, drawer_rect.size.y * 0.35),
+			Vector2(drawer_rect.size.x * 0.66, drawer_rect.size.y * 0.55)
+		)
+		if visual_lock_rect.has_point(tap_position):
+			return true
+
+	return false
 
 
 func _control_contains_tap(control: Control, tap_position: Vector2, grow: float = 8.0) -> bool:
@@ -2205,6 +2423,14 @@ func _setup_drawer_ui() -> void:
 	if drawer_panel:
 		drawer_panel.visible = false
 		drawer_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	if drawer_lock_hotspot:
+		drawer_lock_hotspot.position = Vector2(350.0, 88.0)
+		drawer_lock_hotspot.size = Vector2(430.0, 170.0)
+		drawer_lock_hotspot.custom_minimum_size = Vector2(430.0, 170.0)
+		drawer_lock_hotspot.focus_mode = Control.FOCUS_NONE
+		drawer_lock_hotspot.ignore_texture_size = true
+		drawer_lock_hotspot.stretch_mode = TextureButton.STRETCH_SCALE
 
 	if drawer_lock_panel:
 		drawer_lock_panel.visible = false
@@ -2668,10 +2894,16 @@ func _setup_final_box_ui() -> void:
 
 	if answer_input:
 		answer_input.text = ""
-		answer_input.placeholder_text = ""
+		answer_input.placeholder_text = "_"
 		answer_input.max_length = 3
 		answer_input.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		answer_input.add_theme_font_size_override("font_size", 24)
+		answer_input.add_theme_color_override("font_color", Color.WHITE)
+		answer_input.add_theme_color_override("caret_color", UI_CREAM)
+		answer_input.add_theme_color_override("font_placeholder_color", Color(1.0, 0.9, 0.62, 0.95))
+		answer_input.add_theme_color_override("selection_color", Color(0.9, 0.68, 0.35, 0.55))
+		answer_input.add_theme_stylebox_override("normal", _make_flat_style(Color(0.08, 0.055, 0.035, 0.78), UI_CREAM, 12, 2))
+		answer_input.add_theme_stylebox_override("focus", _make_flat_style(Color(0.12, 0.075, 0.04, 0.92), Color(1.0, 0.78, 0.34, 1.0), 12, 3))
 		answer_input.custom_minimum_size = Vector2(260, 54)
 	
 	if tiara_image:
@@ -2763,6 +2995,13 @@ func _get_final_box_variation_data() -> Dictionary:
 
 	variation_index = clampi(variation_index, 0, variations.size() - 1)
 	return variations[variation_index]
+
+
+func _format_final_box_display(display_text: String) -> String:
+	var formatted := display_text.replace("□", "_")
+	formatted = formatted.replace("â–¡", "_")
+	formatted = formatted.replace("?", "_")
+	return formatted
 	
 func _on_final_box_hotspot_pressed() -> void:
 	if _dialogue_input_locked:
@@ -2841,12 +3080,16 @@ func _refresh_final_box_panel_state() -> void:
 			final_box_instruction_label.text = "Read the number pattern to your partner."
 			if detective_pattern_label:
 				detective_pattern_label.visible = true
-				detective_pattern_label.text = str(_final_box_data.get("display", ""))
+				detective_pattern_label.text = _format_final_box_display(str(_final_box_data.get("display", "")))
+				detective_pattern_label.position = Vector2(390.0, 118.0)
+				detective_pattern_label.size = Vector2(565.0, 76.0)
 				detective_pattern_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 				detective_pattern_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 				detective_pattern_label.autowrap_mode = TextServer.AUTOWRAP_OFF
-				detective_pattern_label.add_theme_font_size_override("font_size", 30)
-				detective_pattern_label.add_theme_color_override("font_color", Color.WHITE)
+				detective_pattern_label.add_theme_font_size_override("font_size", 34)
+				detective_pattern_label.add_theme_color_override("font_color", UI_CREAM)
+				detective_pattern_label.add_theme_constant_override("outline_size", 5)
+				detective_pattern_label.add_theme_color_override("font_outline_color", Color(0.12, 0.07, 0.03, 0.98))
 			if sidekick_input_row:
 				sidekick_input_row.visible = false
 		else:
@@ -2857,8 +3100,10 @@ func _refresh_final_box_panel_state() -> void:
 				sidekick_input_row.visible = true
 				sidekick_input_row.add_theme_constant_override("separation", 12)
 			if answer_input:
-				answer_input.placeholder_text = ""
+				answer_input.placeholder_text = "_"
 				answer_input.custom_minimum_size = Vector2(260, 48)
+				answer_input.add_theme_font_size_override("font_size", 30)
+				answer_input.add_theme_color_override("font_placeholder_color", Color(1.0, 0.9, 0.62, 0.95))
 			if submit_answer_button:
 				submit_answer_button.custom_minimum_size = Vector2(150, 40)
 
@@ -3750,8 +3995,6 @@ func _set_dialogue_input_lock(locked: bool) -> void:
 	if is_instance_valid(inside_zone_control):
 		if inside_zone_control.has_method("set_pause_enabled"):
 			inside_zone_control.set_pause_enabled(true)
-		if inside_zone_control.has_method("set_ledger_enabled"):
-			inside_zone_control.set_ledger_enabled(not locked and GameState.local_role == GameState.Role.SIDEKICK)
 		if inside_zone_control.has_method("set_briefcase_enabled"):
 			inside_zone_control.set_briefcase_enabled(not locked and GameState.local_role == GameState.Role.SIDEKICK)
 		
