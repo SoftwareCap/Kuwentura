@@ -48,10 +48,13 @@ var _movement_locked: bool = false
 func _ready() -> void:
 	_is_in_lobby = get_parent() is Control
 	
-	# Hide the diamond when displayed in lobby
-	if _is_in_lobby:
-		if is_instance_valid(location_diamond):
+# Diamond: hidden in lobby, only visible on your own player in-game (Sims-style)
+	if is_instance_valid(location_diamond):
+		if _is_in_lobby:
 			location_diamond.visible = false
+		else:
+			location_diamond.visible = false  # hide by default
+			call_deferred("_update_diamond_visibility")
 
 	if multiplayer.has_multiplayer_peer():
 		z_index = 10 if is_multiplayer_authority() else 0
@@ -156,6 +159,13 @@ func _try_jump() -> void:
 # ANIMATION
 func _update_animation() -> String:
 	"""Play the correct sprite animation based on velocity and return its name."""
+	if _is_in_lobby:
+		sprite.play("idle")
+		return "idle"
+		
+	if not is_on_floor():
+		sprite.play("jump")
+		return "jump"
 	if velocity.x == 0:
 		sprite.play("idle")
 		return "idle"
@@ -238,3 +248,10 @@ func _force_initial_sync() -> void:
 	if not _is_local_player():
 		return
 	_send_state("idle")
+
+
+func _update_diamond_visibility() -> void:
+	if not is_instance_valid(location_diamond):
+		return
+	var is_mine := (not multiplayer.has_multiplayer_peer()) or is_multiplayer_authority()
+	location_diamond.visible = is_mine
