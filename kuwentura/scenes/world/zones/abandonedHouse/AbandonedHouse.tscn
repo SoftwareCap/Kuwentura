@@ -1,4 +1,4 @@
-[gd_scene load_steps=82 format=3 uid="uid://bandonedhouse"]
+[gd_scene load_steps=85 format=3 uid="uid://bandonedhouse"]
 
 [ext_resource type="Script" uid="uid://ftv8j2b15oka" path="res://scripts/world/zones/abandonedHouse/abandoned_house.gd" id="1_abandonedhouse"]
 [ext_resource type="Texture2D" uid="uid://cyyv53bejmfyj" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key-2.png" id="2_xh6nx"]
@@ -6,10 +6,10 @@
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="3_fnsr3"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 [ext_resource type="Texture2D" uid="uid://bwccumnrc00pr" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-1.png" id="4_ig5qe"]
-[ext_resource type="Texture2D" uid="uid://cgtl3fi4ldvqd" path="res://assets/sprites/players/detective/detective.png" id="4_w3m7o"]
+[ext_resource type="Texture2D" uid="uid://cgtl3fi4ldvqd" path="res://assets/sprites/players/Detective/detective.png" id="4_w3m7o"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="5_54qax"]
 [ext_resource type="Texture2D" uid="uid://cxoud0qppj31f" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-2.png" id="5_60uqn"]
-[ext_resource type="Texture2D" uid="uid://bppb0lkeirtvl" path="res://assets/sprites/players/detective/sidekick.png" id="5_tdxjt"]
+[ext_resource type="Texture2D" uid="uid://bppb0lkeirtvl" path="res://assets/sprites/players/Detective/sidekick.png" id="5_tdxjt"]
 [ext_resource type="Texture2D" uid="uid://dpuo3g1804rtj" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-3.png" id="6_fnmj2"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="6_pocdh"]
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="7_ctgii"]
@@ -54,9 +54,10 @@
 [ext_resource type="Texture2D" uid="uid://dwymeh76j8r8p" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/glowHint.png" id="44_5rk6e"]
 [ext_resource type="Texture2D" uid="uid://bn3lo7ofeh8ui" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key-3.png" id="45_sofx5"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="47_1767a"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="48_fs4kb"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="48_fs4kb"]
 [ext_resource type="Texture2D" uid="uid://baylpfjefdeqo" path="res://assets/buttons/backWordButton.png" id="52_8h2lu"]
 [ext_resource type="VideoStream" uid="uid://70ej8jwf1trd" path="res://assets/sprites/cutscene/zoneEnding/abandonedHouse.ogv" id="57_26k5c"]
+[ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="58_ig5qe"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wp1ru"]
 size = Vector2(168.5, 86)
@@ -210,6 +211,11 @@ shadow_offset = Vector2(0, 3.41)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ogtg4"]
 size = Vector2(92, 62.5)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_60uqn"]
+texture = ExtResource("58_ig5qe")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fnmj2"]
 
 [node name="AbandonedHouse" type="Node2D"]
 script = ExtResource("1_abandonedhouse")
@@ -1417,3 +1423,110 @@ grow_vertical = 2
 stream = ExtResource("57_26k5c")
 speed_scale = 0.4
 expand = true
+
+[node name="SidekickLayer" type="CanvasLayer" parent="."]
+
+[node name="Ledger" type="Panel" parent="SidekickLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -393.0
+offset_top = -331.0
+offset_right = 519.0
+offset_bottom = 501.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_60uqn")
+
+[node name="Control" type="Control" parent="SidekickLayer/Ledger"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LedgerTitle" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 200.0
+offset_right = 431.0
+offset_bottom = 251.0
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_font_sizes/font_size = 23
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 284.0
+offset_right = 446.0
+offset_bottom = 482.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+
+[node name="LedgerLeftHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 173.0
+offset_top = 270.0
+offset_right = 433.0
+offset_bottom = 330.0
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerLeftBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 339.0
+offset_right = 446.0
+offset_bottom = 482.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="LedgerRightHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 478.0
+offset_top = 208.0
+offset_right = 753.0
+offset_bottom = 276.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerRightBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 478.0
+offset_top = 274.0
+offset_right = 739.0
+offset_bottom = 492.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="Briefcase" type="Panel" parent="SidekickLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -247.0
+offset_top = -297.0
+offset_right = 247.0
+offset_bottom = 197.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_fnmj2")
