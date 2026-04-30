@@ -14,6 +14,7 @@ const MEMORY_PUZZLE_ID := "abandoned_house_memory"
 const MEMORY_FACE_IDS := ["face_1", "face_2", "face_3", "face_4", "face_5", "face_6"]
 const MEMORY_REWARD_ITEMS := ["key_fragment_2", "light_bulb"]
 const DRAWER_REWARD_ITEMS := ["key_fragment_3"]
+const ZONE_COMPLETION_SFX: AudioStream = preload("res://assets/audios/ZoneCompletionSFX.mp3")
 
 # Keeps the puzzle more responsive on different screen sizes.
 const BOOK_WIDTH_RATIOS := {
@@ -112,8 +113,9 @@ var _final_box_data: Dictionary = {}
 @onready var lamp_hotspot: TextureButton = $PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer/MirrorHolder/LampHotspot
 @onready var close_mirror_button: TouchScreenButton = $PuzzleCanvasLayer/Dimmer/MirrorPuzzlePanel/MarginContainer/VBoxContainer/CloseMirrorButton
 
-@onready var inside_zone_control = $InsideZoneControl
+@onready var inside_zone_control: CanvasLayer = $InsideZoneControl
 @onready var inventory_board: Node2D = get_node_or_null("InventoryBoard") as Node2D
+@onready var inventory_board_sprite: Sprite2D = get_node_or_null("InventoryBoard/Board") as Sprite2D
 @onready var inventory_area: Area2D = get_node_or_null("InventoryBoard/Area2D") as Area2D
 
 @onready var puzzle_area: Area2D = $InteractiveLayer/PuzzleArea
@@ -161,6 +163,7 @@ const FINAL_BOX_PUZZLE_ID := "abandoned_house_final_box_opened"
 
 @onready var final_box_panel: PanelContainer = $PuzzleCanvasLayer/Dimmer/FinalBoxPanel
 @onready var final_box_instruction_label: Label = $PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/InstructionLabel
+@onready var final_box_holder: Control = $PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BoxHolder
 @onready var final_box_texture_rect: TextureRect = $PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BoxHolder/BoxTexture
 @onready var detective_pattern_label: Label = $PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BoxHolder/DetectivePatternLabel
 @onready var sidekick_input_row: VBoxContainer = $PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BoxHolder/SidekickInputRow
@@ -202,13 +205,19 @@ const BOOKS_PUZZLE_ID := "abandoned_house_books_solved"
 const TIARA_SPARKLE_MIN_SCALE := 0.45
 const TIARA_SPARKLE_MAX_SCALE := 0.55
 const TIARA_SPARKLE_PULSE_SPEED := 4.0
-const QUEST_PANEL_POS := Vector2(30, 245)
+const QUEST_PANEL_POS := Vector2(22, 108)
 const QUEST_PANEL_WIDTH := 390.0
 const QUEST_HEADER_HEIGHT := 34.0
 const QUEST_ROW_HEIGHT := 33.0
 const QUEST_ROW_GAP := 5.0
 const QUEST_TEXT_LEFT_PADDING := 12.0
 const QUEST_DONE_ALPHA := 0.45
+const UI_BROWN := Color(0.55, 0.31, 0.12, 1.0)
+const UI_BROWN_DARK := Color(0.30, 0.15, 0.05, 1.0)
+const UI_BROWN_HOVER := Color(0.65, 0.39, 0.17, 1.0)
+const UI_CREAM := Color(1.0, 0.90, 0.72, 1.0)
+const UI_DIM_PANEL := Color(0.02, 0.015, 0.01, 0.76)
+const UI_QUEST_DONE := Color(0.72, 0.68, 0.61, 1.0)
 
 
 @onready var cinematic_reward_layer: CanvasLayer = get_node_or_null("RewardLayer")
@@ -255,9 +264,21 @@ const INVENTORY_ITEM_NAMES := {
 	"key_fragment_3": "Key Fragment 3",
 	"assembled_key": "Key"
 }
+const INVENTORY_DISPLAY_PRIORITY := [
+	"key_fragment_1",
+	"card_piece",
+	"key_fragment_2",
+	"light_bulb",
+	"key_fragment_3"
+]
 
 var _armed_inventory_item: String = ""
 var _inventory_icon_nodes: Dictionary = {}
+var _inventory_display_items: Array[String] = []
+var _inventory_slot_highlight: Panel
+var _inventory_block_label: Label
+var _inventory_block_tween: Tween
+var _armed_inventory_slot_index: int = -1
 
 var _cabinet_opened: bool = false
 
@@ -293,13 +314,131 @@ var _memory_solved: bool = false
 
 var _quest_style_ready: bool = false
 var _quest_labels: Array = []
+var _quest_row_backgrounds: Array = []
+var _quest_toggle_button: Button
+var _quest_expanded: bool = false
+var _quest_active_index: int = 0
+var _sfx_player: AudioStreamPlayer
+var _final_box_role_card: Panel
+var _final_box_role_title_label: Label
+var _final_box_role_hint_label: Label
+
+
+func _make_flat_style(fill_color: Color, border_color: Color = Color.TRANSPARENT, radius: int = 10, border_width: int = 0) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = fill_color
+	style.border_color = border_color
+	style.border_width_left = border_width
+	style.border_width_top = border_width
+	style.border_width_right = border_width
+	style.border_width_bottom = border_width
+	style.corner_radius_top_left = radius
+	style.corner_radius_top_right = radius
+	style.corner_radius_bottom_left = radius
+	style.corner_radius_bottom_right = radius
+	style.content_margin_left = 18.0
+	style.content_margin_right = 18.0
+	style.content_margin_top = 8.0
+	style.content_margin_bottom = 8.0
+	return style
+
+
+func _style_brown_button(button: Button, minimum_size: Vector2 = Vector2(180, 46)) -> void:
+	if not is_instance_valid(button):
+		return
+
+	button.custom_minimum_size = minimum_size
+	button.focus_mode = Control.FOCUS_NONE
+	button.add_theme_font_size_override("font_size", 18)
+	button.add_theme_color_override("font_color", Color.WHITE)
+	button.add_theme_color_override("font_hover_color", Color.WHITE)
+	button.add_theme_color_override("font_pressed_color", UI_CREAM)
+	button.add_theme_color_override("font_focus_color", Color.WHITE)
+	button.add_theme_color_override("font_disabled_color", Color(1, 1, 1, 0.42))
+	button.add_theme_stylebox_override("normal", _make_flat_style(UI_BROWN, UI_CREAM, 11, 2))
+	button.add_theme_stylebox_override("hover", _make_flat_style(UI_BROWN_HOVER, UI_CREAM, 11, 2))
+	button.add_theme_stylebox_override("pressed", _make_flat_style(UI_BROWN_DARK, UI_CREAM, 11, 2))
+	button.add_theme_stylebox_override("disabled", _make_flat_style(Color(0.28, 0.22, 0.17, 0.82), Color(0.75, 0.65, 0.52, 0.55), 11, 2))
+	button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+
+
+func _style_abandoned_house_buttons() -> void:
+	_style_brown_button(back_button, Vector2(160, 42))
+	_style_brown_button(close_memory_button, Vector2(170, 42))
+	_style_brown_button(collect_reward_button, Vector2(210, 46))
+	_style_brown_button(submit_answer_button, Vector2(190, 46))
+	_style_brown_button(cinematic_collect_button, Vector2(240, 58))
+
+
+func _ensure_sfx_bus() -> void:
+	var sfx_bus_index := AudioServer.get_bus_index("SFX")
+	if sfx_bus_index != -1:
+		return
+
+	AudioServer.add_bus(AudioServer.bus_count)
+	var last_bus_index := AudioServer.bus_count - 1
+	AudioServer.set_bus_name(last_bus_index, "SFX")
+	AudioServer.set_bus_volume_db(last_bus_index, 0.0)
+
+
+func _play_zone_completion_sfx() -> void:
+	if not is_instance_valid(_sfx_player) or ZONE_COMPLETION_SFX == null:
+		return
+
+	MusicController.pause_music()
+	_sfx_player.stream = ZONE_COMPLETION_SFX
+	_sfx_player.play()
+	if not _sfx_player.finished.is_connected(_on_sfx_finished_resume_music):
+		_sfx_player.finished.connect(_on_sfx_finished_resume_music, CONNECT_ONE_SHOT)
+
+
+func _on_sfx_finished_resume_music() -> void:
+	MusicController.resume_music()
+
+
+func _spawn_confetti(parent_node: Node, amount: int = 52) -> void:
+	if not is_instance_valid(parent_node):
+		return
+
+	var viewport_size: Vector2 = get_viewport_rect().size
+	var colors: Array[Color] = [
+		Color(1.0, 0.78, 0.22, 1.0),
+		Color(0.95, 0.38, 0.25, 1.0),
+		Color(0.35, 0.78, 0.42, 1.0),
+		Color(0.36, 0.65, 1.0, 1.0),
+		Color(1.0, 0.92, 0.62, 1.0)
+	]
+
+	for i in range(amount):
+		var piece := ColorRect.new()
+		var color_index: int = randi() % colors.size()
+		piece.name = "ConfettiPiece"
+		piece.color = colors[color_index]
+		piece.size = Vector2(randf_range(7.0, 13.0), randf_range(12.0, 22.0))
+		piece.position = Vector2(randf_range(0.0, viewport_size.x), randf_range(-110.0, -15.0))
+		piece.rotation = randf_range(-0.9, 0.9)
+		piece.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		piece.z_index = 500
+		parent_node.add_child(piece)
+
+		var fall_duration: float = randf_range(1.6, 2.45)
+		var end_position := piece.position + Vector2(
+			randf_range(-120.0, 120.0),
+			viewport_size.y + randf_range(100.0, 220.0)
+		)
+		var tween := create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(piece, "position", end_position, fall_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+		tween.tween_property(piece, "rotation", piece.rotation + randf_range(3.0, 7.0), fall_duration)
+		tween.tween_property(piece, "modulate:a", 0.0, 0.35).set_delay(maxf(0.1, fall_duration - 0.35))
+		tween.finished.connect(piece.queue_free)
 
 
 func _setup_quest_panel_style() -> void:
 	if not is_instance_valid(quest_layer):
 		return
 
-	var labels := [
+	var labels: Array[Label] = [
 		quest_books_label,
 		quest_memory_label,
 		quest_mirror_label,
@@ -309,6 +448,7 @@ func _setup_quest_panel_style() -> void:
 	]
 
 	_quest_labels.clear()
+	_quest_row_backgrounds.clear()
 
 	var header_bar := quest_layer.get_node_or_null("QuestHeaderBar") as ColorRect
 	if not is_instance_valid(header_bar):
@@ -319,7 +459,7 @@ func _setup_quest_panel_style() -> void:
 
 	header_bar.position = QUEST_PANEL_POS
 	header_bar.size = Vector2(QUEST_PANEL_WIDTH, QUEST_HEADER_HEIGHT)
-	header_bar.color = Color(0.34, 0.17, 0.05, 0.95)
+	header_bar.color = UI_BROWN
 	header_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	header_bar.z_index = 0
 
@@ -334,6 +474,23 @@ func _setup_quest_panel_style() -> void:
 		quest_title_label.add_theme_constant_override("outline_size", 2)
 		quest_title_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 		quest_title_label.z_index = 3
+
+	_quest_toggle_button = quest_layer.get_node_or_null("QuestToggleButton") as Button
+	if not is_instance_valid(_quest_toggle_button):
+		_quest_toggle_button = Button.new()
+		_quest_toggle_button.name = "QuestToggleButton"
+		quest_layer.add_child(_quest_toggle_button)
+
+	_quest_toggle_button.position = QUEST_PANEL_POS
+	_quest_toggle_button.size = Vector2(QUEST_PANEL_WIDTH, QUEST_HEADER_HEIGHT)
+	_quest_toggle_button.text = ""
+	_quest_toggle_button.flat = true
+	_quest_toggle_button.focus_mode = Control.FOCUS_NONE
+	_quest_toggle_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	_quest_toggle_button.z_index = 10
+	_quest_toggle_button.self_modulate = Color(1, 1, 1, 0)
+	if not _quest_toggle_button.pressed.is_connected(_on_quest_header_pressed):
+		_quest_toggle_button.pressed.connect(_on_quest_header_pressed)
 
 	for i in range(labels.size()):
 		var label := labels[i] as Label
@@ -355,7 +512,7 @@ func _setup_quest_panel_style() -> void:
 
 		row_bg.position = row_pos
 		row_bg.size = Vector2(QUEST_PANEL_WIDTH, QUEST_ROW_HEIGHT)
-		row_bg.color = Color(0.10, 0.05, 0.02, 0.72)
+		row_bg.color = UI_DIM_PANEL
 		row_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row_bg.z_index = 0
 
@@ -372,11 +529,24 @@ func _setup_quest_panel_style() -> void:
 		label.z_index = 2
 
 		_quest_labels.append(label)
+		_quest_row_backgrounds.append(row_bg)
 
 	_quest_style_ready = true
 
 
-func _set_quest_task(index: int, text: String, done: bool) -> void:
+func _on_quest_header_pressed() -> void:
+	_quest_expanded = not _quest_expanded
+	_update_quest_labels()
+
+
+func _get_quest_row_position(row_index: int) -> Vector2:
+	return QUEST_PANEL_POS + Vector2(
+		0.0,
+		QUEST_HEADER_HEIGHT + 8.0 + float(row_index) * (QUEST_ROW_HEIGHT + QUEST_ROW_GAP)
+	)
+
+
+func _set_quest_task(index: int, text: String, done: bool, active: bool) -> void:
 	if index < 0 or index >= _quest_labels.size():
 		return
 
@@ -384,8 +554,32 @@ func _set_quest_task(index: int, text: String, done: bool) -> void:
 	if not is_instance_valid(label):
 		return
 
+	var row_bg: ColorRect = null
+	if index < _quest_row_backgrounds.size():
+		row_bg = _quest_row_backgrounds[index] as ColorRect
+	var row_visible: bool = _quest_expanded or active
+	var visible_row_index: int = index if _quest_expanded else 0
+	var row_pos := _get_quest_row_position(visible_row_index)
+
 	label.text = text
+	label.set_meta("quest_done", done)
+	label.visible = row_visible
+	label.position = row_pos + Vector2(QUEST_TEXT_LEFT_PADDING, 0.0)
+	label.size = Vector2(QUEST_PANEL_WIDTH - (QUEST_TEXT_LEFT_PADDING * 2.0), QUEST_ROW_HEIGHT)
+	label.add_theme_font_size_override("font_size", 15 if active and not done else 14)
+	label.add_theme_color_override("font_color", UI_QUEST_DONE if done else Color.WHITE)
 	label.modulate = Color(1, 1, 1, QUEST_DONE_ALPHA) if done else Color.WHITE
+
+	if is_instance_valid(row_bg):
+		row_bg.visible = row_visible
+		row_bg.position = row_pos
+		row_bg.size = Vector2(QUEST_PANEL_WIDTH, QUEST_ROW_HEIGHT)
+		if done:
+			row_bg.color = Color(0.02, 0.018, 0.014, 0.48)
+		elif active:
+			row_bg.color = Color(0.02, 0.014, 0.008, 0.82)
+		else:
+			row_bg.color = UI_DIM_PANEL
 
 
 func _is_game_state_puzzle_solved(puzzle_id: String) -> bool:
@@ -403,12 +597,52 @@ func _update_quest_labels() -> void:
 	var cabinet_done := _cabinet_opened or _is_game_state_puzzle_solved(CABINET_PUZZLE_ID)
 	var treasure_done := _final_box_opened or _is_game_state_puzzle_solved(FINAL_BOX_PUZZLE_ID) or (GameState and GameState.has_method("has_clue") and GameState.has_clue(ZONE_ID))
 
-	_set_quest_task(0, "Arrange the books", books_done)
-	_set_quest_task(1, "Complete the memory cards", memory_done)
-	_set_quest_task(2, "Light the mirror", mirror_done)
-	_set_quest_task(3, "Unlock the drawer", drawer_done)
-	_set_quest_task(4, "Open the cabinet", cabinet_done)
-	_set_quest_task(5, "Open the treasure box", treasure_done)
+	var tasks: Array[String] = [
+		"Arrange the books",
+		"Complete the memory cards",
+		"Light the mirror",
+		"Unlock the drawer",
+		"Open the cabinet",
+		"Open the treasure box"
+	]
+	var done_states: Array[bool] = [
+		books_done,
+		memory_done,
+		mirror_done,
+		drawer_done,
+		cabinet_done,
+		treasure_done
+	]
+
+	var previous_active_index: int = _quest_active_index
+	_quest_active_index = done_states.find(false)
+	if _quest_active_index == -1:
+		_quest_active_index = done_states.size() - 1
+
+	for i in range(tasks.size()):
+		_set_quest_task(i, tasks[i], done_states[i], i == _quest_active_index)
+
+	if previous_active_index != _quest_active_index and not _quest_expanded:
+		_animate_current_quest_task()
+
+
+func _animate_current_quest_task() -> void:
+	if _quest_active_index < 0 or _quest_active_index >= _quest_labels.size():
+		return
+
+	var label := _quest_labels[_quest_active_index] as Label
+	if not is_instance_valid(label) or not label.visible:
+		return
+
+	var start_position := label.position
+	var target_modulate := Color(1, 1, 1, QUEST_DONE_ALPHA) if bool(label.get_meta("quest_done", false)) else Color.WHITE
+	label.position = start_position + Vector2(18.0, 0.0)
+	label.modulate = Color(1, 1, 1, 0.35)
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(label, "position", start_position, 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(label, "modulate", target_modulate, 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 
 func _ready() -> void:
@@ -461,6 +695,10 @@ func _ready() -> void:
 	_setup_quest_panel_style()
 	_update_quest_labels()
 	_setup_inventory_board()
+	_ensure_sfx_bus()
+	_sfx_player = AudioStreamPlayer.new()
+	_sfx_player.bus = "SFX"
+	add_child(_sfx_player)
 	
 	await get_tree().process_frame
 	_resize_books_popup()
@@ -490,6 +728,7 @@ func _setup_ui() -> void:
 	instruction_label.text = "Drag the books to arrange them by width.\nNarrowest should be on top and widest should be at the bottom."
 
 	dimmer.visible = false
+	dimmer.color = Color.BLACK
 	books_puzzle_panel.visible = false
 	dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	books_puzzle_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -499,10 +738,12 @@ func _setup_ui() -> void:
 		reward_canvas_layer.layer = 80
 
 	reward_dimmer.visible = false
+	reward_dimmer.color = Color.BLACK
 	reward_panel.visible = false
 	reward_items_row.visible = false
 	reward_dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	reward_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_style_abandoned_house_buttons()
 
 func _center_reward_panel() -> void:
 	var viewport_size: Vector2 = get_viewport_rect().size
@@ -519,8 +760,8 @@ func _center_reward_panel() -> void:
 		reward_dimmer.offset_bottom = 0.0
 
 	# Actual popup size.
-	var panel_width: float = clampf(viewport_size.x * 0.46, 460.0, 620.0)
-	var panel_height: float = clampf(viewport_size.y * 0.48, 280.0, 380.0)
+	var panel_width: float = clampf(viewport_size.x * 0.44, 520.0, 700.0)
+	var panel_height: float = clampf(viewport_size.y * 0.52, 360.0, 450.0)
 	var panel_size := Vector2(panel_width, panel_height)
 
 	# IMPORTANT:
@@ -548,26 +789,31 @@ func _center_reward_panel() -> void:
 		reward_vbox.anchor_right = 1.0
 		reward_vbox.anchor_bottom = 1.0
 
-		reward_vbox.offset_left = 24.0
-		reward_vbox.offset_top = 20.0
-		reward_vbox.offset_right = -24.0
-		reward_vbox.offset_bottom = -20.0
+		reward_vbox.offset_left = 30.0
+		reward_vbox.offset_top = 24.0
+		reward_vbox.offset_right = -30.0
+		reward_vbox.offset_bottom = -24.0
 
 		reward_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-		reward_vbox.add_theme_constant_override("separation", 14)
+		reward_vbox.add_theme_constant_override("separation", 18)
 
 	if reward_title_label:
 		reward_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		reward_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		reward_title_label.custom_minimum_size = Vector2(0, 54)
+		reward_title_label.add_theme_font_size_override("font_size", 34)
 
 	if reward_body_label:
 		reward_body_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		reward_body_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		reward_body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		reward_body_label.custom_minimum_size = Vector2(0, 68)
+		reward_body_label.add_theme_font_size_override("font_size", 22)
 
 	if reward_items_row:
 		reward_items_row.alignment = BoxContainer.ALIGNMENT_CENTER
 		reward_items_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		reward_items_row.custom_minimum_size = Vector2(0, 146)
 
 	if collect_reward_button:
 		collect_reward_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -577,18 +823,18 @@ func _setup_reward_preview() -> void:
 	_center_reward_panel()
 
 	reward_items_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	reward_items_row.add_theme_constant_override("separation", 16)
+	reward_items_row.add_theme_constant_override("separation", 24)
 
-	key_item.custom_minimum_size = Vector2(140, 100)
-	card_item.custom_minimum_size = Vector2(140, 140)
+	key_item.custom_minimum_size = Vector2(150, 130)
+	card_item.custom_minimum_size = Vector2(150, 130)
 
 	key_item.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	key_item.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	card_item.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	card_item.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
-	_fit_reward_texture(key_texture_rect, Vector2(110, 70))
-	_fit_reward_texture(card_texture_rect, Vector2(110, 110))
+	_fit_reward_texture(key_texture_rect, Vector2(124, 92))
+	_fit_reward_texture(card_texture_rect, Vector2(124, 124))
 
 	if key_fragment_1_texture:
 		key_texture_rect.texture = _make_cropped_key_texture(key_fragment_1_texture)
@@ -641,6 +887,12 @@ func _connect_signals() -> void:
 	if not close_drawer_button.pressed.is_connected(_on_close_drawer_button_pressed):
 		close_drawer_button.pressed.connect(_on_close_drawer_button_pressed)
 
+	if drawer_panel and not drawer_panel.gui_input.is_connected(_on_drawer_panel_gui_input):
+		drawer_panel.gui_input.connect(_on_drawer_panel_gui_input)
+
+	if drawer_lock_panel and not drawer_lock_panel.gui_input.is_connected(_on_drawer_lock_panel_gui_input):
+		drawer_lock_panel.gui_input.connect(_on_drawer_lock_panel_gui_input)
+
 	if not drawer_lock_hotspot.pressed.is_connected(_on_drawer_lock_hotspot_pressed):
 		drawer_lock_hotspot.pressed.connect(_on_drawer_lock_hotspot_pressed)
 
@@ -665,6 +917,9 @@ func _connect_signals() -> void:
 	if not close_cabinet_button.pressed.is_connected(_on_close_cabinet_button_pressed):
 		close_cabinet_button.pressed.connect(_on_close_cabinet_button_pressed)
 
+	if cabinet_puzzle_panel and not cabinet_puzzle_panel.gui_input.is_connected(_on_cabinet_panel_gui_input):
+		cabinet_puzzle_panel.gui_input.connect(_on_cabinet_panel_gui_input)
+
 	if not cabinet_lock_hotspot.pressed.is_connected(_on_cabinet_lock_hotspot_pressed):
 		cabinet_lock_hotspot.pressed.connect(_on_cabinet_lock_hotspot_pressed)
 	
@@ -676,6 +931,9 @@ func _connect_signals() -> void:
 
 	if submit_answer_button and not submit_answer_button.pressed.is_connected(_on_submit_final_box_answer_pressed):
 		submit_answer_button.pressed.connect(_on_submit_final_box_answer_pressed)
+
+	if final_box_panel and not final_box_panel.gui_input.is_connected(_on_final_box_panel_gui_input):
+		final_box_panel.gui_input.connect(_on_final_box_panel_gui_input)
 	
 	if tiara_hotspot and not tiara_hotspot.pressed.is_connected(_on_tiara_hotspot_pressed):
 		tiara_hotspot.pressed.connect(_on_tiara_hotspot_pressed)
@@ -702,6 +960,8 @@ func _refresh_role_label() -> void:
 
 	if inside_zone_control and inside_zone_control.has_method("set_sidekick_ui_visible"):
 		inside_zone_control.set_sidekick_ui_visible(_is_local_sidekick())
+
+	_refresh_inventory_interaction_state()
 
 
 func _load_books_progress() -> void:
@@ -784,7 +1044,10 @@ func _refresh_books_panel_for_role() -> void:
 	# ClosePuzzleButton is a TouchScreenButton image, so no text update is needed.
 
 func _open_books_panel() -> void:
-	_set_books_panel_visible(true)
+	if multiplayer.has_multiplayer_peer():
+		_sync_books_panel_visible_rpc.rpc(true)
+	else:
+		_apply_books_panel_visibility(true)
 	_refresh_books_panel_for_role()
 	await get_tree().process_frame
 	_resize_books_popup()
@@ -796,15 +1059,43 @@ func _close_books_panel() -> void:
 	if _drag_book_id != "":
 		_finish_drag()
 
-	_set_books_panel_visible(false)
+	if multiplayer.has_multiplayer_peer():
+		_sync_books_panel_visible_rpc.rpc(false)
+	else:
+		_apply_books_panel_visibility(false)
 
 
-func _set_books_panel_visible(visible_state: bool) -> void:
+func _close_books_panel_local_only() -> void:
+	if _drag_book_id != "":
+		_finish_drag()
+
+	_apply_books_panel_visibility(false)
+
+
+@rpc("any_peer", "reliable", "call_local")
+func _sync_books_panel_visible_rpc(visible_state: bool) -> void:
+	_apply_books_panel_visibility(visible_state)
+
+
+func _apply_books_panel_visibility(visible_state: bool) -> void:
 	dimmer.visible = visible_state
 	books_puzzle_panel.visible = visible_state
 
 	dimmer.mouse_filter = Control.MOUSE_FILTER_STOP if visible_state else Control.MOUSE_FILTER_IGNORE
 	books_puzzle_panel.mouse_filter = Control.MOUSE_FILTER_STOP if visible_state else Control.MOUSE_FILTER_IGNORE
+
+	if visible_state:
+		_refresh_books_view_state()
+		_refresh_books_panel_for_role()
+		call_deferred("_finalize_books_panel_open")
+
+
+func _finalize_books_panel_open() -> void:
+	if not is_instance_valid(books_puzzle_panel) or not books_puzzle_panel.visible:
+		return
+
+	_resize_books_popup()
+	_layout_books()
 
 
 func _on_close_puzzle_button_pressed() -> void:
@@ -996,7 +1287,7 @@ func _apply_books_puzzle_solved() -> void:
 
 	# IMPORTANT:
 	# Do NOT grant the reward items here anymore.
-	# We only grant them after the sidekick presses Collect Clue.
+	# We only grant them after the Sidekick presses the reward button.
 
 	_close_books_panel()
 	_update_quest_labels()
@@ -1047,7 +1338,7 @@ func _show_reward_panel(title: String, body: String, item_ids: Array, texture_1:
 	if texture_2:
 		card_texture_rect.texture = texture_2
 
-	collect_reward_button.text = "Collect Clue"
+	collect_reward_button.text = "Collect Reward"
 	collect_reward_button.visible = _is_local_sidekick()
 	collect_reward_button.disabled = not _is_local_sidekick()
 
@@ -1058,6 +1349,8 @@ func _show_reward_panel(title: String, body: String, item_ids: Array, texture_1:
 
 	reward_dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
 	reward_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_play_zone_completion_sfx()
+	_spawn_confetti(reward_canvas_layer, 56)
 
 
 func _show_books_reward_panel() -> void:
@@ -1117,6 +1410,8 @@ func _collect_reward_items_rpc(item_ids: Array) -> void:
 	# refresh drawer UI in case key_fragment_3 was just collected
 	if item_ids.has("key_fragment_3"):
 		_refresh_drawer_panel_state()
+		if _has_inventory_item("key_fragment_1") and _has_inventory_item("key_fragment_2") and _has_inventory_item("key_fragment_3"):
+			_show_notification("Tap any key fragment to combine them into the key.")
 		
 	if item_ids.has("pinas_tiara"):
 		if GameState and GameState.has_method("has_clue") and GameState.has_method("collect_clue"):
@@ -1562,11 +1857,65 @@ func _load_mirror_progress() -> void:
 
 
 func _on_puzzle_dimmer_gui_input(event: InputEvent) -> void:
-	_try_close_mirror_from_tap(event)
+	if not _is_primary_press_event(event):
+		return
+
+	if _try_close_mirror_from_tap(event):
+		return
+
+	if _close_active_focus_panel_from_backdrop():
+		get_viewport().set_input_as_handled()
 
 
 func _on_mirror_panel_gui_input(event: InputEvent) -> void:
 	_try_close_mirror_from_tap(event)
+
+
+func _on_drawer_panel_gui_input(event: InputEvent) -> void:
+	_try_close_drawer_from_tap(event)
+
+
+func _on_drawer_lock_panel_gui_input(event: InputEvent) -> void:
+	_try_close_drawer_lock_from_tap(event)
+
+
+func _on_cabinet_panel_gui_input(event: InputEvent) -> void:
+	_try_close_cabinet_from_tap(event)
+
+
+func _on_final_box_panel_gui_input(event: InputEvent) -> void:
+	_try_close_final_box_from_tap(event)
+
+
+func _close_active_focus_panel_from_backdrop() -> bool:
+	if is_instance_valid(books_puzzle_panel) and books_puzzle_panel.visible:
+		_close_books_panel_local_only()
+		return true
+
+	var closed_any := false
+
+	if _drag_book_id != "":
+		_finish_drag()
+
+	var focus_panels: Array[Control] = [
+		memory_puzzle_panel,
+		drawer_panel,
+		drawer_lock_panel,
+		cabinet_puzzle_panel,
+		final_box_panel
+	]
+
+	for panel in focus_panels:
+		if is_instance_valid(panel) and panel.visible:
+			panel.visible = false
+			panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			closed_any = true
+
+	if closed_any and is_instance_valid(dimmer):
+		dimmer.visible = false
+		dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	return closed_any
 
 
 func _try_close_mirror_from_tap(event: InputEvent) -> bool:
@@ -1593,6 +1942,102 @@ func _try_close_mirror_from_tap(event: InputEvent) -> bool:
 	return true
 
 
+func _try_close_drawer_from_tap(event: InputEvent) -> bool:
+	if not drawer_panel or not drawer_panel.visible:
+		return false
+
+	if not _is_primary_press_event(event):
+		return false
+
+	var tap_position: Vector2 = _get_event_position(event)
+
+	if drawer_texture_rect and drawer_texture_rect.get_global_rect().grow(8.0).has_point(tap_position):
+		return false
+
+	if drawer_lock_hotspot and drawer_lock_hotspot.visible and drawer_lock_hotspot.get_global_rect().grow(8.0).has_point(tap_position):
+		return false
+
+	if key_fragment_hotspot and key_fragment_hotspot.visible and key_fragment_hotspot.get_global_rect().grow(8.0).has_point(tap_position):
+		return false
+
+	_close_drawer_panel()
+	get_viewport().set_input_as_handled()
+	return true
+
+
+func _control_contains_tap(control: Control, tap_position: Vector2, grow: float = 8.0) -> bool:
+	return is_instance_valid(control) and control.visible and control.get_global_rect().grow(grow).has_point(tap_position)
+
+
+func _try_close_drawer_lock_from_tap(event: InputEvent) -> bool:
+	if not drawer_lock_panel or not drawer_lock_panel.visible:
+		return false
+
+	if not _is_primary_press_event(event):
+		return false
+
+	var tap_position: Vector2 = _get_event_position(event)
+
+	if _control_contains_tap(drawer_lock_texture_rect, tap_position):
+		return false
+
+	if _control_contains_tap(digit_1_button, tap_position) or _control_contains_tap(digit_2_button, tap_position) or _control_contains_tap(digit_3_button, tap_position):
+		return false
+
+	_close_drawer_lock_panel()
+	get_viewport().set_input_as_handled()
+	return true
+
+
+func _try_close_cabinet_from_tap(event: InputEvent) -> bool:
+	if not cabinet_puzzle_panel or not cabinet_puzzle_panel.visible:
+		return false
+
+	if not _is_primary_press_event(event):
+		return false
+
+	var tap_position: Vector2 = _get_event_position(event)
+
+	if _control_contains_tap(cabinet_texture_rect, tap_position):
+		return false
+
+	if _control_contains_tap(cabinet_lock_hotspot, tap_position) or _control_contains_tap(final_box_hotspot, tap_position):
+		return false
+
+	_close_cabinet_panel()
+	get_viewport().set_input_as_handled()
+	return true
+
+
+func _try_close_final_box_from_tap(event: InputEvent) -> bool:
+	if not final_box_panel or not final_box_panel.visible:
+		return false
+
+	if not _is_primary_press_event(event):
+		return false
+
+	var tap_position: Vector2 = _get_event_position(event)
+
+	if _control_contains_tap(final_box_texture_rect, tap_position):
+		return false
+
+	if _control_contains_tap(_final_box_role_card, tap_position):
+		return false
+
+	if _control_contains_tap(answer_input, tap_position) or _control_contains_tap(submit_answer_button, tap_position):
+		return false
+
+	if _control_contains_tap(detective_pattern_label, tap_position) or _control_contains_tap(sidekick_input_row, tap_position):
+		return false
+
+	if _control_contains_tap(tiara_image, tap_position) or _control_contains_tap(tiara_hotspot, tap_position):
+		return false
+
+	_close_final_box_panel()
+	get_viewport().set_input_as_handled()
+	return true
+
+
 func _on_mirror_area_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if _dialogue_input_locked:
 		return
@@ -1604,7 +2049,7 @@ func _on_mirror_area_input_event(_viewport: Node, event: InputEvent, _shape_idx:
 
 
 func _open_mirror_panel() -> void:
-	_close_books_panel()
+	_close_books_panel_local_only()
 	_close_memory_panel()
 
 	dimmer.visible = true
@@ -1757,7 +2202,7 @@ func _on_drawer_area_input_event(_viewport: Node, event: InputEvent, _shape_idx:
 
 
 func _open_drawer_panel() -> void:
-	_close_books_panel()
+	_close_books_panel_local_only()
 	_close_memory_panel()
 	_close_mirror_panel()
 
@@ -1985,7 +2430,7 @@ func _apply_drawer_unlocked() -> void:
 	_show_notification("The drawer unlocked.")
 
 	# New flow: after solving the drawer lock, show the reward panel immediately.
-	# The Sidekick is the only one who can press Collect Clue.
+	# The Sidekick is the only one who can collect this reward.
 	_hide_drawer_ui()
 	if dimmer:
 		dimmer.visible = false
@@ -2070,7 +2515,7 @@ func _on_cabinet_area_input_event(_viewport: Node, event: InputEvent, _shape_idx
 
 
 func _open_cabinet_panel() -> void:
-	_close_books_panel()
+	_close_books_panel_local_only()
 	_close_memory_panel()
 	_close_mirror_panel()
 	_hide_drawer_ui()
@@ -2186,8 +2631,11 @@ func _setup_final_box_ui() -> void:
 
 	if answer_input:
 		answer_input.text = ""
-		answer_input.placeholder_text = "Enter Missing Number"
+		answer_input.placeholder_text = ""
 		answer_input.max_length = 3
+		answer_input.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		answer_input.add_theme_font_size_override("font_size", 24)
+		answer_input.custom_minimum_size = Vector2(260, 54)
 	
 	if tiara_image:
 		tiara_image.visible = false
@@ -2196,6 +2644,54 @@ func _setup_final_box_ui() -> void:
 	if tiara_hotspot:
 		tiara_hotspot.visible = false
 		tiara_hotspot.disabled = true
+
+	_ensure_final_box_role_card()
+
+
+func _ensure_final_box_role_card() -> void:
+	if not is_instance_valid(final_box_holder):
+		return
+
+	_final_box_role_card = final_box_holder.get_node_or_null("RoleCard") as Panel
+	if not is_instance_valid(_final_box_role_card):
+		_final_box_role_card = Panel.new()
+		_final_box_role_card.name = "RoleCard"
+		final_box_holder.add_child(_final_box_role_card)
+
+	_final_box_role_card.position = Vector2(370, 58)
+	_final_box_role_card.size = Vector2(490, 192)
+	_final_box_role_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_final_box_role_card.z_index = 1
+	_final_box_role_card.add_theme_stylebox_override("panel", _make_flat_style(Color(0.95, 0.92, 0.82, 0.96), Color(0.58, 0.37, 0.16, 1.0), 18, 3))
+
+	_final_box_role_title_label = final_box_holder.get_node_or_null("RoleCardTitle") as Label
+	if not is_instance_valid(_final_box_role_title_label):
+		_final_box_role_title_label = Label.new()
+		_final_box_role_title_label.name = "RoleCardTitle"
+		final_box_holder.add_child(_final_box_role_title_label)
+
+	_final_box_role_title_label.position = _final_box_role_card.position + Vector2(0, 12)
+	_final_box_role_title_label.size = Vector2(_final_box_role_card.size.x, 24)
+	_final_box_role_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_final_box_role_title_label.add_theme_font_size_override("font_size", 17)
+	_final_box_role_title_label.add_theme_color_override("font_color", UI_BROWN_DARK)
+	_final_box_role_title_label.add_theme_constant_override("outline_size", 1)
+	_final_box_role_title_label.add_theme_color_override("font_outline_color", Color(1, 1, 1, 0.45))
+	_final_box_role_title_label.z_index = 2
+
+	_final_box_role_hint_label = final_box_holder.get_node_or_null("RoleCardHint") as Label
+	if not is_instance_valid(_final_box_role_hint_label):
+		_final_box_role_hint_label = Label.new()
+		_final_box_role_hint_label.name = "RoleCardHint"
+		final_box_holder.add_child(_final_box_role_hint_label)
+
+	_final_box_role_hint_label.position = _final_box_role_card.position + Vector2(28, 150)
+	_final_box_role_hint_label.size = Vector2(_final_box_role_card.size.x - 56.0, 32.0)
+	_final_box_role_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_final_box_role_hint_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_final_box_role_hint_label.add_theme_font_size_override("font_size", 15)
+	_final_box_role_hint_label.add_theme_color_override("font_color", UI_BROWN_DARK)
+	_final_box_role_hint_label.z_index = 2
 	
 func _load_final_box_progress() -> void:
 	if GameState and GameState.has_method("is_puzzle_solved"):
@@ -2249,6 +2745,8 @@ func _open_final_box_panel() -> void:
 
 	final_box_panel.visible = true
 	final_box_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	if answer_input and not _final_box_opened:
+		answer_input.text = ""
 
 	_refresh_final_box_panel_state()
 
@@ -2277,21 +2775,41 @@ func _refresh_final_box_panel_state() -> void:
 			final_box_texture_rect.texture = final_box_opened_texture
 
 		final_box_instruction_label.text = "The box is open."
+		final_box_texture_rect.modulate = Color(1, 1, 1, 0.22)
 
 		if detective_pattern_label:
 			detective_pattern_label.visible = false
 
 		if sidekick_input_row:
 			sidekick_input_row.visible = false
+		if is_instance_valid(_final_box_role_card):
+			_final_box_role_card.visible = false
+		if is_instance_valid(_final_box_role_title_label):
+			_final_box_role_title_label.visible = false
+		if is_instance_valid(_final_box_role_hint_label):
+			_final_box_role_hint_label.visible = false
 	else:
 		if final_box_closed_texture:
 			final_box_texture_rect.texture = final_box_closed_texture
+		final_box_texture_rect.modulate = Color(1, 1, 1, 0.28)
+
+		if is_instance_valid(_final_box_role_card):
+			_final_box_role_card.visible = false
+		if is_instance_valid(_final_box_role_title_label):
+			_final_box_role_title_label.visible = false
+		if is_instance_valid(_final_box_role_hint_label):
+			_final_box_role_hint_label.visible = false
 
 		if _is_local_detective():
 			final_box_instruction_label.text = "Read the number pattern to your partner."
 			if detective_pattern_label:
 				detective_pattern_label.visible = true
 				detective_pattern_label.text = str(_final_box_data.get("display", ""))
+				detective_pattern_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				detective_pattern_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+				detective_pattern_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+				detective_pattern_label.add_theme_font_size_override("font_size", 30)
+				detective_pattern_label.add_theme_color_override("font_color", Color.WHITE)
 			if sidekick_input_row:
 				sidekick_input_row.visible = false
 		else:
@@ -2300,6 +2818,12 @@ func _refresh_final_box_panel_state() -> void:
 				detective_pattern_label.visible = false
 			if sidekick_input_row:
 				sidekick_input_row.visible = true
+				sidekick_input_row.add_theme_constant_override("separation", 12)
+			if answer_input:
+				answer_input.placeholder_text = ""
+				answer_input.custom_minimum_size = Vector2(260, 48)
+			if submit_answer_button:
+				submit_answer_button.custom_minimum_size = Vector2(150, 40)
 
 	_refresh_final_box_clue_state()
 			
@@ -2469,7 +2993,105 @@ func _setup_inventory_board() -> void:
 		if not GameState.briefcase_updated.is_connected(_refresh_inventory_board):
 			GameState.briefcase_updated.connect(_refresh_inventory_board)
 
+	_ensure_inventory_slot_highlight()
+	_ensure_inventory_block_label()
+	_refresh_inventory_interaction_state()
 	_refresh_inventory_board()
+
+
+func _refresh_inventory_interaction_state() -> void:
+	if is_instance_valid(inventory_area):
+		# Keep the board pickable on both screens so Detective taps can show
+		# a local guidance message, but only Sidekick can actually use items.
+		inventory_area.input_pickable = true
+
+	if is_instance_valid(inventory_board_sprite):
+		inventory_board_sprite.modulate = Color(0.68, 0.68, 0.68, 0.74) if _is_local_detective() else Color.WHITE
+
+
+func _ensure_inventory_slot_highlight() -> void:
+	if not is_instance_valid(inventory_board):
+		return
+
+	var existing_highlight := inventory_board.get_node_or_null("SelectedSlotHighlight")
+	if is_instance_valid(existing_highlight) and not (existing_highlight is Panel):
+		inventory_board.remove_child(existing_highlight)
+		existing_highlight.queue_free()
+
+	_inventory_slot_highlight = inventory_board.get_node_or_null("SelectedSlotHighlight") as Panel
+	if is_instance_valid(_inventory_slot_highlight):
+		return
+
+	_inventory_slot_highlight = Panel.new()
+	_inventory_slot_highlight.name = "SelectedSlotHighlight"
+	_inventory_slot_highlight.size = Vector2(112.0, 82.0)
+	_inventory_slot_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_inventory_slot_highlight.visible = false
+	_inventory_slot_highlight.z_index = 18
+	_inventory_slot_highlight.add_theme_stylebox_override(
+		"panel",
+		_make_flat_style(Color(0.66, 0.66, 0.66, 0.78), Color(1.0, 1.0, 1.0, 0.9), 8, 3)
+	)
+	inventory_board.add_child(_inventory_slot_highlight)
+
+
+func _ensure_inventory_block_label() -> void:
+	if not is_instance_valid(inventory_board):
+		return
+
+	_inventory_block_label = inventory_board.get_node_or_null("DetectiveInventoryHint") as Label
+	if is_instance_valid(_inventory_block_label):
+		return
+
+	_inventory_block_label = Label.new()
+	_inventory_block_label.name = "DetectiveInventoryHint"
+	_inventory_block_label.text = "Only Sidekick can interact with the inventory."
+	_inventory_block_label.size = Vector2(560.0, 34.0)
+	_inventory_block_label.position = Vector2(398.0, 438.0)
+	if is_instance_valid(inventory_board_sprite):
+		_inventory_block_label.position = inventory_board_sprite.position + Vector2(-280.0, -134.0)
+	_inventory_block_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_inventory_block_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_inventory_block_label.add_theme_font_size_override("font_size", 18)
+	_inventory_block_label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 1.0))
+	_inventory_block_label.add_theme_constant_override("outline_size", 5)
+	_inventory_block_label.add_theme_color_override("font_outline_color", Color(0.08, 0.08, 0.08, 0.95))
+	_inventory_block_label.modulate.a = 0.0
+	_inventory_block_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_inventory_block_label.z_index = 60
+	inventory_board.add_child(_inventory_block_label)
+
+
+func _show_inventory_block_message() -> void:
+	if not is_instance_valid(_inventory_block_label):
+		_ensure_inventory_block_label()
+	if not is_instance_valid(_inventory_block_label):
+		return
+
+	if is_instance_valid(_inventory_block_tween):
+		_inventory_block_tween.kill()
+
+	_inventory_block_label.visible = true
+	_inventory_block_label.modulate.a = 0.0
+	_inventory_block_tween = create_tween()
+	_inventory_block_tween.tween_property(_inventory_block_label, "modulate:a", 1.0, 0.14).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_inventory_block_tween.tween_interval(1.35)
+	_inventory_block_tween.tween_property(_inventory_block_label, "modulate:a", 0.0, 0.28).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+
+
+func _get_display_inventory_items() -> Array[String]:
+	var display_items: Array[String] = []
+
+	if _has_inventory_item(CABINET_KEY_ITEM_ID):
+		display_items.append(CABINET_KEY_ITEM_ID)
+
+	for item_id in INVENTORY_DISPLAY_PRIORITY:
+		if item_id.begins_with("key_fragment_") and _has_inventory_item(CABINET_KEY_ITEM_ID):
+			continue
+		if _has_inventory_item(item_id):
+			display_items.append(item_id)
+
+	return display_items
 
 
 func _refresh_inventory_board() -> void:
@@ -2480,12 +3102,21 @@ func _refresh_inventory_board() -> void:
 		if is_instance_valid(icon):
 			icon.queue_free()
 	_inventory_icon_nodes.clear()
+	_inventory_display_items = _get_display_inventory_items()
 
-	for slot_index in range(INVENTORY_SLOT_ITEM_ORDER.size()):
-		var item_id: String = INVENTORY_SLOT_ITEM_ORDER[slot_index]
-		if not _has_inventory_item(item_id):
-			continue
+	if not _inventory_display_items.has(_armed_inventory_item):
+		_armed_inventory_item = ""
 
+	_armed_inventory_slot_index = _inventory_display_items.find(_armed_inventory_item)
+
+	if is_instance_valid(_inventory_slot_highlight):
+		_inventory_slot_highlight.visible = false
+
+	for slot_index in range(_inventory_display_items.size()):
+		if slot_index >= INVENTORY_SLOT_ITEM_ORDER.size():
+			break
+
+		var item_id: String = _inventory_display_items[slot_index]
 		var texture := _get_inventory_item_texture(item_id)
 		if texture == null:
 			continue
@@ -2498,16 +3129,23 @@ func _refresh_inventory_board() -> void:
 		icon.name = "Inventory_%s" % item_id
 		icon.texture = texture
 		icon.position = inventory_board.to_local(slot_node.global_position)
-		icon.z_index = 20
+		icon.z_index = 26
 		_fit_inventory_icon(icon, texture)
 
 		if _armed_inventory_item == item_id:
-			icon.modulate = Color(1.0, 0.92, 0.55, 1.0)
+			icon.modulate = Color(1.0, 0.96, 0.72, 1.0)
+			icon.scale *= 1.1
+		elif _is_local_detective():
+			icon.modulate = Color(0.72, 0.72, 0.72, 0.82)
 		else:
 			icon.modulate = Color.WHITE
 
 		inventory_board.add_child(icon)
 		_inventory_icon_nodes[item_id] = icon
+
+		if slot_index == _armed_inventory_slot_index and is_instance_valid(_inventory_slot_highlight):
+			_inventory_slot_highlight.position = icon.position - (_inventory_slot_highlight.size * 0.5)
+			_inventory_slot_highlight.visible = true
 
 
 func _fit_inventory_icon(icon: Sprite2D, texture: Texture2D) -> void:
@@ -2554,16 +3192,17 @@ func _on_inventory_area_input_event(_viewport: Node, event: InputEvent, shape_id
 		return
 
 	if not _is_local_sidekick():
-		_show_notification("Only the Sidekick can use inventory items.")
+		_show_inventory_block_message()
 		return
 
 	if shape_idx < 0 or shape_idx >= INVENTORY_SLOT_ITEM_ORDER.size():
 		return
 
-	var item_id: String = INVENTORY_SLOT_ITEM_ORDER[shape_idx]
-	if not _has_inventory_item(item_id):
+	if shape_idx >= _inventory_display_items.size():
 		_show_notification("That inventory slot is still empty.")
 		return
+
+	var item_id: String = _inventory_display_items[shape_idx]
 
 	if item_id in ["key_fragment_1", "key_fragment_2", "key_fragment_3"]:
 		_try_combine_key_fragments()
@@ -2615,9 +3254,25 @@ func _apply_assemble_key() -> void:
 
 
 func _arm_inventory_item(item_id: String) -> void:
+	if multiplayer.has_multiplayer_peer():
+		_sync_inventory_selection_rpc.rpc(item_id)
+	else:
+		_apply_inventory_selection(item_id)
+
+
+@rpc("any_peer", "reliable", "call_local")
+func _sync_inventory_selection_rpc(item_id: String) -> void:
+	_apply_inventory_selection(item_id)
+
+
+func _apply_inventory_selection(item_id: String) -> void:
+	if not _has_inventory_item(item_id):
+		return
+
 	_armed_inventory_item = item_id
 	_refresh_inventory_board()
-	_show_notification("%s selected." % str(INVENTORY_ITEM_NAMES.get(item_id, item_id)))
+	if _is_local_sidekick() or not multiplayer.has_multiplayer_peer():
+		_show_notification("%s selected." % str(INVENTORY_ITEM_NAMES.get(item_id, item_id)))
 
 
 func _consume_armed_inventory_item(item_id: String) -> bool:
@@ -2659,6 +3314,7 @@ func _setup_tiara_reward_layer() -> void:
 
 	if cinematic_dark_overlay:
 		cinematic_dark_overlay.visible = true
+		cinematic_dark_overlay.color = Color.BLACK
 		cinematic_dark_overlay.modulate.a = 0.0
 
 	if cinematic_clue_sprite:
@@ -2683,6 +3339,7 @@ func _setup_tiara_reward_layer() -> void:
 	if cinematic_collect_button:
 		cinematic_collect_button.visible = false
 		cinematic_collect_button.disabled = true
+		_style_brown_button(cinematic_collect_button, Vector2(240, 58))
 
 	if cinematic_tap_catcher:
 		cinematic_tap_catcher.visible = false
@@ -2728,7 +3385,7 @@ func rpc_show_tiara_reward() -> void:
 		cinematic_reward_layer.layer = 100
 
 	if cinematic_dark_overlay:
-		cinematic_dark_overlay.modulate.a = 0.45
+		cinematic_dark_overlay.modulate.a = 1.0
 
 	if cinematic_clue_sprite:
 		cinematic_clue_sprite.visible = true
@@ -2743,7 +3400,7 @@ func rpc_show_tiara_reward() -> void:
 
 	if cinematic_banner_label:
 		cinematic_banner_label.visible = true
-		cinematic_banner_label.text = "CLUE FOUND!"
+		cinematic_banner_label.text = "ARTIFACT FOUND!"
 
 	if cinematic_reward_text:
 		cinematic_reward_text.text = ""
@@ -2766,6 +3423,9 @@ func rpc_show_tiara_reward() -> void:
 	if cinematic_briefcase_reveal:
 		cinematic_briefcase_reveal.visible = false
 		cinematic_briefcase_reveal.texture = null
+
+	_play_zone_completion_sfx()
+	_spawn_confetti(cinematic_reward_layer, 72)
 		
 func _show_tiara_reward_stage_text(text: String) -> void:
 	if cinematic_reward_panel:
@@ -2812,7 +3472,7 @@ func _on_tiara_tap_catcher_pressed() -> void:
 				cinematic_reward_text.text = ""
 
 			if cinematic_collect_button:
-				cinematic_collect_button.text = "Collect Clue"
+				cinematic_collect_button.text = "Collect Artifact"
 				# Only the Sidekick can collect the artifact in multiplayer.
 				# In single-player/debug with no peer, allow collection so you can test quickly.
 				var can_collect := _is_local_sidekick() or not multiplayer.has_multiplayer_peer()
