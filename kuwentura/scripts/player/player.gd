@@ -68,16 +68,20 @@ func _ready() -> void:
 			_last_sent_position = global_position
 			_last_sent_animation = "idle"
 
-	# Defer diamond check to next frame so multiplayer authority is fully resolved
-	if is_instance_valid(location_diamond) and not _is_in_lobby:
-		location_diamond.visible = false  # Hide by default until confirmed
-		call_deferred("_update_diamond_visibility")
+	# Diamond starts hidden; _process enforces the correct state every frame
+	if is_instance_valid(location_diamond):
+		location_diamond.visible = false
 
 
 func _update_diamond_visibility() -> void:
-	"""Deferred so multiplayer authority is fully assigned before we check it."""
+	"""Single source of truth for diamond visibility. Safe to call any time."""
 	if not is_instance_valid(location_diamond):
 		return
+	# Never show in lobby
+	if _is_in_lobby:
+		location_diamond.visible = false
+		return
+	# In-game: only the local authority sees their own diamond
 	if multiplayer.has_multiplayer_peer():
 		location_diamond.visible = is_multiplayer_authority()
 	else:
@@ -88,6 +92,10 @@ func _process(_delta: float) -> void:
 	if _is_in_lobby:
 		_update_animation()
 		return
+
+	# Continuously enforce correct diamond visibility.
+	# Cheap: one bool read per frame, no dict lookup or math.
+	_update_diamond_visibility()
 
 	if not multiplayer.has_multiplayer_peer():
 		return
