@@ -1,8 +1,10 @@
-[gd_scene load_steps=54 format=3 uid="uid://backyardpath"]
+[gd_scene load_steps=57 format=3 uid="uid://backyardpath"]
 
 [ext_resource type="Script" uid="uid://dfs4agyqe4qk4" path="res://scripts/world/zones/backyardPath/backyard_path.gd" id="1_backyardpath"]
 [ext_resource type="Texture2D" uid="uid://p1tc8ablyx3s" path="res://assets/sprites/places/backyardBackground.png" id="2_krb5t"]
+[ext_resource type="Texture2D" uid="uid://cgtl3fi4ldvqd" path="res://assets/sprites/players/detective/detective.png" id="3_3lfn3"]
 [ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
+[ext_resource type="Texture2D" uid="uid://bppb0lkeirtvl" path="res://assets/sprites/players/detective/sidekick.png" id="4_m8y0n"]
 [ext_resource type="Texture2D" uid="uid://c3sfa1s0d5uam" path="res://assets/sprites/zoneObjects/backyardPathObjects/pinaGhost.png" id="5_no1tq"]
 [ext_resource type="Texture2D" uid="uid://5hqcc5yhq64a" path="res://assets/buttons/rightArrow.png" id="6_u25mc"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="9_s7hv4"]
@@ -15,9 +17,9 @@
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="13_y7aiq"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="15_0c5pu"]
 [ext_resource type="Texture2D" uid="uid://cuhne1u8q0p3s" path="res://assets/sprites/clues/pineappleClue.png" id="17_s7hv4"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="17_va6t2"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="17_va6t2"]
 [ext_resource type="Texture2D" uid="uid://dvkupminll3bb" path="res://assets/sprites/tracker/backyardPath/defaultBY.png" id="18_ura6l"]
-[ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/InventoryBoard.png" id="19_ul8jb"]
+[ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/inventoryBoard.png" id="19_ul8jb"]
 [ext_resource type="Texture2D" uid="uid://dlgforqpe1w81" path="res://assets/sprites/places/firefly.png" id="20_0c5pu"]
 [ext_resource type="Texture2D" uid="uid://dtiny4ff0gqqc" path="res://assets/sprites/places/lightedLantern.png" id="21_0vlwp"]
 [ext_resource type="Texture2D" uid="uid://wwlwrsk4makl" path="res://assets/sprites/places/fog.png" id="22_va6t2"]
@@ -34,6 +36,7 @@
 [ext_resource type="Texture2D" uid="uid://judmu1aofcb1" path="res://assets/sprites/zoneObjects/backyardPathObjects/LetterA.png" id="33_3lfn3"]
 [ext_resource type="Texture2D" uid="uid://3wut433tk73q" path="res://assets/sprites/zoneObjects/backyardPathObjects/nonagon.png" id="33_on1j4"]
 [ext_resource type="Texture2D" uid="uid://bkwfqf3u2vbnv" path="res://assets/sprites/zoneObjects/backyardPathObjects/acute.png" id="34_3lfn3"]
+[ext_resource type="VideoStream" uid="uid://b422cfvc811pa" path="res://assets/sprites/cutscene/zoneEnding/backyardPath.ogv" id="37_m8y0n"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_krb5t"]
 bg_color = Color(0.360784, 0.215686, 0.180392, 1)
@@ -165,6 +168,19 @@ scale = Vector2(0.99999994, 0.99999994)
 position = Vector2(732, 353.49997)
 scale = Vector2(0.7687501, 0.66759264)
 texture = ExtResource("2_krb5t")
+
+[node name="Players" type="Node2D" parent="."]
+z_index = 20
+
+[node name="Detective" type="Sprite2D" parent="Players"]
+position = Vector2(99, 603)
+scale = Vector2(0.98, 0.98)
+texture = ExtResource("3_3lfn3")
+
+[node name="Sidekick" type="Sprite2D" parent="Players"]
+position = Vector2(99, 603)
+scale = Vector2(0.98, 0.98)
+texture = ExtResource("4_m8y0n")
 
 [node name="RoleLayer" type="CanvasLayer" parent="."]
 visible = false
@@ -359,7 +375,6 @@ theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 14
 placeholder_text = "CM value"
 alignment = 1
-expand_to_text_length = false
 virtual_keyboard_type = 2
 flat = true
 
@@ -1378,5 +1393,28 @@ offset_top = 527.0
 offset_right = 883.0
 offset_bottom = 595.0
 text = "CONTINUE"
+
+[node name="Cutscene" type="CanvasLayer" parent="."]
+
+[node name="DarkOverlay" type="ColorRect" parent="Cutscene"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.011764706, 0.011764706, 0.011764706, 1)
+
+[node name="EndingCutscene" type="VideoStreamPlayer" parent="Cutscene"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1240.0
+offset_bottom = -648.0
+grow_horizontal = 2
+grow_vertical = 2
+stream = ExtResource("37_m8y0n")
+speed_scale = 0.4
+expand = true
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
