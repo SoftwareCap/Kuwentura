@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://blps2ckssbff3"
-path.s3tc="res://.godot/imported/Sidekick_hide.png-071a5c2815d2221c019ad3f781309af8.s3tc.ctex"
-path.etc2="res://.godot/imported/Sidekick_hide.png-071a5c2815d2221c019ad3f781309af8.etc2.ctex"
+path.s3tc="res://.godot/imported/Sidekick_hide.png-745cfddc33039ce57849a6e2660d2c12.s3tc.ctex"
+path.etc2="res://.godot/imported/Sidekick_hide.png-745cfddc33039ce57849a6e2660d2c12.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/players/Sidekick/Sidekick_hide.png"
-dest_files=["res://.godot/imported/Sidekick_hide.png-071a5c2815d2221c019ad3f781309af8.s3tc.ctex", "res://.godot/imported/Sidekick_hide.png-071a5c2815d2221c019ad3f781309af8.etc2.ctex"]
+source_file="res://assets/sprites/players/sidekick/Sidekick_hide.png"
+dest_files=["res://.godot/imported/Sidekick_hide.png-745cfddc33039ce57849a6e2660d2c12.s3tc.ctex", "res://.godot/imported/Sidekick_hide.png-745cfddc33039ce57849a6e2660d2c12.etc2.ctex"]
 
 [params]
 

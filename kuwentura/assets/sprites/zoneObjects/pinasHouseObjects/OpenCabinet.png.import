@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://du4de733sad05"
-path.bptc="res://.godot/imported/OpenCabinet.png-3801a2ab3bc32be465d2530c031e6782.bptc.ctex"
-path.astc="res://.godot/imported/OpenCabinet.png-3801a2ab3bc32be465d2530c031e6782.astc.ctex"
+path.bptc="res://.godot/imported/openCabinet.png-e5484c68a2be9c23575f8043c37a8caf.bptc.ctex"
+path.astc="res://.godot/imported/openCabinet.png-e5484c68a2be9c23575f8043c37a8caf.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/OpenCabinet.png"
-dest_files=["res://.godot/imported/OpenCabinet.png-3801a2ab3bc32be465d2530c031e6782.bptc.ctex", "res://.godot/imported/OpenCabinet.png-3801a2ab3bc32be465d2530c031e6782.astc.ctex"]
+source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/openCabinet.png"
+dest_files=["res://.godot/imported/openCabinet.png-e5484c68a2be9c23575f8043c37a8caf.bptc.ctex", "res://.godot/imported/openCabinet.png-e5484c68a2be9c23575f8043c37a8caf.astc.ctex"]
 
 [params]
 
