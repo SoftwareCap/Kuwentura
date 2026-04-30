@@ -1,17 +1,17 @@
 extends Node2D
 
-const ZONE_ID          := "backyard_path"
-const TOTAL_TIME_SEC   := 300
-const MAX_STRIKES      := 3
-const _SERVER_PEER_ID  := 1
+const ZONE_ID := "backyard_path"
+const TOTAL_TIME_SEC := 300
+const MAX_STRIKES := 3
+const _SERVER_PEER_ID := 1
 const SCENE_FOREST_HUB := "res://scenes/world/hub/ForestHub.tscn"
-const SCENE_MAIN_MENU  := "res://scenes/mainMenu/MainMenu.tscn"
+const SCENE_MAIN_MENU := "res://scenes/mainMenu/MainMenu.tscn"
 
 const PROGRESS_DEFAULT_TEX: Texture2D = preload("res://assets/sprites/tracker/backyardPath/defaultBY.png")
 const PROGRESS_PUZZLE1_TEX: Texture2D = preload("res://assets/sprites/tracker/backyardPath/puzzle1BY.png")
 
-const SPARKLE_MIN_SCALE   := 0.45
-const SPARKLE_MAX_SCALE   := 0.55
+const SPARKLE_MIN_SCALE := 0.45
+const SPARKLE_MAX_SCALE := 0.55
 const SPARKLE_PULSE_SPEED := 4.0
 const FIREFLY_PULSE_SPEED := 2.8
 const FIREFLY_MIN_SCALE_MULTIPLIER := 0.85
@@ -51,56 +51,61 @@ const UI_BORDER := Color(0.96, 0.83, 0.58, 1.0)
 const UI_SUCCESS := Color(0.53, 0.86, 0.47, 1.0)
 const UI_ERROR := Color(0.91, 0.42, 0.34, 1.0)
 const UI_INFO := Color(0.99, 0.91, 0.63, 1.0)
-@onready var role_label:          Label         = get_node_or_null("RoleLabel")
-@onready var back_button:         Button        = $BackButton
-@onready var detective_overlays:  Control       = $RoleLayer/Control/DetectiveOverlays
-@onready var sidekick_overlays:   Control       = $RoleLayer/Control/SidekickOverlays
-@onready var pina_spirit:         TextureRect   = $RoleLayer/Control/DetectiveOverlays/Pina
-@onready var detective_height_label: Label      = $RoleLayer/Control/DetectiveOverlays/PinasHeight
-@onready var pineapple_plant:     TextureRect   = $RoleLayer/Control/SidekickOverlays/PineapplePlant
-@onready var pineapple_fruit:     TextureRect   = $RoleLayer/Control/SidekickOverlays/PineappleFruit
-@onready var sidekick_height_label: Label       = $RoleLayer/Control/SidekickOverlays/PlantsHeight
-@onready var revealed_pineapple:  Sprite2D      = $RoleLayer/Control/Pineapple
-@onready var revealed_plant:      TextureRect   = $RoleLayer/Control/PineapplePlant
-@onready var board_tap_button:    TextureButton = $RoleLayer/Control/BoardTapButton
-@onready var fruit_tap_button:    TextureButton = $RoleLayer/Control/FruitTapButton
-@onready var board_layer:         CanvasLayer   = $"Deduction Board"
-@onready var board_sprite:        Sprite2D      = $"Deduction Board/Control/BoardSprite"
-@onready var board_height_label:  Label         = $"Deduction Board/Control/PlantHeight"
-@onready var board_instruction_label: Label     = $"Deduction Board/Control/Plant"
-@onready var x_input:             LineEdit      = $"Deduction Board/Control/XInput"
-@onready var submit_button:       Button        = $"Deduction Board/Control/SubmitButton"
-@onready var feedback_label:      Label         = $"Deduction Board/Control/FeedbackLabel"
-@onready var notification_ui:     CanvasLayer   = get_node_or_null("NotificationUI")
-@onready var notification_panel:  Panel         = get_node_or_null("NotificationUI/Panel")
-@onready var notification_label:  Label         = get_node_or_null("NotificationUI/Panel/Label")
-@onready var guidance_arrow:      CanvasItem    = get_node_or_null("RoleLayer/Control/GuidanceArrow")
-@onready var touch_controls:      Node          = get_node_or_null("InsideZoneControl")
-@onready var ledger_touch_button:    TouchScreenButton = get_node_or_null("InsideZoneControl/Ledger")
+
+@onready var role_label: Label = get_node_or_null("RoleLabel")
+@onready var back_button: Button = $BackButton
+@onready var players_node: Node = get_node_or_null("Players")
+@onready var detective_player: Node2D = get_node_or_null("Players/Detective")
+@onready var sidekick_player: Node2D = get_node_or_null("Players/Sidekick")
+
+@onready var detective_overlays: Control = $RoleLayer/Control/DetectiveOverlays
+@onready var sidekick_overlays: Control = $RoleLayer/Control/SidekickOverlays
+@onready var pina_spirit: TextureRect = $RoleLayer/Control/DetectiveOverlays/Pina
+@onready var detective_height_label: Label = $RoleLayer/Control/DetectiveOverlays/PinasHeight
+@onready var pineapple_plant: TextureRect = $RoleLayer/Control/SidekickOverlays/PineapplePlant
+@onready var pineapple_fruit: TextureRect = $RoleLayer/Control/SidekickOverlays/PineappleFruit
+@onready var sidekick_height_label: Label = $RoleLayer/Control/SidekickOverlays/PlantsHeight
+@onready var revealed_pineapple: Sprite2D = $RoleLayer/Control/Pineapple
+@onready var revealed_plant: TextureRect = $RoleLayer/Control/PineapplePlant
+@onready var board_tap_button: TextureButton = $RoleLayer/Control/BoardTapButton
+@onready var fruit_tap_button: TextureButton = $RoleLayer/Control/FruitTapButton
+@onready var board_layer: CanvasLayer = $"Deduction Board"
+@onready var board_sprite: Sprite2D = $"Deduction Board/Control/BoardSprite"
+@onready var board_height_label:  Label = $"Deduction Board/Control/PlantHeight"
+@onready var board_instruction_label: Label = $"Deduction Board/Control/Plant"
+@onready var x_input: LineEdit = $"Deduction Board/Control/XInput"
+@onready var submit_button: Button = $"Deduction Board/Control/SubmitButton"
+@onready var feedback_label: Label = $"Deduction Board/Control/FeedbackLabel"
+@onready var notification_ui: CanvasLayer = get_node_or_null("NotificationUI")
+@onready var notification_panel: Panel = get_node_or_null("NotificationUI/Panel")
+@onready var notification_label: Label = get_node_or_null("NotificationUI/Panel/Label")
+@onready var guidance_arrow: CanvasItem = get_node_or_null("RoleLayer/Control/GuidanceArrow")
+@onready var touch_controls: Node = get_node_or_null("InsideZoneControl")
+@onready var ledger_touch_button: TouchScreenButton = get_node_or_null("InsideZoneControl/Ledger")
 @onready var briefcase_touch_button: TouchScreenButton = get_node_or_null("InsideZoneControl/Briefcase")
-@onready var ledger_panel:        Panel  = get_node_or_null("SidekickLayer/Ledger")
-@onready var ledger_title_label:  Label  = get_node_or_null("SidekickLayer/Ledger/Control/LedgerTitle")
-@onready var ledger_body_label:   Label  = get_node_or_null("SidekickLayer/Ledger/Control/LedgerBody")
-@onready var fog_overlay:         ColorRect = $FogOverlay
+@onready var ledger_panel: Panel = get_node_or_null("SidekickLayer/Ledger")
+@onready var ledger_title_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerTitle")
+@onready var ledger_body_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerBody")
+@onready var fog_overlay: ColorRect = $FogOverlay
 @onready var inside_zone_control: CanvasLayer = get_node_or_null("InsideZoneControl")
-@onready var pause_canvas_layer:  CanvasLayer = get_node_or_null("PauseCanvasLayer")
-@onready var in_game_pause_panel: Panel       = get_node_or_null("PauseCanvasLayer/InGamePausePanel")
-@onready var option_sub_panel:    Panel       = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel")
-@onready var volume_slider:       HSlider     = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeSlider")
-@onready var volume_value_label:  Label       = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeValue")
-@onready var briefcase_panel:     Panel       = get_node_or_null("SidekickLayer/Briefcase")
-@onready var briefcase_display:   TextureRect = get_node_or_null("SidekickLayer/Briefcase/BriefcaseDisplay")
-@onready var reward_layer:             CanvasLayer = get_node_or_null("RewardLayer")
-@onready var reward_dark_overlay:      ColorRect   = get_node_or_null("RewardLayer/DarkOverlay")
-@onready var reward_banner_label:      Label       = get_node_or_null("RewardLayer/BannerLabel")
-@onready var reward_text_label:        Label       = get_node_or_null("RewardLayer/RewardPanel/RewardText")
-@onready var clue_sprite:              Sprite2D    = get_node_or_null("RewardLayer/ClueSprite")
-@onready var collect_button:           Button      = get_node_or_null("RewardLayer/CollectButton")
-@onready var reward_panel:             Sprite2D    = get_node_or_null("RewardLayer/RewardPanel")
-@onready var tap_instruction_label:    Label       = get_node_or_null("RewardLayer/TapInstruction")
-@onready var tap_catcher:              Button      = get_node_or_null("RewardLayer/TapCatcher")
-@onready var briefcase_reveal_sprite:  TextureRect = get_node_or_null("RewardLayer/BriefcaseRevealSprite")
-@onready var sparkle:                  Sprite2D    = $RewardLayer/Sparkle
+@onready var pause_canvas_layer: CanvasLayer = get_node_or_null("PauseCanvasLayer")
+@onready var in_game_pause_panel: Panel = get_node_or_null("PauseCanvasLayer/InGamePausePanel")
+@onready var option_sub_panel: Panel = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel")
+@onready var volume_slider: HSlider = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeSlider")
+@onready var volume_value_label: Label = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeValue")
+@onready var briefcase_panel: Panel = get_node_or_null("SidekickLayer/Briefcase")
+@onready var briefcase_display: TextureRect = get_node_or_null("SidekickLayer/Briefcase/BriefcaseDisplay")
+@onready var reward_layer: CanvasLayer = get_node_or_null("RewardLayer")
+@onready var reward_dark_overlay: ColorRect = get_node_or_null("RewardLayer/DarkOverlay")
+@onready var reward_banner_label: Label = get_node_or_null("RewardLayer/BannerLabel")
+@onready var reward_text_label: Label = get_node_or_null("RewardLayer/RewardPanel/RewardText")
+@onready var clue_sprite: Sprite2D = get_node_or_null("RewardLayer/ClueSprite")
+@onready var collect_button: Button = get_node_or_null("RewardLayer/CollectButton")
+@onready var reward_panel: Sprite2D = get_node_or_null("RewardLayer/RewardPanel")
+@onready var tap_instruction_label: Label = get_node_or_null("RewardLayer/TapInstruction")
+@onready var tap_catcher: Button = get_node_or_null("RewardLayer/TapCatcher")
+@onready var briefcase_reveal_sprite: TextureRect = get_node_or_null("RewardLayer/BriefcaseRevealSprite")
+@onready var sparkle: Sprite2D = $RewardLayer/Sparkle
 @onready var progress_tracker: Node = get_node_or_null("ProgressTracker")
 @onready var progress_tracker_sprite: Sprite2D = get_node_or_null("ProgressTracker/Sprite2D")
 
@@ -173,32 +178,34 @@ const UI_INFO := Color(0.99, 0.91, 0.63, 1.0)
 @onready var pineapple_reveal_plant: Sprite2D = get_node_or_null("PineappleReveal/Area2D/PineapplePlant")
 @onready var pineapple_reveal_fruit: Sprite2D = get_node_or_null("PineappleReveal/Area2D/PineappleFruit")
 
+@onready var ending_cutscene: VideoStreamPlayer = $Cutscene/EndingCutscene
+
 var _sfx_player: AudioStreamPlayer
 var _zone_completion_sfx: AudioStream = preload("res://assets/audios/ZoneCompletionSFX.mp3")
 
-var spirit_height_cm:  int
+var spirit_height_cm: int
 var plant_height_dali: int
-var solution_cm:       int
+var solution_cm: int
 
-var _waiting_reward_continue  := false
-var _reward_stage             := 0
+var _waiting_reward_continue := false
+var _reward_stage := 0
 var _collect_sequence_started := false
 
 var _intro_dialogue_played := false
 var _intro_ready_peers: Dictionary = {}
-var _zone_active      := false
-var _board_unlocked   := false
-var _board_opened     := false
-var _timer_started    := false
-var _puzzle_solved    := false
-var _reward_active    := false
-var _zone_failed      := false
-var _strikes          := 0
+var _zone_active := false
+var _board_unlocked := false
+var _board_opened := false
+var _timer_started := false
+var _puzzle_solved := false
+var _reward_active := false
+var _zone_failed := false
+var _strikes := 0
 var _ledger_hint_shown := false
 var _dialogue_input_locked := false
 
 var _timer_node: Timer
-var _animation_time: float  = 0.0
+var _animation_time: float = 0.0
 var _sparkle_animating: bool = false
 var _firefly_base_scales: Dictionary = {}
 var _new_lantern_base_scale: Vector2 = Vector2.ONE
@@ -422,14 +429,22 @@ func _ready() -> void:
 	_sfx_player = AudioStreamPlayer.new()
 	_sfx_player.bus = "SFX"
 	add_child(_sfx_player)
+	
+	if is_instance_valid(ending_cutscene):
+		ending_cutscene.visible = false
+		ending_cutscene.finished.connect(_on_cutscene_finished)
+		
+	var cutscene_dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	if is_instance_valid(cutscene_dark):
+		cutscene_dark.visible = false
 
 	_initialize_puzzle_sync()
 
 
 func _create_timer() -> void:
 	_timer_node = Timer.new()
-	_timer_node.one_shot    = true
-	_timer_node.wait_time   = TOTAL_TIME_SEC
+	_timer_node.one_shot = true
+	_timer_node.wait_time = TOTAL_TIME_SEC
 	add_child(_timer_node)
 	if not _timer_node.timeout.is_connected(_on_board_timer_timeout):
 		_timer_node.timeout.connect(_on_board_timer_timeout)
@@ -1527,12 +1542,24 @@ func _setup_role_visibility() -> void:
 		GameState.Role.DETECTIVE:
 			detective_overlays.visible = true
 			sidekick_overlays.visible  = false
+			if is_instance_valid(detective_player):
+				detective_player.visible = true
+			if is_instance_valid(sidekick_player):
+				sidekick_player.visible  = false
 		GameState.Role.SIDEKICK:
 			detective_overlays.visible = false
 			sidekick_overlays.visible  = true
+			if is_instance_valid(detective_player):
+				detective_player.visible = false
+			if is_instance_valid(sidekick_player):
+				sidekick_player.visible  = true
 		_:
 			detective_overlays.visible = false
 			sidekick_overlays.visible  = false
+			if is_instance_valid(detective_player):
+				detective_player.visible = false
+			if is_instance_valid(sidekick_player):
+				sidekick_player.visible  = false
 	_refresh_inside_zone_buttons()
 
 
@@ -1558,8 +1585,12 @@ func _populate_ledger_content() -> void:
 func _set_dialogue_input_lock(locked: bool) -> void:
 	_dialogue_input_locked = locked
 	_set_dialogue_focus(locked)
+	
+	if is_instance_valid(players_node):
+		players_node.visible = not locked
+	
 	var is_sidekick: bool  = GameState.local_role == GameState.Role.SIDEKICK
-	var dim_color   := Color(0.65, 0.65, 0.65, 1.0)
+	var dim_color := Color(0.65, 0.65, 0.65, 1.0)
 	var normal_color := Color(1, 1, 1, 1)
 
 	if is_instance_valid(touch_controls) and touch_controls.has_method("set_pause_enabled"):
@@ -1586,7 +1617,7 @@ func _set_dialogue_input_lock(locked: bool) -> void:
 		submit_button.modulate = dim_color if submit_button.disabled else normal_color
 
 	if is_instance_valid(touch_controls):
-		if touch_controls.has_method("set_ledger_enabled"):    touch_controls.set_ledger_enabled(is_sidekick and not locked)
+		if touch_controls.has_method("set_ledger_enabled"): touch_controls.set_ledger_enabled(is_sidekick and not locked)
 		if touch_controls.has_method("set_briefcase_enabled"): touch_controls.set_briefcase_enabled(is_sidekick and not locked and _reward_active)
 
 	if is_instance_valid(ledger_touch_button):
@@ -1882,8 +1913,8 @@ func _set_area_enabled(area: Area2D, enabled: bool) -> void:
 
 
 func _setup_quest_panel_style() -> void:
-	var quest_layer := get_node_or_null("QuestLayer")
-	if not is_instance_valid(quest_layer):
+	var queatLayer := get_node_or_null("QuestLayer")
+	if not is_instance_valid(queatLayer):
 		return
 
 	var labels := [
@@ -1897,12 +1928,12 @@ func _setup_quest_panel_style() -> void:
 	_quest_labels.clear()
 	_quest_strike_lines.clear()
 
-	var header_bar := quest_layer.get_node_or_null("QuestHeaderBar") as ColorRect
+	var header_bar := queatLayer.get_node_or_null("QuestHeaderBar") as ColorRect
 	if not is_instance_valid(header_bar):
 		header_bar = ColorRect.new()
 		header_bar.name = "QuestHeaderBar"
-		quest_layer.add_child(header_bar)
-		quest_layer.move_child(header_bar, 0)
+		queatLayer.add_child(header_bar)
+		queatLayer.move_child(header_bar, 0)
 
 	header_bar.position = QUEST_PANEL_POS
 	header_bar.size = Vector2(QUEST_PANEL_WIDTH, QUEST_HEADER_HEIGHT)
@@ -2943,14 +2974,14 @@ func _ensure_briefcase_display() -> void:
 	if not is_instance_valid(briefcase_panel) or is_instance_valid(briefcase_display):
 		return
 	briefcase_display = TextureRect.new()
-	briefcase_display.name          = "BriefcaseDisplay"
-	briefcase_display.visible       = false
-	briefcase_display.expand_mode   = TextureRect.EXPAND_IGNORE_SIZE
+	briefcase_display.name = "BriefcaseDisplay"
+	briefcase_display.visible = false
+	briefcase_display.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	briefcase_display.stretch_mode  = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	briefcase_display.mouse_filter  = Control.MOUSE_FILTER_IGNORE
 	briefcase_display.set_anchors_preset(Control.PRESET_FULL_RECT)
-	briefcase_display.offset_left   = -152.0
-	briefcase_display.offset_top    = 40.0
+	briefcase_display.offset_left = -152.0
+	briefcase_display.offset_top = 40.0
 	briefcase_display.offset_right  = 185.0
 	briefcase_display.offset_bottom = 67.0
 	briefcase_panel.add_child(briefcase_display)
@@ -2970,7 +3001,7 @@ func _on_briefcase_updated() -> void:
 
 func _on_pause_button_pressed() -> void:
 	if is_instance_valid(in_game_pause_panel): in_game_pause_panel.visible = true
-	if is_instance_valid(option_sub_panel):    option_sub_panel.visible    = false
+	if is_instance_valid(option_sub_panel): option_sub_panel.visible = false
 	if is_instance_valid(inside_zone_control): inside_zone_control.visible = false
 	MusicController.pause_music()
 	get_tree().paused = true
@@ -2978,7 +3009,7 @@ func _on_pause_button_pressed() -> void:
 
 func _on_resume_play_button_pressed() -> void:
 	if is_instance_valid(in_game_pause_panel): in_game_pause_panel.visible = false
-	if is_instance_valid(option_sub_panel):    option_sub_panel.visible    = false
+	if is_instance_valid(option_sub_panel): option_sub_panel.visible = false
 	get_tree().paused = false
 	MusicController.resume_music()
 	if is_instance_valid(inside_zone_control): inside_zone_control.visible = true
@@ -3140,10 +3171,10 @@ func _server_fail_zone(message: String) -> void:
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_fail_zone(message: String) -> void:
-	_zone_failed    = true
+	_zone_failed = true
 	_board_unlocked = false
 	if is_instance_valid(board_tap_button):  board_tap_button.disabled  = true
-	if is_instance_valid(submit_button):     submit_button.disabled     = true
+	if is_instance_valid(submit_button): submit_button.disabled = true
 	hide_notification()
 	_set_dialogue_input_lock(true)
 	await _play_tikbalang_consequence_glitch(message, true, MAX_STRIKES)
@@ -3437,7 +3468,7 @@ func rpc_puzzle_solved() -> void:
 func _sync_fruit_tap_button_to_revealed_pineapple() -> void:
 	if is_instance_valid(fruit_tap_button) and is_instance_valid(revealed_pineapple):
 		fruit_tap_button.global_position = revealed_pineapple.global_position
-		fruit_tap_button.scale           = Vector2(1.4, 1.4)
+		fruit_tap_button.scale = Vector2(1.4, 1.4)
 
 
 func _blink_board() -> void:
@@ -3445,9 +3476,9 @@ func _blink_board() -> void:
 		return
 	var tw := create_tween()
 	tw.tween_property(board_sprite, "modulate", Color(1, 1, 1, 0.3), 0.12)
-	tw.tween_property(board_sprite, "modulate", Color(1, 1, 1, 1),   0.12)
+	tw.tween_property(board_sprite, "modulate", Color(1, 1, 1, 1), 0.12)
 	tw.tween_property(board_sprite, "modulate", Color(1, 1, 1, 0.3), 0.12)
-	tw.tween_property(board_sprite, "modulate", Color(1, 1, 1, 1),   0.12)
+	tw.tween_property(board_sprite, "modulate", Color(1, 1, 1, 1), 0.12)
 	await tw.finished
 
 
@@ -3481,9 +3512,9 @@ func rpc_request_show_reward() -> void:
 @rpc("any_peer", "reliable", "call_local")
 func rpc_show_reward() -> void:
 	if _reward_active: return
-	_reward_active             = true
-	_waiting_reward_continue   = true
-	_reward_stage              = 1
+	_reward_active = true
+	_waiting_reward_continue = true
+	_reward_stage = 1
 	_collect_sequence_started  = false
 
 	_play_zone_completion_sfx()
@@ -3492,31 +3523,31 @@ func rpc_show_reward() -> void:
 	if is_instance_valid(fruit_tap_button):
 		fruit_tap_button.disabled = true
 		fruit_tap_button.visible  = false
-	if is_instance_valid(reward_layer):      reward_layer.visible      = true
-	if is_instance_valid(clue_sprite):       clue_sprite.visible       = true
+	if is_instance_valid(reward_layer): reward_layer.visible = true
+	if is_instance_valid(clue_sprite): clue_sprite.visible = true
 	_spawn_artifact_reward_confetti()
 	if is_instance_valid(clue_sprite):
 		clue_sprite.modulate.a = 0.0
 		clue_sprite.scale = Vector2(0.14, 0.14)
 	if is_instance_valid(sparkle):
-		sparkle.visible    = true
-		sparkle.scale      = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
-		_animation_time    = 0.0
+		sparkle.visible = true
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+		_animation_time = 0.0
 		_sparkle_animating = true
 	if is_instance_valid(reward_dark_overlay): reward_dark_overlay.modulate.a = 0.45
 	if is_instance_valid(reward_banner_label):
 		reward_banner_label.visible = true
-		reward_banner_label.text    = "ARTIFACT FOUND!"
+		reward_banner_label.text = "ARTIFACT FOUND!"
 		reward_banner_label.modulate.a = 0.0
-	if is_instance_valid(reward_text_label):   reward_text_label.text   = ""
-	if is_instance_valid(reward_panel):        reward_panel.visible      = false
+	if is_instance_valid(reward_text_label): reward_text_label.text = ""
+	if is_instance_valid(reward_panel): reward_panel.visible = false
 	if is_instance_valid(tap_instruction_label):
 		tap_instruction_label.visible = true
-		tap_instruction_label.text    = "Tap anywhere to continue."
+		tap_instruction_label.text = "Tap anywhere to continue."
 	if is_instance_valid(tap_catcher):
 		tap_catcher.visible  = true
 		tap_catcher.disabled = false
-	if is_instance_valid(collect_button):     collect_button.visible    = false
+	if is_instance_valid(collect_button): collect_button.visible = false
 	if is_instance_valid(briefcase_reveal_sprite):
 		briefcase_reveal_sprite.visible = false
 		briefcase_reveal_sprite.texture = null
@@ -3554,22 +3585,25 @@ func rpc_finalize_clue() -> void:
 	_sparkle_animating = false
 	if is_instance_valid(sparkle):
 		sparkle.visible = false
-		sparkle.scale   = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
-	if is_instance_valid(clue_sprite):            clue_sprite.visible            = false
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+	if is_instance_valid(clue_sprite): clue_sprite.visible = false
 	if is_instance_valid(reward_banner_label):
 		reward_banner_label.visible = false
-		reward_banner_label.text    = ""
+		reward_banner_label.text = ""
 	if is_instance_valid(briefcase_reveal_sprite):
 		briefcase_reveal_sprite.visible = false
 		briefcase_reveal_sprite.texture = null
-	if is_instance_valid(reward_layer):           reward_layer.visible           = false
-	_return_to_forest()
+	if is_instance_valid(reward_layer): reward_layer.visible = false
+	if is_instance_valid(reward_dark_overlay): reward_dark_overlay.modulate.a = 0.0
+	await _fade_out(0.6)
+	_play_ending_cutscene()
+	await _fade_in(0.6)
 
 
 func show_notification(text: String, duration: float = 2.0) -> void:
 	if not is_instance_valid(notification_panel) or not is_instance_valid(notification_label):
 		return
-	notification_label.text    = text
+	notification_label.text = text
 	notification_panel.modulate.a = 0.0
 	notification_panel.visible = true
 	var current_id := Time.get_ticks_msec()
@@ -3620,23 +3654,23 @@ func _return_to_forest() -> void:
 func _refresh_inside_zone_buttons() -> void:
 	var is_sidekick: bool = GameState.local_role == GameState.Role.SIDEKICK
 	if is_instance_valid(touch_controls):
-		if touch_controls.has_method("set_pause_enabled"):      touch_controls.set_pause_enabled(true)
-		if touch_controls.has_method("set_ledger_enabled"):     touch_controls.set_ledger_enabled(is_sidekick)
+		if touch_controls.has_method("set_pause_enabled"): touch_controls.set_pause_enabled(true)
+		if touch_controls.has_method("set_ledger_enabled"): touch_controls.set_ledger_enabled(is_sidekick)
 		if touch_controls.has_method("set_briefcase_enabled"):  touch_controls.set_briefcase_enabled(is_sidekick)
 		if touch_controls.has_method("set_sidekick_ui_visible"):touch_controls.set_sidekick_ui_visible(is_sidekick)
 	if not is_sidekick:
-		if is_instance_valid(ledger_panel):           ledger_panel.visible           = false
-		if is_instance_valid(briefcase_panel):        briefcase_panel.visible        = false
-		if is_instance_valid(ledger_touch_button):    ledger_touch_button.visible    = false
+		if is_instance_valid(ledger_panel): ledger_panel.visible = false
+		if is_instance_valid(briefcase_panel): briefcase_panel.visible = false
+		if is_instance_valid(ledger_touch_button): ledger_touch_button.visible = false
 		if is_instance_valid(briefcase_touch_button): briefcase_touch_button.visible = false
 
 
 func _show_reward_stage_text(text: String) -> void:
-	if is_instance_valid(reward_panel):          reward_panel.visible           = true
-	if is_instance_valid(reward_text_label):     reward_text_label.text         = text
+	if is_instance_valid(reward_panel): reward_panel.visible = true
+	if is_instance_valid(reward_text_label): reward_text_label.text = text
 	if is_instance_valid(tap_instruction_label):
 		tap_instruction_label.visible = true
-		tap_instruction_label.text    = "Tap anywhere to continue."
+		tap_instruction_label.text = "Tap anywhere to continue."
 
 
 func _on_reward_tap_catcher_pressed() -> void:
@@ -3656,16 +3690,16 @@ func _on_reward_tap_catcher_pressed() -> void:
 			_reward_stage = 5
 			_show_reward_stage_text("perhaps she could see them again.")
 		5:
-			_reward_stage            = 6
+			_reward_stage = 6
 			_waiting_reward_continue = false
 			if is_instance_valid(tap_instruction_label):
 				tap_instruction_label.visible = false
-				tap_instruction_label.text    = ""
+				tap_instruction_label.text = ""
 			if is_instance_valid(tap_catcher):
 				tap_catcher.visible  = false
 				tap_catcher.disabled = true
-			if is_instance_valid(reward_panel):      reward_panel.visible      = false
-			if is_instance_valid(reward_text_label): reward_text_label.text    = ""
+			if is_instance_valid(reward_panel): reward_panel.visible = false
+			if is_instance_valid(reward_text_label): reward_text_label.text = ""
 			if is_instance_valid(collect_button):
 				collect_button.visible = GameState.local_role == GameState.Role.SIDEKICK if multiplayer.has_multiplayer_peer() else true
 				collect_button.disabled = not collect_button.visible
@@ -3687,7 +3721,7 @@ func rpc_show_briefcase_reveal_then_finalize() -> void:
 	_show_briefcase_reveal_local()
 	if is_instance_valid(tap_instruction_label):
 		tap_instruction_label.visible = false
-		tap_instruction_label.text    = ""
+		tap_instruction_label.text = ""
 	if is_instance_valid(tap_catcher):
 		tap_catcher.visible  = false
 		tap_catcher.disabled = true
@@ -3740,20 +3774,20 @@ func _hide_reward_visuals_for_briefcase() -> void:
 	_sparkle_animating = false
 	if is_instance_valid(sparkle):
 		sparkle.visible = false
-		sparkle.scale   = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
-	if is_instance_valid(clue_sprite):            clue_sprite.visible            = false
+		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
+	if is_instance_valid(clue_sprite): clue_sprite.visible = false
 	if is_instance_valid(reward_banner_label):
 		reward_banner_label.visible = false
-		reward_banner_label.text    = ""
-	if is_instance_valid(reward_panel):           reward_panel.visible           = false
-	if is_instance_valid(reward_text_label):      reward_text_label.text         = ""
+		reward_banner_label.text = ""
+	if is_instance_valid(reward_panel): reward_panel.visible = false
+	if is_instance_valid(reward_text_label): reward_text_label.text = ""
 	if is_instance_valid(tap_instruction_label):
 		tap_instruction_label.visible = false
-		tap_instruction_label.text    = ""
+		tap_instruction_label.text = ""
 	if is_instance_valid(tap_catcher):
 		tap_catcher.visible  = false
 		tap_catcher.disabled = true
-	if is_instance_valid(collect_button):         collect_button.visible         = false
+	if is_instance_valid(collect_button): collect_button.visible = false
 	_set_attention_pulse(collect_button, false)
 
 
@@ -3882,3 +3916,72 @@ func _show_dali_conversion_ledger() -> void:
 	else:
 		if is_instance_valid(ledger_panel):
 			ledger_panel.visible = false
+
+
+func _play_ending_cutscene() -> void:
+	if not is_instance_valid(ending_cutscene):
+		_return_to_forest()
+		return
+	var dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	var viewport_size := get_viewport().get_visible_rect().size
+	if is_instance_valid(dark):
+		dark.visible = true
+		dark.z_index = 1
+		dark.position = Vector2.ZERO
+		dark.size = viewport_size
+
+	# Inset the video to leave a black frame — mirrors Pinas House layout
+	var margin_x := viewport_size.x * 0.1
+	var margin_y := viewport_size.y * 0.1
+	ending_cutscene.z_index = 2
+	ending_cutscene.visible = true
+	ending_cutscene.position = Vector2(margin_x, margin_y)
+	ending_cutscene.size = Vector2(
+		viewport_size.x - margin_x * 2.0,
+		viewport_size.y - margin_y * 2.0
+	)
+	ending_cutscene.play()
+
+
+func _on_cutscene_finished() -> void:
+	if is_instance_valid(ending_cutscene):
+		ending_cutscene.visible = false
+		ending_cutscene.stop()
+	var dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	if is_instance_valid(dark):
+		dark.visible = false
+	await _fade_out(0.6)
+	get_tree().paused = false
+	await get_tree().process_frame
+	if is_inside_tree():
+		get_tree().change_scene_to_file(SCENE_FOREST_HUB)
+
+
+func _fade_out(duration: float = 0.6) -> void:
+	var overlay := ColorRect.new()
+	overlay.name = "FadeOverlay"
+	overlay.color = Color(0, 0, 0, 0)
+	overlay.z_index = 4096
+	overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(overlay)
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(overlay, "color:a", 1.0, duration)
+	await tween.finished
+
+
+func _fade_in(duration: float = 0.6) -> void:
+	var overlay := get_node_or_null("FadeOverlay")
+	if not is_instance_valid(overlay):
+		return
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(overlay, "color:a", 0.0, duration)
+	await tween.finished
+	overlay.queue_free()
+
+
+func _input(event: InputEvent) -> void:
+	if is_instance_valid(ending_cutscene) and ending_cutscene.visible:
+		if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
+			ending_cutscene.stop()
+			_on_cutscene_finished()
