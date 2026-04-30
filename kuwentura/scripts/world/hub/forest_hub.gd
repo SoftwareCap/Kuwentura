@@ -91,6 +91,10 @@ const BRIEFCASE_OPEN_SCALE: Vector2 = Vector2(1.0, 1.0)
 const BRIEFCASE_CLOSED_SCALE: Vector2 = Vector2(1.0, 0.1)
 const SCENE_MAIN_MENU := "res://scenes/mainMenu/MainMenu.tscn"
 const SETTINGS_FILE := "user://settings.json"
+const MAP_LAYER_FOCUS_LAYER := 105
+const MAP_OVERLAY_ALPHA := 0.72
+const MAP_CONTENT_OPEN_SCALE := Vector2(1.0, 1.0)
+const MAP_CONTENT_CLOSED_SCALE := Vector2(0.92, 0.92)
 
 ## Zone thought lines: zone_name → { true: [speaker, line], false: [speaker, line] }
 ## true = detective, false = sidekick.
@@ -131,6 +135,11 @@ var _quest_objective_labels: Dictionary = {}
 var _quest_objective_texts: Dictionary = {}
 var _map_zone_markers: Dictionary = {}
 var _map_artifact_markers: Dictionary = {}
+var _map_dim_overlay: ColorRect
+var _map_open_tween: Tween
+var _map_marker_tweens: Array = []
+var _touch_controls_default_layer: int = 101
+var _map_focus_controls_active: bool = false
 
 # ─── LIFECYCLE ───────────────────────────────────────────────────────────────
 
@@ -559,6 +568,8 @@ func _setup_ui_controls() -> void:
 		return
 
 	## [node_name, visible, handler] — Callable() means visible-only, no signal
+	_touch_controls_default_layer = touch_controls.layer
+
 	var button_configs := [
 		["Map",         true,        _on_map_button_pressed],
 		["Ledger",      is_sidekick, _on_ledger_button_pressed],
@@ -625,20 +636,65 @@ func _open_map() -> void:
 
 	_refresh_quest_objectives()
 	_refresh_map_progress()
+	_stop_map_marker_animations()
+	_stop_map_panel_tween()
+	_set_touch_controls_map_focus(true)
 
 	map_layer.visible = true
+	_is_animating = true
 
-	if map_panel:
-		map_panel.visible = true
-		map_panel.modulate = Color(1, 1, 1, 1)
+	if is_instance_valid(_map_dim_overlay):
+		_map_dim_overlay.color = Color(0, 0, 0, 0.0)
+
+	for visual in _get_map_visual_nodes():
+		_cache_map_visual_state(visual)
+		visual.modulate.a = 0.0
+		_set_map_visual_scale(visual, _get_map_visual_base_scale(visual) * MAP_CONTENT_CLOSED_SCALE)
+
+	_map_open_tween = create_tween()
+	_map_open_tween.set_parallel(true)
+	if is_instance_valid(_map_dim_overlay):
+		_map_open_tween.tween_property(_map_dim_overlay, "color:a", MAP_OVERLAY_ALPHA, 0.22)
+	for visual in _get_map_visual_nodes():
+		_map_open_tween.tween_property(visual, "modulate:a", _get_map_visual_base_modulate(visual).a, 0.24)
+		_map_open_tween.tween_property(visual, "scale", _get_map_visual_base_scale(visual) * MAP_CONTENT_OPEN_SCALE, 0.34).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_map_open_tween.finished.connect(func():
+		_is_animating = false
+		_start_map_marker_animations())
 
 
 
-func _close_map(_animate: bool = true) -> void:
+func _close_map(animate: bool = true) -> void:
 	if not map_layer:
 		return
+	if not map_layer.visible:
+		return
 
-	map_layer.visible = false
+	_stop_map_marker_animations()
+	_stop_map_panel_tween()
+
+	if animate:
+		_is_animating = true
+		_map_open_tween = create_tween()
+		_map_open_tween.set_parallel(true)
+		if is_instance_valid(_map_dim_overlay):
+			_map_open_tween.tween_property(_map_dim_overlay, "color:a", 0.0, 0.18)
+		for visual in _get_map_visual_nodes():
+			_map_open_tween.tween_property(visual, "modulate:a", 0.0, 0.16)
+			_map_open_tween.tween_property(visual, "scale", _get_map_visual_base_scale(visual) * MAP_CONTENT_CLOSED_SCALE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		_map_open_tween.finished.connect(func():
+			map_layer.visible = false
+			for visual in _get_map_visual_nodes():
+				_restore_map_visual_state(visual)
+			_set_touch_controls_map_focus(false)
+			_is_animating = false)
+	else:
+		map_layer.visible = false
+		if is_instance_valid(_map_dim_overlay):
+			_map_dim_overlay.color = Color(0, 0, 0, MAP_OVERLAY_ALPHA)
+		for visual in _get_map_visual_nodes():
+			_restore_map_visual_state(visual)
+		_set_touch_controls_map_focus(false)
 
 
 func _open_ledger() -> void:
@@ -1264,13 +1320,189 @@ func _setup_map_layer() -> void:
 		push_error("[ForestHub] MapLayer not found!")
 		return
 
+	map_layer.layer = MAP_LAYER_FOCUS_LAYER
+	map_layer.follow_viewport_enabled = false
 	map_layer.visible = false
+	_ensure_map_focus_ui()
 
 	if map_panel:
 		map_panel.visible = true
 		map_panel.modulate = Color(1, 1, 1, 1)
 
 	_setup_map_progress_markers()
+
+
+func _ensure_map_focus_ui() -> void:
+	if not is_instance_valid(map_layer):
+		return
+
+	_map_dim_overlay = map_layer.get_node_or_null("DimOverlay") as ColorRect
+	if not is_instance_valid(_map_dim_overlay):
+		_map_dim_overlay = ColorRect.new()
+		_map_dim_overlay.name = "DimOverlay"
+		map_layer.add_child(_map_dim_overlay)
+		map_layer.move_child(_map_dim_overlay, 0)
+
+	_map_dim_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_map_dim_overlay.color = Color(0, 0, 0, 0.72)
+	_map_dim_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_map_dim_overlay.z_index = -100
+
+	var old_close_button := map_layer.get_node_or_null("CloseMapButton")
+	if is_instance_valid(old_close_button):
+		old_close_button.queue_free()
+
+
+func _get_map_visual_nodes() -> Array[CanvasItem]:
+	var nodes: Array[CanvasItem] = []
+	if is_instance_valid(map_panel):
+		nodes.append(map_panel)
+	var quest_panel := map_layer.get_node_or_null("Quest") as CanvasItem
+	if is_instance_valid(quest_panel):
+		nodes.append(quest_panel)
+	for marker in _map_zone_markers.values():
+		var marker_item := marker as CanvasItem
+		if is_instance_valid(marker_item):
+			nodes.append(marker_item)
+	for marker in _map_artifact_markers.values():
+		var marker_item := marker as CanvasItem
+		if is_instance_valid(marker_item):
+			nodes.append(marker_item)
+	return nodes
+
+
+func _set_touch_controls_map_focus(map_open: bool) -> void:
+	if not is_instance_valid(touch_controls):
+		return
+
+	if map_open:
+		if not _map_focus_controls_active:
+			for child in touch_controls.get_children():
+				if child is CanvasItem:
+					child.set_meta("map_previous_visible", (child as CanvasItem).visible)
+			_map_focus_controls_active = true
+		touch_controls.visible = true
+		touch_controls.layer = MAP_LAYER_FOCUS_LAYER + 1
+		for child in touch_controls.get_children():
+			if child is CanvasItem:
+				(child as CanvasItem).visible = child.name == "Map"
+	else:
+		if not _map_focus_controls_active:
+			return
+		for child in touch_controls.get_children():
+			if child is CanvasItem:
+				(child as CanvasItem).visible = bool(child.get_meta("map_previous_visible", (child as CanvasItem).visible))
+				if child.has_meta("map_previous_visible"):
+					child.remove_meta("map_previous_visible")
+		touch_controls.layer = _touch_controls_default_layer
+		_map_focus_controls_active = false
+
+
+func _stop_map_panel_tween() -> void:
+	if is_instance_valid(_map_open_tween):
+		_map_open_tween.kill()
+	_map_open_tween = null
+
+
+func _cache_map_visual_state(visual: CanvasItem) -> void:
+	if not is_instance_valid(visual):
+		return
+	if not visual.has_meta("map_base_modulate"):
+		visual.set_meta("map_base_modulate", visual.modulate)
+	if not visual.has_meta("map_base_scale"):
+		visual.set_meta("map_base_scale", _get_map_visual_current_scale(visual))
+	if visual is Node2D and not visual.has_meta("map_base_rotation"):
+		visual.set_meta("map_base_rotation", (visual as Node2D).rotation)
+
+
+func _get_map_visual_current_scale(visual: CanvasItem) -> Vector2:
+	if visual is Node2D:
+		return (visual as Node2D).scale
+	if visual is Control:
+		return (visual as Control).scale
+	return Vector2.ONE
+
+
+func _get_map_visual_base_scale(visual: CanvasItem) -> Vector2:
+	if not is_instance_valid(visual):
+		return Vector2.ONE
+	return visual.get_meta("map_base_scale", _get_map_visual_current_scale(visual)) as Vector2
+
+
+func _get_map_visual_base_modulate(visual: CanvasItem) -> Color:
+	if not is_instance_valid(visual):
+		return Color.WHITE
+	return visual.get_meta("map_base_modulate", visual.modulate) as Color
+
+
+func _set_map_visual_scale(visual: CanvasItem, new_scale: Vector2) -> void:
+	if visual is Node2D:
+		(visual as Node2D).scale = new_scale
+	elif visual is Control:
+		(visual as Control).scale = new_scale
+
+
+func _restore_map_visual_state(visual: CanvasItem) -> void:
+	if not is_instance_valid(visual):
+		return
+	visual.modulate = _get_map_visual_base_modulate(visual)
+	_set_map_visual_scale(visual, _get_map_visual_base_scale(visual))
+	if visual is Node2D:
+		(visual as Node2D).rotation = visual.get_meta("map_base_rotation", (visual as Node2D).rotation) as float
+
+
+func _start_map_marker_animations() -> void:
+	_stop_map_marker_animations()
+	var marker_index := 0
+	for marker in _map_zone_markers.values():
+		var sprite := marker as Sprite2D
+		if is_instance_valid(sprite) and sprite.visible:
+			_play_map_marker_loop(sprite, false, marker_index)
+			marker_index += 1
+	for marker in _map_artifact_markers.values():
+		var sprite := marker as Sprite2D
+		if is_instance_valid(sprite) and sprite.visible:
+			_play_map_marker_loop(sprite, true, marker_index)
+			marker_index += 1
+
+
+func _play_map_marker_loop(marker: Sprite2D, is_artifact: bool, marker_index: int) -> void:
+	_cache_map_visual_state(marker)
+	var base_scale: Vector2 = _get_map_visual_base_scale(marker)
+	var base_modulate: Color = _get_map_visual_base_modulate(marker)
+	var base_rotation: float = marker.get_meta("map_base_rotation", marker.rotation) as float
+	var pulse_scale := base_scale * (1.14 if is_artifact else 1.08)
+	var pulse_color := Color(1.0, 0.90, 0.48, base_modulate.a) if is_artifact else Color(1.0, 1.0, 1.0, base_modulate.a)
+	var pulse_duration := 0.34 if is_artifact else 0.42
+	var tween := create_tween()
+	tween.set_loops()
+	tween.tween_interval(float(marker_index) * 0.05)
+	tween.tween_property(marker, "scale", pulse_scale, pulse_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(marker, "modulate", pulse_color, pulse_duration)
+	if is_artifact:
+		tween.parallel().tween_property(marker, "rotation", base_rotation + 0.08, pulse_duration)
+	tween.tween_property(marker, "scale", base_scale, pulse_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.parallel().tween_property(marker, "modulate", base_modulate, pulse_duration)
+	if is_artifact:
+		tween.parallel().tween_property(marker, "rotation", base_rotation - 0.05, pulse_duration)
+		tween.tween_property(marker, "rotation", base_rotation, 0.16)
+	tween.tween_interval(0.45 if is_artifact else 0.65)
+	_map_marker_tweens.append(tween)
+
+
+func _stop_map_marker_animations() -> void:
+	for tween in _map_marker_tweens:
+		if is_instance_valid(tween):
+			(tween as Tween).kill()
+	_map_marker_tweens.clear()
+	for marker in _map_zone_markers.values():
+		var marker_item := marker as CanvasItem
+		if is_instance_valid(marker_item):
+			_restore_map_visual_state(marker_item)
+	for marker in _map_artifact_markers.values():
+		var marker_item := marker as CanvasItem
+		if is_instance_valid(marker_item):
+			_restore_map_visual_state(marker_item)
 	
 func _setup_map_progress_markers() -> void:
 	_map_zone_markers = {
@@ -1316,9 +1548,6 @@ func _refresh_map_progress() -> void:
 func _on_zone_visited(_zone_name: String) -> void:
 	_refresh_map_progress()
 		
-func _on_close_map_button_pressed() -> void:
-	_close_all_panels(false)
-
 func _setup_quest_objectives() -> void:
 	_quest_objective_labels = {
 		"pinas_house": objective_label_1,

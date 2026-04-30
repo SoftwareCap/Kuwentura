@@ -24,6 +24,18 @@ const SPARKLE_PULSE_SPEED := 4.0
 const NOTE_REVEAL_SHAKE_OFFSET: float = 10.0
 const NOTE_REVEAL_SHAKE_STEP: float = 0.05
 const NOTE_REVEAL_SHAKE_COUNT: int = 4
+const QUEST_PANEL_POS := Vector2(28, 210)
+const QUEST_PANEL_WIDTH := 390.0
+const QUEST_HEADER_HEIGHT := 38.0
+const QUEST_ROW_HEIGHT := 40.0
+const QUEST_ROW_GAP := 6.0
+const QUEST_TEXT_LEFT_PADDING := 14.0
+const QUEST_DONE_ALPHA := 0.45
+const UI_BROWN := Color(0.55, 0.31, 0.12, 1.0)
+const UI_DIM_PANEL := Color(0.19, 0.12, 0.06, 0.64)
+const UI_ACTIVE_PANEL := Color(0.28, 0.17, 0.08, 0.76)
+const UI_QUEST_DONE := Color(0.72, 0.68, 0.61, 1.0)
+const UI_FOCUS_BROWN := Color(0.31, 0.16, 0.06, 0.70)
 
 @onready var role_label: Label = get_node_or_null("RoleLabel")
 @onready var back_button: Button = get_node_or_null("BackButton")
@@ -113,6 +125,17 @@ const NOTE_REVEAL_SHAKE_COUNT: int = 4
 
 @onready var ending_cutscene: VideoStreamPlayer = $Cutscene/EndingCutscene
 
+var quest_layer: Node2D
+var quest_title_label: Label
+var _quest_style_ready: bool = false
+var _quest_labels: Array[Label] = []
+var _quest_row_backgrounds: Array[ColorRect] = []
+var _quest_toggle_button: Button
+var _quest_expanded: bool = false
+var _quest_active_index: int = 0
+var _focus_overlay: ColorRect
+var _dialogue_focus_active: bool = false
+
 var _animation_time: float = 0.0
 var _sparkle_animating: bool = false
 
@@ -191,6 +214,261 @@ var _aswang_window_frames: Array[Texture2D] = [
 var _aswang_final_frame: Texture2D = preload("res://assets/sprites/consequences/aswang/aswang10.png")
 
 
+func _ensure_quest_nodes() -> void:
+	quest_layer = get_node_or_null("QuestLayer") as Node2D
+	if not is_instance_valid(quest_layer):
+		quest_layer = Node2D.new()
+		quest_layer.name = "QuestLayer"
+		quest_layer.z_index = 80
+		add_child(quest_layer)
+
+	quest_title_label = quest_layer.get_node_or_null("QuestTitle") as Label
+	if not is_instance_valid(quest_title_label):
+		quest_title_label = Label.new()
+		quest_title_label.name = "QuestTitle"
+		quest_layer.add_child(quest_title_label)
+
+	while _quest_labels.size() < 5:
+		var label := Label.new()
+		label.name = "QuestTask" + str(_quest_labels.size() + 1)
+		quest_layer.add_child(label)
+		_quest_labels.append(label)
+
+
+func _setup_quest_panel_style() -> void:
+	_ensure_quest_nodes()
+	if not is_instance_valid(quest_layer):
+		return
+
+	_quest_row_backgrounds.clear()
+
+	var header_bar := quest_layer.get_node_or_null("QuestHeaderBar") as ColorRect
+	if not is_instance_valid(header_bar):
+		header_bar = ColorRect.new()
+		header_bar.name = "QuestHeaderBar"
+		quest_layer.add_child(header_bar)
+		quest_layer.move_child(header_bar, 0)
+
+	header_bar.position = QUEST_PANEL_POS
+	header_bar.size = Vector2(QUEST_PANEL_WIDTH, QUEST_HEADER_HEIGHT)
+	header_bar.color = UI_BROWN
+	header_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	header_bar.z_index = 0
+
+	if is_instance_valid(quest_title_label):
+		quest_title_label.text = "PINAS HOUSE QUEST"
+		quest_title_label.position = QUEST_PANEL_POS + Vector2(12.0, 0.0)
+		quest_title_label.size = Vector2(QUEST_PANEL_WIDTH - 24.0, QUEST_HEADER_HEIGHT)
+		quest_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		quest_title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		quest_title_label.add_theme_font_size_override("font_size", 17)
+		quest_title_label.add_theme_color_override("font_color", Color.WHITE)
+		quest_title_label.add_theme_constant_override("outline_size", 2)
+		quest_title_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.86))
+		quest_title_label.z_index = 3
+
+	_quest_toggle_button = quest_layer.get_node_or_null("QuestToggleButton") as Button
+	if not is_instance_valid(_quest_toggle_button):
+		_quest_toggle_button = Button.new()
+		_quest_toggle_button.name = "QuestToggleButton"
+		quest_layer.add_child(_quest_toggle_button)
+
+	_quest_toggle_button.position = QUEST_PANEL_POS
+	_quest_toggle_button.size = Vector2(QUEST_PANEL_WIDTH, QUEST_HEADER_HEIGHT)
+	_quest_toggle_button.text = ""
+	_quest_toggle_button.flat = true
+	_quest_toggle_button.focus_mode = Control.FOCUS_NONE
+	_quest_toggle_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	_quest_toggle_button.self_modulate = Color(1, 1, 1, 0)
+	_quest_toggle_button.z_index = 10
+	if not _quest_toggle_button.pressed.is_connected(_on_quest_header_pressed):
+		_quest_toggle_button.pressed.connect(_on_quest_header_pressed)
+
+	for i in range(_quest_labels.size()):
+		var label := _quest_labels[i]
+		var row_pos := _get_quest_row_position(i)
+		var bg_name := "QuestRowBG" + str(i + 1)
+		var row_bg := quest_layer.get_node_or_null(bg_name) as ColorRect
+		if not is_instance_valid(row_bg):
+			row_bg = ColorRect.new()
+			row_bg.name = bg_name
+			quest_layer.add_child(row_bg)
+			quest_layer.move_child(row_bg, 0)
+
+		row_bg.position = row_pos
+		row_bg.size = Vector2(QUEST_PANEL_WIDTH, QUEST_ROW_HEIGHT)
+		row_bg.color = UI_DIM_PANEL
+		row_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row_bg.z_index = 0
+
+		label.position = row_pos + Vector2(QUEST_TEXT_LEFT_PADDING, 0.0)
+		label.size = Vector2(QUEST_PANEL_WIDTH - (QUEST_TEXT_LEFT_PADDING * 2.0), QUEST_ROW_HEIGHT)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.clip_text = false
+		label.add_theme_font_size_override("font_size", 15)
+		label.add_theme_color_override("font_color", Color.WHITE)
+		label.add_theme_constant_override("outline_size", 2)
+		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+		label.z_index = 2
+
+		_quest_row_backgrounds.append(row_bg)
+
+	_quest_style_ready = true
+
+
+func _on_quest_header_pressed() -> void:
+	_quest_expanded = not _quest_expanded
+	_update_quest_labels()
+
+
+func _get_quest_row_position(row_index: int) -> Vector2:
+	return QUEST_PANEL_POS + Vector2(
+		0.0,
+		QUEST_HEADER_HEIGHT + 8.0 + float(row_index) * (QUEST_ROW_HEIGHT + QUEST_ROW_GAP)
+	)
+
+
+func _set_quest_task(index: int, text: String, done: bool, active: bool) -> void:
+	if index < 0 or index >= _quest_labels.size():
+		return
+
+	var label := _quest_labels[index]
+	if not is_instance_valid(label):
+		return
+
+	var row_bg: ColorRect = null
+	if index < _quest_row_backgrounds.size():
+		row_bg = _quest_row_backgrounds[index]
+
+	var row_visible: bool = _quest_expanded or active
+	var visible_row_index: int = index if _quest_expanded else 0
+	var row_pos := _get_quest_row_position(visible_row_index)
+
+	label.text = text
+	label.set_meta("quest_done", done)
+	label.visible = row_visible
+	label.position = row_pos + Vector2(QUEST_TEXT_LEFT_PADDING, 0.0)
+	label.size = Vector2(QUEST_PANEL_WIDTH - (QUEST_TEXT_LEFT_PADDING * 2.0), QUEST_ROW_HEIGHT)
+	label.add_theme_font_size_override("font_size", 16 if active and not done else 15)
+	label.add_theme_color_override("font_color", UI_QUEST_DONE if done else Color.WHITE)
+	label.modulate = Color(1, 1, 1, QUEST_DONE_ALPHA) if done else Color.WHITE
+
+	if is_instance_valid(row_bg):
+		row_bg.visible = row_visible
+		row_bg.position = row_pos
+		row_bg.size = Vector2(QUEST_PANEL_WIDTH, QUEST_ROW_HEIGHT)
+		if done:
+			row_bg.color = Color(0.16, 0.12, 0.08, 0.44)
+		elif active:
+			row_bg.color = UI_ACTIVE_PANEL
+		else:
+			row_bg.color = UI_DIM_PANEL
+
+
+func _all_search_tools_collected() -> bool:
+	for tool_id in _TOOL_IDS:
+		if not _tools_collected.get(tool_id, false):
+			return false
+	return true
+
+
+func _update_quest_labels() -> void:
+	if not _quest_style_ready:
+		_setup_quest_panel_style()
+	if not is_instance_valid(quest_layer):
+		return
+
+	var tool_done: bool = _all_search_tools_collected() or _note_phase_active or _note_solved or _cabinet_phase_active or _reward_active or _ladle_found or clue_collected
+	var note_done: bool = _note_solved or _cabinet_phase_active or _reward_active or _ladle_found or clue_collected
+	var cabinet_done: bool = _cabinet_opened or _ladle_found or clue_collected
+	var ladle_done: bool = _ladle_found or clue_collected
+	var artifact_done: bool = clue_collected
+
+	var tasks: Array[String] = [
+		"Find the missing tools",
+		"Solve Pina's hidden note",
+		"Open the cabinet",
+		"Find the ladle artifact",
+		"Collect the artifact"
+	]
+	var done_states: Array[bool] = [
+		tool_done,
+		note_done,
+		cabinet_done,
+		ladle_done,
+		artifact_done
+	]
+
+	var previous_active_index: int = _quest_active_index
+	_quest_active_index = done_states.find(false)
+	if _quest_active_index == -1:
+		_quest_active_index = done_states.size() - 1
+
+	for i in range(tasks.size()):
+		_set_quest_task(i, tasks[i], done_states[i], i == _quest_active_index)
+
+	quest_layer.visible = _zone_active and not clue_collected and not _failed
+	if previous_active_index != _quest_active_index and not _quest_expanded:
+		_animate_current_quest_task()
+
+
+func _animate_current_quest_task() -> void:
+	if _quest_active_index < 0 or _quest_active_index >= _quest_labels.size():
+		return
+
+	var label := _quest_labels[_quest_active_index]
+	if not is_instance_valid(label) or not label.visible:
+		return
+
+	var start_position := label.position
+	var target_modulate := Color(1, 1, 1, QUEST_DONE_ALPHA) if bool(label.get_meta("quest_done", false)) else Color.WHITE
+	label.position = start_position + Vector2(18.0, 0.0)
+	label.modulate = Color(1, 1, 1, 0.35)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(label, "position", start_position, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(label, "modulate", target_modulate, 0.22)
+
+
+func _ensure_focus_overlay() -> void:
+	_focus_overlay = get_node_or_null("FocusOverlay") as ColorRect
+	if not is_instance_valid(_focus_overlay):
+		_focus_overlay = ColorRect.new()
+		_focus_overlay.name = "FocusOverlay"
+		_focus_overlay.z_index = 90
+		_focus_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(_focus_overlay)
+
+	_focus_overlay.position = Vector2.ZERO
+	_focus_overlay.size = get_viewport_rect().size
+	_focus_overlay.color = Color(UI_FOCUS_BROWN.r, UI_FOCUS_BROWN.g, UI_FOCUS_BROWN.b, 0.0)
+	_focus_overlay.visible = false
+
+
+func _is_note_board_open() -> bool:
+	return (is_instance_valid(detective_board) and detective_board.visible) or (is_instance_valid(sidekick_board) and sidekick_board.visible)
+
+
+func _refresh_focus_overlay() -> void:
+	_ensure_focus_overlay()
+	var should_show: bool = _dialogue_focus_active or _is_note_board_open()
+	if not is_instance_valid(_focus_overlay):
+		return
+
+	_focus_overlay.size = get_viewport_rect().size
+	if should_show:
+		_focus_overlay.visible = true
+		_focus_overlay.color = UI_FOCUS_BROWN
+		if is_instance_valid(quest_layer):
+			quest_layer.visible = false
+	else:
+		_focus_overlay.visible = false
+		_focus_overlay.color = Color(UI_FOCUS_BROWN.r, UI_FOCUS_BROWN.g, UI_FOCUS_BROWN.b, 0.0)
+		_update_quest_labels()
+
+
 func _ready() -> void:
 	_init_controllers()
 
@@ -220,6 +498,9 @@ func _ready() -> void:
 	if is_instance_valid(collect_button):
 		collect_button.visible = false
 		collect_button.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+		if collect_button is Button:
+			(collect_button as Button).text = "Collect Artifact"
+			(collect_button as Button).custom_minimum_size = Vector2(300.0, 54.0)
 	if is_instance_valid(tap_catcher):
 		tap_catcher.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	if is_instance_valid(briefcase_reveal_sprite):
@@ -236,6 +517,9 @@ func _ready() -> void:
 		notification_label.visible = false
 	if is_instance_valid(guidance_arrow):
 		guidance_arrow.visible = false
+	if is_instance_valid(progress_tracker):
+		progress_tracker.visible = false
+	_ensure_focus_overlay()
 		
 	# Hide players until search room phase ends
 	if is_instance_valid(detective_player):
@@ -250,6 +534,8 @@ func _ready() -> void:
 
 	_connect_zone_interactions()
 	_prepare_initial_flow_state()
+	_setup_quest_panel_style()
+	_update_quest_labels()
 
 	if is_instance_valid(back_button) and not back_button.pressed.is_connected(_on_back_pressed):
 		back_button.pressed.connect(_on_back_pressed)
@@ -402,11 +688,13 @@ func _prepare_initial_flow_state() -> void:
 		detective_player.visible = false
 	if is_instance_valid(sidekick_player):
 		sidekick_player.visible = false
+	_update_quest_labels()
 
 
 func _hide_note() -> void:
 	if is_instance_valid(note_area): note_area.input_pickable = false
 	if is_instance_valid(note_collision): note_collision.disabled = true
+	_stop_note_reveal_highlight()
 	if is_instance_valid(note_sprite): note_sprite.visible = false
 	if is_instance_valid(note_btn):
 		note_btn.visible = false
@@ -418,13 +706,63 @@ func _show_note() -> void:
 	if is_instance_valid(note_collision): note_collision.disabled = false
 	if is_instance_valid(note_sprite):
 		note_sprite.visible = true
-		_play_note_reveal_shake()
+		_play_note_reveal_highlight()
 	if is_instance_valid(note_btn):
 		note_btn.visible = true
 		note_btn.disabled = false
 
 
-func _play_note_reveal_shake() -> void:
+func _play_note_reveal_highlight() -> void:
+	if not is_instance_valid(note_sprite):
+		return
+	_stop_note_reveal_highlight()
+	var old_glow := note_sprite.get_parent().get_node_or_null("NoteRevealGlow") as Sprite2D
+	if is_instance_valid(old_glow):
+		old_glow.queue_free()
+
+	var base_pos: Vector2 = note_sprite.position
+	var base_scale: Vector2 = note_sprite.scale
+	var base_modulate: Color = note_sprite.modulate
+	var base_z_index: int = note_sprite.z_index
+	note_sprite.set_meta("note_reveal_base_position", base_pos)
+	note_sprite.set_meta("note_reveal_base_scale", base_scale)
+	note_sprite.set_meta("note_reveal_base_modulate", base_modulate)
+	note_sprite.set_meta("note_reveal_base_z_index", base_z_index)
+	var glow := Sprite2D.new()
+	glow.name = "NoteRevealGlow"
+	glow.texture = note_sprite.texture
+	glow.position = note_sprite.position
+	glow.rotation = note_sprite.rotation
+	glow.scale = base_scale * 1.2
+	glow.modulate = Color(1.0, 0.78, 0.24, 0.0)
+	glow.z_index = base_z_index + 1
+	glow.show_behind_parent = false
+	note_sprite.get_parent().add_child(glow)
+
+	note_sprite.z_index = base_z_index + 2
+	note_sprite.scale = base_scale
+	note_sprite.modulate = base_modulate
+
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.set_loops()
+	tween.set_parallel(false)
+	tween.tween_property(note_sprite, "scale", base_scale * 1.18, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(note_sprite, "modulate", Color(1.0, 0.94, 0.62, 1.0), 0.22)
+	tween.parallel().tween_property(glow, "scale", base_scale * 1.45, 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(glow, "modulate:a", 0.58, 0.22)
+	tween.tween_property(note_sprite, "scale", base_scale, 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(note_sprite, "modulate", base_modulate, 0.18)
+	for i in range(NOTE_REVEAL_SHAKE_COUNT):
+		tween.tween_property(note_sprite, "position", base_pos + Vector2(-NOTE_REVEAL_SHAKE_OFFSET, 0), NOTE_REVEAL_SHAKE_STEP)
+		tween.tween_property(note_sprite, "position", base_pos + Vector2(NOTE_REVEAL_SHAKE_OFFSET, 0), NOTE_REVEAL_SHAKE_STEP)
+	tween.tween_property(note_sprite, "position", base_pos, NOTE_REVEAL_SHAKE_STEP)
+	tween.parallel().tween_property(glow, "modulate:a", 0.0, 0.34)
+	tween.parallel().tween_property(glow, "scale", base_scale * 1.62, 0.34)
+	tween.tween_interval(0.35)
+	note_sprite.set_meta("reveal_shake_tween", tween)
+
+
+func _stop_note_reveal_highlight() -> void:
 	if not is_instance_valid(note_sprite):
 		return
 	if note_sprite.has_meta("reveal_shake_tween"):
@@ -432,19 +770,21 @@ func _play_note_reveal_shake() -> void:
 		if is_instance_valid(old):
 			old.kill()
 		note_sprite.remove_meta("reveal_shake_tween")
-	var base_pos: Vector2 = note_sprite.position
-	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	for i in range(NOTE_REVEAL_SHAKE_COUNT):
-		tween.tween_property(note_sprite, "position", base_pos + Vector2(-NOTE_REVEAL_SHAKE_OFFSET, 0), NOTE_REVEAL_SHAKE_STEP)
-		tween.tween_property(note_sprite, "position", base_pos + Vector2(NOTE_REVEAL_SHAKE_OFFSET, 0), NOTE_REVEAL_SHAKE_STEP)
-	tween.tween_property(note_sprite, "position", base_pos, NOTE_REVEAL_SHAKE_STEP)
-	note_sprite.set_meta("reveal_shake_tween", tween)
-	tween.finished.connect(func():
-		if is_instance_valid(note_sprite):
-			note_sprite.position = base_pos
-			if note_sprite.has_meta("reveal_shake_tween"):
-				note_sprite.remove_meta("reveal_shake_tween"))
+	if note_sprite.has_meta("note_reveal_base_position"):
+		note_sprite.position = note_sprite.get_meta("note_reveal_base_position")
+		note_sprite.remove_meta("note_reveal_base_position")
+	if note_sprite.has_meta("note_reveal_base_scale"):
+		note_sprite.scale = note_sprite.get_meta("note_reveal_base_scale")
+		note_sprite.remove_meta("note_reveal_base_scale")
+	if note_sprite.has_meta("note_reveal_base_modulate"):
+		note_sprite.modulate = note_sprite.get_meta("note_reveal_base_modulate")
+		note_sprite.remove_meta("note_reveal_base_modulate")
+	if note_sprite.has_meta("note_reveal_base_z_index"):
+		note_sprite.z_index = note_sprite.get_meta("note_reveal_base_z_index")
+		note_sprite.remove_meta("note_reveal_base_z_index")
+	var glow := note_sprite.get_parent().get_node_or_null("NoteRevealGlow") as Sprite2D
+	if is_instance_valid(glow):
+		glow.queue_free()
 
 
 func _hide_cabinet_reward_state() -> void:
@@ -509,6 +849,7 @@ func _begin_zone_flow_local() -> void:
 		search_room_label.text = "Find missing tools:"
 	if multiplayer.is_server() or not multiplayer.has_multiplayer_peer():
 		_start_strike_system()
+	_update_quest_labels()
 
 
 func update_role_visibility() -> void:
@@ -532,6 +873,7 @@ func _on_role_assigned(role: Variant) -> void:
 	
 	var past_tool_phase: bool = _note_phase_active or _note_solved or _cabinet_phase_active or _reward_active
 	_update_player_visibility(past_tool_phase)
+	_update_quest_labels()
 
 
 func _update_role_label() -> void:
@@ -669,11 +1011,35 @@ func _exit_tree() -> void:
 func _on_clue_collected(zone_id: String, _clue_data: Dictionary) -> void:
 	if zone_id == "pinas_house" and not clue_collected:
 		clue_collected = true
+		_update_quest_labels()
 
 
 func _on_note_area_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if not _dialogue_input_locked and _is_press_event(event):
-		note_controller.on_note_interacted()
+		_request_open_note()
+
+
+func _request_open_note() -> void:
+	if not _note_phase_active and not _note_solved:
+		return
+	if not multiplayer.has_multiplayer_peer():
+		rpc_open_note_boards()
+	elif multiplayer.is_server():
+		rpc_open_note_boards.rpc()
+	else:
+		rpc_request_open_note.rpc_id(_SERVER_PEER_ID)
+
+
+@rpc("any_peer", "reliable")
+func rpc_request_open_note() -> void:
+	if multiplayer.is_server():
+		rpc_open_note_boards.rpc()
+
+
+@rpc("any_peer", "reliable", "call_local")
+func rpc_open_note_boards() -> void:
+	_stop_note_reveal_highlight()
+	note_controller.on_note_interacted()
 
 
 func _on_cabinet_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
@@ -711,6 +1077,7 @@ func rpc_open_cabinet_visual() -> void:
 	if is_instance_valid(cabinet_ladle_collision): cabinet_ladle_collision.disabled = _ladle_found
 	if is_instance_valid(cabinet_ladle_area): cabinet_ladle_area.input_pickable = not _ladle_found
 	show_notification("The cabinet is open. Look inside.", 2.0)
+	_update_quest_labels()
 
 
 @rpc("any_peer", "call_local", "reliable")
@@ -722,6 +1089,7 @@ func show_reward() -> void:
 	if _reward_active:
 		return
 	_reward_active = true
+	_update_quest_labels()
 	get_tree().paused = true
 	reward_layer.visible = true
 	await reward_sequence()
@@ -739,7 +1107,7 @@ func reward_sequence() -> void:
 	sparkle.visible = true
 	await get_tree().create_timer(0.6, true).timeout
 	banner_label.visible = true
-	reward_text.text = "CLUE FOUND!\n\nThe ladle matters because it represents the kitchen work Pina ignored.\n\n\"We use our eyes to find things, but Pina never used hers…\""
+	reward_text.text = "ARTIFACT FOUND!\n\nThe ladle matters because it represents the kitchen work Pina ignored.\n\n\"We use our eyes to find things, but Pina never used hers…\""
 	await get_tree().create_timer(0.6, true).timeout
 	clue_sprite.visible = true
 	await get_tree().create_timer(0.6, true).timeout
@@ -780,6 +1148,8 @@ func _collect_clue_server() -> void:
 func rpc_finalize_clue_collection() -> void:
 	_stop_strike_system()
 	GameState.collect_clue("pinas_house")
+	clue_collected = true
+	_update_quest_labels()
 	_dialogue_input_locked = false
 	get_tree().paused = false
 	if is_instance_valid(briefcase_reveal_sprite):
@@ -835,6 +1205,7 @@ func rpc_set_detective_note_seen(seen: bool) -> void:
 
 func _close_boards(force: bool = false) -> void:
 	note_controller.close_boards(force)
+	_refresh_focus_overlay()
 
 func _on_sidekick_solved() -> void:
 	note_controller.on_sidekick_solved()
@@ -851,10 +1222,12 @@ func rpc_request_collect_tool(tool_id: String) -> void:
 @rpc("any_peer", "reliable", "call_local")
 func rpc_set_tool_collected(tool_id: String) -> void:
 	tool_hunt_controller.set_tool_collected_local(tool_id)
+	_update_quest_labels()
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_set_tools_unlocked(unlocked: bool) -> void:
 	tool_hunt_controller.set_tools_unlocked_local(unlocked)
+	_update_quest_labels()
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_show_tool_feedback(message: String) -> void:
@@ -878,6 +1251,7 @@ func rpc_note_revealed() -> void:
 	
 	# Show the correct player after tool hunt completes
 	_update_player_visibility(true)
+	_update_quest_labels()
 
 
 func _on_wrong_object_input(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
@@ -980,11 +1354,14 @@ func rpc_pinas_house_solved() -> void:
 	pulse_ledger_guidance(false)
 	_refresh_inside_zone_buttons()
 	_set_progress_tracker_stage(2)
+	_update_quest_labels()
 	await note_controller.after_note_solved()
+	_update_quest_labels()
 
 @rpc("any_peer", "reliable", "call_local")
 func rpc_set_search_mode(enable: bool) -> void:
 	tool_hunt_controller.set_search_mode_local(enable)
+	_update_quest_labels()
 
 
 func _populate_ledger_content() -> void:
@@ -1054,8 +1431,12 @@ func _set_dialogue_input_lock(locked: bool) -> void:
 func _play_locked_dialogue(dialogue_id: String, lines: Array[Dictionary]) -> void:
 	_set_dialogue_input_lock(true)
 	_update_player_visibility(false)  # hide players during dialogue
+	_dialogue_focus_active = true
+	_refresh_focus_overlay()
 	DialogueSystem.play(dialogue_id, lines)
 	await DialogueSystem.wait_finished(dialogue_id)
+	_dialogue_focus_active = false
+	_refresh_focus_overlay()
 	_set_dialogue_input_lock(false)
 	# Only show players again if we're past the tool hunt phase
 	var past_tool_phase: bool = _note_phase_active or _note_solved or _cabinet_phase_active or _reward_active
@@ -1090,6 +1471,7 @@ func _reset_cabinet_clue_state() -> void:
 		tap_catcher.disabled = true
 	if is_instance_valid(briefcase_reveal_sprite): briefcase_reveal_sprite.visible = false
 	if is_instance_valid(dark_overlay): dark_overlay.modulate.a = 0.0
+	_update_quest_labels()
 
 
 func _on_cabinet_ladle_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
@@ -1125,6 +1507,7 @@ func rpc_start_ladle_found_sequence() -> void:
 	_waiting_reward_continue = true
 	_reward_stage = 1
 	_set_progress_tracker_stage(3)
+	_update_quest_labels()
 
 	if is_instance_valid(cabinet_ladle_sprite): cabinet_ladle_sprite.visible = false
 	if is_instance_valid(cabinet_ladle_collision): cabinet_ladle_collision.disabled = true
@@ -1137,7 +1520,7 @@ func rpc_start_ladle_found_sequence() -> void:
 	if is_instance_valid(clue_sprite): clue_sprite.visible = true
 	if is_instance_valid(banner_label):
 		banner_label.visible = true
-		banner_label.text = "CLUE FOUND!"
+		banner_label.text = "ARTIFACT FOUND!"
 	if is_instance_valid(sparkle):
 		sparkle.visible = true
 		sparkle.scale = Vector2(SPARKLE_MIN_SCALE, SPARKLE_MIN_SCALE)
@@ -1272,7 +1655,9 @@ func _hide_reward_visuals_for_briefcase() -> void:
 @rpc("authority", "reliable", "call_local")
 func rpc_finalize_clue() -> void:
 	GameState.collect_clue("pinas_house")
+	clue_collected = true
 	_sparkle_animating = false
+	_update_quest_labels()
 	get_tree().paused = false
 	if is_instance_valid(sparkle):
 		sparkle.visible = false
