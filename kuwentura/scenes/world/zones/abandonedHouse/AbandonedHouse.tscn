@@ -1208,7 +1208,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_26k5c")
 theme_override_styles/disabled = SubResource("StyleBoxFlat_xh6nx")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_ig5qe")
 action_mode = 0
-text = "Collect Clue"
+text = "Collect Reward"
 
 [node name="RewardLayer" type="CanvasLayer" parent="."]
 visible = false
@@ -1243,7 +1243,7 @@ offset_top = 21.0
 offset_right = 1334.7273
 offset_bottom = 111.0
 theme_override_font_sizes/font_size = 45
-text = "CLUE FOUND!"
+text = "ARTIFACT FOUND!"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
@@ -1287,7 +1287,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_1s7m6")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_21ulk")
 theme_override_styles/hover = SubResource("StyleBoxFlat_l10hd")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_nfu2f")
-text = "Collect Clue"
+text = "Collect Artifact"
 
 [node name="TapCatcher" type="Button" parent="RewardLayer"]
 self_modulate = Color(1, 1, 1, 0)
@@ -1312,6 +1312,7 @@ mouse_filter = 2
 expand_mode = 1
 
 [node name="ProgressTracker" type="Node2D" parent="."]
+visible = false
 
 [node name="TiaraTracker" type="Sprite2D" parent="ProgressTracker"]
 position = Vector2(237.99998, 53)
