@@ -74,6 +74,9 @@ func on_note_interacted() -> void:
 					zone._refresh_note_puzzle_views()
 				_apply_sidekick_board_input_state()
 
+	if zone.has_method("_refresh_focus_overlay"):
+		zone._refresh_focus_overlay()
+
 	if will_play_note_dialogue:
 		await zone._play_locked_dialogue("pinas_house_note_clicked", DialogueLibraries.PINAS_HOUSE_NOTE_CLICKED)
 
@@ -115,6 +118,8 @@ func close_boards(force: bool = false) -> void:
 	for board in [zone.detective_board, zone.sidekick_board]:
 		if is_instance_valid(board):
 			board.visible = false
+	if zone.has_method("_refresh_focus_overlay"):
+		zone._refresh_focus_overlay()
 
 
 func apply_close_button_visibility() -> void:
@@ -170,8 +175,14 @@ func after_note_solved() -> void:
 		await zone._play_locked_dialogue("pinas_house_riddle_reveal", DialogueLibraries.PINAS_HOUSE_RIDDLE_REVEAL)
 	else:
 		zone._set_dialogue_input_lock(true)
+		if zone.has_method("_refresh_focus_overlay"):
+			zone._dialogue_focus_active = true
+			zone._refresh_focus_overlay()
 		DialogueSystem.play("pinas_house_riddle_reveal", DialogueLibraries.PINAS_HOUSE_RIDDLE_REVEAL)
 		await DialogueSystem.wait_finished("pinas_house_riddle_reveal")
+		if zone.has_method("_refresh_focus_overlay"):
+			zone._dialogue_focus_active = false
+			zone._refresh_focus_overlay()
 		zone._set_dialogue_input_lock(false)
 		if is_instance_valid(zone.sidekick_board):
 			zone.sidekick_board.visible = true
@@ -201,6 +212,8 @@ func _show_boards_solved() -> void:
 		zone.sidekick_board.visible = true
 		if zone.sidekick_board.has_method("apply_solved_view"):
 			zone.sidekick_board.apply_solved_view()
+	if zone.has_method("_refresh_focus_overlay"):
+		zone._refresh_focus_overlay()
 
 
 func _apply_sidekick_board_input_state() -> void:
