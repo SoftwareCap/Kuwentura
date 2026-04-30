@@ -1131,7 +1131,7 @@ offset_top = 39.66298
 offset_right = 1449.7273
 offset_bottom = 133.59502
 theme_override_font_sizes/font_size = 45
-text = "CLUE FOUND!"
+text = "ARTIFACT FOUND!"
 horizontal_alignment = 1
 vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
@@ -1169,9 +1169,10 @@ autowrap_mode = 2
 
 [node name="CollectButton" type="Button" parent="RewardLayer"]
 process_mode = 3
-offset_left = 595.9999
+custom_minimum_size = Vector2(300, 54)
+offset_left = 555.9999
 offset_top = 499.00003
-offset_right = 813.9999
+offset_right = 853.9999
 offset_bottom = 552.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 30
@@ -1179,7 +1180,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_0s51p")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_cfl6u")
 theme_override_styles/hover = SubResource("StyleBoxFlat_cm1dj")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_yg1st")
-text = "Collect Clue"
+text = "Collect Artifact"
 
 [node name="TapCatcher" type="Button" parent="RewardLayer"]
 self_modulate = Color(1, 1, 1, 0)
@@ -1302,6 +1303,7 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_u6sy3")
 
 [node name="ProgressTracker" type="Node2D" parent="."]
+visible = false
 
 [node name="Sprite2D" type="Sprite2D" parent="ProgressTracker"]
 position = Vector2(272.9375, 47.499985)
