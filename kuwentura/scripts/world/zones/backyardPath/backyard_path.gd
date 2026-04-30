@@ -222,6 +222,9 @@ var _quest_strike_lines: Array = []
 var _quest_active_index := -1
 var _quest_expanded := false
 var _quest_toggle_button: Button = null
+var _quest_focus_overlay: ColorRect = null
+var _quest_focus_active := false
+var _quest_layer_base_z_index := 0
 var _ghost_dialogue_overlay: ColorRect = null
 var _dialogue_focus_active := false
 var _grass_transition_focus_active := false
@@ -636,14 +639,26 @@ func _setup_backyard_visual_theme() -> void:
 
 func _style_notification_panel() -> void:
 	if is_instance_valid(notification_panel):
+		notification_panel.anchor_left = 0.5
+		notification_panel.anchor_right = 0.5
+		notification_panel.offset_left = -330.0
+		notification_panel.offset_top = 74.0
+		notification_panel.offset_right = 330.0
+		notification_panel.offset_bottom = 124.0
 		notification_panel.add_theme_stylebox_override("panel", _make_stylebox(UI_PANEL_SOFT, UI_BORDER, 20, 2))
 
 	if is_instance_valid(notification_label):
+		notification_label.offset_left = -305.0
+		notification_label.offset_top = -20.0
+		notification_label.offset_right = 305.0
+		notification_label.offset_bottom = 20.0
 		notification_label.remove_theme_font_override("font")
-		notification_label.add_theme_font_size_override("font_size", 22)
+		notification_label.add_theme_font_size_override("font_size", 20)
 		notification_label.add_theme_color_override("font_color", UI_CREAM)
 		notification_label.add_theme_constant_override("outline_size", 2)
 		notification_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+		notification_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		notification_label.clip_text = false
 
 
 func _style_back_button() -> void:
@@ -1881,16 +1896,18 @@ func _refresh_word_puzzle_ui() -> void:
 		elif local_turn:
 			word_puzzle_turn_label.text = "Your turn"
 		else:
-			word_puzzle_turn_label.text = ""
+			word_puzzle_turn_label.text = _get_word_puzzle_turn_label(_word_puzzle_question_index) + "'s turn"
 
 	if is_instance_valid(word_puzzle_answer_input):
 		word_puzzle_answer_input.add_theme_font_size_override("font_size", 24)
 		word_puzzle_answer_input.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		word_puzzle_answer_input.visible = local_turn
 		word_puzzle_answer_input.editable = local_turn
 		var answer_hint := _get_word_puzzle_answer_hint(_word_puzzle_question_index)
 		word_puzzle_answer_input.placeholder_text = answer_hint
-		if not puzzle_open:
+		if not puzzle_open or not local_turn:
 			word_puzzle_answer_input.text = ""
+			word_puzzle_answer_input.release_focus()
 
 	if is_instance_valid(word_puzzle_placeholder):
 		word_puzzle_placeholder.scale = Vector2(0.27, 0.21)
@@ -1913,9 +1930,10 @@ func _set_area_enabled(area: Area2D, enabled: bool) -> void:
 
 
 func _setup_quest_panel_style() -> void:
-	var queatLayer := get_node_or_null("QuestLayer")
+	var queatLayer := get_node_or_null("QuestLayer") as Node2D
 	if not is_instance_valid(queatLayer):
 		return
+	_quest_layer_base_z_index = queatLayer.z_index
 
 	var labels := [
 		quest_fireflies_label,
@@ -1927,6 +1945,20 @@ func _setup_quest_panel_style() -> void:
 
 	_quest_labels.clear()
 	_quest_strike_lines.clear()
+
+	_quest_focus_overlay = queatLayer.get_node_or_null("QuestFocusOverlay") as ColorRect
+	if not is_instance_valid(_quest_focus_overlay):
+		_quest_focus_overlay = ColorRect.new()
+		_quest_focus_overlay.name = "QuestFocusOverlay"
+		queatLayer.add_child(_quest_focus_overlay)
+		queatLayer.move_child(_quest_focus_overlay, 0)
+
+	_quest_focus_overlay.position = Vector2.ZERO
+	_quest_focus_overlay.size = get_viewport_rect().size
+	_quest_focus_overlay.color = Color(0.06, 0.035, 0.018, 0.84)
+	_quest_focus_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_quest_focus_overlay.visible = false
+	_quest_focus_overlay.z_index = -50
 
 	var header_bar := queatLayer.get_node_or_null("QuestHeaderBar") as ColorRect
 	if not is_instance_valid(header_bar):
@@ -2028,6 +2060,7 @@ func _setup_quest_panel_style() -> void:
 func _on_quest_header_pressed() -> void:
 	_quest_expanded = not _quest_expanded
 	_quest_active_index = -1
+	_set_quest_focus_active(_quest_expanded)
 	_update_quest_labels()
 
 	if is_instance_valid(quest_title_label):
@@ -2035,6 +2068,55 @@ func _on_quest_header_pressed() -> void:
 		quest_title_label.scale = base_scale * 1.04
 		var tween := create_tween()
 		tween.tween_property(quest_title_label, "scale", base_scale, 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+
+func _set_quest_focus_active(active: bool) -> void:
+	if _quest_focus_active == active:
+		_update_quest_focus_overlay()
+		return
+
+	_quest_focus_active = active
+	_update_quest_focus_overlay()
+
+	var focus_nodes: Array = [
+		inside_zone_control,
+		back_button,
+		progress_tracker,
+		lantern_use_layer,
+		ledger_panel,
+		briefcase_panel,
+		notification_ui,
+		detective_player,
+		sidekick_player
+	]
+
+	if active:
+		if is_instance_valid(quest_layer):
+			quest_layer.z_index = 90
+		for node in focus_nodes:
+			if not is_instance_valid(node):
+				continue
+			if not node.has_meta("quest_focus_restore_visible"):
+				node.set_meta("quest_focus_restore_visible", node.visible)
+			node.visible = false
+	else:
+		if is_instance_valid(quest_layer):
+			quest_layer.z_index = _quest_layer_base_z_index
+		for node in focus_nodes:
+			if not is_instance_valid(node):
+				continue
+			if node.has_meta("quest_focus_restore_visible"):
+				var previous_visible: Variant = node.get_meta("quest_focus_restore_visible", false)
+				node.visible = previous_visible if previous_visible is bool else false
+				node.remove_meta("quest_focus_restore_visible")
+
+
+func _update_quest_focus_overlay() -> void:
+	if not is_instance_valid(_quest_focus_overlay):
+		return
+	_quest_focus_overlay.position = Vector2.ZERO
+	_quest_focus_overlay.size = get_viewport_rect().size
+	_quest_focus_overlay.visible = _quest_focus_active
 
 
 func _set_quest_task(index: int, text: String, done: bool, is_active: bool = false) -> void:
@@ -3000,6 +3082,7 @@ func _on_briefcase_updated() -> void:
 
 
 func _on_pause_button_pressed() -> void:
+	if is_instance_valid(pause_canvas_layer): pause_canvas_layer.visible = true
 	if is_instance_valid(in_game_pause_panel): in_game_pause_panel.visible = true
 	if is_instance_valid(option_sub_panel): option_sub_panel.visible = false
 	if is_instance_valid(inside_zone_control): inside_zone_control.visible = false
@@ -3010,6 +3093,7 @@ func _on_pause_button_pressed() -> void:
 func _on_resume_play_button_pressed() -> void:
 	if is_instance_valid(in_game_pause_panel): in_game_pause_panel.visible = false
 	if is_instance_valid(option_sub_panel): option_sub_panel.visible = false
+	if is_instance_valid(pause_canvas_layer): pause_canvas_layer.visible = false
 	get_tree().paused = false
 	MusicController.resume_music()
 	if is_instance_valid(inside_zone_control): inside_zone_control.visible = true
@@ -3025,6 +3109,7 @@ func _on_in_game_option_back_pressed() -> void:
 
 
 func _on_exit_to_main_menu_button_pressed() -> void:
+	if is_instance_valid(pause_canvas_layer): pause_canvas_layer.visible = false
 	get_tree().paused = false
 	MusicController.resume_music()
 	if NetworkManager.has_active_connection():
@@ -3389,7 +3474,6 @@ func _server_clear_grass(grass_name: String) -> void:
 			expected_name = "TangledVines"
 
 	if grass_name != expected_name:
-		_server_add_strike("The Tikbalang confuses your hands in the grass...")
 		return
 
 	_clearing_stage += 1
