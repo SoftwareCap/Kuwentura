@@ -128,6 +128,9 @@ var _final_box_data: Dictionary = {}
 @onready var missing_row: HBoxContainer = get_node_or_null("PuzzleCanvasLayer/Dimmer/MemoryPuzzlePanel/MarginContainer/VBoxContainer/MissingRow")
 
 @onready var role_label: Label = get_node_or_null("RoleLabel") as Label
+@onready var detective_player: Node2D = get_node_or_null("Players/Detective")
+@onready var sidekick_player: Node2D = get_node_or_null("Players/Sidekick")
+@onready var ending_cutscene: VideoStreamPlayer = $Cutscene/EndingCutscene
 @onready var back_button: Button = get_node_or_null("BackButton") as Button
 @onready var notification_label: Label = $Notification/NotificationLabel
 
@@ -705,6 +708,29 @@ func _ready() -> void:
 	_prepare_books()
 	_start_intro_dialogue_delayed()
 	
+	# Hide players until intro dialogue ends
+	if is_instance_valid(detective_player):
+		detective_player.visible = false
+	if is_instance_valid(sidekick_player):
+		sidekick_player.visible = false
+	
+	if is_instance_valid(ending_cutscene):
+		ending_cutscene.visible = false
+		ending_cutscene.expand = true
+		ending_cutscene.anchor_left = 0.1
+		ending_cutscene.anchor_top = 0.1
+		ending_cutscene.anchor_right = 0.9
+		ending_cutscene.anchor_bottom = 0.9
+		ending_cutscene.offset_left = 0
+		ending_cutscene.offset_top = 0
+		ending_cutscene.offset_right = 0
+		ending_cutscene.offset_bottom = 0
+		ending_cutscene.finished.connect(_on_cutscene_finished)
+
+	var cutscene_dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	if is_instance_valid(cutscene_dark):
+		cutscene_dark.visible = false
+	
 	if key_fragment_image:
 		key_fragment_image.visible = false
 
@@ -1117,6 +1143,17 @@ func _on_book_gui_input(event: InputEvent, book_id: String) -> void:
 
 
 func _input(event: InputEvent) -> void:
+		# Skip cutscene
+	if is_instance_valid(ending_cutscene) and ending_cutscene.visible:
+		if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
+			ending_cutscene.stop()
+			_on_cutscene_finished()
+			return
+
+	# existing mirror tap-close logic
+	if _try_close_mirror_from_tap(event):
+		return
+		
 	# Keep this here so taps are detected even when a Control node does not pass gui_input.
 	if _try_close_mirror_from_tap(event):
 		return
@@ -3638,7 +3675,10 @@ func rpc_finalize_tiara_clue() -> void:
 		dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	_refresh_final_box_clue_state()
-	_return_to_forest()
+
+	await _fade_out(0.6)
+	_play_ending_cutscene()
+	await _fade_in(0.6)
 	
 func _process(delta: float) -> void:
 	if _tiara_sparkle_animating and cinematic_sparkle and cinematic_sparkle.visible:
@@ -3651,6 +3691,53 @@ func _return_to_forest() -> void:
 	get_tree().paused = false
 	MusicController.resume_music()
 	get_tree().change_scene_to_file(SCENE_FOREST_HUB)
+	
+func _play_ending_cutscene() -> void:
+	if not is_instance_valid(ending_cutscene):
+		_return_to_forest()
+		return
+	var dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	if is_instance_valid(dark):
+		dark.visible = true
+	ending_cutscene.visible = true
+	ending_cutscene.play()
+
+
+func _on_cutscene_finished() -> void:
+	if is_instance_valid(ending_cutscene):
+		ending_cutscene.visible = false
+		ending_cutscene.stop()
+	var dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	if is_instance_valid(dark):
+		dark.visible = false
+	await _fade_out(0.6)
+	get_tree().paused = false
+	await get_tree().process_frame
+	if is_inside_tree():
+		get_tree().change_scene_to_file(SCENE_FOREST_HUB)
+
+
+func _fade_out(duration: float = 0.6) -> void:
+	var overlay := ColorRect.new()
+	overlay.name = "FadeOverlay"
+	overlay.color = Color(0, 0, 0, 0)
+	overlay.z_index = 9999
+	overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(overlay)
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(overlay, "color:a", 1.0, duration)
+	await tween.finished
+
+
+func _fade_in(duration: float = 0.6) -> void:
+	var overlay := get_node_or_null("FadeOverlay")
+	if not is_instance_valid(overlay):
+		return
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(overlay, "color:a", 0.0, duration)
+	await tween.finished
+	overlay.queue_free()
 
 func _set_dialogue_input_lock(locked: bool) -> void:
 	_dialogue_input_locked = locked
@@ -3667,6 +3754,9 @@ func _set_dialogue_input_lock(locked: bool) -> void:
 			inside_zone_control.set_ledger_enabled(not locked and GameState.local_role == GameState.Role.SIDEKICK)
 		if inside_zone_control.has_method("set_briefcase_enabled"):
 			inside_zone_control.set_briefcase_enabled(not locked and GameState.local_role == GameState.Role.SIDEKICK)
+		
+	# Show/hide players based on lock state
+	_update_player_visibility(not locked)
 
 
 func _start_intro_dialogue_delayed() -> void:
@@ -3699,10 +3789,12 @@ func _get_abandoned_house_intro_dialogue() -> Array[Dictionary]:
 
 
 func _run_intro_sequence() -> void:
+	_update_player_visibility(false)
 	_set_dialogue_input_lock(true)
 	DialogueSystem.play("abandoned_house_intro", _get_abandoned_house_intro_dialogue())
 	await DialogueSystem.wait_finished("abandoned_house_intro")
 	_set_dialogue_input_lock(false)
+	_update_player_visibility(true)
 	if is_instance_valid(quest_layer):
 		quest_layer.visible = true
 	_update_quest_labels()
@@ -3806,3 +3898,11 @@ func _refresh_progress_tracker() -> void:
 
 	if next_texture:
 		progress_tracker_sprite.texture = next_texture
+
+
+# Player Visibility Helper
+func _update_player_visibility(spawn_players: bool) -> void:
+	if is_instance_valid(detective_player):
+		detective_player.visible = spawn_players and GameState.local_role == GameState.Role.DETECTIVE
+	if is_instance_valid(sidekick_player):
+		sidekick_player.visible = spawn_players and GameState.local_role == GameState.Role.SIDEKICK
