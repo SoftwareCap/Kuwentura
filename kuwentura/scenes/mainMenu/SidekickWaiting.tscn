@@ -2,13 +2,13 @@
 
 [ext_resource type="Script" uid="uid://wjhm4mlblikf" path="res://scripts/mainMenu/sidekick_waiting.gd" id="1_ipaaq"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_5k5mc"]
-[ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_o5ctn"]
+[ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="3_l18ci"]
 [ext_resource type="Texture2D" uid="uid://c0dv5xqwhv073" path="res://assets/buttons/cancelWordButton.png" id="4_bqf4h"]
-[ext_resource type="FontFile" uid="uid://bpff8oqdskuog" path="res://assets/fonts/Pixeled.ttf" id="4_t4fp1"]
 [ext_resource type="PackedScene" uid="uid://2ktjes4bfwlo" path="res://scenes/players/PlayerHost.tscn" id="5_pge74"]
 [ext_resource type="PackedScene" uid="uid://udt37i3bt31c" path="res://scenes/players/PlayerSidekick.tscn" id="6_4bddd"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="7_arrow_left"]
 [ext_resource type="Texture2D" uid="uid://5hqcc5yhq64a" path="res://assets/buttons/rightArrow.png" id="8_arrow_right"]
+[ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="8_px2cw"]
 [ext_resource type="PackedScene" uid="uid://cmsvb2etjodsk" path="res://scenes/controls/SettingsControl.tscn" id="9_settings"]
 [ext_resource type="Script" uid="uid://b7hu8uq82xslq" path="res://scripts/controls/settings_control.gd" id="10_settings_script"]
 [ext_resource type="Texture2D" uid="uid://cttyl36cfaej2" path="res://assets/buttons/closeButton.png" id="11_close"]
@@ -26,7 +26,6 @@ shadow_size = 6
 shadow_color = Color(0, 0, 0, 0.5)
 
 [sub_resource type="LabelSettings" id="LabelSettings_2mx5n"]
-font = ExtResource("3_o5ctn")
 font_size = 32
 font_color = Color(1, 0.95, 0.8, 1)
 outline_size = 3
@@ -179,17 +178,18 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -587.5
-offset_top = -19.0
+offset_top = 66.0
 offset_right = 587.5
-offset_bottom = 331.0
+offset_bottom = 243.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_offset_y = 15
-theme_override_fonts/font = ExtResource("4_t4fp1")
-theme_override_font_sizes/font_size = 95
+theme_override_fonts/font = ExtResource("3_l18ci")
+theme_override_font_sizes/font_size = 175
 text = "KUWENTURA"
 horizontal_alignment = 1
+autowrap_mode = 3
 
 [node name="StatusLabel" type="Label" parent="."]
 layout_mode = 1
@@ -207,6 +207,7 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("3_l18ci")
 theme_override_font_sizes/font_size = 20
 text = "Connecting to Detective..."
 horizontal_alignment = 1
@@ -262,9 +263,12 @@ offset_left = -200.0
 offset_top = -520.0
 offset_right = 200.0
 offset_bottom = -450.0
+theme_override_fonts/font = ExtResource("3_l18ci")
 text = "Detective"
 label_settings = SubResource("LabelSettings_f7jkl")
 horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="DetectiveRightBtn" type="TextureButton" parent="DetectiveArea"]
 unique_name_in_owner = true
@@ -293,6 +297,7 @@ offset_left = 171.0
 offset_top = 329.0
 offset_right = 381.0
 offset_bottom = 361.0
+theme_override_fonts/font = ExtResource("3_l18ci")
 text = "Classic Outfit"
 label_settings = SubResource("LabelSettings_2mx5n")
 horizontal_alignment = 1
@@ -310,6 +315,7 @@ theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 
 theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("8_px2cw")
 theme_override_styles/normal = SubResource("StyleBoxFlat_l18ci")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_px2cw")
 theme_override_styles/hover = SubResource("StyleBoxFlat_p5dmv")
@@ -352,9 +358,12 @@ offset_left = -200.0
 offset_top = -520.0
 offset_right = 200.0
 offset_bottom = -450.0
+theme_override_fonts/font = ExtResource("3_l18ci")
 text = "Sidekick"
 label_settings = SubResource("LabelSettings_f7jkl")
 horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="SidekickCostumeName" type="Label" parent="SidekickArea"]
 unique_name_in_owner = true
@@ -363,6 +372,7 @@ offset_left = 144.0
 offset_top = 320.0
 offset_right = 444.0
 offset_bottom = 370.0
+theme_override_fonts/font = ExtResource("3_l18ci")
 text = "Classic Outfit"
 label_settings = SubResource("LabelSettings_2mx5n")
 horizontal_alignment = 1
@@ -393,6 +403,7 @@ theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 
 theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("8_px2cw")
 theme_override_styles/normal = SubResource("StyleBoxFlat_l18ci")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_px2cw")
 theme_override_styles/hover = SubResource("StyleBoxFlat_p5dmv")
@@ -414,14 +425,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0)
-mouse_filter = 0
 
 [node name="SettingsLayer" type="CanvasLayer" parent="."]
 layer = 60
 
 [node name="SettingsPanel" type="Panel" parent="SettingsLayer"]
 visible = false
-layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -445,7 +454,7 @@ offset_top = 18.0
 offset_right = 133.5
 offset_bottom = 127.0
 grow_horizontal = 2
-theme_override_fonts/font = ExtResource("3_o5ctn")
+theme_override_fonts/font = ExtResource("3_l18ci")
 theme_override_font_sizes/font_size = 70
 text = "Settings"
 horizontal_alignment = 1
@@ -471,9 +480,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -140.6
+offset_left = -180.75
 offset_top = -89.0
-offset_right = 140.59998
+offset_right = 180.75
 offset_bottom = -24.875
 grow_horizontal = 2
 grow_vertical = 2
@@ -483,7 +492,7 @@ theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_fonts/font = ExtResource("3_o5ctn")
+theme_override_fonts/font = ExtResource("8_px2cw")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
@@ -508,7 +517,7 @@ theme_override_constants/separation = 30
 
 [node name="VolumeLabel" type="Label" parent="SettingsLayer/SettingsPanel/VolumeSliderControl"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_o5ctn")
+theme_override_fonts/font = ExtResource("3_l18ci")
 theme_override_font_sizes/font_size = 40
 text = "Music Volume:"
 horizontal_alignment = 1
@@ -525,6 +534,7 @@ value = 80.0
 
 [node name="VolumeValue" type="Label" parent="SettingsLayer/SettingsPanel/VolumeSliderControl"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_l18ci")
 theme_override_font_sizes/font_size = 30
 text = "80%"
 horizontal_alignment = 1
@@ -556,7 +566,7 @@ offset_top = 18.0
 offset_right = 133.5
 offset_bottom = 127.0
 grow_horizontal = 2
-theme_override_fonts/font = ExtResource("3_o5ctn")
+theme_override_fonts/font = ExtResource("3_l18ci")
 theme_override_font_sizes/font_size = 70
 text = "User Profile"
 horizontal_alignment = 1
@@ -605,6 +615,7 @@ alignment = 1
 
 [node name="DisplayName" type="Label" parent="SettingsLayer/SettingsPanel/UserSection/UserContent/UserInfo"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_l18ci")
 theme_override_font_sizes/font_size = 25
 text = "\"Player Name\""
 horizontal_alignment = 1
@@ -612,6 +623,7 @@ vertical_alignment = 1
 
 [node name="ProviderLabel" type="Label" parent="SettingsLayer/SettingsPanel/UserSection/UserContent/UserInfo"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_l18ci")
 theme_override_font_sizes/font_size = 25
 text = "\"Guest\""
 horizontal_alignment = 1
@@ -641,7 +653,7 @@ theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_fonts/font = ExtResource("3_o5ctn")
+theme_override_fonts/font = ExtResource("8_px2cw")
 theme_override_font_sizes/font_size = 35
 theme_override_styles/normal = SubResource("StyleBoxFlat_auth")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_auth_pressed")
@@ -656,7 +668,7 @@ theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_fonts/font = ExtResource("3_o5ctn")
+theme_override_fonts/font = ExtResource("8_px2cw")
 theme_override_font_sizes/font_size = 35
 theme_override_styles/normal = SubResource("StyleBoxFlat_auth")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_auth_pressed")
@@ -671,8 +683,8 @@ theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_fonts/font = ExtResource("3_o5ctn")
-theme_override_font_sizes/font_size = 35
+theme_override_fonts/font = ExtResource("8_px2cw")
+theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_auth")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_auth_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_auth_hover")

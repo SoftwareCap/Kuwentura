@@ -1,7 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://b6jvccfrna5vu"]
+[gd_scene load_steps=10 format=3 uid="uid://b6jvccfrna5vu"]
 
 [ext_resource type="Script" uid="uid://h5y0185hh34e" path="res://scripts/world/zones/oldWell/old_well.gd" id="1_oldwell"]
 [ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
+[ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="3_jlo7o"]
+[ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="4_bv3fn"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mf72o"]
 bg_color = Color(0.360784, 0.215686, 0.180392, 1)
@@ -57,6 +59,7 @@ offset_left = 304.0
 offset_top = 168.0
 offset_right = 1104.0
 offset_bottom = 268.0
+theme_override_fonts/font = ExtResource("3_jlo7o")
 theme_override_font_sizes/font_size = 64
 text = "OLD WELL TEST ZONE"
 horizontal_alignment = 1
@@ -67,6 +70,7 @@ offset_left = 305.0
 offset_top = 284.0
 offset_right = 1105.0
 offset_bottom = 344.0
+theme_override_fonts/font = ExtResource("3_jlo7o")
 theme_override_font_sizes/font_size = 48
 text = "Waiting for role..."
 horizontal_alignment = 1
@@ -74,8 +78,9 @@ horizontal_alignment = 1
 [node name="BackButton" type="Button" parent="."]
 offset_left = 50.0
 offset_top = 50.0
-offset_right = 300.0
+offset_right = 437.0
 offset_bottom = 120.0
+theme_override_fonts/font = ExtResource("4_bv3fn")
 theme_override_font_sizes/font_size = 32
 theme_override_styles/normal = SubResource("StyleBoxFlat_mf72o")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_jlo7o")

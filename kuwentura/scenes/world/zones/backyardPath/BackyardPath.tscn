@@ -1,11 +1,11 @@
-[gd_scene load_steps=57 format=3 uid="uid://backyardpath"]
+[gd_scene load_steps=58 format=3 uid="uid://backyardpath"]
 
 [ext_resource type="Script" uid="uid://dfs4agyqe4qk4" path="res://scripts/world/zones/backyardPath/backyard_path.gd" id="1_backyardpath"]
 [ext_resource type="Texture2D" uid="uid://p1tc8ablyx3s" path="res://assets/sprites/places/backyardBackground.png" id="2_krb5t"]
 [ext_resource type="Texture2D" uid="uid://cgtl3fi4ldvqd" path="res://assets/sprites/players/detective/detective.png" id="3_3lfn3"]
-[ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 [ext_resource type="Texture2D" uid="uid://bppb0lkeirtvl" path="res://assets/sprites/players/detective/sidekick.png" id="4_m8y0n"]
 [ext_resource type="Texture2D" uid="uid://c3sfa1s0d5uam" path="res://assets/sprites/zoneObjects/backyardPathObjects/pinaGhost.png" id="5_no1tq"]
+[ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="6_m8y0n"]
 [ext_resource type="Texture2D" uid="uid://5hqcc5yhq64a" path="res://assets/buttons/rightArrow.png" id="6_u25mc"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="9_s7hv4"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="10_4xpvc"]
@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://dmjne63nn4iut" path="res://assets/sprites/zoneObjects/backyardPathObjects/pineappleFruit.png" id="11_ura6l"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="11_vm1ij"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="12_fw11r"]
+[ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="12_lieey"]
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="13_y7aiq"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="15_0c5pu"]
 [ext_resource type="Texture2D" uid="uid://cuhne1u8q0p3s" path="res://assets/sprites/clues/pineappleClue.png" id="17_s7hv4"]
@@ -219,6 +220,7 @@ offset_left = 618.0
 offset_top = 130.0
 offset_right = 763.0
 offset_bottom = 162.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 25
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -256,6 +258,7 @@ offset_left = 473.0
 offset_top = 209.0
 offset_right = 618.0
 offset_bottom = 241.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 25
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -335,6 +338,7 @@ offset_bottom = 64.25003
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 28
 text = "60 Dali ="
 horizontal_alignment = 1
@@ -354,6 +358,7 @@ offset_bottom = -21.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 22
 text = "Convert Dali to Centimeters"
 horizontal_alignment = 1
@@ -371,7 +376,7 @@ theme_override_colors/caret_color = Color(0.014275194, 0.014275219, 0.014275289,
 theme_override_colors/selection_color = Color(0.96035105, 0.96035105, 0.96035093, 1)
 theme_override_colors/clear_button_color = Color(0.021434566, 0.021434668, 0.021434598, 1)
 theme_override_colors/clear_button_color_pressed = Color(0.017732391, 0.017732391, 0.01773239, 1)
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 14
 placeholder_text = "CM value"
 alignment = 1
@@ -393,7 +398,7 @@ theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("12_lieey")
 theme_override_font_sizes/font_size = 25
 theme_override_styles/normal = SubResource("StyleBoxFlat_krb5t")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_2y8sp")
@@ -411,6 +416,7 @@ offset_left = -30.5
 offset_right = 9.5
 offset_bottom = 23.0
 grow_horizontal = 2
+theme_override_fonts/font = ExtResource("6_m8y0n")
 
 [node name="FogOverlay" type="ColorRect" parent="."]
 visible = false
@@ -435,7 +441,7 @@ offset_left = 50.0
 offset_top = 50.0
 offset_right = 300.0
 offset_bottom = 120.0
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("12_lieey")
 theme_override_font_sizes/font_size = 32
 text = "← Back to Forest"
 metadata/_edit_use_anchors_ = true
@@ -474,6 +480,7 @@ offset_right = 431.0
 offset_bottom = 251.0
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 23
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -486,6 +493,7 @@ offset_right = 446.0
 offset_bottom = 482.0
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 21
 horizontal_alignment = 1
 
@@ -497,6 +505,7 @@ offset_right = 433.0
 offset_bottom = 330.0
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 19
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -509,6 +518,7 @@ offset_right = 446.0
 offset_bottom = 482.0
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 
@@ -520,6 +530,7 @@ offset_right = 753.0
 offset_bottom = 276.0
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 19
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -532,6 +543,7 @@ offset_right = 739.0
 offset_bottom = 492.0
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 
@@ -552,9 +564,9 @@ theme_override_styles/panel = SubResource("StyleBoxEmpty_f85bs")
 [node name="PauseCanvasLayer" type="CanvasLayer" parent="."]
 process_mode = 3
 layer = 110
-visible = false
 
 [node name="InGamePausePanel" type="Panel" parent="PauseCanvasLayer"]
+visible = false
 top_level = true
 z_index = 10
 anchors_preset = 8
@@ -580,7 +592,7 @@ offset_top = 18.0
 offset_right = 240.0
 offset_bottom = 127.0
 grow_horizontal = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 70
 text = "Game Paused!"
 horizontal_alignment = 1
@@ -600,7 +612,7 @@ anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 57.25
 offset_top = -107.0
-offset_right = 502.25
+offset_right = 481.25
 offset_bottom = 38.0
 grow_vertical = 2
 size_flags_vertical = 3
@@ -620,7 +632,7 @@ offset_top = -20.0
 offset_bottom = 20.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("12_lieey")
 theme_override_font_sizes/font_size = 40
 text = "Resume Game"
 horizontal_alignment = 1
@@ -656,22 +668,22 @@ offset_top = -20.0
 offset_bottom = 20.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("12_lieey")
 theme_override_font_sizes/font_size = 40
 text = "Option"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ExitButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+[node name="BackToForest" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -247.5
+offset_left = -244.625
 offset_top = -209.0
-offset_right = 247.5
+offset_right = 245.375
 offset_bottom = -64.0
 grow_horizontal = 2
 grow_vertical = 0
@@ -680,7 +692,7 @@ texture_normal = ExtResource("11_fmpb3")
 ignore_texture_size = true
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/ExitButton"]
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/BackToForest"]
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -692,9 +704,9 @@ offset_top = -20.0
 offset_bottom = 20.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("12_lieey")
 theme_override_font_sizes/font_size = 40
-text = "Exit to Main Menu"
+text = "Back to Forest"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -715,7 +727,7 @@ offset_top = 18.0
 offset_right = 94.5
 offset_bottom = 127.0
 grow_horizontal = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 55
 text = "Option:"
 horizontal_alignment = 1
@@ -750,7 +762,7 @@ theme_override_constants/separation = 30
 
 [node name="VolumeLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 40
 text = "Music Volume:"
 horizontal_alignment = 1
@@ -767,6 +779,7 @@ value = 80.0
 
 [node name="VolumeValue" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 30
 text = "80%"
 horizontal_alignment = 1
@@ -806,6 +819,7 @@ offset_left = 32.753967
 offset_top = 66.66298
 offset_right = 1447.7273
 offset_bottom = 160.59502
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 45
 text = "ARTIFACT FOUND!"
 horizontal_alignment = 1
@@ -823,6 +837,7 @@ offset_left = 483.0
 offset_top = 416.0
 offset_right = 937.0
 offset_bottom = 458.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 20
 text = "Tap anywhere to continue."
 horizontal_alignment = 1
@@ -839,6 +854,7 @@ offset_top = 316.271
 offset_right = 714.3307
 offset_bottom = 412.72888
 theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 35
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -852,7 +868,7 @@ offset_top = 499.00003
 offset_right = 858.0
 offset_bottom = 552.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("12_lieey")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_on1j4")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_3lfn3")
@@ -870,6 +886,7 @@ offset_bottom = 8.0
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 action_mode = 0
 flat = true
 
@@ -910,6 +927,7 @@ offset_right = 411.5
 offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -931,6 +949,7 @@ offset_left = 122.0
 offset_top = 262.0
 offset_right = 212.0
 offset_bottom = 301.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -940,6 +959,7 @@ offset_left = 53.0
 offset_top = 321.0
 offset_right = 286.0
 offset_bottom = 359.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -949,6 +969,7 @@ offset_left = 83.0
 offset_top = 366.0
 offset_right = 263.0
 offset_bottom = 396.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -958,6 +979,7 @@ offset_left = 65.0
 offset_top = 402.0
 offset_right = 277.0
 offset_bottom = 446.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -967,6 +989,7 @@ offset_left = 73.0
 offset_top = 458.0
 offset_right = 267.0
 offset_bottom = 495.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -976,6 +999,7 @@ offset_left = 78.0
 offset_top = 508.0
 offset_right = 261.0
 offset_bottom = 554.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1093,6 +1117,7 @@ offset_left = 894.0
 offset_top = 144.0
 offset_right = 1320.0
 offset_bottom = 198.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -1116,6 +1141,7 @@ offset_left = 71.0
 offset_top = 161.0
 offset_right = 435.0
 offset_bottom = 254.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 placeholder_text = "Enter Name"
 alignment = 1
 
@@ -1125,6 +1151,7 @@ offset_left = 151.0
 offset_top = 331.0
 offset_right = 334.0
 offset_bottom = 362.0
+theme_override_fonts/font = ExtResource("12_lieey")
 text = "Submit
 "
 
@@ -1134,6 +1161,7 @@ offset_left = 78.0
 offset_top = 83.0
 offset_right = 426.0
 offset_bottom = 120.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 text = "Rearrange the letters to form a name."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1148,6 +1176,7 @@ offset_left = -280.44147
 offset_top = -130.84346
 offset_right = 283.26715
 offset_bottom = -93.84346
+theme_override_fonts/font = ExtResource("6_m8y0n")
 text = "Rearrange the letters to form a name."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1159,7 +1188,8 @@ offset_left = 530.0
 offset_top = 198.0
 offset_right = 868.0
 offset_bottom = 237.0
-theme_override_font_sizes/font_size = 19
+theme_override_fonts/font = ExtResource("6_m8y0n")
+theme_override_font_sizes/font_size = 25
 text = "You have a Lantern now."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1174,6 +1204,7 @@ offset_left = 505.0
 offset_top = 521.0
 offset_right = 877.0
 offset_bottom = 576.0
+theme_override_fonts/font = ExtResource("12_lieey")
 disabled = true
 text = "Use Lantern"
 
@@ -1251,6 +1282,7 @@ offset_left = 687.0
 offset_top = 521.0
 offset_right = 949.0
 offset_bottom = 575.0
+theme_override_fonts/font = ExtResource("12_lieey")
 disabled = true
 text = "CLEAR"
 expand_icon = true
@@ -1260,6 +1292,7 @@ offset_left = 381.0
 offset_top = 516.0
 offset_right = 653.0
 offset_bottom = 577.0
+theme_override_fonts/font = ExtResource("12_lieey")
 disabled = true
 text = "SUBMIT"
 expand_icon = true
@@ -1279,7 +1312,8 @@ offset_left = 297.0
 offset_top = 102.0
 offset_right = 1035.0
 offset_bottom = 126.0
-theme_override_font_sizes/font_size = 17
+theme_override_fonts/font = ExtResource("6_m8y0n")
+theme_override_font_sizes/font_size = 20
 text = "Answer the clues. Each first letter spells the ghost's name."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1300,6 +1334,7 @@ offset_left = 332.0
 offset_top = 382.0
 offset_right = 1008.0
 offset_bottom = 418.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1310,6 +1345,7 @@ offset_left = 409.0
 offset_top = 414.0
 offset_right = 931.0
 offset_bottom = 443.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1319,6 +1355,7 @@ offset_left = 473.0
 offset_top = 446.0
 offset_right = 845.0
 offset_bottom = 510.0
+theme_override_fonts/font = ExtResource("6_m8y0n")
 theme_override_font_sizes/font_size = 24
 placeholder_text = "_ _ _ _ _ _ _ _"
 alignment = 1
@@ -1392,6 +1429,7 @@ offset_left = 471.0
 offset_top = 527.0
 offset_right = 883.0
 offset_bottom = 595.0
+theme_override_fonts/font = ExtResource("12_lieey")
 text = "CONTINUE"
 
 [node name="Cutscene" type="CanvasLayer" parent="."]

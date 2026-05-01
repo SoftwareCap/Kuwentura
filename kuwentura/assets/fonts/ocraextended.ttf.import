@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://bpff8oqdskuog"
-path="res://.godot/imported/Pixeled.ttf-e8bbf35245fcf80d16d4c25fafd33f1f.fontdata"
+uid="uid://cvl576oaugd8r"
+path="res://.godot/imported/ocraextended.ttf-2ab474482412a1c98158e564d7949a34.fontdata"
 
 [deps]
 
-source_file="res://assets/fonts/Pixeled.ttf"
-dest_files=["res://.godot/imported/Pixeled.ttf-e8bbf35245fcf80d16d4c25fafd33f1f.fontdata"]
+source_file="res://assets/fonts/ocraextended.ttf"
+dest_files=["res://.godot/imported/ocraextended.ttf-2ab474482412a1c98158e564d7949a34.fontdata"]
 
 [params]
 

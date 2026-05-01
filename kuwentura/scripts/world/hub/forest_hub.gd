@@ -2,18 +2,12 @@ extends Node2D
 
 ## Forest Hub - Main world scene with zone portals and player spawning.
 
-# ─── PRELOADS ────────────────────────────────────────────────────────────────
-
 @onready var player_host_scene: PackedScene = preload("res://scenes/players/PlayerHost.tscn")
 @onready var player_sidekick_scene: PackedScene = preload("res://scenes/players/PlayerSidekick.tscn")
-
-# ─── EXPORTS ─────────────────────────────────────────────────────────────────
 
 @export var detective_scale: Vector2 = Vector2(0.2, 0.2)
 @export var sidekick_scale: Vector2 = Vector2(0.2, 0.2)
 @export var ground_y: float = 750.0
-
-# ─── NODE REFERENCES ─────────────────────────────────────────────────────────
 
 @onready var dialogue_panel: Panel = $DialogueLayer/DialoguePanel
 @onready var speaker_label: Label = $DialogueLayer/DialoguePanel/SpeakerLabel
@@ -74,8 +68,6 @@ extends Node2D
 @onready var objective_label_4: Label = $MapLayer/Quest/Objective/ObjectiveLabel4
 @onready var objective_label_5: Label = $MapLayer/Quest/Objective/ObjectiveLabel5
 
-# ─── CONSTANTS ───────────────────────────────────────────────────────────────
-
 const PANEL_ANIMATION_DURATION: float = 0.4
 const DIALOGUE_SPEED: float = 0.04
 const LEDGER_PAGE_TURN_DURATION: float = 0.16
@@ -96,33 +88,29 @@ const MAP_OVERLAY_ALPHA := 0.72
 const MAP_CONTENT_OPEN_SCALE := Vector2(1.0, 1.0)
 const MAP_CONTENT_CLOSED_SCALE := Vector2(0.92, 0.92)
 
-## Zone thought lines: zone_name → { true: [speaker, line], false: [speaker, line] }
-## true = detective, false = sidekick.
-## zone_name must exactly match portal.zone_name in the Inspector.
+
 const ZONE_THOUGHTS: Dictionary = {
 	"pinas_house": {
-		true:  ["Detective", "Pina's place... Come with me! I sense an artifact inside."],
-		false: ["Sidekick",  "Lights are on! I bet there's an artifact. Let's go inside!"]
+		true: ["Detective", "Pina's place... Come with me! I sense an artifact inside."],
+		false: ["Sidekick", "Lights are on! I bet there's an artifact. Let's go inside!"]
 	},
 	"old_well": {
-		true:  ["Detective", "The well is deep. An artifact lies below. Let's check it together!"],
-		false: ["Sidekick",  "Something's in the well wall! Help me look."]
+		true: ["Detective", "The well is deep. An artifact lies below. Let's check it together!"],
+		false: ["Sidekick", "Something's in the well wall! Help me look."]
 	},
 	"backyard_path": {
-		true:  ["Detective", "Tracks lead this way. Come with me!"],
-		false: ["Sidekick",  "The path is clear! Let's find that artifact together."]
+		true: ["Detective", "Tracks lead this way. Come with me!"],
+		false: ["Sidekick", "The path is clear! Let's find that artifact together."]
 	},
 	"storage_hut": {
-		true:  ["Detective", "The hut is unlocked. Let's go inside an artifact awaits."],
-		false: ["Sidekick",  "It's small, but I bet there's an artifact inside!"]
+		true: ["Detective", "The hut is unlocked. Let's go inside an artifact awaits."],
+		false: ["Sidekick", "It's small, but I bet there's an artifact inside!"]
 	},
 	"abandoned_house": {
-		true:  ["Detective", "Eerie... but there is an artifact within."],
-		false: ["Sidekick",  "Spooky! I'm not going in for that artifact alone."]
+		true: ["Detective", "Eerie... but there is an artifact within."],
+		false: ["Sidekick", "Spooky! I'm not going in for that artifact alone."]
 	},
 }
-
-# ─── STATE ───────────────────────────────────────────────────────────────────
 
 var _spawned_players: Dictionary = {}
 var _is_finding_partner: bool = false
@@ -141,7 +129,6 @@ var _map_marker_tweens: Array = []
 var _touch_controls_default_layer: int = 101
 var _map_focus_controls_active: bool = false
 
-# ─── LIFECYCLE ───────────────────────────────────────────────────────────────
 
 func _ready() -> void:
 	_ensure_spawn_points()
@@ -190,16 +177,15 @@ func _exit_tree() -> void:
 	_disconnect_network_signals()
 	_clear_dialogue()
 
-# ─── SIGNAL WIRING ───────────────────────────────────────────────────────────
 
 func _get_network_signal_pairs() -> Array:
 	return [
-		[NetworkManager.player_connected,         _on_player_connected],
-		[NetworkManager.player_disconnected,      _on_player_disconnected],
-		[NetworkManager.partner_disconnected,     _on_partner_disconnected],
-		[NetworkManager.spawn_player_requested,   _on_spawn_player_requested],
+		[NetworkManager.player_connected, _on_player_connected],
+		[NetworkManager.player_disconnected, _on_player_disconnected],
+		[NetworkManager.partner_disconnected, _on_partner_disconnected],
+		[NetworkManager.spawn_player_requested, _on_spawn_player_requested],
 		[NetworkManager.despawn_player_requested, _on_despawn_player_requested],
-		[NetworkManager.rejoin_game_requested,    _on_rejoin_game_requested],
+		[NetworkManager.rejoin_game_requested, _on_rejoin_game_requested],
 	]
 
 
@@ -227,7 +213,6 @@ func _disconnect_network_signals() -> void:
 		if sig.is_connected(cb):
 			sig.disconnect(cb)
 
-# ─── SPAWN POINTS ────────────────────────────────────────────────────────────
 
 func _ensure_spawn_points() -> void:
 	if spawn_points:
@@ -242,7 +227,6 @@ func _ensure_spawn_points() -> void:
 		m.position = cfg[1]
 		spawn_points.add_child(m)
 
-# ─── ROOM CODE ───────────────────────────────────────────────────────────────
 
 func _setup_room_code_label() -> void:
 	if not room_code_label:
@@ -254,7 +238,6 @@ func _setup_room_code_label() -> void:
 	else:
 		room_code_label.visible = false
 
-# ─── PAUSE ───────────────────────────────────────────────────────────────────
 
 func _setup_pause_panel() -> void:
 	if not in_game_pause_panel:
@@ -329,7 +312,6 @@ func _save_settings() -> void:
 		file.store_string(JSON.stringify({"volume": MusicController.get_volume()}))
 		file.close()
 
-# ─── PLAYER SPAWNING ─────────────────────────────────────────────────────────
 
 func _on_spawn_player_requested(peer_id: int, is_detective: bool) -> void:
 	_rpc_spawn_player(peer_id, is_detective, GameState.get_spawn_position(peer_id))
@@ -571,11 +553,11 @@ func _setup_ui_controls() -> void:
 	_touch_controls_default_layer = touch_controls.layer
 
 	var button_configs := [
-		["Map",         true,        _on_map_button_pressed],
-		["Ledger",      is_sidekick, _on_ledger_button_pressed],
+		["Map", true, _on_map_button_pressed],
+		["Ledger", is_sidekick, _on_ledger_button_pressed],
 		["Briefcase",   is_sidekick, _on_briefcase_button_pressed],
-		["FindPartner", true,        _on_find_partner_pressed],
-		["Jump",        false,       Callable()],
+		["FindPartner", true, _on_find_partner_pressed],
+		["Jump", false, Callable()],
 	]
 
 	for cfg in button_configs:
@@ -616,8 +598,8 @@ func _on_briefcase_button_pressed() -> void:
 
 func _open_panel(panel_name: String) -> void:
 	match panel_name:
-		"map":       _open_map()
-		"ledger":    _open_ledger()
+		"map": _open_map()
+		"ledger": _open_ledger()
 		"briefcase": _open_briefcase()
 	_current_open_panel = panel_name
 
@@ -793,18 +775,18 @@ func _convert_entry_to_book_page(entry: Dictionary) -> Dictionary:
 	var layout: String = str(entry.get("layout", "single_body"))
 	if layout == "two_column":
 		return {
-			"title":        str(entry.get("zone_name", entry.get("title", "Ledger"))),
+			"title": str(entry.get("zone_name", entry.get("title", "Ledger"))),
 			"left_header":  str(entry.get("left_header", "")),
-			"left_body":    str(entry.get("left_body", "")),
+			"left_body": str(entry.get("left_body", "")),
 			"right_header": str(entry.get("right_header", "")),
 			"right_body":   str(entry.get("right_body", "")),
 		}
 	var body_text := str(entry.get("body", ""))
 	var split_pages := _split_body_into_book_pages(body_text)
 	return {
-		"title":        str(entry.get("zone_name", entry.get("title", "Ledger"))),
+		"title": str(entry.get("zone_name", entry.get("title", "Ledger"))),
 		"left_header":  str(entry.get("title", "Notes")),
-		"left_body":    str(split_pages.get("left", "")),
+		"left_body": str(split_pages.get("left", "")),
 		"right_header": "Example" if str(split_pages.get("right", "")) != "" else "",
 		"right_body":   str(split_pages.get("right", "")),
 	}
@@ -857,9 +839,9 @@ func _show_forest_ledger_page(page_index: int, animate: bool = true) -> void:
 
 func _apply_forest_ledger_page(page_data: Dictionary) -> void:
 	var label_map := [
-		[forest_ledger_title_label,        "title"],
+		[forest_ledger_title_label, "title"],
 		[forest_ledger_left_header_label,  "left_header"],
-		[forest_ledger_left_body_label,    "left_body"],
+		[forest_ledger_left_body_label, "left_body"],
 		[forest_ledger_right_header_label, "right_header"],
 		[forest_ledger_right_body_label,   "right_body"],
 	]
