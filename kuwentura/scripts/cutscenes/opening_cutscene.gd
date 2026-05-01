@@ -1,6 +1,5 @@
 extends Node
 
-
 @onready var scene1 : Node = $Scene1
 @onready var scene2 : Node = $Scene2
 
@@ -8,7 +7,7 @@ extends Node
 @onready var grandma : AnimatedSprite2D = $Scene1/Grandma/AnimatedSprite2D
 @onready var grandma_node : Node = $Scene1/Grandma
 @onready var detective_idle1 : AnimatedSprite2D = $Scene1/DetectiveIdle
-@onready var sidekick_idle1  : AnimatedSprite2D = $Scene1/SidekickIdle
+@onready var sidekick_idle1 : AnimatedSprite2D = $Scene1/SidekickIdle
 @onready var scene1_background : Node = $Scene1/Background
 @onready var book_scene : Node = $Scene1/BookScene
 @onready var words_fading : AnimatedSprite2D = $Scene1/BookScene/WordsFading
@@ -25,7 +24,7 @@ extends Node
 @onready var dialogue_label2 : Label = $Scene2/Scene2_DialogueLabel
 @onready var name_label2 : Label = $Scene2/Scene2_NameLabel
 @onready var detective_idle2 : AnimatedSprite2D = $Scene2/DetectiveIdle
-@onready var sidekick_idle2  : AnimatedSprite2D = $Scene2/SidekickIdle
+@onready var sidekick_idle2 : AnimatedSprite2D = $Scene2/SidekickIdle
 
 # Scene 3
 @onready var scene3 : Node = $Scene3
@@ -57,25 +56,15 @@ var _bg_filler : ColorRect
 
 
 func _ready() -> void:
-	# ── Letterbox filler ────────────────────────────────────────────────────
-	# Insert a full-screen ColorRect behind everything so the window's border
-	# areas (gray bars) show the cutscene background colour instead of gray.
-	# The color is sampled from Scene1's background; update _sync_filler_color()
-	# if you ever need it to change between scenes.
 	_bg_filler = ColorRect.new()
 	_bg_filler.name = "BgFiller"
 	_bg_filler.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# Stretch to cover the full window regardless of viewport size
 	_bg_filler.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	# Warm library brown — matches the Scene1 Background sprite dominant colour.
-	# Adjust this hex if your background art has a different edge colour.
 	_bg_filler.color = Color(0.22, 0.16, 0.10, 1.0)
-	# Add as a CanvasLayer so it sits behind the scene tree but fills the window
 	var cl := CanvasLayer.new()
 	cl.layer = -10
 	add_child(cl)
 	cl.add_child(_bg_filler)
-	# ────────────────────────────────────────────────────────────────────────
 
 	scene2.visible = false
 	scene2.modulate.a = 0.0
@@ -134,7 +123,7 @@ func _scene1() -> void:
 	# Grandma reads — BookScene still hidden
 	_play_anim(grandma, "sitting_idle")
 	_play_anim(detective_idle1, "default")
-	_play_anim(sidekick_idle1,  "default")
+	_play_anim(sidekick_idle1, "default")
 	await _say1("Grandmother", "Long ago, in a quiet village, there lived a girl named Pina…")
 	await _say1_auto("Grandmother", "She was known for—", 1.0)
 
@@ -163,11 +152,11 @@ func _transition_to_scene2() -> void:
 	skip_button.visible = false
 
 	# Hide scene1 characters and book, keep background visible
-	grandma_node.visible  = false
+	grandma_node.visible = false
 	book_flipping.visible = false
 	book_scene.visible = false
 	detective_idle1.visible = false
-	sidekick_idle1.visible  = false
+	sidekick_idle1.visible = false
 
 	# Show scene2 immediately on top of scene1 background — no fade
 	scene2.visible = true
@@ -183,12 +172,12 @@ func _scene2() -> void:
 	# GrandmaFlipping plays over scene1 background (still visible)
 	_play_anim(grandma_flip, "sitting_flipping")
 	_play_anim(detective_idle2, "default")
-	_play_anim(sidekick_idle2,  "default")
+	_play_anim(sidekick_idle2, "default")
 	await _say2_auto("Grandmother", "What is happening to this book?", 1.2)
 	await _say2_auto("Grandmother", "The story is fading.", 1.2)
 
 	# GrandmaFlipping hides, GrandmaLightEmerge takes over
-	grandma_flip.get_parent().visible  = false
+	grandma_flip.get_parent().visible = false
 	grandma_light.get_parent().visible = true
 	_play_anim(grandma_light, "sitting_light")
 	await _say2_auto("Grandmother", "If the story disappears…", 1.2)
@@ -202,7 +191,7 @@ func _scene2() -> void:
 	_clear_dialogue(dialogue_label2, name_label2)
 
 
-# TRANSITION  Scene 2 → Scene 3
+# TRANSITION Scene 2 → Scene 3
 func _transition_to_scene3() -> void:
 	skip_button.visible = false
 
@@ -238,10 +227,10 @@ func _scene3() -> void:
 	detective_silhouette.visible = true
 	sidekick_silhouette.visible = true
 	detective_silhouette.modulate.a = 0.0
-	sidekick_silhouette.modulate.a  = 0.0
+	sidekick_silhouette.modulate.a = 0.0
 	var tw := create_tween().set_parallel(true)
 	tw.tween_property(detective_silhouette, "modulate:a", 1.0, 1.0)
-	tw.tween_property(sidekick_silhouette,  "modulate:a", 1.0, 1.0)
+	tw.tween_property(sidekick_silhouette, "modulate:a", 1.0, 1.0)
 	await tw.finished
 
 	await _say3_auto("", "Only those who seek the truth can restore the lost story.", 1.5)
@@ -262,7 +251,7 @@ func _scene3() -> void:
 	_clear_dialogue(dialogue_label3, name_label3)
 	
 
-# TRANSITION  Scene 3 → Scene 4
+# TRANSITION Scene 3 → Scene 4
 func _transition_to_scene4() -> void:
 	skip_button.visible = false
 	scene4.visible = true
@@ -317,7 +306,7 @@ func _fade_node(node: Node, target_alpha: float) -> void:
 
 
 func _set_flipping_mode(flipping: bool) -> void:
-	grandma_node.visible  = not flipping
+	grandma_node.visible = not flipping
 	book_flipping.visible = flipping
 	if flipping:
 		_play_anim(book_flipping, "book_flipping")
@@ -332,7 +321,7 @@ func _play_anim(sprite: AnimatedSprite2D, anim: String) -> void:
 
 func _say(dlabel: Label, nlabel: Label, speaker: String, text: String) -> void:
 	_skip_pressed = false
-	_typing_done  = false
+	_typing_done = false
 	nlabel.text = speaker
 	dlabel.text = ""
 

@@ -1,4 +1,7 @@
-[gd_scene format=3 uid="uid://wrt4te8e67ht"]
+[gd_scene load_steps=3 format=3 uid="uid://wrt4te8e67ht"]
+
+[ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="1_ys06e"]
+[ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="2_88sdb"]
 
 [node name="PuzzleUi" type="Control"]
 layout_mode = 3
@@ -14,6 +17,7 @@ layout_mode = 2
 
 [node name="Puzzle Title" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("1_ys06e")
 
 [node name="Host\'s view" type="TextureRect" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -23,6 +27,8 @@ layout_mode = 2
 
 [node name="ForAnswers" type="LineEdit" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("1_ys06e")
 
 [node name="Submit button" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_88sdb")

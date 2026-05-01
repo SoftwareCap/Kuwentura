@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://c3tjujm7q6nas"]
+[gd_scene load_steps=6 format=3 uid="uid://c3tjujm7q6nas"]
 
-[ext_resource type="Texture2D" uid="uid://brqmyeqdpbi3h" path="res://assets/sprites/players/DetectiveDialogueBox.png" id="1_ggoq5"]
+[ext_resource type="Texture2D" uid="uid://brqmyeqdpbi3h" path="res://assets/sprites/players/detectiveDialogueBox.png" id="1_ggoq5"]
 [ext_resource type="Script" uid="uid://cgrhmpox3p676" path="res://scripts/ui/dialogue_box.gd" id="1_nfm5p"]
-[ext_resource type="Texture2D" uid="uid://5duvlotnm43p" path="res://assets/sprites/players/SidekickDialogueBox.png" id="2_nfm5p"]
+[ext_resource type="Texture2D" uid="uid://5duvlotnm43p" path="res://assets/sprites/players/sidekickDialogueBox.png" id="2_nfm5p"]
+[ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="4_rdkif"]
 [ext_resource type="Texture2D" uid="uid://q26ui1ynvv34" path="res://assets/buttons/rightButton.png" id="5_rdkif"]
 
 [node name="DialogueBox" type="CanvasLayer"]
@@ -44,6 +45,7 @@ offset_top = 275.0
 offset_right = 1129.0
 offset_bottom = 334.0
 theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+theme_override_fonts/font = ExtResource("4_rdkif")
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 vertical_alignment = 1

@@ -1,12 +1,12 @@
-[gd_scene load_steps=83 format=3 uid="uid://b7ya8xhkrdyfk"]
+[gd_scene load_steps=84 format=3 uid="uid://b7ya8xhkrdyfk"]
 
 [ext_resource type="Script" uid="uid://ctce8c3qr21yg" path="res://scripts/world/zones/pinasHouse/pinas_house.gd" id="1_pinashouse"]
 [ext_resource type="Texture2D" uid="uid://mn5xegdioqrn" path="res://assets/sprites/zoneObjects/notification.png" id="2_m2a4r"]
 [ext_resource type="Texture2D" uid="uid://miy70k8n04ul" path="res://assets/sprites/places/pinasHouseBackground.png" id="2_vt60f"]
 [ext_resource type="Texture2D" uid="uid://du4de733sad05" path="res://assets/sprites/zoneObjects/pinasHouseObjects/openCabinet.png" id="3_0s51p"]
 [ext_resource type="Texture2D" uid="uid://cgtl3fi4ldvqd" path="res://assets/sprites/players/detective/detective.png" id="3_cyexm"]
-[ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 [ext_resource type="Texture2D" uid="uid://b1dy4fq6ytpn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/inventoryBoard.png" id="3_k0xpg"]
+[ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="3_wjw6o"]
 [ext_resource type="Texture2D" uid="uid://3boff2bjwjx5" path="res://assets/sprites/zoneObjects/pinasHouseObjects/pan.png" id="4_d1egf"]
 [ext_resource type="Texture2D" uid="uid://bppb0lkeirtvl" path="res://assets/sprites/players/detective/sidekick.png" id="4_m2a4r"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="4_zonecontrols"]
@@ -36,6 +36,7 @@
 [ext_resource type="Texture2D" uid="uid://b216jsk5hyag5" path="res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Ladle.png" id="25_eedqa"]
 [ext_resource type="Texture2D" uid="uid://llr505ongc63" path="res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Pan.png" id="26_cd1wg"]
 [ext_resource type="Texture2D" uid="uid://cnu6aahk6prn6" path="res://assets/sprites/zoneObjects/pinasHouseObjects/shadow_Pot.png" id="27_egl2a"]
+[ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="32_cfl6u"]
 [ext_resource type="Texture2D" uid="uid://xav0rox1o7wd" path="res://assets/sprites/consequences/aswang/aswang10.png" id="33_eedqa"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="35_dcipd"]
 [ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="36_u6sy3"]
@@ -271,7 +272,8 @@ offset_left = 388.0
 offset_top = 28.0
 offset_right = 1053.0
 offset_bottom = 105.0
-theme_override_font_sizes/font_size = 20
+theme_override_fonts/font = ExtResource("3_wjw6o")
+theme_override_font_sizes/font_size = 25
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
@@ -607,7 +609,8 @@ offset_right = 591.0
 offset_bottom = 146.0
 theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
 theme_override_constants/line_spacing = 3
-theme_override_font_sizes/font_size = 30
+theme_override_fonts/font = ExtResource("3_wjw6o")
+theme_override_font_sizes/font_size = 35
 text = "Find missing tools:"
 vertical_alignment = 2
 
@@ -691,6 +694,7 @@ offset_left = 653.0
 offset_top = 252.0
 offset_right = 789.0
 offset_bottom = 401.0
+theme_override_fonts/font = ExtResource("32_cfl6u")
 icon = ExtResource("22_vt60f")
 flat = true
 expand_icon = true
@@ -703,6 +707,7 @@ offset_right = 735.0
 offset_bottom = 700.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.9955804, 0.99558026, 0.99558026, 1)
+theme_override_fonts/font = ExtResource("3_wjw6o")
 theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -715,7 +720,7 @@ offset_top = 443.0
 offset_right = 836.0
 offset_bottom = 505.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("32_cfl6u")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_u6sy3")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_ra7mo")
@@ -752,6 +757,7 @@ offset_left = 652.0
 offset_top = 254.0
 offset_right = 790.0
 offset_bottom = 392.0
+theme_override_fonts/font = ExtResource("32_cfl6u")
 icon = ExtResource("22_vt60f")
 flat = true
 expand_icon = true
@@ -771,6 +777,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_wjw6o")
 theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -787,7 +794,7 @@ theme_override_colors/caret_color = Color(0.014275194, 0.014275219, 0.014275289,
 theme_override_colors/selection_color = Color(0.96035105, 0.96035105, 0.96035093, 1)
 theme_override_colors/clear_button_color = Color(0.021434566, 0.021434668, 0.021434598, 1)
 theme_override_colors/clear_button_color_pressed = Color(0.017732391, 0.017732391, 0.01773239, 1)
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("3_wjw6o")
 theme_override_font_sizes/font_size = 35
 placeholder_text = "Answer"
 alignment = 1
@@ -808,7 +815,7 @@ theme_override_colors/caret_color = Color(0.0430391, 0.043039143, 0.04303936, 1)
 theme_override_colors/selection_color = Color(0.9779369, 0.97793704, 0.9779369, 1)
 theme_override_colors/clear_button_color = Color(0.064696394, 0.0646966, 0.06469644, 1)
 theme_override_colors/clear_button_color_pressed = Color(0.043039158, 0.04303915, 0.04303915, 1)
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("3_wjw6o")
 theme_override_font_sizes/font_size = 35
 placeholder_text = "Enter Y"
 alignment = 1
@@ -822,7 +829,7 @@ offset_top = 680.0
 offset_right = 772.0
 offset_bottom = 735.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("32_cfl6u")
 theme_override_font_sizes/font_size = 27
 theme_override_styles/normal = SubResource("StyleBoxFlat_cyexm")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_m2a4r")
@@ -836,6 +843,7 @@ offset_left = -625.0
 offset_top = -157.0
 offset_right = -585.0
 offset_bottom = -134.0
+theme_override_fonts/font = ExtResource("3_wjw6o")
 
 [node name="SearchRoomButton" type="Button" parent="RoleLayer/Control/SidekickOverlays"]
 visible = false
@@ -845,7 +853,7 @@ offset_top = 442.0
 offset_right = 835.0
 offset_bottom = 505.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("32_cfl6u")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_j1qle")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_ignus")
@@ -901,7 +909,7 @@ offset_top = 18.0
 offset_right = 240.0
 offset_bottom = 127.0
 grow_horizontal = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("3_wjw6o")
 theme_override_font_sizes/font_size = 70
 text = "Game Paused!"
 horizontal_alignment = 1
@@ -922,7 +930,7 @@ anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 57.25
 offset_top = -107.0
-offset_right = 502.25
+offset_right = 481.25
 offset_bottom = 38.0
 grow_vertical = 2
 size_flags_vertical = 3
@@ -942,7 +950,7 @@ offset_top = -20.0
 offset_bottom = 20.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("32_cfl6u")
 theme_override_font_sizes/font_size = 40
 text = "Resume Game"
 horizontal_alignment = 1
@@ -979,7 +987,7 @@ offset_top = -20.0
 offset_bottom = 20.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("32_cfl6u")
 theme_override_font_sizes/font_size = 40
 text = "Option"
 horizontal_alignment = 1
@@ -993,9 +1001,9 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -247.5
+offset_left = -244.625
 offset_top = -209.0
-offset_right = 247.5
+offset_right = 245.375
 offset_bottom = -64.0
 grow_horizontal = 2
 grow_vertical = 0
@@ -1011,13 +1019,12 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -355.0
-offset_top = -20.0
-offset_right = -19.0
-offset_bottom = 20.0
+offset_left = -338.0
+offset_top = -21.5
+offset_bottom = 21.5
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("32_cfl6u")
 theme_override_font_sizes/font_size = 40
 text = "Back to Forest"
 horizontal_alignment = 1
@@ -1041,7 +1048,7 @@ offset_top = 18.0
 offset_right = 94.5
 offset_bottom = 127.0
 grow_horizontal = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("3_wjw6o")
 theme_override_font_sizes/font_size = 55
 text = "Option:"
 horizontal_alignment = 1
@@ -1077,7 +1084,7 @@ theme_override_constants/separation = 30
 
 [node name="VolumeLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("3_wjw6o")
 theme_override_font_sizes/font_size = 40
 text = "Music Volume:"
 horizontal_alignment = 1
@@ -1094,6 +1101,7 @@ value = 80.0
 
 [node name="VolumeValue" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_wjw6o")
 theme_override_font_sizes/font_size = 30
 text = "80%"
 horizontal_alignment = 1
@@ -1130,6 +1138,7 @@ offset_left = 34.753967
 offset_top = 39.66298
 offset_right = 1449.7273
 offset_bottom = 133.59502
+theme_override_fonts/font = ExtResource("3_wjw6o")
 theme_override_font_sizes/font_size = 45
 text = "ARTIFACT FOUND!"
 horizontal_alignment = 1
@@ -1147,6 +1156,7 @@ offset_left = 483.0
 offset_top = 402.0
 offset_right = 918.0
 offset_bottom = 444.0
+theme_override_fonts/font = ExtResource("3_wjw6o")
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1162,6 +1172,7 @@ offset_top = 316.271
 offset_right = 714.3307
 offset_bottom = 412.72888
 theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+theme_override_fonts/font = ExtResource("3_wjw6o")
 theme_override_font_sizes/font_size = 35
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1175,6 +1186,7 @@ offset_top = 499.00003
 offset_right = 853.9999
 offset_bottom = 552.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("32_cfl6u")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_0s51p")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_cfl6u")
@@ -1192,6 +1204,7 @@ offset_bottom = 8.0
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
+theme_override_fonts/font = ExtResource("3_wjw6o")
 action_mode = 0
 flat = true
 

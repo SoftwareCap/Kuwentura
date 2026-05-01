@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://i0u1yuc5fl88"
-path="res://.godot/imported/Minecraft.ttf-e1845dfc080db589cd29d952a380f38e.fontdata"
+uid="uid://rniso7qjbwbg"
+path="res://.godot/imported/Arabica.ttf-bd3008334127030aff6efa481a847bd0.fontdata"
 
 [deps]
 
-source_file="res://assets/fonts/Minecraft.ttf"
-dest_files=["res://.godot/imported/Minecraft.ttf-e1845dfc080db589cd29d952a380f38e.fontdata"]
+source_file="res://assets/fonts/Arabica.ttf"
+dest_files=["res://.godot/imported/Arabica.ttf-bd3008334127030aff6efa481a847bd0.fontdata"]
 
 [params]
 

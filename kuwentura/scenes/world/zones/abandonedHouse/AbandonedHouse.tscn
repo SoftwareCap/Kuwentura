@@ -1,15 +1,14 @@
-[gd_scene load_steps=85 format=3 uid="uid://bandonedhouse"]
+[gd_scene load_steps=86 format=3 uid="uid://bandonedhouse"]
 
 [ext_resource type="Script" uid="uid://ftv8j2b15oka" path="res://scripts/world/zones/abandonedHouse/abandoned_house.gd" id="1_abandonedhouse"]
 [ext_resource type="Texture2D" uid="uid://cyyv53bejmfyj" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key-2.png" id="2_xh6nx"]
 [ext_resource type="Texture2D" uid="uid://ddpsrg1yqwx22" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Lighter.png" id="3_26k5c"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="3_fnsr3"]
-[ext_resource type="FontFile" uid="uid://i0u1yuc5fl88" path="res://assets/fonts/Minecraft.ttf" id="3_font"]
 [ext_resource type="Texture2D" uid="uid://bwccumnrc00pr" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-1.png" id="4_ig5qe"]
-[ext_resource type="Texture2D" uid="uid://cgtl3fi4ldvqd" path="res://assets/sprites/players/Detective/detective.png" id="4_w3m7o"]
+[ext_resource type="Texture2D" uid="uid://cgtl3fi4ldvqd" path="res://assets/sprites/players/detective/detective.png" id="4_w3m7o"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="5_54qax"]
 [ext_resource type="Texture2D" uid="uid://cxoud0qppj31f" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-2.png" id="5_60uqn"]
-[ext_resource type="Texture2D" uid="uid://bppb0lkeirtvl" path="res://assets/sprites/players/Detective/sidekick.png" id="5_tdxjt"]
+[ext_resource type="Texture2D" uid="uid://bppb0lkeirtvl" path="res://assets/sprites/players/detective/sidekick.png" id="5_tdxjt"]
 [ext_resource type="Texture2D" uid="uid://dpuo3g1804rtj" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Book-3.png" id="6_fnmj2"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="6_pocdh"]
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="7_ctgii"]
@@ -49,12 +48,14 @@
 [ext_resource type="Texture2D" uid="uid://bqq2mplpu2rrg" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/finalboxOpen.png" id="38_x5fcx"]
 [ext_resource type="Texture2D" uid="uid://bp3dqrgc2d337" path="res://assets/sprites/clues/tiaraClue.png" id="39_lnpua"]
 [ext_resource type="Texture2D" uid="uid://hjocro1muuep" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/poster.png" id="40_1s7m6"]
+[ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="41_60uqn"]
 [ext_resource type="Texture2D" uid="uid://mn5xegdioqrn" path="res://assets/sprites/zoneObjects/notification.png" id="42_5rk6e"]
 [ext_resource type="Texture2D" uid="uid://bsqdoe81d60lw" path="res://assets/sprites/places/abandonedHouseBackground.png" id="43_8h2lu"]
 [ext_resource type="Texture2D" uid="uid://dwymeh76j8r8p" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/glowHint.png" id="44_5rk6e"]
 [ext_resource type="Texture2D" uid="uid://bn3lo7ofeh8ui" path="res://assets/sprites/zoneObjects/abandonedHouseObjects/Key-3.png" id="45_sofx5"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="47_1767a"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="48_fs4kb"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="48_fs4kb"]
+[ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="49_fnmj2"]
 [ext_resource type="Texture2D" uid="uid://baylpfjefdeqo" path="res://assets/buttons/backWordButton.png" id="52_8h2lu"]
 [ext_resource type="VideoStream" uid="uid://70ej8jwf1trd" path="res://assets/sprites/cutscene/zoneEnding/abandonedHouse.ogv" id="57_26k5c"]
 [ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="58_ig5qe"]
@@ -264,6 +265,7 @@ offset_left = 388.0
 offset_top = 28.0
 offset_right = 1053.0
 offset_bottom = 105.0
+theme_override_fonts/font = ExtResource("41_60uqn")
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -363,7 +365,7 @@ offset_top = 18.0
 offset_right = 240.0
 offset_bottom = 127.0
 grow_horizontal = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("41_60uqn")
 theme_override_font_sizes/font_size = 70
 text = "Game Paused!"
 horizontal_alignment = 1
@@ -383,7 +385,7 @@ anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 57.25
 offset_top = -107.0
-offset_right = 502.25
+offset_right = 481.25
 offset_bottom = 38.0
 grow_vertical = 2
 size_flags_vertical = 3
@@ -403,7 +405,7 @@ offset_top = -20.0
 offset_bottom = 20.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("49_fnmj2")
 theme_override_font_sizes/font_size = 40
 text = "Resume Game"
 horizontal_alignment = 1
@@ -439,22 +441,22 @@ offset_top = -20.0
 offset_bottom = 20.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("49_fnmj2")
 theme_override_font_sizes/font_size = 40
 text = "Option"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ExitButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+[node name="BackToForest" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -247.5
+offset_left = -244.625
 offset_top = -209.0
-offset_right = 247.5
+offset_right = 245.375
 offset_bottom = -64.0
 grow_horizontal = 2
 grow_vertical = 0
@@ -463,7 +465,7 @@ texture_normal = ExtResource("7_ctgii")
 ignore_texture_size = true
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/ExitButton"]
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/BackToForest"]
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -475,9 +477,9 @@ offset_top = -20.0
 offset_bottom = 20.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("49_fnmj2")
 theme_override_font_sizes/font_size = 40
-text = "Exit to Main Menu"
+text = "Back to Forest"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -498,7 +500,7 @@ offset_top = 18.0
 offset_right = 94.5
 offset_bottom = 127.0
 grow_horizontal = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("41_60uqn")
 theme_override_font_sizes/font_size = 55
 text = "Option:"
 horizontal_alignment = 1
@@ -533,7 +535,7 @@ theme_override_constants/separation = 30
 
 [node name="VolumeLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_font")
+theme_override_fonts/font = ExtResource("41_60uqn")
 theme_override_font_sizes/font_size = 40
 text = "Music Volume:"
 horizontal_alignment = 1
@@ -550,6 +552,7 @@ value = 80.0
 
 [node name="VolumeValue" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("41_60uqn")
 theme_override_font_sizes/font_size = 30
 text = "80%"
 horizontal_alignment = 1
@@ -598,7 +601,8 @@ theme_override_constants/separation = 10
 custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 20
+theme_override_fonts/font = ExtResource("41_60uqn")
+theme_override_font_sizes/font_size = 25
 text = "Narrowest should be on top and widest should be at the bottom."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -633,6 +637,7 @@ offset_left = 397.0
 offset_top = 21.0
 offset_right = 1062.0
 offset_bottom = 111.0
+theme_override_fonts/font = ExtResource("41_60uqn")
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
@@ -661,6 +666,7 @@ layout_mode = 0
 offset_top = 302.0
 offset_right = 1474.0
 offset_bottom = 310.0
+theme_override_fonts/font = ExtResource("49_fnmj2")
 
 [node name="MirrorPuzzlePanel" type="PanelContainer" parent="PuzzleCanvasLayer/Dimmer"]
 visible = false
@@ -694,7 +700,8 @@ theme_override_constants/separation = 10
 custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 20
+theme_override_fonts/font = ExtResource("41_60uqn")
+theme_override_font_sizes/font_size = 25
 text = "Inspect the mirror"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -764,7 +771,8 @@ theme_override_constants/separation = 10
 custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 20
+theme_override_fonts/font = ExtResource("41_60uqn")
+theme_override_font_sizes/font_size = 25
 text = "Inspect the drawer."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -858,7 +866,8 @@ theme_override_constants/separation = 10
 custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 20
+theme_override_fonts/font = ExtResource("41_60uqn")
+theme_override_font_sizes/font_size = 25
 text = "Inspect the lock."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -947,7 +956,8 @@ theme_override_constants/separation = 10
 custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 20
+theme_override_fonts/font = ExtResource("41_60uqn")
+theme_override_font_sizes/font_size = 25
 text = "Inspect the cabinet."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1029,6 +1039,7 @@ theme_override_constants/separation = 10
 custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("41_60uqn")
 text = "Inspect the cabinet."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1058,6 +1069,7 @@ offset_left = 579.0
 offset_top = 219.0
 offset_right = 816.0
 offset_bottom = 275.0
+theme_override_fonts/font = ExtResource("41_60uqn")
 theme_override_font_sizes/font_size = 30
 
 [node name="SidekickInputRow" type="VBoxContainer" parent="PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BoxHolder"]
@@ -1070,6 +1082,7 @@ offset_bottom = 241.0
 [node name="AnswerInput" type="LineEdit" parent="PuzzleCanvasLayer/Dimmer/FinalBoxPanel/MarginContainer/VBoxContainer/BoxHolder/SidekickInputRow"]
 custom_minimum_size = Vector2(400, 100)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("41_60uqn")
 placeholder_text = "Enter Missing Number"
 alignment = 1
 expand_to_text_length = true
@@ -1085,6 +1098,7 @@ theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 
 theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("49_fnmj2")
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_60uqn")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_fnmj2")
@@ -1161,6 +1175,7 @@ theme_override_constants/separation = 25
 custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("41_60uqn")
 theme_override_font_sizes/font_size = 30
 text = "Puzzle Solved"
 horizontal_alignment = 1
@@ -1171,6 +1186,7 @@ autowrap_mode = 3
 custom_minimum_size = Vector2(665, 90)
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("41_60uqn")
 theme_override_font_sizes/font_size = 20
 text = "You found Key Fragment 1 and the Card Piece."
 horizontal_alignment = 1
@@ -1208,6 +1224,7 @@ theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 
 theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("49_fnmj2")
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_8h2lu")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_xh6nx")
@@ -1245,10 +1262,11 @@ texture = SubResource("CompressedTexture2D_emdfy")
 anchors_preset = -1
 anchor_left = -0.22961879
 anchor_right = -0.22961879
-offset_left = 598.75397
+offset_left = 669.7273
 offset_top = 21.0
-offset_right = 1334.7273
+offset_right = 1405.7007
 offset_bottom = 111.0
+theme_override_fonts/font = ExtResource("41_60uqn")
 theme_override_font_sizes/font_size = 45
 text = "ARTIFACT FOUND!"
 horizontal_alignment = 1
@@ -1261,6 +1279,7 @@ offset_left = 483.0
 offset_top = 416.0
 offset_right = 937.0
 offset_bottom = 458.0
+theme_override_fonts/font = ExtResource("41_60uqn")
 theme_override_font_sizes/font_size = 20
 text = "Tap anywhere to continue."
 horizontal_alignment = 1
@@ -1289,6 +1308,7 @@ offset_top = 499.00003
 offset_right = 809.9999
 offset_bottom = 561.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("49_fnmj2")
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_1s7m6")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_21ulk")
@@ -1306,6 +1326,7 @@ offset_bottom = 8.0
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
+theme_override_fonts/font = ExtResource("41_60uqn")
 action_mode = 0
 flat = true
 
@@ -1366,42 +1387,49 @@ offset_left = 51.0
 offset_top = 332.0
 offset_right = 373.0
 offset_bottom = 370.0
+theme_override_fonts/font = ExtResource("41_60uqn")
 
 [node name="MemoryPuzzle" type="Label" parent="Quest"]
 offset_left = 53.0
 offset_top = 368.0
 offset_right = 352.0
 offset_bottom = 402.0
+theme_override_fonts/font = ExtResource("41_60uqn")
 
 [node name="MirrorPuzzle" type="Label" parent="Quest"]
 offset_left = 54.0
 offset_top = 401.0
 offset_right = 182.0
 offset_bottom = 424.0
+theme_override_fonts/font = ExtResource("41_60uqn")
 
 [node name="DrawerLockPuzzle" type="Label" parent="Quest"]
 offset_left = 55.0
 offset_top = 434.0
 offset_right = 290.0
 offset_bottom = 466.0
+theme_override_fonts/font = ExtResource("41_60uqn")
 
 [node name="CabinetPuzzle" type="Label" parent="Quest"]
 offset_left = 53.0
 offset_top = 466.0
 offset_right = 304.0
 offset_bottom = 505.0
+theme_override_fonts/font = ExtResource("41_60uqn")
 
 [node name="TreasureboxPuzzle" type="Label" parent="Quest"]
 offset_left = 58.0
 offset_top = 503.0
 offset_right = 451.0
 offset_bottom = 526.0
+theme_override_fonts/font = ExtResource("41_60uqn")
 
 [node name="QuestTitle" type="Label" parent="Quest"]
 offset_left = 51.0
 offset_top = 296.0
 offset_right = 281.0
 offset_bottom = 319.0
+theme_override_fonts/font = ExtResource("41_60uqn")
 
 [node name="Cutscene" type="CanvasLayer" parent="."]
 
