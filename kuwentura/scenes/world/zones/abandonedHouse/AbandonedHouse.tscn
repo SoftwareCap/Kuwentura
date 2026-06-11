@@ -58,7 +58,7 @@
 [ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="49_fnmj2"]
 [ext_resource type="Texture2D" uid="uid://baylpfjefdeqo" path="res://assets/buttons/backWordButton.png" id="52_8h2lu"]
 [ext_resource type="VideoStream" uid="uid://70ej8jwf1trd" path="res://assets/sprites/cutscene/zoneEnding/abandonedHouse.ogv" id="57_26k5c"]
-[ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="58_ig5qe"]
+[ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/ledger/ledgerOpen.png" id="58_ig5qe"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wp1ru"]
 size = Vector2(168.5, 86)
