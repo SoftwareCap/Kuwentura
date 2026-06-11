@@ -5,9 +5,9 @@ class_name Player
 # CONSTANTS
 
 # Network interpolation thresholds
-const TELEPORT_THRESHOLD := 100.0 # Snap instantly beyond this distance
-const LERP_DIST_FAR := 50.0 # Distance band: far
-const LERP_DIST_NEAR := 10.0 # Distance band: near
+const TELEPORT_THRESHOLD := 100.0
+const LERP_DIST_FAR := 50.0
+const LERP_DIST_NEAR := 10.0
 const LERP_FACTOR_FAR := 0.5
 const LERP_FACTOR_MID := 0.3
 const LERP_FACTOR_DEFAULT := 0.15
@@ -48,7 +48,6 @@ var _movement_locked: bool = false
 func _ready() -> void:
 	_is_in_lobby = get_parent() is Control
 	
-	# Hide the diamond when displayed in lobby
 	if _is_in_lobby:
 		if is_instance_valid(location_diamond):
 			location_diamond.visible = false
@@ -68,20 +67,16 @@ func _ready() -> void:
 			_last_sent_position = global_position
 			_last_sent_animation = "idle"
 
-	# Diamond starts hidden; _process enforces the correct state every frame
 	if is_instance_valid(location_diamond):
 		location_diamond.visible = false
 
 
 func _update_diamond_visibility() -> void:
-	"""Single source of truth for diamond visibility. Safe to call any time."""
 	if not is_instance_valid(location_diamond):
 		return
-	# Never show in lobby
 	if _is_in_lobby:
 		location_diamond.visible = false
 		return
-	# In-game: only the local authority sees their own diamond
 	if multiplayer.has_multiplayer_peer():
 		location_diamond.visible = is_multiplayer_authority()
 	else:
@@ -93,8 +88,6 @@ func _process(_delta: float) -> void:
 		_update_animation()
 		return
 
-	# Continuously enforce correct diamond visibility.
-	# Cheap: one bool read per frame, no dict lookup or math.
 	_update_diamond_visibility()
 
 	if not multiplayer.has_multiplayer_peer():
@@ -129,9 +122,12 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 
 
+func apply_pushback(force: Vector2) -> void:
+	velocity += force
+
+
 # SETUP
 func _configure_physics() -> void:
-	"""Apply physics settings that prevent sliding at small scales."""
 	floor_constant_speed = false
 	floor_stop_on_slope = true
 	floor_block_on_wall = true
@@ -144,7 +140,6 @@ func _configure_physics() -> void:
 
 # MOVEMENT
 func _process_local_movement(delta: float) -> void:
-	"""Process input, gravity, jump, and horizontal drift prevention."""
 	var direction := Input.get_axis("game_left", "game_right")
 
 	if direction == 0 and is_on_floor():
@@ -178,7 +173,6 @@ func _try_jump() -> void:
 
 # ANIMATION
 func _update_animation() -> String:
-	"""Play the correct sprite animation based on velocity and return its name."""
 	if velocity.x == 0:
 		sprite.play("idle")
 		return "idle"
@@ -189,12 +183,10 @@ func _update_animation() -> String:
 
 # NETWORK — LOCAL PLAYER
 func _is_local_player() -> bool:
-	"""True when this node is the local authority in a multiplayer session."""
 	return multiplayer.has_multiplayer_peer() and is_multiplayer_authority()
 
 
 func _sync_state(delta: float, current_anim: String) -> void:
-	"""Throttle-check and broadcast state to other peers."""
 	_sync_timer += delta
 	var pos_changed := global_position.distance_to(_last_sent_position) > POSITION_CHANGED_THRESHOLD
 	var anim_changed := current_anim != _last_sent_animation
@@ -207,7 +199,6 @@ func _sync_state(delta: float, current_anim: String) -> void:
 
 
 func _send_state(animation: String) -> void:
-	"""Broadcast position, velocity, facing, and animation via RPC."""
 	var facing := "left" if sprite.flip_h else "right"
 	NetworkManager.sync_player_state.rpc(global_position, velocity, facing, animation)
 	NetworkManager.report_position(multiplayer.get_unique_id(), global_position)
@@ -215,7 +206,6 @@ func _send_state(animation: String) -> void:
 
 # NETWORK — REMOTE PLAYER
 func _update_from_network_state() -> void:
-	"""Interpolate position and sync animation from the partner's broadcast state."""
 	var peer_id := int(str(name))
 	if peer_id == 0:
 		return
@@ -248,7 +238,6 @@ func _update_from_network_state() -> void:
 
 # PUBLIC API
 func _force_grounded() -> void:
-	"""Snap the player to the floor after a scene transition."""
 	velocity = Vector2.ZERO
 	if not is_on_floor():
 		velocity.y = GROUNDING_VELOCITY
@@ -257,7 +246,6 @@ func _force_grounded() -> void:
 
 
 func _force_initial_sync() -> void:
-	"""Send an immediate state broadcast so other players can see this player on spawn."""
 	if not _is_local_player():
 		return
 	_send_state("idle")

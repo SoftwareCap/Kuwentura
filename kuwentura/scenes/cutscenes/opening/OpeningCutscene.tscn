@@ -2067,6 +2067,7 @@ position = Vector2(900, 450)
 scale = Vector2(0.4, 0.4)
 sprite_frames = SubResource("SpriteFrames_s0vm4")
 animation = &"sidekick_idle_silhiouette"
+flip_h = true
 
 [node name="PlayersPull" type="AnimatedSprite2D" parent="Scene3"]
 position = Vector2(621.1313, 357.5)
@@ -2135,9 +2136,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 1036.0
+offset_left = 963.0
 offset_top = 565.0
-offset_right = 1218.0
+offset_right = 1187.0
 offset_bottom = 618.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -2147,7 +2148,7 @@ theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098
 theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
 theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("407_dgnjl")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxFlat_2bykp")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_5m2cp")
 theme_override_styles/hover = SubResource("StyleBoxFlat_1tyme")
@@ -2155,6 +2156,7 @@ theme_override_styles/disabled = SubResource("StyleBoxFlat_5m2cp")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_x4prc")
 action_mode = 0
 text = "Skip"
+autowrap_mode = 3
 
 [node name="Scene1_DialogueLabel" type="Label" parent="."]
 anchors_preset = 8

@@ -23,18 +23,25 @@ extends Node2D
 @onready var room_code_label: Label = $HUDLayer/RoomCode
 @onready var finish_zone_indicator: Node = $FinishZoneIndicator
 
-@onready var forest_ledger_title_label: Label = $SidekickLayer/Ledger/Control/LedgerTitle
-@onready var forest_ledger_left_header_label: Label = $SidekickLayer/Ledger/Control/LedgerLeftHeader
-@onready var forest_ledger_left_body_label: Label = $SidekickLayer/Ledger/Control/LedgerLeftBody
-@onready var forest_ledger_right_header_label: Label = $SidekickLayer/Ledger/Control/LedgerRightHeader
-@onready var forest_ledger_right_body_label: Label = $SidekickLayer/Ledger/Control/LedgerRightBody
-@onready var forest_prev_page_button: Button = $SidekickLayer/Ledger/Control/PrevPageButton
-@onready var forest_next_page_button: Button = $SidekickLayer/Ledger/Control/NextPageButton
-@onready var forest_page_indicator_label: Label = $SidekickLayer/Ledger/Control/PageIndicator
-@onready var forest_ledger_control: Control = $SidekickLayer/Ledger/Control
+# ── Bookmarks (scene tree: SidekickLayer/Ledger/Bookmarks/) ──────────────────
+@onready var _bookmark_pinas:     TextureButton = $SidekickLayer/Ledger/Bookmarks/PHBookmark
+@onready var _bookmark_oldwell:   TextureButton = $SidekickLayer/Ledger/Bookmarks/OWBookmark
+@onready var _bookmark_backyard:  TextureButton = $SidekickLayer/Ledger/Bookmarks/BPBookmark
+@onready var _bookmark_storage:   TextureButton = $SidekickLayer/Ledger/Bookmarks/SHBookmark
+@onready var _bookmark_abandoned: TextureButton = $SidekickLayer/Ledger/Bookmarks/AHBookmark
+
+# ── Zone instruction sprites (scene tree: SidekickLayer/Ledger/ZoneInstructions/) ──
+@onready var _ins_pinas:     Sprite2D = $SidekickLayer/Ledger/ZoneInstructions/PHInstruction
+@onready var _ins_oldwell:   Sprite2D = $SidekickLayer/Ledger/ZoneInstructions/OWInstruction
+@onready var _ins_backyard:  Sprite2D = $SidekickLayer/Ledger/ZoneInstructions/BPInstruction
+@onready var _ins_storage:   Sprite2D = $SidekickLayer/Ledger/ZoneInstructions/SHInstruction
+@onready var _ins_abandoned: Sprite2D = $SidekickLayer/Ledger/ZoneInstructions/AHInstruction
+
+# ── Empty-ledger panel shown before any zone is completed ────────────────────
+@onready var _empty_ledger: Control = $SidekickLayer/Ledger/OpenEmptyLedger
 
 @onready var sidekick_layer: CanvasLayer = $SidekickLayer
-@onready var ledger_panel: Panel = $SidekickLayer/Ledger
+@onready var ledger_panel: Node2D = $SidekickLayer/Ledger
 @onready var briefcase_panel: Panel = $SidekickLayer/Briefcase
 @onready var briefcase_display: TextureRect = $SidekickLayer/Briefcase/BriefcaseDisplay
 
@@ -75,9 +82,27 @@ const DOOR_ANIMATION_DURATION: float = 0.5
 const FIND_PARTNER_DURATION: float = 1.2
 const FIND_PARTNER_HOLD: float = 2.0
 const ZONE_THOUGHT_HOLD: float = 2.0
+const BAKUNAWA_SCENE: String = "res://scenes/world/climax/Bakunawa.tscn"
 
-const LEDGER_EMPTY_TEXT := "Solve a zone puzzle to unlock \nledger notes in the forest."
 const LEDGER_OPEN_SCALE: Vector2 = Vector2(1.0, 1.0)
+
+# ── Bookmark textures ─────────────────────────────────────────────────────────
+const BOOKMARK_ACTIVE_TEXTURES: Dictionary = {
+	"pinas_house":     preload("res://assets/sprites/ledger/bookmarks/active_pinasHouse.png"),
+	"backyard_path":   preload("res://assets/sprites/ledger/bookmarks/active_backyardPath.png"),
+	"old_well":        preload("res://assets/sprites/ledger/bookmarks/active_oldWell.png"),
+	"storage_hut":     preload("res://assets/sprites/ledger/bookmarks/active_storageHut.png"),
+	"abandoned_house": preload("res://assets/sprites/ledger/bookmarks/active_abandonedHouse.png"),
+}
+
+const BOOKMARK_INACTIVE_TEXTURES: Dictionary = {
+	"pinas_house":     preload("res://assets/sprites/ledger/bookmarks/inactive_pinasHouse.png"),
+	"backyard_path":   preload("res://assets/sprites/ledger/bookmarks/inactive_backyardPath.png"),
+	"old_well":        preload("res://assets/sprites/ledger/bookmarks/inactive_oldWell.png"),
+	"storage_hut":     preload("res://assets/sprites/ledger/bookmarks/inactive_storageHut.png"),
+	"abandoned_house": preload("res://assets/sprites/ledger/bookmarks/inactive_abandonedHouse.png"),
+}
+
 const LEDGER_CLOSED_SCALE: Vector2 = Vector2(0.1, 1.0)
 const BRIEFCASE_OPEN_SCALE: Vector2 = Vector2(1.0, 1.0)
 const BRIEFCASE_CLOSED_SCALE: Vector2 = Vector2(1.0, 0.1)
@@ -88,6 +113,17 @@ const MAP_OVERLAY_ALPHA := 0.72
 const MAP_CONTENT_OPEN_SCALE := Vector2(1.0, 1.0)
 const MAP_CONTENT_CLOSED_SCALE := Vector2(0.92, 0.92)
 
+# ── Physical left-to-right order of bookmark tabs in the ledger ───────────────
+## Used to determine page-turn direction: higher index = forward (right-to-left
+## page flip); lower index = backward (left-to-right page flip).
+## Adjust if the visual layout of your tabs differs.
+const ZONE_ORDER: Array[String] = [
+	"pinas_house",
+	"old_well",
+	"backyard_path",
+	"storage_hut",
+	"abandoned_house",
+]
 
 const ZONE_THOUGHTS: Dictionary = {
 	"pinas_house": {
@@ -116,8 +152,9 @@ var _spawned_players: Dictionary = {}
 var _is_finding_partner: bool = false
 var _current_open_panel: String = ""
 var _is_animating: bool = false
-var _ledger_pages: Array[Dictionary] = []
-var _current_ledger_page: int = 0
+var _active_zone: String = ""
+var _bookmark_buttons: Dictionary = {}
+var _instruction_sprites: Dictionary = {}
 var _ledger_page_animating: bool = false
 var _quest_objective_labels: Dictionary = {}
 var _quest_objective_texts: Dictionary = {}
@@ -140,8 +177,7 @@ func _ready() -> void:
 	_setup_ui_controls()
 	_setup_map_layer()
 	_setup_quest_objectives()
-	_setup_forest_ledger_navigation()
-	_refresh_forest_ledger_pages()
+	_setup_ledger_bookmarks()
 	_connect_portal_signals()
 	_setup_zone_completion_indicators()
 	_refresh_briefcase_display()
@@ -201,6 +237,8 @@ func _connect_signals() -> void:
 		GameState.zone_visited.connect(_on_zone_visited)
 	if not GameState.briefcase_updated.is_connected(_on_briefcase_updated):
 		GameState.briefcase_updated.connect(_on_briefcase_updated)
+	if not GameState.all_clues_collected.is_connected(_on_all_clues_collected):
+		GameState.all_clues_collected.connect(_on_all_clues_collected)
 	if touch_controls and touch_controls.has_signal("pause_pressed"):
 		if not touch_controls.pause_pressed.is_connected(_on_pause_button_pressed):
 			touch_controls.pause_pressed.connect(_on_pause_button_pressed)
@@ -549,15 +587,14 @@ func _setup_ui_controls() -> void:
 		push_error("[ForestHub] TouchControls not found")
 		return
 
-	## [node_name, visible, handler] — Callable() means visible-only, no signal
 	_touch_controls_default_layer = touch_controls.layer
 
 	var button_configs := [
-		["Map", true, _on_map_button_pressed],
-		["Ledger", is_sidekick, _on_ledger_button_pressed],
+		["Map",         true,        _on_map_button_pressed],
+		["Ledger",      is_sidekick, _on_ledger_button_pressed],
 		["Briefcase",   is_sidekick, _on_briefcase_button_pressed],
-		["FindPartner", true, _on_find_partner_pressed],
-		["Jump", false, Callable()],
+		["FindPartner", true,        _on_find_partner_pressed],
+		["Jump",        false,       Callable()],
 	]
 
 	for cfg in button_configs:
@@ -598,8 +635,8 @@ func _on_briefcase_button_pressed() -> void:
 
 func _open_panel(panel_name: String) -> void:
 	match panel_name:
-		"map": _open_map()
-		"ledger": _open_ledger()
+		"map":       _open_map()
+		"ledger":    _open_ledger()
 		"briefcase": _open_briefcase()
 	_current_open_panel = panel_name
 
@@ -645,7 +682,6 @@ func _open_map() -> void:
 		_start_map_marker_animations())
 
 
-
 func _close_map(animate: bool = true) -> void:
 	if not map_layer:
 		return
@@ -682,12 +718,10 @@ func _close_map(animate: bool = true) -> void:
 func _open_ledger() -> void:
 	if not ledger_panel:
 		return
-	_refresh_forest_ledger_pages()
-	_show_forest_ledger_page(_current_ledger_page, false)
+	_refresh_ledger_display()
 	_is_animating = true
 	ledger_panel.visible = true
 	ledger_panel.scale = LEDGER_CLOSED_SCALE
-	ledger_panel.pivot_offset = ledger_panel.size / 2
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_ELASTIC)
 	tween.set_ease(Tween.EASE_OUT)
@@ -747,133 +781,218 @@ func _close_briefcase(animate: bool = true) -> void:
 
 # ─── LEDGER ──────────────────────────────────────────────────────────────────
 
-func _setup_forest_ledger_navigation() -> void:
-	_connect_button_once(forest_prev_page_button, _on_forest_prev_page_pressed)
-	_connect_button_once(forest_next_page_button, _on_forest_next_page_pressed)
-
-
-func _connect_button_once(btn: Button, handler: Callable) -> void:
-	if is_instance_valid(btn) and not btn.pressed.is_connected(handler):
-		btn.pressed.connect(handler)
-
-
-func _refresh_forest_ledger_pages() -> void:
-	_ledger_pages.clear()
-	var entries: Array = PuzzleManager.get_unlocked_global_ledger_entries()
-	if entries.is_empty():
-		_ledger_pages.append({
-			"title": "Ledger", "left_header": "Notes",
-			"left_body": LEDGER_EMPTY_TEXT, "right_header": "", "right_body": "",
-		})
-	else:
-		for entry in entries:
-			_ledger_pages.append(_convert_entry_to_book_page(entry))
-	_current_ledger_page = clamp(_current_ledger_page, 0, max(_ledger_pages.size() - 1, 0))
-
-
-func _convert_entry_to_book_page(entry: Dictionary) -> Dictionary:
-	var layout: String = str(entry.get("layout", "single_body"))
-	if layout == "two_column":
-		return {
-			"title": str(entry.get("zone_name", entry.get("title", "Ledger"))),
-			"left_header":  str(entry.get("left_header", "")),
-			"left_body": str(entry.get("left_body", "")),
-			"right_header": str(entry.get("right_header", "")),
-			"right_body":   str(entry.get("right_body", "")),
-		}
-	var body_text := str(entry.get("body", ""))
-	var split_pages := _split_body_into_book_pages(body_text)
-	return {
-		"title": str(entry.get("zone_name", entry.get("title", "Ledger"))),
-		"left_header":  str(entry.get("title", "Notes")),
-		"left_body": str(split_pages.get("left", "")),
-		"right_header": "Example" if str(split_pages.get("right", "")) != "" else "",
-		"right_body":   str(split_pages.get("right", "")),
+func _setup_ledger_bookmarks() -> void:
+	_bookmark_buttons = {
+		"pinas_house":     _bookmark_pinas,
+		"old_well":        _bookmark_oldwell,
+		"backyard_path":   _bookmark_backyard,
+		"storage_hut":     _bookmark_storage,
+		"abandoned_house": _bookmark_abandoned,
+	}
+	_instruction_sprites = {
+		"pinas_house":     _ins_pinas,
+		"old_well":        _ins_oldwell,
+		"backyard_path":   _ins_backyard,
+		"storage_hut":     _ins_storage,
+		"abandoned_house": _ins_abandoned,
 	}
 
+	# Wire all bookmark buttons. All tabs are always pressable so the player
+	# can navigate to any page. Incomplete zones will show the empty-ledger
+	# panel instead of an instruction sprite.
+	for zone_name in _bookmark_buttons.keys():
+		var btn: TextureButton = _bookmark_buttons[zone_name]
+		if not is_instance_valid(btn):
+			continue
+		btn.texture_normal  = BOOKMARK_INACTIVE_TEXTURES[zone_name]
+		btn.texture_pressed = BOOKMARK_ACTIVE_TEXTURES[zone_name]
+		btn.texture_hover   = BOOKMARK_ACTIVE_TEXTURES[zone_name]
+		btn.disabled = false
+		if not btn.pressed.is_connected(_on_bookmark_pressed.bind(zone_name)):
+			btn.pressed.connect(_on_bookmark_pressed.bind(zone_name))
 
-func _split_body_into_book_pages(body_text: String) -> Dictionary:
-	var sections := body_text.split("\n\n", false)
-	if sections.size() <= 1:
-		return {"left": body_text, "right": ""}
-	var midpoint := int(ceil(float(sections.size()) / 2.0))
-	var left_parts: Array[String] = []
-	var right_parts: Array[String] = []
-	for i in range(sections.size()):
-		if i < midpoint:
-			left_parts.append(sections[i])
-		else:
-			right_parts.append(sections[i])
-	return {"left": "\n\n".join(left_parts), "right": "\n\n".join(right_parts)}
+	# Seed the empty-ledger label text.
+	if is_instance_valid(_empty_ledger):
+		var lbl := _empty_ledger.get_node_or_null("Label") as Label
+		if is_instance_valid(lbl):
+			lbl.text = "Complete a zone to view their instructions."
+
+	_refresh_ledger_display()
 
 
-func _show_forest_ledger_page(page_index: int, animate: bool = true) -> void:
-	if _ledger_pages.is_empty():
+func _refresh_ledger_display() -> void:
+	var completed_zones: Array[String] = []
+
+	for zone_name in _bookmark_buttons.keys():
+		var btn: TextureButton = _bookmark_buttons.get(zone_name)
+		var is_completed := _is_ledger_zone_completed(zone_name)
+
+		if is_instance_valid(btn):
+			# All tabs remain pressable at all times. Incomplete ones navigate
+			# to the empty-ledger panel, completed ones show their instruction.
+			btn.disabled = false
+
+		if is_completed:
+			completed_zones.append(zone_name)
+
+	# Only reset _active_zone if it is completely unknown (not in ZONE_ORDER).
+	# An incomplete zone name is still a valid active selection — navigating to
+	# it shows the empty-ledger panel, which is correct behaviour.
+	if _active_zone.is_empty() or not ZONE_ORDER.has(_active_zone):
+		_active_zone = completed_zones[0] if not completed_zones.is_empty() else ""
+
+	_update_bookmark_textures()
+	_update_instruction_visibility()
+
+
+func _is_ledger_zone_completed(zone_name: String) -> bool:
+	return (
+		GameState.has_clue(zone_name)
+		or GameState.zones_status.get(zone_name, GameState.ZoneStatus.AVAILABLE) == GameState.ZoneStatus.COMPLETED
+	)
+
+
+func _on_bookmark_pressed(zone_name: String) -> void:
+	# Guard against re-pressing the already-active tab or mid-animation presses.
+	if _ledger_page_animating:
 		return
-	page_index = clamp(page_index, 0, _ledger_pages.size() - 1)
-	if animate and _ledger_page_animating:
+	if _active_zone == zone_name:
 		return
-	if not animate:
-		_current_ledger_page = page_index
-		_apply_forest_ledger_page(_ledger_pages[_current_ledger_page])
-		_update_forest_ledger_navigation()
-		if is_instance_valid(forest_ledger_control):
-			forest_ledger_control.scale = Vector2.ONE
-		return
+
+	var old_zone := _active_zone
+	_active_zone = zone_name
+	_update_bookmark_textures()
+	_animate_page_turn(old_zone, zone_name)
+
+
+## Animates a page turn between two zones.
+##
+## Direction logic:
+##   • new zone index > old zone index → "forward" turn  (page arrives from the right)
+##   • new zone index < old zone index → "backward" turn (page arrives from the left)
+##
+## Content logic:
+##   • completed zone  → shows its instruction Sprite2D
+##   • incomplete zone → shows _empty_ledger (Control) with the hint message
+##   • no prior zone ("") → no outgoing node, only incoming animates in
+##
+## Both Sprite2D (scale-x squeeze) and Control (position slide + alpha) nodes
+## are handled so the empty-ledger panel animates identically to an instruction page.
+func _animate_page_turn(old_zone: String, new_zone: String) -> void:
 	_ledger_page_animating = true
-	_current_ledger_page = page_index
-	if is_instance_valid(forest_ledger_control):
-		forest_ledger_control.pivot_offset = forest_ledger_control.size / 2
+
+	# ── Resolve outgoing / incoming nodes ────────────────────────────────────
+	var outgoing: CanvasItem = null
+	var incoming: CanvasItem = null
+
+	var old_completed := not old_zone.is_empty() and _is_ledger_zone_completed(old_zone)
+	var new_completed := _is_ledger_zone_completed(new_zone)
+
+	if old_completed:
+		outgoing = _instruction_sprites.get(old_zone) as CanvasItem
+	elif not old_zone.is_empty():
+		outgoing = _empty_ledger as CanvasItem
+
+	if new_completed:
+		incoming = _instruction_sprites.get(new_zone) as CanvasItem
+	else:
+		incoming = _empty_ledger as CanvasItem
+
+	# ── Determine turn direction ──────────────────────────────────────────────
+	var old_idx: int = ZONE_ORDER.find(old_zone)   # -1 when old_zone is ""
+	var new_idx: int = ZONE_ORDER.find(new_zone)
+	# Higher index = forward (page slides in from right).
+	var forward: bool = new_idx > old_idx
+	var slide_offset: float = 300.0   # px — tune to match your ledger width
+
+	# ── Prepare incoming node (invisible, displaced to entry side) ────────────
+	if is_instance_valid(incoming):
+		incoming.visible = true
+		incoming.modulate.a = 0.0
+		if incoming is Sprite2D:
+			(incoming as Sprite2D).scale = Vector2(0.05, 1.0)
+		elif incoming is Control:
+			(incoming as Control).position.x += (slide_offset if forward else -slide_offset)
+
+	# ── Build tween ───────────────────────────────────────────────────────────
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN_OUT)
-	if is_instance_valid(forest_ledger_control):
-		tween.tween_property(forest_ledger_control, "scale", Vector2(0.05, 1.0), LEDGER_PAGE_TURN_DURATION)
+
+	# Phase 1 — collapse / fade out the outgoing node.
+	if is_instance_valid(outgoing) and outgoing.visible:
+		if outgoing is Sprite2D:
+			tween.tween_property(outgoing, "scale:x", 0.0, LEDGER_PAGE_TURN_DURATION)
+		elif outgoing is Control:
+			tween.tween_property(outgoing, "modulate:a", 0.0, LEDGER_PAGE_TURN_DURATION)
+		else:
+			tween.tween_interval(LEDGER_PAGE_TURN_DURATION)
+	else:
+		tween.tween_interval(LEDGER_PAGE_TURN_DURATION)
+
+	# Phase 2 — hide outgoing, restore its state for next time.
 	tween.tween_callback(func():
-		_apply_forest_ledger_page(_ledger_pages[_current_ledger_page])
-		_update_forest_ledger_navigation())
-	if is_instance_valid(forest_ledger_control):
-		tween.tween_property(forest_ledger_control, "scale", Vector2.ONE, LEDGER_PAGE_TURN_DURATION)
+		if is_instance_valid(outgoing):
+			outgoing.visible = false
+			if outgoing is Sprite2D:
+				(outgoing as Sprite2D).scale = Vector2.ONE
+			elif outgoing is Control:
+				(outgoing as Control).modulate.a = 1.0
+
+		# When outgoing and incoming are the same node (_empty_ledger shown on
+		# both sides), keep it visible so the incoming phase can run.
+		if is_instance_valid(incoming):
+			incoming.visible = true
+	)
+
+	# Phase 3 — expand / slide in the incoming node.
+	if is_instance_valid(incoming):
+		if incoming is Sprite2D:
+			tween.tween_property(incoming, "scale:x", 1.0, LEDGER_PAGE_TURN_DURATION)
+			tween.parallel().tween_property(incoming, "modulate:a", 1.0, LEDGER_PAGE_TURN_DURATION)
+		elif incoming is Control:
+			var target_x: float = (incoming as Control).position.x - (slide_offset if forward else -slide_offset)
+			tween.tween_property(incoming, "position:x", target_x, LEDGER_PAGE_TURN_DURATION)
+			tween.parallel().tween_property(incoming, "modulate:a", 1.0, LEDGER_PAGE_TURN_DURATION)
+	else:
+		tween.tween_interval(LEDGER_PAGE_TURN_DURATION)
+
 	tween.tween_callback(func(): _ledger_page_animating = false)
 
 
-func _apply_forest_ledger_page(page_data: Dictionary) -> void:
-	var label_map := [
-		[forest_ledger_title_label, "title"],
-		[forest_ledger_left_header_label,  "left_header"],
-		[forest_ledger_left_body_label, "left_body"],
-		[forest_ledger_right_header_label, "right_header"],
-		[forest_ledger_right_body_label,   "right_body"],
-	]
-	for pair in label_map:
-		var lbl: Label = pair[0]
-		var key: String = pair[1]
-		if is_instance_valid(lbl):
-			lbl.text = str(page_data.get(key, ""))
+## Active tab uses the active texture; all others use the inactive texture.
+## All tabs remain enabled — only the texture changes to show which is selected.
+func _update_bookmark_textures() -> void:
+	for zone_name in _bookmark_buttons.keys():
+		var btn: TextureButton = _bookmark_buttons.get(zone_name)
+		if not is_instance_valid(btn):
+			continue
+		btn.texture_normal = (
+			BOOKMARK_ACTIVE_TEXTURES[zone_name]
+			if zone_name == _active_zone
+			else BOOKMARK_INACTIVE_TEXTURES[zone_name]
+		)
 
 
-func _update_forest_ledger_navigation() -> void:
-	var total := _ledger_pages.size()
-	if is_instance_valid(forest_page_indicator_label):
-		forest_page_indicator_label.text = "%d / %d" % [_current_ledger_page + 1, max(total, 1)]
-	_set_page_button_state(forest_prev_page_button, total > 1, _current_ledger_page <= 0)
-	_set_page_button_state(forest_next_page_button, total > 1, _current_ledger_page >= total - 1)
+## Shows the instruction sprite for the active completed zone,
+## or _empty_ledger when no zone is active / the active zone is incomplete.
+## All other instruction sprites are hidden.
+func _update_instruction_visibility() -> void:
+	for zone_name in _instruction_sprites.keys():
+		var sprite: Sprite2D = _instruction_sprites.get(zone_name)
+		if not is_instance_valid(sprite):
+			continue
+		sprite.visible = (zone_name == _active_zone) and _is_ledger_zone_completed(zone_name)
 
-
-func _set_page_button_state(btn: Button, should_show: bool, should_disabled: bool) -> void:
-	if is_instance_valid(btn):
-		btn.visible = should_show
-		btn.disabled = should_disabled
-
-
-func _on_forest_prev_page_pressed() -> void:
-	if not _ledger_page_animating and _current_ledger_page > 0:
-		_show_forest_ledger_page(_current_ledger_page - 1, true)
-
-
-func _on_forest_next_page_pressed() -> void:
-	if not _ledger_page_animating and _current_ledger_page < _ledger_pages.size() - 1:
-		_show_forest_ledger_page(_current_ledger_page + 1, true)
+	if is_instance_valid(_empty_ledger):
+		# Show empty-ledger when:
+		#   a) No zones completed yet (_active_zone is ""), OR
+		#   b) The currently selected tab belongs to an incomplete zone.
+		var show_empty: bool = (
+			_active_zone.is_empty()
+			or not _is_ledger_zone_completed(_active_zone)
+		)
+		_empty_ledger.visible = show_empty
 
 # ─── BRIEFCASE ───────────────────────────────────────────────────────────────
 
@@ -885,26 +1004,22 @@ func _refresh_briefcase_display() -> void:
 	if not is_instance_valid(briefcase_display):
 		push_error("[ForestHub] briefcase_display is invalid")
 		return
-
-	# State-driven
 	briefcase_display.visible = true
 	_update_forest_briefcase_clues()
-	
+
+
 func _update_forest_briefcase_clues() -> void:
 	if is_instance_valid(clue_ladle):
 		clue_ladle.visible = GameState.has_clue("pinas_house")
-
 	if is_instance_valid(clue_pineapple):
 		clue_pineapple.visible = GameState.has_clue("backyard_path")
-
 	if is_instance_valid(clue_eyes):
 		clue_eyes.visible = GameState.has_clue("old_well")
-
 	if is_instance_valid(clue_tiara):
 		clue_tiara.visible = GameState.has_clue("abandoned_house")
-
 	if is_instance_valid(clue_scroll):
 		clue_scroll.visible = GameState.has_clue("storage_hut")
+
 # ─── PORTALS ─────────────────────────────────────────────────────────────────
 
 func _connect_portal_signals() -> void:
@@ -912,22 +1027,16 @@ func _connect_portal_signals() -> void:
 		return
 	await get_tree().process_frame
 	for portal in portals.get_children():
-		# Transition signals — fire only when both players confirm entry together
 		if portal.has_signal("players_entering") and not portal.players_entering.is_connected(_on_players_entering_zone):
 			portal.players_entering.connect(_on_players_entering_zone)
 		if portal.has_signal("players_entered") and not portal.players_entered.is_connected(_on_players_entered_zone):
 			portal.players_entered.connect(_on_players_entered_zone)
-
-		# Zone thought trigger — portal IS the Area2D (see zone_portal.gd).
-		# body_entered fires per body individually; we filter to local player only.
 		if portal is Area2D:
 			var zone: String = (portal as Area2D).zone_name
 			if not portal.body_entered.is_connected(_on_zone_body_entered):
 				portal.body_entered.connect(_on_zone_body_entered.bind(zone))
 
 
-## Fires when any body enters a portal Area2D.
-## Filtered to the local player's own CharacterBody2D only.
 func _on_zone_body_entered(body: Node2D, zone_name: String) -> void:
 	if not body is CharacterBody2D:
 		return
@@ -941,23 +1050,21 @@ func _on_zone_body_entered(body: Node2D, zone_name: String) -> void:
 	_show_zone_thought(zone_name)
 
 
-## Fires when BOTH players have confirmed entry — used only for door animation.
 func _on_players_entering_zone(zone_name: String) -> void:
 	if is_instance_valid(touch_controls):
 		touch_controls.visible = false
-		
+
 	match zone_name:
-		"pinas_house": _animate_door(pinas_house_door, zone_name)
-		"storage_hut": _animate_door(storage_hut_door, zone_name)
+		"pinas_house":     _animate_door(pinas_house_door, zone_name)
+		"storage_hut":     _animate_door(storage_hut_door, zone_name)
 		"abandoned_house": _animate_door(abandoned_house_door, zone_name)
 
 
 func _on_players_entered_zone(zone_name: String) -> void:
 	if is_instance_valid(touch_controls):
 		touch_controls.visible = false
-		
-	var target_portal: Node = null
 
+	var target_portal: Node = null
 	for portal in portals.get_children():
 		if portal.zone_name == zone_name:
 			target_portal = portal
@@ -969,7 +1076,6 @@ func _on_players_entered_zone(zone_name: String) -> void:
 
 	GameState.mark_zone_visited(zone_name)
 	_refresh_map_progress()
-
 	target_portal.complete_zone_entry()
 
 
@@ -1035,9 +1141,10 @@ func _on_zone_completed(completed_zone: String) -> void:
 
 	_refresh_quest_objectives()
 	_refresh_map_progress()
+	_refresh_ledger_display()
+
 # ─── DIALOGUE ────────────────────────────────────────────────────────────────
-## One-time zone thought triggered when the local player walks into a portal.
-## Keys in ZONE_THOUGHTS must match portal.zone_name exactly (check Inspector).
+
 func _show_zone_thought(zone_name: String) -> void:
 	if not ZONE_THOUGHTS.has(zone_name):
 		return
@@ -1048,12 +1155,13 @@ func _show_zone_thought(zone_name: String) -> void:
 
 
 const ZONE_DISPLAY_NAMES: Dictionary = {
-	"pinas_house": "Pina's House",
-	"old_well": "Old Well",
-	"backyard_path": "Backyard Path",
-	"storage_hut": "Storage Hut",
+	"pinas_house":     "Pina's House",
+	"old_well":        "Old Well",
+	"backyard_path":   "Backyard Path",
+	"storage_hut":     "Storage Hut",
 	"abandoned_house": "Abandoned House",
 }
+
 
 func _show_zone_completed_thought(zone_name: String) -> void:
 	var is_detective := (NetworkManager.get_my_role() == "detective")
@@ -1064,20 +1172,17 @@ func _show_zone_completed_thought(zone_name: String) -> void:
 	_clear_dialogue()
 
 
-## Sets speaker label, clears text, makes panel visible.
 func _show_dialogue_panel(speaker: String) -> void:
 	if not is_inside_tree():
 		return
 	if not is_instance_valid(speaker_label) or not is_instance_valid(dialogue_label) or not is_instance_valid(dialogue_panel):
 		return
-
 	speaker_label.text = speaker
 	dialogue_label.text = ""
 	dialogue_panel.modulate.a = 1.0
 	dialogue_panel.visible = true
 
 
-## Streams text into dialogue_label character by character.
 func _typewrite(text: String) -> void:
 	if not is_inside_tree():
 		return
@@ -1093,58 +1198,46 @@ func _typewrite(text: String) -> void:
 			return
 		if not is_instance_valid(dialogue_label):
 			return
-
 		elapsed += get_process_delta_time()
 		if elapsed >= DIALOGUE_SPEED:
 			elapsed -= DIALOGUE_SPEED
 			char_index += 1
 			dialogue_label.text = text.substr(0, char_index)
-
 		var tree := get_tree()
 		if tree == null:
 			return
 		await tree.process_frame
 
 
-## Typewriter + hides panel when text finishes (manual-advance style).
 func _say(speaker: String, text: String) -> void:
 	if not is_inside_tree():
 		return
-
 	_show_dialogue_panel(speaker)
 	await _typewrite(text)
-
 	if not is_inside_tree():
 		return
 	if is_instance_valid(dialogue_panel):
 		dialogue_panel.visible = false
 
 
-## Typewriter + auto-dismisses after [hold] seconds.
 func _say_auto(speaker: String, text: String, hold: float) -> void:
 	if not is_inside_tree():
 		return
-
 	_show_dialogue_panel(speaker)
 	await _typewrite(text)
-
 	if not is_inside_tree():
 		return
-
 	await _wait(hold)
 
 
 func _wait(seconds: float) -> void:
 	if not is_inside_tree():
 		return
-
 	var elapsed: float = 0.0
 	while elapsed < seconds:
 		if not is_inside_tree():
 			return
-
 		elapsed += get_process_delta_time()
-
 		var tree := get_tree()
 		if tree == null:
 			return
@@ -1242,7 +1335,6 @@ func _unlock_player_movement() -> void:
 	if is_instance_valid(player) and player.has_method("set_movement_locked"):
 		player.set_movement_locked(false)
 
-
 # ─── FOREST TUTORIAL ─────────────────────────────────────────────────────────
 
 func _setup_forest_tutorial() -> void:
@@ -1290,12 +1382,11 @@ func _on_tutorial_closed() -> void:
 	var tutorial := get_node_or_null("ForestTutorial")
 	if tutorial:
 		tutorial.queue_free()
-
-	# Restore touch controls
 	if touch_controls:
 		touch_controls.visible = true
-	
 	get_tree().paused = false
+
+# ─── MAP LAYER ───────────────────────────────────────────────────────────────
 
 func _setup_map_layer() -> void:
 	if not map_layer:
@@ -1450,12 +1541,12 @@ func _start_map_marker_animations() -> void:
 
 func _play_map_marker_loop(marker: Sprite2D, is_artifact: bool, marker_index: int) -> void:
 	_cache_map_visual_state(marker)
-	var base_scale: Vector2 = _get_map_visual_base_scale(marker)
-	var base_modulate: Color = _get_map_visual_base_modulate(marker)
-	var base_rotation: float = marker.get_meta("map_base_rotation", marker.rotation) as float
-	var pulse_scale := base_scale * (1.14 if is_artifact else 1.08)
-	var pulse_color := Color(1.0, 0.90, 0.48, base_modulate.a) if is_artifact else Color(1.0, 1.0, 1.0, base_modulate.a)
-	var pulse_duration := 0.34 if is_artifact else 0.42
+	var base_scale: Vector2    = _get_map_visual_base_scale(marker)
+	var base_modulate: Color   = _get_map_visual_base_modulate(marker)
+	var base_rotation: float   = marker.get_meta("map_base_rotation", marker.rotation) as float
+	var pulse_scale            := base_scale * (1.14 if is_artifact else 1.08)
+	var pulse_color            := Color(1.0, 0.90, 0.48, base_modulate.a) if is_artifact else Color(1.0, 1.0, 1.0, base_modulate.a)
+	var pulse_duration         := 0.34 if is_artifact else 0.42
 	var tween := create_tween()
 	tween.set_loops()
 	tween.tween_interval(float(marker_index) * 0.05)
@@ -1485,65 +1576,60 @@ func _stop_map_marker_animations() -> void:
 		var marker_item := marker as CanvasItem
 		if is_instance_valid(marker_item):
 			_restore_map_visual_state(marker_item)
-	
+
+
 func _setup_map_progress_markers() -> void:
 	_map_zone_markers = {
-		"pinas_house": map_ph_marker,
-		"backyard_path": map_bp_marker,
-		"old_well": map_ow_marker,
-		"storage_hut": map_sh_marker,
+		"pinas_house":     map_ph_marker,
+		"backyard_path":   map_bp_marker,
+		"old_well":        map_ow_marker,
+		"storage_hut":     map_sh_marker,
 		"abandoned_house": map_ah_marker,
 	}
-
 	_map_artifact_markers = {
-		"pinas_house": art_ladle_marker,
-		"backyard_path": art_pineapple_marker,
-		"old_well": art_eye_marker,
-		"storage_hut": art_scroll_marker,
+		"pinas_house":     art_ladle_marker,
+		"backyard_path":   art_pineapple_marker,
+		"old_well":        art_eye_marker,
+		"storage_hut":     art_scroll_marker,
 		"abandoned_house": art_tiara_marker,
 	}
-
 	_refresh_map_progress()
 
 
 func _refresh_map_progress() -> void:
 	for zone_name in _map_zone_markers.keys():
 		var zone_marker: Sprite2D = _map_zone_markers.get(zone_name, null) as Sprite2D
-
 		if is_instance_valid(zone_marker):
 			zone_marker.visible = GameState.has_zone_visited(zone_name)
 
 	for zone_name in _map_artifact_markers.keys():
 		var artifact_marker: Sprite2D = _map_artifact_markers.get(zone_name, null) as Sprite2D
-
 		if not is_instance_valid(artifact_marker):
 			continue
-
 		var is_completed: bool = (
 			GameState.has_clue(zone_name)
 			or GameState.zones_status.get(zone_name, GameState.ZoneStatus.AVAILABLE) == GameState.ZoneStatus.COMPLETED
 		)
-
 		artifact_marker.visible = is_completed
 
 
 func _on_zone_visited(_zone_name: String) -> void:
 	_refresh_map_progress()
-		
+
+# ─── QUEST OBJECTIVES ────────────────────────────────────────────────────────
+
 func _setup_quest_objectives() -> void:
 	_quest_objective_labels = {
-		"pinas_house": objective_label_1,
-		"backyard_path": objective_label_2,
-		"old_well": objective_label_3,
-		"storage_hut": objective_label_4,
+		"pinas_house":     objective_label_1,
+		"backyard_path":   objective_label_2,
+		"old_well":        objective_label_3,
+		"storage_hut":     objective_label_4,
 		"abandoned_house": objective_label_5,
 	}
-
 	for zone_name in _quest_objective_labels.keys():
 		var label: Label = _quest_objective_labels[zone_name]
 		if is_instance_valid(label):
 			_quest_objective_texts[zone_name] = label.text
-
 	_refresh_quest_objectives()
 
 
@@ -1552,10 +1638,8 @@ func _refresh_quest_objectives() -> void:
 		var label: Label = _quest_objective_labels[zone_name]
 		if not is_instance_valid(label):
 			continue
-
 		var original_text: String = str(_quest_objective_texts.get(zone_name, label.text))
 		var completed := _is_quest_zone_completed(zone_name)
-
 		if completed:
 			label.text = "✓ " + _make_strikethrough(original_text)
 			label.modulate = Color(0.6, 0.6, 0.6, 1.0)
@@ -1567,19 +1651,26 @@ func _refresh_quest_objectives() -> void:
 func _is_quest_zone_completed(zone_name: String) -> bool:
 	if GameState.has_clue(zone_name):
 		return true
-
 	return GameState.zones_status.get(zone_name, GameState.ZoneStatus.AVAILABLE) == GameState.ZoneStatus.COMPLETED
 
 
 func _make_strikethrough(text: String) -> String:
 	var result := ""
-
 	for i in range(text.length()):
 		var character := text.substr(i, 1)
-
 		if character == " ":
 			result += character
 		else:
 			result += character + "\u0336"
-
 	return result
+
+func _on_all_clues_collected() -> void:
+	if not multiplayer.is_server():
+		return
+	_lock_player_movement()
+	_notify_transition_to_bakunawa.rpc()
+
+@rpc("authority", "reliable", "call_local")
+func _notify_transition_to_bakunawa() -> void:
+	await get_tree().create_timer(0.5).timeout
+	get_tree().change_scene_to_file(BAKUNAWA_SCENE)

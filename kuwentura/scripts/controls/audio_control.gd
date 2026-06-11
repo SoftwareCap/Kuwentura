@@ -6,6 +6,7 @@ enum MusicTrack {
 	FOREST_HUB,
 	PINAS_HOUSE,
 	BACKYARD_PATH,
+	BAKUNAWA,
 }
 
 # Maps each track to its resource path — single source of truth for all paths
@@ -15,6 +16,7 @@ const TRACK_PATHS: Dictionary = {
 	MusicTrack.FOREST_HUB: "res://assets/audios/ForestBG.mp3",
 	MusicTrack.PINAS_HOUSE: "res://assets/audios/PinasHouseBG.mp3",
 	MusicTrack.BACKYARD_PATH: "res://assets/audios/BackyardBG.mp3",
+	MusicTrack.BAKUNAWA: "res://assets/audios/BakunawaBG.mp3",
 }
 
 @onready var _player: AudioStreamPlayer = $AudioStreamPlayer
