@@ -1,4 +1,4 @@
-[gd_scene load_steps=70 format=4 uid="uid://c65bu18udl64v"]
+[gd_scene load_steps=85 format=4 uid="uid://c65bu18udl64v"]
 
 [ext_resource type="Texture2D" uid="uid://k60h4yhhde0x" path="res://assets/backgrounds/forest.png" id="2_87r7r"]
 [ext_resource type="Texture2D" uid="uid://d06a48u2atl4o" path="res://assets/sprites/places/pinasHouseZone.png" id="2_anhpr"]
@@ -26,7 +26,7 @@
 [ext_resource type="Texture2D" uid="uid://bhpd04e8tv3xe" path="res://assets/sprites/places/abandonedHouseOpenDoor.png" id="12_qlgbp"]
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="13_cpdo7"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="14_wp30c"]
-[ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="15_cpdo7"]
+[ext_resource type="Texture2D" uid="uid://djlktpioqbhaa" path="res://assets/sprites/ledger/ledgerOpen.png" id="15_cpdo7"]
 [ext_resource type="Texture2D" uid="uid://dfy6d3tmvitny" path="res://assets/sprites/places/abandonedHouseIndicator.png" id="15_lnjeo"]
 [ext_resource type="Texture2D" uid="uid://bx6q2amuwpu5h" path="res://assets/sprites/clues/eyeClue.png" id="15_pr8q8"]
 [ext_resource type="Texture2D" uid="uid://bp3dqrgc2d337" path="res://assets/sprites/clues/tiaraClue.png" id="16_7oiuu"]
@@ -53,6 +53,21 @@
 [ext_resource type="Texture2D" uid="uid://bqjfuyc087ve0" path="res://assets/sprites/quest/yellow_pineapple.png" id="51_ovw54"]
 [ext_resource type="Texture2D" uid="uid://njvnr2nw6os8" path="res://assets/sprites/quest/yellow_scroll.png" id="52_7fj6x"]
 [ext_resource type="Texture2D" uid="uid://c188o656x7dju" path="res://assets/sprites/quest/yellow_tiara.png" id="53_nt1ne"]
+[ext_resource type="Texture2D" uid="uid://doqn3riuibwhs" path="res://assets/sprites/ledger/bookmarks/active_abandonedHouse.png" id="ah_bm_act"]
+[ext_resource type="Texture2D" uid="uid://lmxtatw3ij5k" path="res://assets/sprites/ledger/bookmarks/inactive_abandonedHouse.png" id="ah_bm_ina"]
+[ext_resource type="Texture2D" uid="uid://ds2g6tpbx3uf3" path="res://assets/sprites/ledger/abandonedhouse_instructions.png" id="ah_ins"]
+[ext_resource type="Texture2D" uid="uid://doa2lnt7p6frh" path="res://assets/sprites/ledger/bookmarks/active_backyardPath.png" id="bp_bm_act"]
+[ext_resource type="Texture2D" uid="uid://b0vkiv2ewp4fs" path="res://assets/sprites/ledger/bookmarks/inactive_backyardPath.png" id="bp_bm_ina"]
+[ext_resource type="Texture2D" uid="uid://b1tucxrdoq38v" path="res://assets/sprites/ledger/backyardpath_instructions.png" id="bp_ins"]
+[ext_resource type="Texture2D" uid="uid://babm4dtq3kk25" path="res://assets/sprites/ledger/bookmarks/active_oldWell.png" id="ow_bm_act"]
+[ext_resource type="Texture2D" uid="uid://cigwf8yxcjnes" path="res://assets/sprites/ledger/bookmarks/inactive_oldWell.png" id="ow_bm_ina"]
+[ext_resource type="Texture2D" uid="uid://bguqoumbmknw5" path="res://assets/sprites/ledger/oldwell_instructions.png" id="ow_ins"]
+[ext_resource type="Texture2D" uid="uid://rg3h8wpi7nbh" path="res://assets/sprites/ledger/bookmarks/active_pinasHouse.png" id="ph_bm_act"]
+[ext_resource type="Texture2D" uid="uid://bjxq2pmv4gnvn" path="res://assets/sprites/ledger/bookmarks/inactive_pinasHouse.png" id="ph_bm_ina"]
+[ext_resource type="Texture2D" uid="uid://3r3bvvojbklk" path="res://assets/sprites/ledger/pinashouse_instructions.png" id="ph_ins"]
+[ext_resource type="Texture2D" uid="uid://c7sak5ms3ly0f" path="res://assets/sprites/ledger/bookmarks/active_storageHut.png" id="sh_bm_act"]
+[ext_resource type="Texture2D" uid="uid://cvkpxjx5hxar6" path="res://assets/sprites/ledger/bookmarks/inactive_storageHut.png" id="sh_bm_ina"]
+[ext_resource type="Texture2D" uid="uid://njoeyyh3k21d" path="res://assets/sprites/ledger/storagehut_instructions.png" id="sh_ins"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6nmbo"]
 size = Vector2(1.0549998, 9.77)
@@ -99,7 +114,7 @@ corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4f0r4"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jxga6"]
 texture = ExtResource("2_k5ulr")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
@@ -898,7 +913,7 @@ texture = ExtResource("2_k5ulr")
 [sub_resource type="TileSet" id="TileSet_dyw7g"]
 physics_layer_0/collision_layer = 1
 physics_layer_0/collision_mask = 2
-sources/0 = SubResource("TileSetAtlasSource_4f0r4")
+sources/0 = SubResource("TileSetAtlasSource_jxga6")
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rbch1"]
 
@@ -1677,122 +1692,131 @@ vertical_alignment = 1
 
 [node name="SidekickLayer" type="CanvasLayer" parent="."]
 
-[node name="Ledger" type="Panel" parent="SidekickLayer"]
-visible = false
-anchors_preset = 8
+[node name="Ledger" type="Node2D" parent="SidekickLayer"]
+
+[node name="OpenEmptyLedger" type="Panel" parent="SidekickLayer/Ledger"]
+z_index = 4
+anchors_preset = 5
 anchor_left = 0.5
-anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -393.0
-offset_top = -331.0
-offset_right = 519.0
-offset_bottom = 501.0
+offset_left = 286.0
+offset_top = -26.0
+offset_right = 953.0
+offset_bottom = 640.0
 grow_horizontal = 2
-grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_rbch1")
 
-[node name="Control" type="Control" parent="SidekickLayer/Ledger"]
+[node name="Bookmarks" type="Control" parent="SidekickLayer/Ledger"]
+z_index = -1
+layout_mode = 3
+anchors_preset = 0
+
+[node name="PHBookmark" type="TextureButton" parent="SidekickLayer/Ledger/Bookmarks"]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 339.0
+offset_top = 38.0
+offset_right = 639.0
+offset_bottom = 338.0
 grow_horizontal = 2
-grow_vertical = 2
+scale = Vector2(0.4, 0.4)
+texture_normal = ExtResource("ph_bm_ina")
+texture_pressed = ExtResource("ph_bm_act")
+texture_disabled = ExtResource("ph_bm_ina")
+texture_focused = ExtResource("ph_bm_act")
 
-[node name="LedgerTitle" type="Label" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 160.0
-offset_top = 200.0
-offset_right = 431.0
-offset_bottom = 251.0
-size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_font_sizes/font_size = 21
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="OWBookmark" type="TextureButton" parent="SidekickLayer/Ledger/Bookmarks"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 404.0
+offset_top = 39.0
+offset_right = 704.0
+offset_bottom = 339.0
+grow_horizontal = 2
+scale = Vector2(0.4, 0.4)
+texture_normal = ExtResource("ow_bm_ina")
+texture_pressed = ExtResource("ow_bm_act")
+texture_disabled = ExtResource("ow_bm_ina")
+texture_focused = ExtResource("ow_bm_act")
 
-[node name="LedgerLeftHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 173.0
-offset_top = 270.0
-offset_right = 433.0
-offset_bottom = 330.0
-size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_font_sizes/font_size = 19
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="BPBookmark" type="TextureButton" parent="SidekickLayer/Ledger/Bookmarks"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 471.0
+offset_top = 37.0
+offset_right = 771.0
+offset_bottom = 337.0
+grow_horizontal = 2
+scale = Vector2(0.4, 0.4)
+texture_normal = ExtResource("bp_bm_ina")
+texture_pressed = ExtResource("bp_bm_act")
+texture_disabled = ExtResource("bp_bm_ina")
+texture_focused = ExtResource("bp_bm_act")
 
-[node name="LedgerLeftBody" type="Label" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 152.0
-offset_top = 339.0
-offset_right = 446.0
-offset_bottom = 482.0
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_font_sizes/font_size = 18
-horizontal_alignment = 1
+[node name="SHBookmark" type="TextureButton" parent="SidekickLayer/Ledger/Bookmarks"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 638.99994
+offset_top = 37.0
+offset_right = 938.99994
+offset_bottom = 337.0
+grow_horizontal = 2
+scale = Vector2(0.4, 0.4)
+texture_normal = ExtResource("sh_bm_ina")
+texture_pressed = ExtResource("sh_bm_act")
+texture_disabled = ExtResource("sh_bm_ina")
+texture_focused = ExtResource("sh_bm_act")
 
-[node name="LedgerRightHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 478.0
-offset_top = 208.0
-offset_right = 753.0
-offset_bottom = 276.0
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_font_sizes/font_size = 19
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="AHBookmark" type="TextureButton" parent="SidekickLayer/Ledger/Bookmarks"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 710.0
+offset_top = 35.0
+offset_right = 1010.0
+offset_bottom = 335.0
+grow_horizontal = 2
+scale = Vector2(0.4, 0.4)
+texture_normal = ExtResource("ah_bm_ina")
+texture_pressed = ExtResource("ah_bm_act")
+texture_disabled = ExtResource("ah_bm_ina")
+texture_focused = ExtResource("ah_bm_act")
 
-[node name="LedgerRightBody" type="Label" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 478.0
-offset_top = 274.0
-offset_right = 739.0
-offset_bottom = 492.0
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
-theme_override_font_sizes/font_size = 18
-horizontal_alignment = 1
+[node name="ZoneInstructions" type="Node2D" parent="SidekickLayer/Ledger"]
 
-[node name="PrevPageButton" type="Button" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 36.0
-offset_top = 275.0
-offset_right = 90.0
-offset_bottom = 393.0
-theme_override_colors/font_color = Color(0.9901666, 0.9396903, 0.92559636, 1)
-theme_override_font_sizes/font_size = 80
-text = "<"
-flat = true
-expand_icon = true
+[node name="PHInstruction" type="Sprite2D" parent="SidekickLayer/Ledger/ZoneInstructions"]
+position = Vector2(620, 335.0001)
+scale = Vector2(0.32592773, 0.32592773)
+texture = ExtResource("ph_ins")
 
-[node name="NextPageButton" type="Button" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 851.0
-offset_top = 273.0
-offset_right = 905.0
-offset_bottom = 391.0
-theme_override_colors/font_color = Color(0.9901666, 0.9396903, 0.92559636, 1)
-theme_override_font_sizes/font_size = 80
-text = ">"
-flat = true
-expand_icon = true
+[node name="OWInstruction" type="Sprite2D" parent="SidekickLayer/Ledger/ZoneInstructions"]
+position = Vector2(620, 335.0001)
+scale = Vector2(0.32592773, 0.32592773)
+texture = ExtResource("ow_ins")
 
-[node name="PageIndicator" type="Label" parent="SidekickLayer/Ledger/Control"]
-layout_mode = 0
-offset_left = 661.0
-offset_top = 174.0
-offset_right = 759.0
-offset_bottom = 208.0
-theme_override_colors/font_color = Color(0.44313726, 0.22745098, 0.16862746, 1)
-theme_override_font_sizes/font_size = 25
-text = "1/1"
-horizontal_alignment = 2
-vertical_alignment = 1
+[node name="BPInstruction" type="Sprite2D" parent="SidekickLayer/Ledger/ZoneInstructions"]
+position = Vector2(620, 335.0001)
+scale = Vector2(0.32592773, 0.32592773)
+texture = ExtResource("bp_ins")
+
+[node name="SHInstruction" type="Sprite2D" parent="SidekickLayer/Ledger/ZoneInstructions"]
+position = Vector2(620, 335.0001)
+scale = Vector2(0.32592773, 0.32592773)
+texture = ExtResource("sh_ins")
+
+[node name="AHInstruction" type="Sprite2D" parent="SidekickLayer/Ledger/ZoneInstructions"]
+position = Vector2(620, 335.0001)
+scale = Vector2(0.32592773, 0.32592773)
+texture = ExtResource("ah_ins")
 
 [node name="Briefcase" type="Panel" parent="SidekickLayer"]
 visible = false

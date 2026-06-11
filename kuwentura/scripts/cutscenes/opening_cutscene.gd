@@ -346,7 +346,7 @@ func _say(dlabel: Label, nlabel: Label, speaker: String, text: String) -> void:
 			break
 
 	_typing_done = true
-	skip_button.text = "Click to continue..."
+	skip_button.text = "Click to continue.."
 	_skip_pressed = false
 
 	while not _skip_pressed:

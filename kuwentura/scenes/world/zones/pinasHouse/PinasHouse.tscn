@@ -41,7 +41,7 @@
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="35_dcipd"]
 [ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="36_u6sy3"]
 [ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/clues/ladleClue.png" id="37_dcipd"]
-[ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/players/ledgerOpen.png" id="39_0s51p"]
+[ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/ledger/ledgerOpen.png" id="39_0s51p"]
 [ext_resource type="Texture2D" uid="uid://bvn74hwrf4gx2" path="res://assets/sprites/tracker/pinasHouse/defaultPH.png" id="39_ra7mo"]
 [ext_resource type="VideoStream" uid="uid://cf0vo7ifmgiha" path="res://assets/sprites/cutscene/zoneEnding/pinasHouse.ogv" id="40_fvin0"]
 
