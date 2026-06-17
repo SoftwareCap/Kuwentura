@@ -1,10 +1,11 @@
-[gd_scene load_steps=85 format=4 uid="uid://c65bu18udl64v"]
+[gd_scene load_steps=86 format=4 uid="uid://c65bu18udl64v"]
 
 [ext_resource type="Texture2D" uid="uid://k60h4yhhde0x" path="res://assets/backgrounds/forest.png" id="2_87r7r"]
 [ext_resource type="Texture2D" uid="uid://d06a48u2atl4o" path="res://assets/sprites/places/pinasHouseZone.png" id="2_anhpr"]
 [ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="2_jxga6"]
 [ext_resource type="Texture2D" uid="uid://fyaaxc6p5k04" path="res://assets/tiles/forestPathTilemap.png" id="2_k5ulr"]
 [ext_resource type="Script" uid="uid://b57klslahartq" path="res://scripts/world/hub/zone_portal.gd" id="3_dyw7g"]
+[ext_resource type="Script" uid="uid://cns4o5inkkkeb" path="res://scenes/world/hub/partner_arrow.gd" id="3_p1k6o"]
 [ext_resource type="Texture2D" uid="uid://bhj0bkd0e3ina" path="res://assets/sprites/places/pinasHouseIndicator.png" id="5_bh328"]
 [ext_resource type="Texture2D" uid="uid://p18vin8nbajb" path="res://assets/sprites/places/oldWellZone.png" id="5_ggw0p"]
 [ext_resource type="Texture2D" uid="uid://co67v77hnrb2d" path="res://assets/sprites/places/pinasHouseOpenDoor.png" id="5_wp30c"]
@@ -966,6 +967,11 @@ theme_override_font_sizes/font_size = 20
 text = "Code:"
 horizontal_alignment = 1
 
+[node name="PartnerLocatorLayer" type="CanvasLayer" parent="."]
+
+[node name="PartnerArrow" type="Node2D" parent="PartnerLocatorLayer"]
+script = ExtResource("3_p1k6o")
+
 [node name="Boundaries" type="Node2D" parent="."]
 
 [node name="LeftWall" type="StaticBody2D" parent="Boundaries"]
@@ -1691,6 +1697,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="SidekickLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Ledger" type="Node2D" parent="SidekickLayer"]
 
@@ -1879,6 +1886,7 @@ scale = Vector2(0.053499985, 0.051999994)
 texture = ExtResource("17_hp607")
 
 [node name="ForestTutorial" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Sprite2D" type="Sprite2D" parent="ForestTutorial"]
 position = Vector2(737.7778, 323)
@@ -1894,6 +1902,7 @@ scale = Vector2(0.5, 0.5)
 texture_normal = ExtResource("32_ynpm6")
 
 [node name="DialogueLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="DialoguePanel" type="Panel" parent="DialogueLayer"]
 offset_left = 273.0
@@ -1936,6 +1945,7 @@ vertical_alignment = 1
 autowrap_mode = 3
 
 [node name="MapLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Map" type="Sprite2D" parent="MapLayer"]
 z_index = 25
