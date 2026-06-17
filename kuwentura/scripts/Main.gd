@@ -5,7 +5,7 @@ extends Node2D
 const SCENE_PLAZA: String = "res://scenes/world/hub/Plaza.tscn"
 const SCENE_ZONE_PATH: String = "res://scenes/world/zones/%s/%s.tscn"
 
-@onready var hud: Node = $HUD
+@onready var hud: Node = get_node_or_null("HUD")
 
 var puzzle_ui: Control = null
 

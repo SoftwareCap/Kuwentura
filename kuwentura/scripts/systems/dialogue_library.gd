@@ -1,3 +1,4 @@
+##dialogue_library.gd
 extends Node
 class_name DialogueLibrary
 

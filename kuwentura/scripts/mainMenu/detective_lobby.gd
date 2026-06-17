@@ -11,6 +11,7 @@ const FADE_DURATION := 0.2
 const SETTINGS_FILE := "user://settings.json"
 const SCENE_MAIN_MENU := "res://scenes/mainMenu/MainMenu.tscn"
 const SCENE_OPENING_CUTSCENE := "res://scenes/cutscenes/opening/OpeningCutscene.tscn"
+const SCENE_MOBILE_OPENING_CUTSCENE := "res://scenes/cutscenes/opening/MobileOpeningCutscene.tscn"
 
 # UI colors — named so intent is visible at every call site
 const COLOR_NORMAL := Color(1, 1, 1, 1)
@@ -546,13 +547,19 @@ func _on_game_started(_checkpoint: String = "") -> void:
 
 	if not is_instance_valid(self) or not is_inside_tree():
 		return
-	get_tree().change_scene_to_file(SCENE_OPENING_CUTSCENE)
+	get_tree().change_scene_to_file(_get_opening_cutscene_scene())
 
 
 func _on_connection_failed(error: String) -> void:
 	if is_instance_valid(status_label):
 		status_label.text = "Connection failed: %s" % error
 		status_label.modulate = COLOR_ERROR
+
+
+func _get_opening_cutscene_scene() -> String:
+	if CutsceneHelper.is_mobile_platform():
+		return SCENE_MOBILE_OPENING_CUTSCENE
+	return SCENE_OPENING_CUTSCENE
 
 
 # SETTINGS

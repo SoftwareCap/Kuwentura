@@ -20,9 +20,11 @@ const FULLBODY_SWAP_DISTANCE: float = 300.0
 const ALTAR_SCENE: String = "res://scenes/world/climax/AltarDeduction.tscn"
 
 var players_in_portal: Array[int] = []
+var _intro_resolved := false
 
 func _ready() -> void:
 	_fit_darkness_to_screen()
+	CutsceneHelper.prepare_mobile_video_player(video_player)
 	_play_intro()
 
 func _fit_darkness_to_screen() -> void:
@@ -32,8 +34,7 @@ func _fit_darkness_to_screen() -> void:
 
 func _play_intro() -> void:
 	_fit_video_to_screen()
-	video_player.play()
-	video_player.finished.connect(_on_intro_finished)
+	CutsceneHelper.play_with_fallback(self, video_player, _on_intro_finished, 2.5, 120.0)
 
 func _fit_video_to_screen() -> void:
 	var screen_size := get_viewport().get_visible_rect().size
@@ -47,8 +48,11 @@ func _fit_video_to_screen() -> void:
 	video_player.position = Vector2.ZERO
 
 func _on_intro_finished() -> void:
+	if _intro_resolved:
+		return
+	_intro_resolved = true
 	$IntroScene.visible = false
-	MusicController.play_track(MusicController.BAKUNAWA)
+	MusicController.play_track(MusicController.MusicTrack.BAKUNAWA)
 	_setup_touch_controls()
 	_spawn_players()
 	_setup_consequence()
