@@ -1,3 +1,4 @@
+#game_state.gd
 extends Node
 
 ## Game State - Central Game Progression Manager

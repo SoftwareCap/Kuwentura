@@ -1,3 +1,4 @@
+##main_menu.gd
 extends Control
 
 # CONSTANTS

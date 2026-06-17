@@ -2,7 +2,8 @@ extends Control
 
 # CONSTANTS
 const SCENE_MAIN_MENU := "res://scenes/mainMenu/MainMenu.tscn"
-const SCENE_OPENING_CUTSCENE := "res://scenes/cutscenes/OpeningCutscene.tscn"
+const SCENE_OPENING_CUTSCENE := "res://scenes/cutscenes/opening/OpeningCutscene.tscn"
+const SCENE_MOBILE_OPENING_CUTSCENE := "res://scenes/cutscenes/opening/MobileOpeningCutscene.tscn"
 const FADE_DURATION := 1.0
 
 # NODE REFERENCES
@@ -114,7 +115,7 @@ func _on_restart_confirmed(_checkpoint: String = "") -> void:
 	status_label.text = "Starting new story..."
 	await _fade(Color.TRANSPARENT, FADE_DURATION)
 	GameState.reset_all_progress()
-	get_tree().change_scene_to_file(SCENE_OPENING_CUTSCENE)
+	get_tree().change_scene_to_file(_get_opening_cutscene_scene())
 
 
 # HELPERS
@@ -123,6 +124,12 @@ func _fade(target: Color, duration: float) -> void:
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", target, duration)
 	await tween.finished
+
+
+func _get_opening_cutscene_scene() -> String:
+	if CutsceneHelper.is_mobile_platform():
+		return SCENE_MOBILE_OPENING_CUTSCENE
+	return SCENE_OPENING_CUTSCENE
 
 
 func _show_partner_left_dialog() -> void:

@@ -1,0 +1,80 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/kapre.gd" id="1_kapre"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kapre"]
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"idle",
+"speed": 1.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"eyes_glow",
+"speed": 1.0
+}, {
+"frames": [],
+"loop": false,
+"name": &"manifest",
+"speed": 1.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"walk",
+"speed": 1.0
+}, {
+"frames": [],
+"loop": false,
+"name": &"attack",
+"speed": 1.0
+}]
+
+[sub_resource type="Gradient" id="Gradient_shadow"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(0, 0, 0, 0.45, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_shadow"]
+gradient = SubResource("Gradient_shadow")
+width = 128
+height = 48
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_kapre"]
+radius = 32.0
+
+[node name="Kapre" type="CharacterBody2D"]
+script = ExtResource("1_kapre")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -16)
+sprite_frames = SubResource("SpriteFrames_kapre")
+animation = &"idle"
+
+[node name="EyeGlow" type="PointLight2D" parent="."]
+position = Vector2(0, -20)
+enabled = true
+color = Color(0.9, 0.1, 0.05, 1)
+energy = 0.0
+texture_scale = 0.5
+
+[node name="Shadow" type="Sprite2D" parent="."]
+position = Vector2(0, 16)
+texture = SubResource("GradientTexture2D_shadow")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+volume_db = -10.0
+
+[node name="SmokeParticles" type="CPUParticles2D" parent="."]
+position = Vector2(0, 20)
+emitting = false
+amount = 8
+lifetime = 2.0
+speed_max = 20.0
+gravity = Vector2(0, -5)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -16)
+shape = SubResource("CircleShape2D_kapre")
