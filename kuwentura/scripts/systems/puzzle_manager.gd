@@ -12,95 +12,95 @@ extends Node
 #------------------------------------------------------------------------------
 const PUZZLE_DATA = {
 	"pinas_house": {
-	"type": "algebra",
-	"name": "Pina's House",
-	"theme": "The Ladle",
-	"narrative": "Clear the kitchen, uncover the Hidden Number Note, and solve for x to reveal the riddle that leads to the clue.",
+		"type": "algebra",
+		"name": "Pina's House",
+		"theme": "The Ladle",
+		"narrative": "Clear the kitchen, uncover the Hidden Number Note, and solve for x to reveal the riddle that leads to the clue.",
 
-	"host_view": {
-		"title": "Hidden Number Note",
-		"description": "You see a note with a single algebra equation and a hidden riddle waiting to be revealed.",
-		"sees": ["One equation with x", "A hidden riddle after solving"],
-		"task": "Solve the equation and reveal the riddle"
-	},
+		"host_view": {
+			"title": "Hidden Number Note",
+			"description": "You see a note with a single algebra equation and a hidden riddle waiting to be revealed.",
+			"sees": ["One equation with x", "A hidden riddle after solving"],
+			"task": "Solve the equation and reveal the riddle"
+		},
 
-	"sidekick_view": {
-		"title": "Hidden Number Note",
-		"description": "You see the same note and must solve for the missing value of x.",
-		"sees": ["One equation with x", "One answer input"],
-		"task": "Solve for x and reveal the next clue"
-	},
+		"sidekick_view": {
+			"title": "Hidden Number Note",
+			"description": "You see the same note and must solve for the missing value of x.",
+			"sees": ["One equation with x", "One answer input"],
+			"task": "Solve for x and reveal the next clue"
+		},
 
-	"ledger": {
-	"layout": "two_column",
-	"title": "Finding the Missing Number",
-	"left_header": "How to Solve",
-	"left_body": "1. Move the number.\n2. Do the opposite.\n3. Divide if needed.",
-	"right_header": "Example",
-	"right_body": "2x - 8 = 2\n\n1. Add 8 to both sides.\n   2x = 10\n\n2. Divide by 2.\n   x = 5",
-	"instruction": "Undo what was done to x.\nMove the number first.\nThen divide if needed.",
-	"example": "Example: 2x - 8 = 2\nStep 1: Add 8 to both sides.\nNow it becomes x = 10.\nStep 2: Divide both sides by 2.\nNow it becomes x = 5."
-	},
+		"ledger": {
+			"layout": "two_column",
+			"title": "Finding the Missing Number",
+			"left_header": "How to Solve",
+			"left_body": "1. Move the number.\n2. Do the opposite.\n3. Divide if needed.",
+			"right_header": "Example",
+			"right_body": "2x - 8 = 2\n\n1. Add 8 to both sides.\n   2x = 10\n\n2. Divide by 2.\n   x = 5",
+			"instruction": "Undo what was done to x.\nMove the number first.\nThen divide if needed.",
+			"example": "Example: 2x - 8 = 2\nStep 1: Add 8 to both sides.\nNow it becomes 2x = 10.\nStep 2: Divide both sides by 2.\nNow it becomes x = 5."
+		},
 
-	"variations": [
-		{
-			"id": 1,
-			"difficulty": "Easy",
-			"title": "Hidden Number Note",
-			"equation": "x + 4 = 9",
-			"solution": 5,
-			"answer_format": "x=5",
-			"riddle": "Where pots and pans quietly stay, a hidden clue now waits your way."
+		"variations": [
+			{
+				"id": 1,
+				"difficulty": "Easy",
+				"title": "Hidden Number Note",
+				"equation": "x + 4 = 9",
+				"solution": 5,
+				"answer_format": "x=5",
+				"riddle": "Where pots and pans quietly stay, a hidden clue now waits your way."
+			},
+			{
+				"id": 2,
+				"difficulty": "Easy",
+				"title": "Hidden Number Note",
+				"equation": "x - 3 = 6",
+				"solution": 9,
+				"answer_format": "x=9",
+				"riddle": "Look where cooking tools are kept, the next secret there is left."
+			},
+			{
+				"id": 3,
+				"difficulty": "Medium",
+				"title": "Hidden Number Note",
+				"equation": "2x = 10",
+				"solution": 5,
+				"answer_format": "x=5",
+				"riddle": "Open the place where kitchen things rest, inside it hides the village’s test."
+			},
+			{
+				"id": 4,
+				"difficulty": "Medium",
+				"title": "Hidden Number Note",
+				"equation": "2x - 8 = 2",
+				"solution": 5,
+				"answer_format": "x=5",
+				"riddle": "Not on the floor and not by the door, search where kitchen tools sleep once more."
+			},
+			{
+				"id": 5,
+				"difficulty": "Hard",
+				"title": "Hidden Number Note",
+				"equation": "3x + 2 = 14",
+				"solution": 4,
+				"answer_format": "x=4",
+				"riddle": "A quiet cupboard holds the key, open it to learn Pina’s mystery."
+			}
+		],
+
+		"reward": {
+			"clue": "Ladle",
+			"note": "We use our eyes to find things, but Pina never used hers…"
 		},
-		{
-			"id": 2,
-			"difficulty": "Easy",
-			"title": "Hidden Number Note",
-			"equation": "x - 3 = 6",
-			"solution": 9,
-			"answer_format": "x=9",
-			"riddle": "Look where cooking tools are kept, the next secret there is left."
-		},
-		{
-			"id": 3,
-			"difficulty": "Medium",
-			"title": "Hidden Number Note",
-			"equation": "2x = 10",
-			"solution": 5,
-			"answer_format": "x=5",
-			"riddle": "Open the place where kitchen things rest, inside it hides the village’s test."
-		},
-		{
-			"id": 4,
-			"difficulty": "Medium",
-			"title": "Hidden Number Note",
-			"equation": "2x - 8 = 2",
-			"solution": 5,
-			"answer_format": "x=5",
-			"riddle": "Not on the floor and not by the door, search where kitchen tools sleep once more."
-		},
-		{
-			"id": 5,
-			"difficulty": "Hard",
-			"title": "Hidden Number Note",
-			"equation": "3x + 2 = 14",
-			"solution": 4,
-			"answer_format": "x=4",
-			"riddle": "A quiet cupboard holds the key, open it to learn Pina’s mystery."
+
+		"consequence": {
+			"enemy": "Aswang",
+			"behavior": "Watches from outside, thumping on window",
+			"escalation": "Thumping grows stronger with delays and mistakes",
+			"failure": "Aswang shatters window and breaks in"
 		}
-	],
-
-	"reward": {
-		"clue": "Ladle",
-		"note": "We use our eyes to find things, but Pina never used hers…"
-	},
-
-	"consequence": {
-		"enemy": "Aswang",
-		"behavior": "Watches from outside, thumping on window",
-		"escalation": "Thumping grows stronger with delays and mistakes",
-		"failure": "Aswang shatters window and breaks in"
-	}
 	},
 	
 	"backyard_path": {
@@ -124,12 +124,12 @@ const PUZZLE_DATA = {
 		},
 		
 		"ledger": {
-		"layout": "single_body",
-		"title": "Measurement Conversion",
-		"body": "1 Dali = 2 Centimeters\n\nTo convert Dali to cm:\nMultiply the Dali value by 2.\n\nExample:\n40 Dali × 2 = 80 cm",
-		"formula": "1 Dali = 2 cm",
-		"instruction": "To convert Dali to centimeters, multiply by 2.",
-		"example": "40 Dali × 2 = 80 cm"
+			"layout": "single_body",
+			"title": "Measurement Conversion",
+			"body": "1 Dali = 2 Centimeters\n\nTo convert Dali to cm:\nMultiply the Dali value by 2.\n\nExample:\n40 Dali × 2 = 80 cm",
+			"formula": "1 Dali = 2 cm",
+			"instruction": "To convert Dali to centimeters, multiply by 2.",
+			"example": "40 Dali × 2 = 80 cm"
 		},
 		
 		"variations": [
@@ -161,6 +161,7 @@ const PUZZLE_DATA = {
 			"failure": "Fog becomes heavy cloud covering entire backyard"
 		}
 	},
+	
 	"old_well": {
 		"type": "coordinates",
 		"name": "Old Well",
@@ -182,7 +183,9 @@ const PUZZLE_DATA = {
 		},
 		
 		"ledger": {
+			"layout": "single_body",
 			"title": "Coordinate Geometry",
+			"body": "Coordinates (X, Y) represent position on a plane.\nX = horizontal axis\nY = vertical axis\n\nRoman Numeral Guide:\nI = 1, II = 2, III = 3, IV = 4, V = 5\nVI = 6, VII = 7, VIII = 8\n\nExample: (II, IV) = (2, 4)",
 			"instruction": "Coordinates (X, Y) represent position on a plane. X = horizontal, Y = vertical.",
 			"roman_guide": {
 				"I": 1, "II": 2, "III": 3, "IV": 4, "V": 5,
@@ -242,7 +245,9 @@ const PUZZLE_DATA = {
 		},
 		
 		"ledger": {
+			"layout": "single_body",
 			"title": "Volume Formulas",
+			"body": "Rectangular Box: V = L × W × H\nCylinder: V = π × r² × H\nπ = 3.14\n\nCalculate each container's volume.\nThe correct one matches the spirit water level.",
 			"formulas": {
 				"rectangular": "V = L × W × H",
 				"cylinder": "V = π × r² × H"
@@ -314,7 +319,9 @@ const PUZZLE_DATA = {
 		},
 		
 		"ledger": {
+			"layout": "single_body",
 			"title": "Arithmetic Sequences",
+			"body": "Formula: aₙ = a₁ + (n-1)d\n\nWhere:\na₁ = first term\nd = common difference\nn = term position\n\nTo find missing number:\n1. Find common difference (d) between known terms\n2. Apply formula to find the missing value\n\nExample: 2, 5, 8, ?, 14\nd = 5-2 = 3\nMissing = 8 + 3 = 11\n\nABANDONED HOUSE LEDGER\n\nMay 3: 12 jars\nMay 10: 7 jars missing\nMay 17: 4 jars remaining\nMay 24: 9 jars added\n\nFINAL BOX CODE: Add all remaining jars from each week\nSolution: (12-7)=5 + 4 + 9 = 18",
 			"formula": "aₙ = a₁ + (n-1)d",
 			"instruction": "Find the common difference (d) between terms, then calculate the missing value.",
 			"example": "In 2, 5, 8, ?, 14... the difference is 3, so missing number is 11"
@@ -347,10 +354,10 @@ const PUZZLE_DATA = {
 		},
 		
 		"consequence": {
-			"enemy": "Tikbalang",
-			"behavior": "Fog spreads as players hesitate",
-			"escalation": "Fog thickens with time",
-			"failure": "Heavy fog cloud covers the entire area"
+			"enemy": "Kapre",
+			"behavior": "Smoke rises from tree, shadow creeps across ground",
+			"escalation": "Shadow grows larger, screen darkens at edges",
+			"failure": "Kapre's shadow engulfs the entire house, plunging it into darkness"
 		}
 	}
 }
@@ -363,6 +370,9 @@ const LEDGER_ZONE_ORDER := [
 	"abandoned_house"
 ]
 
+#------------------------------------------------------------------------------
+# Helper Functions
+#------------------------------------------------------------------------------
 
 func get_zone_ledger_display(zone_id: String) -> Dictionary:
 	if not PUZZLE_DATA.has(zone_id):
@@ -386,7 +396,6 @@ func get_zone_ledger_display(zone_id: String) -> Dictionary:
 		"right_body": str(ledger.get("right_body", ledger.get("example", "")))
 	}
 
-
 func get_unlocked_global_ledger_entries() -> Array:
 	var entries: Array = []
 
@@ -402,7 +411,6 @@ func get_unlocked_global_ledger_entries() -> Array:
 		entries.append(ledger_entry)
 
 	return entries
-
 
 func _build_fallback_ledger_body(ledger: Dictionary) -> String:
 	var blocks: Array[String] = []
@@ -433,7 +441,6 @@ func _build_fallback_ledger_body(ledger: Dictionary) -> String:
 			blocks.append("Roman Numeral Guide:\n" + ", ".join(roman_lines))
 
 	return "\n\n".join(blocks)
-
 
 #------------------------------------------------------------------------------
 # Public API
@@ -494,7 +501,6 @@ func get_puzzle_for_zone(zone_id: String) -> Dictionary:
 		"riddle": riddle_text
 	}
 
-
 func _generate_conversion_puzzle(zone_id: String, _seed: int) -> Dictionary:
 	var rng = RandomNumberGenerator.new()
 	rng.seed = _seed
@@ -515,7 +521,6 @@ func _generate_conversion_puzzle(zone_id: String, _seed: int) -> Dictionary:
 		{"sees_plant_dali": true, "plant_dali": dali_value, "formula": "1 Dali = 2 cm"}
 	}
 
-
 func _generate_coordinate_puzzle(_zone_id: String, _seed: int) -> Dictionary:
 	# Eye shape coordinates (fixed pattern but scaled)
 	var base_coords = [
@@ -530,7 +535,7 @@ func _generate_coordinate_puzzle(_zone_id: String, _seed: int) -> Dictionary:
 	]
 
 	var rng = RandomNumberGenerator.new()
-	rng.seed = seed
+	rng.seed = _seed
 	var offset = rng.randi_range(1, 5)
 	var scale = rng.randi_range(1, 3)
 
@@ -548,10 +553,9 @@ func _generate_coordinate_puzzle(_zone_id: String, _seed: int) -> Dictionary:
 		"sidekick_view": {"sees_roman_numerals": true, "coordinates_raw": coords}
 	}
 
-
 func _generate_volume_puzzle(_zone_id: String, _seed: int) -> Dictionary:
 	var rng = RandomNumberGenerator.new()
-	rng.seed = seed
+	rng.seed = _seed
 
 	# Generate container dimensions
 	var containers = []
@@ -590,10 +594,9 @@ func _generate_volume_puzzle(_zone_id: String, _seed: int) -> Dictionary:
 		"sidekick_view": {"sees_dimensions": true, "containers_data": containers}
 	}
 
-
 func _generate_arithmetic_puzzle(_zone_id: String, _seed: int) -> Dictionary:
 	var rng = RandomNumberGenerator.new()
-	rng.seed = seed
+	rng.seed = _seed
 
 	# Generate arithmetic sequence
 	var start = rng.randi_range(1, 10)
@@ -621,7 +624,6 @@ func _generate_arithmetic_puzzle(_zone_id: String, _seed: int) -> Dictionary:
 		"host_view": {"sees_lock_combination": true, "sequence_display": sequence},
 		"sidekick_view": {"can_input": true, "sequence_input": sequence}
 	}
-
 
 func validate_answer(_zone_id: String, player_answer: Variant, puzzle_data: Dictionary) -> bool:
 	"""Validate player's answer against puzzle solution."""
@@ -655,7 +657,6 @@ func validate_answer(_zone_id: String, player_answer: Variant, puzzle_data: Dict
 	
 	return false
 
-
 func get_zone_info(zone_id: String) -> Dictionary:
 	"""Get static zone info without generating a variation."""
 	if not PUZZLE_DATA.has(zone_id):
@@ -671,18 +672,15 @@ func get_zone_info(zone_id: String) -> Dictionary:
 		"consequence": data.consequence
 	}
 
-
 func get_all_zones() -> Array:
 	"""Return list of all zone IDs."""
 	return PUZZLE_DATA.keys()
-
 
 func get_ledger_info(zone_id: String) -> Dictionary:
 	"""Get ledger/hint information for a zone."""
 	if not PUZZLE_DATA.has(zone_id):
 		return {}
 	return PUZZLE_DATA[zone_id].ledger
-
 
 func get_consequence_info(zone_id: String) -> Dictionary:
 	"""Get consequence/failure information for a zone."""
@@ -721,7 +719,6 @@ func _build_host_view(zone_data: Dictionary, variation: Dictionary) -> Dictionar
 	
 	return view
 
-
 func _build_sidekick_view(zone_data: Dictionary, variation: Dictionary) -> Dictionary:
 	"""Construct the complete sidekick view for a puzzle variation."""
 	var view = zone_data.sidekick_view.duplicate()
@@ -755,7 +752,6 @@ func _build_sidekick_view(zone_data: Dictionary, variation: Dictionary) -> Dicti
 			view["formula"] = zone_data.ledger.formula
 	
 	return view
-
 
 func _filter_containers_for_host(containers: Array) -> Array:
 	"""Host sees containers with symbolic labels, not full dimensions."""
@@ -809,7 +805,6 @@ func debug_print_zone(zone_id: String) -> void:
 	print("  Failure: %s" % puzzle.consequence.failure)
 	
 	print("=".repeat(50) + "\n")
-
 
 func debug_test_all_zones() -> void:
 	"""Test and print all zones."""

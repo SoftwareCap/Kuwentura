@@ -10,6 +10,7 @@ var _is_transitioning: bool = false
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	fade_rect.modulate = Color.TRANSPARENT
 	loading_label.modulate = Color(1, 1, 1, 0)
 	visible = false
@@ -17,7 +18,12 @@ func _ready() -> void:
 
 func change_scene(scene_path: String, fade_duration: float = 0.5) -> void:
 	if not _begin_transition():
-		return
+		_end_transition()
+		if not _begin_transition():
+			var err_direct := get_tree().change_scene_to_file(scene_path)
+			if err_direct != OK:
+				push_error("[LoadingScreen] Failed to change scene: " + scene_path)
+			return
 	
 	# Fade to black first
 	await _fade(Color.BLACK, fade_duration)
@@ -56,6 +62,8 @@ func _begin_transition() -> bool:
 		return false
 	_is_transitioning = true
 	visible = true
+	fade_rect.modulate = Color.TRANSPARENT
+	loading_label.modulate = Color(1, 1, 1, 0)
 	return true
 
 
@@ -68,6 +76,7 @@ func _fade(target: Color, duration: float) -> void:
 	"""Fade both fade_rect and loading_label to target color in parallel."""
 	var label_target := Color(1, 1, 1, target.a)
 	var tween := create_tween()
+	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tween.set_parallel(true)
 	tween.tween_property(fade_rect, "modulate", target, duration)
 	tween.tween_property(loading_label, "modulate", label_target, duration)

@@ -1,3 +1,4 @@
+##backyard_path.gd
 extends Node2D
 
 const ZONE_ID := "backyard_path"
@@ -179,6 +180,8 @@ const UI_INFO := Color(0.99, 0.91, 0.63, 1.0)
 @onready var pineapple_reveal_fruit: Sprite2D = get_node_or_null("PineappleReveal/Area2D/PineappleFruit")
 
 @onready var ending_cutscene: VideoStreamPlayer = $Cutscene/EndingCutscene
+
+var _ending_cutscene_resolved := false
 
 var _sfx_player: AudioStreamPlayer
 var _zone_completion_sfx: AudioStream = preload("res://assets/audios/ZoneCompletionSFX.mp3")
@@ -434,8 +437,8 @@ func _ready() -> void:
 	add_child(_sfx_player)
 	
 	if is_instance_valid(ending_cutscene):
+		CutsceneHelper.prepare_mobile_video_player(ending_cutscene)
 		ending_cutscene.visible = false
-		ending_cutscene.finished.connect(_on_cutscene_finished)
 		
 	var cutscene_dark: Node = get_node_or_null("Cutscene/DarkOverlay")
 	if is_instance_valid(cutscene_dark):
@@ -4024,10 +4027,13 @@ func _play_ending_cutscene() -> void:
 		viewport_size.x - margin_x * 2.0,
 		viewport_size.y - margin_y * 2.0
 	)
-	ending_cutscene.play()
+	CutsceneHelper.play_with_fallback(self, ending_cutscene, _on_cutscene_finished)
 
 
 func _on_cutscene_finished() -> void:
+	if _ending_cutscene_resolved:
+		return
+	_ending_cutscene_resolved = true
 	if is_instance_valid(ending_cutscene):
 		ending_cutscene.visible = false
 		ending_cutscene.stop()
@@ -4066,6 +4072,7 @@ func _fade_in(duration: float = 0.6) -> void:
 
 func _input(event: InputEvent) -> void:
 	if is_instance_valid(ending_cutscene) and ending_cutscene.visible:
-		if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
-			ending_cutscene.stop()
+		var skip := event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel")
+		skip = skip or (event is InputEventScreenTouch and event.pressed)
+		if skip:
 			_on_cutscene_finished()

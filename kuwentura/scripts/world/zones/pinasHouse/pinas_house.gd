@@ -1,3 +1,4 @@
+##pinas_house.gd
 extends Node2D
 
 const PauseControllerScript = preload("res://scripts/world/zones/pinasHouse/controllers/pinas_house_pause_controller.gd")
@@ -124,6 +125,8 @@ const UI_FOCUS_BROWN := Color(0.31, 0.16, 0.06, 0.70)
 @onready var progress_tracker_sprite: Sprite2D = get_node_or_null("ProgressTracker/Sprite2D")
 
 @onready var ending_cutscene: VideoStreamPlayer = $Cutscene/EndingCutscene
+
+var _ending_cutscene_resolved := false
 
 var quest_layer: Node2D
 var quest_title_label: Label
@@ -543,6 +546,7 @@ func _ready() -> void:
 		collect_button.pressed.connect(_on_collect_clue_pressed)
 		
 	if is_instance_valid(ending_cutscene):
+		CutsceneHelper.prepare_mobile_video_player(ending_cutscene)
 		ending_cutscene.visible = false
 		ending_cutscene.expand = true
 		ending_cutscene.anchor_left = 0.1
@@ -553,7 +557,6 @@ func _ready() -> void:
 		ending_cutscene.offset_top = 0
 		ending_cutscene.offset_right = 0
 		ending_cutscene.offset_bottom = 0
-		ending_cutscene.finished.connect(_on_cutscene_finished)
 		
 	var cutscene_dark: Node = get_node_or_null("Cutscene/DarkOverlay")
 	if is_instance_valid(cutscene_dark):
@@ -1794,10 +1797,13 @@ func _play_ending_cutscene() -> void:
 	if is_instance_valid(dark):
 		dark.visible = true
 	ending_cutscene.visible = true
-	ending_cutscene.play()
+	CutsceneHelper.play_with_fallback(self, ending_cutscene, _on_cutscene_finished)
 
 
 func _on_cutscene_finished() -> void:
+	if _ending_cutscene_resolved:
+		return
+	_ending_cutscene_resolved = true
 	if is_instance_valid(ending_cutscene):
 		ending_cutscene.visible = false
 		ending_cutscene.stop()
@@ -1815,8 +1821,9 @@ func _on_cutscene_finished() -> void:
 
 func _input(event: InputEvent) -> void:
 	if is_instance_valid(ending_cutscene) and ending_cutscene.visible:
-		if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
-			ending_cutscene.stop()
+		var skip := event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel")
+		skip = skip or (event is InputEventScreenTouch and event.pressed)
+		if skip:
 			_on_cutscene_finished()
 
 

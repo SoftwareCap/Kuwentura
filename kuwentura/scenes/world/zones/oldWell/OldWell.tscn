@@ -1,92 +1,260 @@
-[gd_scene load_steps=10 format=3 uid="uid://b6jvccfrna5vu"]
+[gd_scene load_steps=2 format=3 uid="uid://b6jvccfrna5vu"]
 
-[ext_resource type="Script" uid="uid://h5y0185hh34e" path="res://scripts/world/zones/oldWell/old_well.gd" id="1_oldwell"]
-[ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
-[ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="3_jlo7o"]
-[ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="4_bv3fn"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mf72o"]
-bg_color = Color(0.360784, 0.215686, 0.180392, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.3)
-shadow_size = 8
-shadow_offset = Vector2(0, 4)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jlo7o"]
-bg_color = Color(0.65098, 0.439216, 0.266667, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.2)
-shadow_size = 4
-shadow_offset = Vector2(0, 2)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bv3fn"]
-bg_color = Color(0.752941, 0.505882, 0.329412, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.25)
-shadow_size = 6
-shadow_offset = Vector2(0, 3)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1bsgl"]
-bg_color = Color(0.65098, 0.439216, 0.266667, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.2)
-shadow_size = 4
-shadow_offset = Vector2(0, 2)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_n8sim"]
+[ext_resource type="Script" path="res://scripts/world/zones/oldWell/old_well.gd" id="1_oldwell"]
 
 [node name="OldWell" type="Node2D"]
 script = ExtResource("1_oldwell")
 
 [node name="Background" type="Sprite2D" parent="."]
-position = Vector2(768, 320)
-texture = ExtResource("2_bg")
-
-[node name="TestLabel" type="Label" parent="."]
-offset_left = 304.0
-offset_top = 168.0
-offset_right = 1104.0
-offset_bottom = 268.0
-theme_override_fonts/font = ExtResource("3_jlo7o")
-theme_override_font_sizes/font_size = 64
-text = "OLD WELL TEST ZONE"
-horizontal_alignment = 1
-
-[node name="RoleLabel" type="Label" parent="."]
-unique_name_in_owner = true
-offset_left = 305.0
-offset_top = 284.0
-offset_right = 1105.0
-offset_bottom = 344.0
-theme_override_fonts/font = ExtResource("3_jlo7o")
-theme_override_font_sizes/font_size = 48
-text = "Waiting for role..."
-horizontal_alignment = 1
+position = Vector2(640, 360)
+scale = Vector2(1.0, 1.0)
 
 [node name="BackButton" type="Button" parent="."]
-offset_left = 50.0
-offset_top = 50.0
-offset_right = 437.0
-offset_bottom = 120.0
-theme_override_fonts/font = ExtResource("4_bv3fn")
-theme_override_font_sizes/font_size = 32
-theme_override_styles/normal = SubResource("StyleBoxFlat_mf72o")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_jlo7o")
-theme_override_styles/hover = SubResource("StyleBoxFlat_bv3fn")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_1bsgl")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_n8sim")
-text = "← Back to Forest"
+visible = false
+offset_left = 26.0
+offset_top = 24.0
+offset_right = 236.0
+offset_bottom = 78.0
+text = "<- Back to Forest"
 
-[connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="RoleLabel" type="Label" parent="HUD"]
+offset_left = 318.0
+offset_top = 22.0
+offset_right = 962.0
+offset_bottom = 68.0
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StatusPanel" type="Panel" parent="HUD"]
+offset_left = 28.0
+offset_top = 92.0
+offset_right = 382.0
+offset_bottom = 216.0
+
+[node name="StatusLabel" type="Label" parent="HUD/StatusPanel"]
+offset_left = 18.0
+offset_top = 10.0
+offset_right = 336.0
+offset_bottom = 42.0
+text = "Old Well"
+vertical_alignment = 1
+
+[node name="ProgressLabel" type="Label" parent="HUD/StatusPanel"]
+offset_left = 18.0
+offset_top = 46.0
+offset_right = 336.0
+offset_bottom = 78.0
+text = "Progress: 0/3"
+vertical_alignment = 1
+
+[node name="LivesLabel" type="Label" parent="HUD/StatusPanel"]
+offset_left = 18.0
+offset_top = 82.0
+offset_right = 336.0
+offset_bottom = 114.0
+text = "Lives: 3/3"
+vertical_alignment = 1
+
+[node name="InstructionPanel" type="Panel" parent="HUD"]
+offset_left = 418.0
+offset_top = 92.0
+offset_right = 1252.0
+offset_bottom = 176.0
+
+[node name="InstructionLabel" type="Label" parent="HUD/InstructionPanel"]
+offset_left = 18.0
+offset_top = 10.0
+offset_right = 816.0
+offset_bottom = 74.0
+text = "The Old Well stirs. Listen carefully before answering."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="GameLayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="SiyokoySprite" type="TextureRect" parent="GameLayer"]
+visible = false
+offset_left = 426.0
+offset_top = 174.0
+offset_right = 854.0
+offset_bottom = 596.0
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="RomanFloating" type="Label" parent="GameLayer"]
+visible = false
+offset_left = 316.0
+offset_top = 190.0
+offset_right = 964.0
+offset_bottom = 350.0
+text = "XIX"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SidekickPanel" type="Panel" parent="GameLayer"]
+visible = false
+offset_left = 66.0
+offset_top = 238.0
+offset_right = 446.0
+offset_bottom = 584.0
+
+[node name="SidekickTitle" type="Label" parent="GameLayer/SidekickPanel"]
+offset_left = 20.0
+offset_top = 18.0
+offset_right = 360.0
+offset_bottom = 58.0
+text = "SIDEKICK SEES"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RomanLabel" type="Label" parent="GameLayer/SidekickPanel"]
+offset_left = 20.0
+offset_top = 88.0
+offset_right = 360.0
+offset_bottom = 226.0
+text = "XII"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SidekickHint" type="Label" parent="GameLayer/SidekickPanel"]
+offset_left = 28.0
+offset_top = 250.0
+offset_right = 352.0
+offset_bottom = 324.0
+text = "Tell the Detective what number this Roman numeral means."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="DetectivePanel" type="Control" parent="GameLayer"]
+visible = false
+offset_left = 384.0
+offset_top = 370.0
+offset_right = 896.0
+offset_bottom = 544.0
+
+[node name="DetectiveTitle" type="Label" parent="GameLayer/DetectivePanel"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 512.0
+offset_bottom = 42.0
+text = "Choose the correct number."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Choices" type="HBoxContainer" parent="GameLayer/DetectivePanel"]
+offset_left = 56.0
+offset_top = 62.0
+offset_right = 456.0
+offset_bottom = 174.0
+theme_override_constants/separation = 32
+alignment = 1
+
+[node name="Choice1" type="Button" parent="GameLayer/DetectivePanel/Choices"]
+custom_minimum_size = Vector2(112, 112)
+size_flags_horizontal = 4
+text = "12"
+
+[node name="Choice2" type="Button" parent="GameLayer/DetectivePanel/Choices"]
+custom_minimum_size = Vector2(112, 112)
+size_flags_horizontal = 4
+text = "18"
+
+[node name="Choice3" type="Button" parent="GameLayer/DetectivePanel/Choices"]
+custom_minimum_size = Vector2(112, 112)
+size_flags_horizontal = 4
+text = "20"
+
+[node name="FeedbackPanel" type="Panel" parent="GameLayer"]
+visible = false
+offset_left = 306.0
+offset_top = 608.0
+offset_right = 974.0
+offset_bottom = 684.0
+
+[node name="FeedbackLabel" type="Label" parent="GameLayer/FeedbackPanel"]
+offset_left = 16.0
+offset_top = 8.0
+offset_right = 652.0
+offset_bottom = 68.0
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="RewardLayer" type="CanvasLayer" parent="."]
+visible = false
+layer = 90
+
+[node name="DarkOverlay" type="ColorRect" parent="RewardLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.48)
+mouse_filter = 0
+
+[node name="BannerLabel" type="Label" parent="RewardLayer"]
+offset_left = 220.0
+offset_top = 62.0
+offset_right = 1060.0
+offset_bottom = 134.0
+text = "ARTIFACT FOUND!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ClueSprite" type="TextureRect" parent="RewardLayer"]
+offset_left = 498.0
+offset_top = 146.0
+offset_right = 782.0
+offset_bottom = 430.0
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="RewardPanel" type="Panel" parent="RewardLayer"]
+offset_left = 302.0
+offset_top = 464.0
+offset_right = 978.0
+offset_bottom = 592.0
+
+[node name="RewardText" type="Label" parent="RewardLayer/RewardPanel"]
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 652.0
+offset_bottom = 112.0
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="TapCatcher" type="Button" parent="RewardLayer"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1280.0
+offset_bottom = 720.0
+flat = true
+text = ""
+
+[node name="CollectButton" type="Button" parent="RewardLayer"]
+visible = false
+offset_left = 492.0
+offset_top = 614.0
+offset_right = 788.0
+offset_bottom = 674.0
+text = "COLLECT ARTIFACT"
+
+[node name="BriefcaseRevealSprite" type="TextureRect" parent="RewardLayer"]
+visible = false
+offset_left = 368.0
+offset_top = 154.0
+offset_right = 912.0
+offset_bottom = 566.0
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
