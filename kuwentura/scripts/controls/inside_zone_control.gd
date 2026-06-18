@@ -1,3 +1,4 @@
+#inside_zone_control.gd
 extends CanvasLayer
 
 signal pause_pressed

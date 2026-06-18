@@ -1,3 +1,4 @@
+##abandoned_house.gd
 extends Node2D
 
 const FOREST_HUB_SCENE_PATH := "res://scenes/world/hub/ForestHub.tscn"
@@ -145,6 +146,7 @@ var _final_box_data: Dictionary = {}
 @onready var detective_player: Node2D = get_node_or_null("Players/Detective")
 @onready var sidekick_player: Node2D = get_node_or_null("Players/Sidekick")
 @onready var ending_cutscene: VideoStreamPlayer = $Cutscene/EndingCutscene
+var _ending_cutscene_resolved := false
 @onready var back_button: Button = get_node_or_null("BackButton") as Button
 @onready var notification_label: Label = $Notification/NotificationLabel
 
@@ -729,6 +731,7 @@ func _ready() -> void:
 		sidekick_player.visible = false
 	
 	if is_instance_valid(ending_cutscene):
+		CutsceneHelper.prepare_mobile_video_player(ending_cutscene)
 		ending_cutscene.visible = false
 		ending_cutscene.expand = true
 		ending_cutscene.anchor_left = 0.1
@@ -739,7 +742,6 @@ func _ready() -> void:
 		ending_cutscene.offset_top = 0
 		ending_cutscene.offset_right = 0
 		ending_cutscene.offset_bottom = 0
-		ending_cutscene.finished.connect(_on_cutscene_finished)
 
 	var cutscene_dark: Node = get_node_or_null("Cutscene/DarkOverlay")
 	if is_instance_valid(cutscene_dark):
@@ -1209,8 +1211,9 @@ func _on_book_gui_input(event: InputEvent, book_id: String) -> void:
 func _input(event: InputEvent) -> void:
 		# Skip cutscene
 	if is_instance_valid(ending_cutscene) and ending_cutscene.visible:
-		if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
-			ending_cutscene.stop()
+		var skip := event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel")
+		skip = skip or (event is InputEventScreenTouch and event.pressed)
+		if skip:
 			_on_cutscene_finished()
 			return
 
@@ -3945,10 +3948,13 @@ func _play_ending_cutscene() -> void:
 	if is_instance_valid(dark):
 		dark.visible = true
 	ending_cutscene.visible = true
-	ending_cutscene.play()
+	CutsceneHelper.play_with_fallback(self, ending_cutscene, _on_cutscene_finished)
 
 
 func _on_cutscene_finished() -> void:
+	if _ending_cutscene_resolved:
+		return
+	_ending_cutscene_resolved = true
 	if is_instance_valid(ending_cutscene):
 		ending_cutscene.visible = false
 		ending_cutscene.stop()

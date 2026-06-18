@@ -1,5 +1,5 @@
 extends Node
-
+##firebase_firestore
 ## Firebase Firestore - Cloud Database Operations
 ##
 ## Handles saving/loading game state to/from Firestore.
@@ -17,6 +17,15 @@ var _pending_requests: Dictionary = {}
 func _is_configured() -> bool:
 	"""Check if Firebase is properly configured."""
 	return FirebaseAuth.API_KEY != "YOUR_API_KEY_HERE" and not FirebaseAuth.API_KEY.is_empty()
+
+
+# ── PATH HELPER ───────────────────────────────────────────────────────────────
+# Firestore requires EVEN path segments (collection/document pairs).
+# WRONG:  users/{uid}/game_state          → 3 segments → 400 error
+# CORRECT: users/{uid}/saves/game_state   → 4 segments → OK
+func _save_url(user_id: String) -> String:
+	return BASE_URL + "/users/" + user_id + "/saves/game_state"
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 # SAVE OPERATIONS
@@ -37,7 +46,7 @@ func save_game_state(user_id: String, data: Dictionary):
 		FirebaseManager.on_cloud_save_failed("Not authenticated")
 		return
 	
-	var url = BASE_URL + "/users/" + user_id + "/game_state"
+	var url = _save_url(user_id)  # FIXED
 	var headers = [
 		"Content-Type: application/json",
 		"Authorization: Bearer " + id_token
@@ -78,7 +87,7 @@ func save_game_state_async(user_id: String, data: Dictionary) -> Dictionary:
 		result.error = "Not authenticated"
 		return result
 	
-	var url = BASE_URL + "/users/" + user_id + "/game_state"
+	var url = _save_url(user_id)  # FIXED
 	var headers = [
 		"Content-Type: application/json",
 		"Authorization: Bearer " + id_token
@@ -92,7 +101,6 @@ func save_game_state_async(user_id: String, data: Dictionary) -> Dictionary:
 	
 	http.request(url, headers, HTTPClient.METHOD_PATCH, body)
 	
-	# Wait for response
 	var response = await http.request_completed
 	http.queue_free()
 	
@@ -141,7 +149,7 @@ func load_game_state():
 		FirebaseManager.on_cloud_load_failed("Not authenticated")
 		return
 	
-	var url = BASE_URL + "/users/" + user_id + "/game_state"
+	var url = _save_url(user_id)  # FIXED
 	var headers = ["Authorization: Bearer " + id_token]
 	
 	var http = HTTPRequest.new()
@@ -178,7 +186,7 @@ func load_game_state_async() -> Dictionary:
 		result.error = "Not authenticated"
 		return result
 	
-	var url = BASE_URL + "/users/" + user_id + "/game_state"
+	var url = _save_url(user_id)  # FIXED
 	var headers = ["Authorization: Bearer " + id_token]
 	
 	var http = HTTPRequest.new()
@@ -246,7 +254,7 @@ func check_save_exists():
 	if user_id.is_empty() or id_token.is_empty():
 		return
 	
-	var url = BASE_URL + "/users/" + user_id + "/game_state"
+	var url = _save_url(user_id)  # FIXED
 	var headers = ["Authorization: Bearer " + id_token]
 	
 	var http = HTTPRequest.new()
@@ -257,13 +265,8 @@ func check_save_exists():
 
 func _on_check_response(_result, response_code, _headers, _body, http):
 	http.queue_free()
-	
 	var exists = (response_code == 200)
-	var timestamp = 0
-	
-	# Note: HEAD response doesn't include body, so we can't get timestamp
-	# Full load would be needed for that
-	FirebaseManager.emit_signal("cloud_status_changed", exists, timestamp)
+	FirebaseManager.emit_signal("cloud_status_changed", exists, 0)
 
 
 # DELETE
@@ -299,11 +302,9 @@ func _convert_to_firestore_format(data: Dictionary) -> Dictionary:
 	
 	for key in data.keys():
 		if key.begins_with("_"):
-			# Internal fields go in metadata
 			continue
 		fields[key] = _godot_value_to_firestore(data[key])
 	
-	# Handle metadata specially
 	if data.has("_metadata"):
 		fields["_metadata"] = {"mapValue": {"fields": {}}}
 		for meta_key in data["_metadata"].keys():
@@ -346,17 +347,14 @@ func _godot_value_to_firestore(value) -> Dictionary:
 				"y": {"doubleValue": value.y}
 			}}}
 		_:
-			# Fallback to string
 			return {"stringValue": str(value)}
 
 
 func _convert_from_firestore(fields: Dictionary) -> Dictionary:
 	"""Convert Firestore document fields to Godot Dictionary"""
 	var result = {}
-	
 	for key in fields.keys():
 		result[key] = _firestore_value_to_godot(fields[key])
-	
 	return result
 
 
