@@ -132,42 +132,43 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="DetectivePanel" type="Panel" parent="GameLayer"]
+[node name="DetectivePanel" type="Control" parent="GameLayer"]
 visible = false
-offset_left = 836.0
-offset_top = 236.0
-offset_right = 1236.0
-offset_bottom = 592.0
+offset_left = 384.0
+offset_top = 370.0
+offset_right = 896.0
+offset_bottom = 544.0
 
 [node name="DetectiveTitle" type="Label" parent="GameLayer/DetectivePanel"]
-offset_left = 20.0
-offset_top = 18.0
-offset_right = 380.0
-offset_bottom = 58.0
-text = "DETECTIVE CHOOSES"
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 512.0
+offset_bottom = 42.0
+text = "Choose the correct number."
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Choices" type="VBoxContainer" parent="GameLayer/DetectivePanel"]
-offset_left = 42.0
-offset_top = 88.0
-offset_right = 358.0
-offset_bottom = 320.0
-theme_override_constants/separation = 18
+[node name="Choices" type="HBoxContainer" parent="GameLayer/DetectivePanel"]
+offset_left = 56.0
+offset_top = 62.0
+offset_right = 456.0
+offset_bottom = 174.0
+theme_override_constants/separation = 32
+alignment = 1
 
 [node name="Choice1" type="Button" parent="GameLayer/DetectivePanel/Choices"]
-custom_minimum_size = Vector2(316, 64)
-size_flags_horizontal = 3
+custom_minimum_size = Vector2(112, 112)
+size_flags_horizontal = 4
 text = "12"
 
 [node name="Choice2" type="Button" parent="GameLayer/DetectivePanel/Choices"]
-custom_minimum_size = Vector2(316, 64)
-size_flags_horizontal = 3
+custom_minimum_size = Vector2(112, 112)
+size_flags_horizontal = 4
 text = "18"
 
 [node name="Choice3" type="Button" parent="GameLayer/DetectivePanel/Choices"]
-custom_minimum_size = Vector2(316, 64)
-size_flags_horizontal = 3
+custom_minimum_size = Vector2(112, 112)
+size_flags_horizontal = 4
 text = "20"
 
 [node name="FeedbackPanel" type="Panel" parent="GameLayer"]

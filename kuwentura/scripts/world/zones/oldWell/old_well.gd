@@ -44,7 +44,7 @@ const ROMAN_POOL: Array[Dictionary] = [
 @onready var siyokoy_sprite: TextureRect = get_node_or_null("GameLayer/SiyokoySprite")
 @onready var sidekick_panel: Panel = get_node_or_null("GameLayer/SidekickPanel")
 @onready var roman_label: Label = get_node_or_null("GameLayer/RomanFloating")
-@onready var detective_panel: Panel = get_node_or_null("GameLayer/DetectivePanel")
+@onready var detective_panel: Control = get_node_or_null("GameLayer/DetectivePanel")
 @onready var choice_buttons: Array[Button] = [
 	get_node_or_null("GameLayer/DetectivePanel/Choices/Choice1") as Button,
 	get_node_or_null("GameLayer/DetectivePanel/Choices/Choice2") as Button,
@@ -76,6 +76,8 @@ var _reward_stage := 0
 var _waiting_reward_tap := false
 var _collect_started := false
 var _clue_collected := false
+var _siyokoy_rest_position := Vector2.ZERO
+var _attack_active := false
 
 
 func _ready() -> void:
@@ -94,6 +96,8 @@ func _apply_scene_textures() -> void:
 	if is_instance_valid(siyokoy_sprite):
 		siyokoy_sprite.texture = TEX_SIYOKOY_WELL
 		siyokoy_sprite.visible = false
+		siyokoy_sprite.modulate = Color(1, 1, 1, 0)
+		_siyokoy_rest_position = siyokoy_sprite.position
 	if is_instance_valid(clue_sprite):
 		clue_sprite.texture = TEX_EYE_CLUE
 
@@ -119,10 +123,10 @@ func _apply_fonts_and_theme() -> void:
 		if panel is Panel:
 			panel.add_theme_stylebox_override("panel", _make_panel_style())
 	for button in choice_buttons:
-		_style_button(button)
+		_style_choice_button(button)
 		if is_instance_valid(button):
-			button.custom_minimum_size = Vector2(316, 64)
-			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			button.custom_minimum_size = Vector2(112, 112)
+			button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_style_button(back_button)
 	_style_button(collect_button)
 	if is_instance_valid(tap_catcher):
@@ -188,6 +192,34 @@ func _make_button_style(color: Color) -> StyleBoxFlat:
 	return style
 
 
+func _style_choice_button(button: Button) -> void:
+	if not is_instance_valid(button):
+		return
+	button.focus_mode = Control.FOCUS_NONE
+	button.add_theme_font_override("font", FONT_BODY)
+	button.add_theme_font_size_override("font_size", 34)
+	button.add_theme_color_override("font_color", UI_CREAM)
+	button.add_theme_stylebox_override("normal", _make_circle_button_style(UI_BROWN))
+	button.add_theme_stylebox_override("hover", _make_circle_button_style(Color(0.65, 0.42, 0.20, 1.0)))
+	button.add_theme_stylebox_override("pressed", _make_circle_button_style(Color(0.36, 0.20, 0.10, 1.0)))
+	button.add_theme_stylebox_override("disabled", _make_circle_button_style(Color(0.25, 0.19, 0.15, 0.75)))
+
+
+func _make_circle_button_style(color: Color) -> StyleBoxFlat:
+	var style := _make_button_style(color)
+	style.corner_radius_top_left = 56
+	style.corner_radius_top_right = 56
+	style.corner_radius_bottom_left = 56
+	style.corner_radius_bottom_right = 56
+	style.border_width_left = 4
+	style.border_width_top = 4
+	style.border_width_right = 4
+	style.border_width_bottom = 4
+	style.shadow_color = Color(0, 0, 0, 0.32)
+	style.shadow_size = 8
+	return style
+
+
 func _connect_signals() -> void:
 	if is_instance_valid(back_button) and not back_button.pressed.is_connected(_on_back_pressed):
 		back_button.pressed.connect(_on_back_pressed)
@@ -250,8 +282,8 @@ func _start_intro() -> void:
 	_update_instruction("The Old Well stirs. Listen carefully before answering.")
 	var lines: Array[Dictionary] = [
 		{"speaker": "detective", "text": "The well is moving. Something is watching us."},
-		{"speaker": "sidekick", "text": "I can see Roman numerals glowing on the stones."},
-		{"speaker": "detective", "text": "Tell me what number they mean. I will choose the answer."},
+		{"speaker": "detective", "text": "I can see Roman numerals glowing on the stones."},
+		{"speaker": "sidekick", "text": "Tell me what number they mean. I will choose the answer."},
 		{"speaker": "sidekick", "text": "Hurry. The Siyokoy is waiting for a mistake."}
 	]
 	DialogueSystem.play("old_well_roman_intro", lines)
@@ -362,34 +394,34 @@ func _update_instruction(text: String = "") -> void:
 	if not text.is_empty():
 		instruction_label.text = text
 	elif _is_sidekick_view() and not _is_detective_view():
-		instruction_label.text = "Read the Roman numeral aloud. The Detective chooses the number."
+		instruction_label.text = "Listen to the Detective, then choose the matching number."
 	elif _is_detective_view() and not _is_sidekick_view():
-		instruction_label.text = "Listen to the Sidekick, then choose the matching number."
+		instruction_label.text = "Read the Roman numeral aloud. The Sidekick chooses the number."
 	else:
 		instruction_label.text = "Solo test: Roman prompt and answer choices are both visible."
 
 
 func _update_role_panels() -> void:
-	var show_sidekick := _is_sidekick_view() and _zone_active and not _reward_active and not _clue_collected
-	var show_detective := _is_detective_view() and _zone_active and not _reward_active and not _clue_collected
+	var show_roman := _is_detective_view() and _zone_active and not _reward_active and not _clue_collected
+	var show_choices := _is_sidekick_view() and _zone_active and not _reward_active and not _clue_collected and not _attack_active
 	if is_instance_valid(sidekick_panel):
 		sidekick_panel.visible = false
 	if is_instance_valid(detective_panel):
-		detective_panel.visible = show_detective
+		detective_panel.visible = show_choices
 	if is_instance_valid(siyokoy_sprite):
-		siyokoy_sprite.visible = _zone_active and not _reward_active and not _clue_collected
+		siyokoy_sprite.visible = false
 	if is_instance_valid(roman_label):
-		roman_label.visible = show_sidekick
-		roman_label.text = _current_roman if show_sidekick else ""
+		roman_label.visible = show_roman
+		roman_label.text = _current_roman if show_roman else ""
 	for i in range(choice_buttons.size()):
 		var button := choice_buttons[i]
 		if is_instance_valid(button):
 			var has_choice := i < _current_choices.size()
 			button.visible = has_choice
-			button.disabled = not show_detective or not has_choice or _dialogue_locked
+			button.disabled = not show_choices or not has_choice or _dialogue_locked
 			button.text = str(_current_choices[i]) if has_choice else ""
-			button.custom_minimum_size = Vector2(316, 64)
-			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			button.custom_minimum_size = Vector2(112, 112)
+			button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_update_instruction()
 
 
@@ -402,8 +434,8 @@ func _set_choice_buttons_enabled(enabled: bool) -> void:
 func _on_choice_pressed(choice_index: int) -> void:
 	if _dialogue_locked or not _zone_active or _reward_active:
 		return
-	if not _is_detective_view():
-		_show_feedback("Only the Detective can choose an answer.", UI_GOLD, 1.5)
+	if not _is_sidekick_view():
+		_show_feedback("Only the Sidekick can choose an answer.", UI_GOLD, 1.5)
 		return
 	if choice_index < 0 or choice_index >= _current_choices.size():
 		return
@@ -465,11 +497,12 @@ func rpc_answer_feedback(correct: bool, round_index: int, lives: int, reset: boo
 	if correct:
 		_show_feedback("Correct. The well calms for a moment.", UI_GREEN, 1.1)
 	else:
-		_play_siyokoy_attack(reset)
+		await _play_siyokoy_attack(reset)
 		if reset:
 			_show_feedback("No lives left. The Siyokoy resets the puzzle.", UI_RED, 1.8)
 		else:
 			_show_feedback("Wrong answer. The Siyokoy splashes the well.", UI_RED, 1.6)
+		_update_role_panels()
 
 
 func _server_complete_puzzle() -> void:
@@ -507,19 +540,30 @@ func _show_feedback(text: String, color: Color, duration: float) -> void:
 func _play_siyokoy_attack(reset: bool) -> void:
 	if not is_instance_valid(siyokoy_sprite):
 		return
+	_attack_active = true
+	_update_role_panels()
 	siyokoy_sprite.visible = true
 	siyokoy_sprite.texture = TEX_SIYOKOY_ATTACK
-	var base_pos := siyokoy_sprite.position
+	var base_pos := _siyokoy_rest_position
+	if base_pos == Vector2.ZERO:
+		base_pos = siyokoy_sprite.position
+	siyokoy_sprite.position = base_pos + Vector2(0, 92 if reset else 70)
+	siyokoy_sprite.modulate = Color(1.0, 0.78, 0.78, 0.0)
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(siyokoy_sprite, "modulate", Color(1.0, 0.78, 0.78, 1.0), 0.12)
-	tween.tween_property(siyokoy_sprite, "position", base_pos + Vector2(0, -18 if reset else -10), 0.12)
-	tween.chain().tween_property(siyokoy_sprite, "position", base_pos, 0.22)
+	tween.tween_property(siyokoy_sprite, "modulate", Color(1.0, 0.78, 0.78, 1.0), 0.65)
+	tween.tween_property(siyokoy_sprite, "position", base_pos + Vector2(0, -16 if reset else -8), 0.65)
+	tween.chain().tween_property(siyokoy_sprite, "position", base_pos, 0.2)
+	tween.chain().tween_interval(0.35)
 	tween.chain().tween_callback(func():
 		if is_instance_valid(siyokoy_sprite):
 			siyokoy_sprite.texture = TEX_SIYOKOY_WELL
-			siyokoy_sprite.modulate = Color.WHITE
+			siyokoy_sprite.modulate = Color(1, 1, 1, 0)
+			siyokoy_sprite.position = base_pos
+			siyokoy_sprite.visible = false
 	)
+	await tween.finished
+	_attack_active = false
 
 
 func _show_reward() -> void:
