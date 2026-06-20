@@ -1,18 +1,118 @@
-[gd_scene load_steps=5 format=3 uid="uid://storagehut"]
+[gd_scene load_steps=42 format=3 uid="uid://storagehut"]
 
 [ext_resource type="Script" uid="uid://rlqjp66bw7gk" path="res://scripts/world/zones/storageHut/storage_hut.gd" id="1_storagehut"]
-[ext_resource type="Texture2D" uid="uid://cuc1274cad4bw" path="res://assets/backgrounds/lobby.png" id="2_bg"]
 [ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="3_wl25h"]
 [ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="4_6n2rk"]
+[ext_resource type="Texture2D" uid="uid://cm4h0lilnf8lo" path="res://assets/sprites/places/storageHut.png" id="4_wl25h"]
+[ext_resource type="Texture2D" uid="uid://dbl3xack1rg3r" path="res://assets/sprites/zoneObjects/storageHut/rectangularContainer.png" id="5_2w32v"]
+[ext_resource type="Texture2D" uid="uid://hpqdw6fqijv0" path="res://assets/sprites/zoneObjects/storageHut/triangleStorageHut.png" id="6_7mtyr"]
+[ext_resource type="Texture2D" uid="uid://btgnsos2vm234" path="res://assets/sprites/zoneObjects/storageHut/squareStorageHut.png" id="7_w5q4s"]
+[ext_resource type="Texture2D" uid="uid://bdacql87buphd" path="res://assets/sprites/zoneObjects/storageHut/pentagonStorageHut.png" id="8_ceovl"]
+[ext_resource type="Texture2D" uid="uid://djlktpioqbhaa" path="res://assets/sprites/ledger/ledgerOpen.png" id="9_u1wdi"]
+[ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="10_dlbia"]
+[ext_resource type="Texture2D" uid="uid://bepqi3l7fudbv" path="res://assets/sprites/clues/scrollClue.png" id="11_vi7lo"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="12_u5bgj"]
+[ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="13_hjfqw"]
+[ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="14_gi6hd"]
+[ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="15_gfj04"]
+[ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="16_i0npi"]
+[ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="17_2bkes"]
+[ext_resource type="Texture2D" uid="uid://dvkupminll3bb" path="res://assets/sprites/tracker/backyardPath/defaultBY.png" id="18_hxsfn"]
+[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/tapeMeasure.png" id="19_tape"]
+[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/rectangularPrismPaper.png" id="20_rectpaper"]
+[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/cylinderPaper.png" id="21_cylpaper"]
+[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/widthRectangular.png" id="22_widthrect"]
+[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/heightRectangular.png" id="23_heightrect"]
+[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/lengthRectangular.png" id="24_lengthrect"]
+[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/radiusCylinder.png" id="25_radiuscyl"]
+[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/heightCylinder.png" id="26_heightcyl"]
+[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/crumplePaperRoll.png" id="27_crumple"]
+[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/cylinderContainer.png" id="28_cylcontainer"]
+[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/hexagonStorageHut.png" id="29_hexagon"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qwhi7"]
+size = Vector2(165.5, 81)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tape_tool"]
+size = Vector2(170, 95)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_paper_tool"]
+size = Vector2(140, 115)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_pe3ft"]
+texture = ExtResource("9_u1wdi")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nk15b"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yfhlj"]
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.36078432, 0.21568628, 0.18039216, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vdqf1"]
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_revuv"]
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_top = 16.0
+expand_margin_bottom = 16.0
+shadow_color = Color(0, 0, 0, 0.20392157)
+shadow_size = 5
+shadow_offset = Vector2(0, 3.41)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ms7al"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5jp5d"]
+bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.65178686, 0.44065732, 0.2680916, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_pfif1"]
+color = Color(1, 1, 1, 1)
+thickness = 20
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_yysjm"]
+color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+thickness = 20
 
 [node name="StorageHut" type="Node2D"]
 script = ExtResource("1_storagehut")
 
-[node name="Background" type="Sprite2D" parent="."]
-position = Vector2(768, 320)
-texture = ExtResource("2_bg")
-
 [node name="TestLabel" type="Label" parent="."]
+visible = false
 offset_left = 270.0
 offset_top = 186.0
 offset_right = 1138.0
@@ -24,6 +124,7 @@ horizontal_alignment = 1
 
 [node name="RoleLabel" type="Label" parent="."]
 unique_name_in_owner = true
+visible = false
 offset_left = 305.0
 offset_top = 284.0
 offset_right = 1105.0
@@ -34,6 +135,7 @@ text = "Waiting for role..."
 horizontal_alignment = 1
 
 [node name="BackButton" type="Button" parent="."]
+visible = false
 offset_left = 50.0
 offset_top = 50.0
 offset_right = 300.0
@@ -41,5 +143,809 @@ offset_bottom = 120.0
 theme_override_fonts/font = ExtResource("4_6n2rk")
 theme_override_font_sizes/font_size = 32
 text = "← Back to Forest"
+
+[node name="BackgroundLayer" type="Node2D" parent="."]
+position = Vector2(6.1035156e-05, 6.1035156e-05)
+scale = Vector2(0.99999994, 0.99999994)
+
+[node name="StorageBackground" type="Sprite2D" parent="BackgroundLayer"]
+position = Vector2(656.49994, 325.49997)
+scale = Vector2(0.78409094, 0.6981934)
+texture = ExtResource("4_wl25h")
+
+[node name="RoomObjectLayer" type="Node2D" parent="."]
+
+[node name="ChestObject" type="Area2D" parent="RoomObjectLayer"]
+
+[node name="ChestSprite" type="Sprite2D" parent="RoomObjectLayer/ChestObject"]
+self_modulate = Color(1, 1, 1, 0.5764706)
+position = Vector2(661, 416.99997)
+scale = Vector2(0.27600005, 0.18149999)
+texture = ExtResource("5_2w32v")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomObjectLayer/ChestObject"]
+position = Vector2(665.25, 411)
+shape = SubResource("RectangleShape2D_qwhi7")
+
+[node name="MeasuringToolObject" type="Area2D" parent="RoomObjectLayer"]
+visible = false
+position = Vector2(190, 520)
+monitoring = false
+monitorable = false
+
+[node name="MeasuringToolSprite" type="Sprite2D" parent="RoomObjectLayer/MeasuringToolObject"]
+scale = Vector2(0.13, 0.13)
+texture = ExtResource("19_tape")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomObjectLayer/MeasuringToolObject"]
+shape = SubResource("RectangleShape2D_tape_tool")
+
+[node name="ScratchPaperObject" type="Area2D" parent="RoomObjectLayer"]
+visible = false
+position = Vector2(1030, 525)
+monitoring = false
+monitorable = false
+
+[node name="ScratchPaperSprite" type="Sprite2D" parent="RoomObjectLayer/ScratchPaperObject"]
+scale = Vector2(0.14, 0.14)
+texture = ExtResource("27_crumple")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomObjectLayer/ScratchPaperObject"]
+shape = SubResource("RectangleShape2D_paper_tool")
+
+[node name="LightingLayer" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="LightingLayer"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1299.0
+offset_bottom = 655.0
+
+[node name="DarkOverlay" type="ColorRect" parent="LightingLayer/Control"]
+layout_mode = 0
+offset_right = 1298.0
+offset_bottom = 650.0
+
+[node name="LanternGlow" type="ColorRect" parent="LightingLayer/Control"]
+layout_mode = 0
+offset_right = 1298.0
+offset_bottom = 652.0
+
+[node name="GlowProgressPanel" type="Panel" parent="LightingLayer/Control"]
+layout_mode = 0
+offset_right = 1299.0
+offset_bottom = 654.0
+
+[node name="GlowTitleLabel" type="Label" parent="LightingLayer/Control/GlowProgressPanel"]
+layout_mode = 0
+offset_left = 159.0
+offset_top = 66.0
+offset_right = 1093.0
+offset_bottom = 132.0
+
+[node name="GlowCounterLabel" type="Label" parent="LightingLayer/Control/GlowProgressPanel"]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 2.0
+offset_right = 1128.0
+offset_bottom = 78.0
+
+[node name="RiddleLayer" type="CanvasLayer" parent="."]
+
+[node name="RiddlePanel" type="Panel" parent="RiddleLayer"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="RiddleHeaderLabel" type="Label" parent="RiddleLayer/RiddlePanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="TurnLabel" type="Label" parent="RiddleLayer/RiddlePanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="ViewerInstructionLabel" type="Label" parent="RiddleLayer/RiddlePanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="ShapeViewerPanel" type="Panel" parent="RiddleLayer"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="ShapeExpressionNode" type="Node2D" parent="RiddleLayer/ShapeViewerPanel"]
+
+[node name="ShapeSlot1" type="Sprite2D" parent="RiddleLayer/ShapeViewerPanel/ShapeExpressionNode"]
+position = Vector2(458.00006, 269)
+scale = Vector2(0.14475001, 0.12625003)
+texture = ExtResource("6_7mtyr")
+
+[node name="OperatorLabel1" type="Label" parent="RiddleLayer/ShapeViewerPanel/ShapeExpressionNode"]
+offset_top = 8.0
+offset_right = 1.0
+offset_bottom = 31.0
+
+[node name="ShapeSlot2" type="Sprite2D" parent="RiddleLayer/ShapeViewerPanel/ShapeExpressionNode"]
+position = Vector2(459.125, 269)
+scale = Vector2(0.14374997, 0.12600002)
+texture = ExtResource("7_w5q4s")
+
+[node name="OperatorLabel2" type="Label" parent="RiddleLayer/ShapeViewerPanel/ShapeExpressionNode"]
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 6.0
+offset_bottom = 31.0
+
+[node name="ShapeSlot3" type="Sprite2D" parent="RiddleLayer/ShapeViewerPanel/ShapeExpressionNode"]
+position = Vector2(461, 268)
+scale = Vector2(0.135, 0.12799999)
+texture = ExtResource("8_ceovl")
+
+[node name="EqualsLabel" type="Label" parent="RiddleLayer/ShapeViewerPanel/ShapeExpressionNode"]
+offset_left = 10.0
+offset_top = 8.0
+offset_right = 11.0
+offset_bottom = 31.0
+
+[node name="AnswerPanel" type="Panel" parent="RiddleLayer"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="AnswerInstructionLabel" type="Label" parent="RiddleLayer/AnswerPanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="AnswerInput" type="LineEdit" parent="RiddleLayer/AnswerPanel"]
+layout_mode = 0
+offset_right = 68.5625
+offset_bottom = 31.0
+
+[node name="SubmitAnswerButton" type="Button" parent="RiddleLayer/AnswerPanel"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+
+[node name="FeedbackLabel" type="Label" parent="RiddleLayer"]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="ChestUILayer" type="CanvasLayer" parent="."]
+
+[node name="ChestModal" type="Panel" parent="ChestUILayer"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="ModalTitleLabel" type="Label" parent="ChestUILayer/ChestModal"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="ModalInstructionLabel" type="Label" parent="ChestUILayer/ChestModal"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="ContainerPreview" type="Sprite2D" parent="ChestUILayer/ChestModal"]
+
+[node name="DimensionLabel" type="Label" parent="ChestUILayer/ChestModal"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="PasscodeInput" type="LineEdit" parent="ChestUILayer/ChestModal"]
+layout_mode = 0
+offset_right = 68.5625
+offset_bottom = 31.0
+
+[node name="SubmitPasscodeButton" type="Button" parent="ChestUILayer/ChestModal"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+
+[node name="HintButton" type="Button" parent="ChestUILayer/ChestModal"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Hint"
+
+[node name="CloseChestButton" type="Button" parent="ChestUILayer/ChestModal"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+
+[node name="ChestFeedbackLabel" type="Label" parent="ChestUILayer/ChestModal"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+
+[node name="MeasurementUILayer" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="MeasurementModal" type="Panel" parent="MeasurementUILayer"]
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_5jp5d")
+
+[node name="MeasurementTitleLabel" type="Label" parent="MeasurementUILayer/MeasurementModal"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="MeasurementInstructionLabel" type="Label" parent="MeasurementUILayer/MeasurementModal"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+autowrap_mode = 2
+
+[node name="MeasurementImage" type="Sprite2D" parent="MeasurementUILayer/MeasurementModal"]
+
+[node name="MeasurementAnswerInput" type="LineEdit" parent="MeasurementUILayer/MeasurementModal"]
+layout_mode = 0
+offset_right = 68.5625
+offset_bottom = 31.0
+placeholder_text = "Measurement"
+
+[node name="ConfirmMeasurementButton" type="Button" parent="MeasurementUILayer/MeasurementModal"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Record"
+
+[node name="CloseMeasurementButton" type="Button" parent="MeasurementUILayer/MeasurementModal"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Step Back"
+
+[node name="MeasurementFeedbackLabel" type="Label" parent="MeasurementUILayer/MeasurementModal"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+autowrap_mode = 2
+
+[node name="MeasurementSummaryLabel" type="Label" parent="MeasurementUILayer/MeasurementModal"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+autowrap_mode = 2
+
+[node name="ScratchPaperUILayer" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="ScratchPaperModal" type="Panel" parent="ScratchPaperUILayer"]
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_5jp5d")
+
+[node name="ScratchPaperTitleLabel" type="Label" parent="ScratchPaperUILayer/ScratchPaperModal"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Crumpled Scratch Paper"
+
+[node name="ScratchPaperImage" type="Sprite2D" parent="ScratchPaperUILayer/ScratchPaperModal"]
+
+[node name="RectangularPaperButton" type="Button" parent="ScratchPaperUILayer/ScratchPaperModal"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Wooden Box"
+
+[node name="CylinderPaperButton" type="Button" parent="ScratchPaperUILayer/ScratchPaperModal"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Round Vessel"
+
+[node name="CloseScratchPaperButton" type="Button" parent="ScratchPaperUILayer/ScratchPaperModal"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Step Back"
+
+[node name="ScratchPaperFeedbackLabel" type="Label" parent="ScratchPaperUILayer/ScratchPaperModal"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+autowrap_mode = 2
+
+[node name="SidekickLayer" type="CanvasLayer" parent="."]
+
+[node name="Ledger" type="Panel" parent="SidekickLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -393.0
+offset_top = -331.0
+offset_right = 519.0
+offset_bottom = 501.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_pe3ft")
+
+[node name="Control" type="Control" parent="SidekickLayer/Ledger"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LedgerTitle" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 200.0
+offset_right = 431.0
+offset_bottom = 251.0
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 23
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 284.0
+offset_right = 446.0
+offset_bottom = 482.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+
+[node name="LedgerLeftHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 173.0
+offset_top = 270.0
+offset_right = 433.0
+offset_bottom = 330.0
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerLeftBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 339.0
+offset_right = 446.0
+offset_bottom = 482.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="LedgerRightHeader" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 478.0
+offset_top = 208.0
+offset_right = 753.0
+offset_bottom = 276.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LedgerRightBody" type="Label" parent="SidekickLayer/Ledger/Control"]
+layout_mode = 0
+offset_left = 478.0
+offset_top = 274.0
+offset_right = 739.0
+offset_bottom = 492.0
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="Briefcase" type="Panel" parent="SidekickLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -247.0
+offset_top = -297.0
+offset_right = 247.0
+offset_bottom = 197.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_nk15b")
+
+[node name="RewardLayer" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="DarkOverlay" type="ColorRect" parent="RewardLayer"]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 158.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.011087579, 0.011087578, 0.01108758, 1)
+
+[node name="Sparkle" type="Sprite2D" parent="RewardLayer"]
+visible = false
+position = Vector2(744.75, 385.5)
+scale = Vector2(0.5719907, 0.5358025)
+texture = ExtResource("10_dlbia")
+
+[node name="ClueSprite" type="Sprite2D" parent="RewardLayer"]
+visible = false
+position = Vector2(707.5, 312.5)
+scale = Vector2(0.1515, 0.1125)
+texture = ExtResource("11_vi7lo")
+
+[node name="BannerLabel" type="Label" parent="RewardLayer"]
+anchors_preset = -1
+anchor_left = -0.029618787
+anchor_right = -0.029618787
+offset_left = 32.753967
+offset_top = 66.66298
+offset_right = 1447.7273
+offset_bottom = 160.59502
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 45
+text = "ARTIFACT FOUND!"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="RewardBanner" type="Sprite2D" parent="RewardLayer"]
+visible = false
+position = Vector2(732.5, 41.750008)
+scale = Vector2(0.27175924, 0.20864198)
+texture = ExtResource("12_u5bgj")
+
+[node name="TapInstruction" type="Label" parent="RewardLayer"]
+offset_left = 483.0
+offset_top = 416.0
+offset_right = 937.0
+offset_bottom = 458.0
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 20
+text = "Tap anywhere to continue."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RewardPanel" type="Sprite2D" parent="RewardLayer"]
+position = Vector2(730, 325.50003)
+scale = Vector2(0.587963, 0.5390947)
+texture = ExtResource("12_u5bgj")
+
+[node name="RewardText" type="Label" parent="RewardLayer/RewardPanel"]
+offset_left = -818.07886
+offset_top = 316.271
+offset_right = 714.3307
+offset_bottom = 412.72888
+theme_override_colors/font_color = Color(0.54901963, 0.29803923, 0.078431375, 1)
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 35
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="CollectButton" type="Button" parent="RewardLayer"]
+process_mode = 3
+visible = false
+offset_left = 552.0
+offset_top = 499.00003
+offset_right = 858.0
+offset_bottom = 552.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("4_6n2rk")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_yfhlj")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_vdqf1")
+theme_override_styles/hover = SubResource("StyleBoxFlat_revuv")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ms7al")
+text = "Collect Artifact"
+
+[node name="TapCatcher" type="Button" parent="RewardLayer"]
+self_modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 74.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+theme_override_fonts/font = ExtResource("3_wl25h")
+action_mode = 0
+flat = true
+
+[node name="BriefcaseRevealSprite" type="TextureRect" parent="RewardLayer"]
+visible = false
+offset_left = 226.0
+offset_top = 35.0
+offset_right = 2510.7493
+offset_bottom = 1382.9524
+scale = Vector2(0.3947917, 0.4273148)
+mouse_filter = 2
+expand_mode = 1
+
+[node name="NotificationUI" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="Panel" type="Panel" parent="NotificationUI"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -360.0
+offset_top = 60.0
+offset_right = 481.0
+offset_bottom = 100.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="NotificationUI/Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -411.5
+offset_top = -20.0
+offset_right = 411.5
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="PauseCanvasLayer" type="CanvasLayer" parent="."]
+process_mode = 3
+layer = 110
+
+[node name="InGamePausePanel" type="Panel" parent="PauseCanvasLayer"]
+visible = false
+top_level = true
+z_index = 10
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -442.25
+offset_top = -294.0
+offset_right = 442.25
+offset_bottom = 294.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_5jp5d")
+
+[node name="TitleLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -241.0
+offset_top = 18.0
+offset_right = 240.0
+offset_bottom = 127.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 70
+text = "Game Paused!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Separator" type="Line2D" parent="PauseCanvasLayer/InGamePausePanel"]
+position = Vector2(0.10900879, -58)
+scale = Vector2(0.73165876, 1)
+points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+width = 2.0
+default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+
+[node name="Resume_PlayButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 57.25
+offset_top = -107.0
+offset_right = 481.25
+offset_bottom = 38.0
+grow_vertical = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("13_hjfqw")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/Resume_PlayButton"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -286.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("4_6n2rk")
+theme_override_font_sizes/font_size = 40
+text = "Resume Game"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OptionButton" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -354.25
+offset_top = -107.0
+offset_right = -61.25
+offset_bottom = 38.0
+grow_horizontal = 0
+grow_vertical = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("14_gi6hd")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionButton"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -128.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("4_6n2rk")
+theme_override_font_sizes/font_size = 40
+text = "Option"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackToForest" type="TextureButton" parent="PauseCanvasLayer/InGamePausePanel"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -244.625
+offset_top = -209.0
+offset_right = 245.375
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_vertical = 3
+texture_normal = ExtResource("15_gfj04")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PauseCanvasLayer/InGamePausePanel/BackToForest"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -336.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("4_6n2rk")
+theme_override_font_sizes/font_size = 40
+text = "Back to Forest"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OptionSubPanel" type="Panel" parent="PauseCanvasLayer/InGamePausePanel"]
+visible = false
+layout_mode = 0
+offset_right = 884.5
+offset_bottom = 588.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_5jp5d")
+
+[node name="OptionLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -94.5
+offset_top = 18.0
+offset_right = 94.5
+offset_bottom = 127.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 55
+text = "Option:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackToPrevious" type="TouchScreenButton" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+position = Vector2(20, 10)
+scale = Vector2(0.3, 0.3)
+texture_normal = ExtResource("16_i0npi")
+
+[node name="Separator2" type="Line2D" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+position = Vector2(0.10900879, -58)
+scale = Vector2(0.73165876, 1)
+points = PackedVector2Array(2.40625, 194.75, 610.5802, 194.75, 1206.4063, 194.75)
+width = 2.0
+default_color = Color(0.6509804, 0.4392157, 0.26666668, 1)
+
+[node name="VolumeSliderControl" type="HBoxContainer" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -388.40625
+offset_top = -103.0
+offset_right = 388.40625
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 30
+
+[node name="VolumeLabel" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 40
+text = "Music Volume:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VolumeSlider" type="HSlider" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/slider = SubResource("StyleBoxLine_pfif1")
+theme_override_styles/grabber_area = SubResource("StyleBoxLine_yysjm")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_yysjm")
+value = 80.0
+
+[node name="VolumeValue" type="Label" parent="PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 30
+text = "80%"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="InsideZoneControl" parent="." instance=ExtResource("17_2bkes")]
+
+[node name="ProgressTracker" type="Node2D" parent="."]
+visible = false
+
+[node name="Sprite2D" type="Sprite2D" parent="ProgressTracker"]
+position = Vector2(253, 70)
+scale = Vector2(0.28802085, 0.3236111)
+texture = ExtResource("18_hxsfn")
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
