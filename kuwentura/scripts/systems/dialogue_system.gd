@@ -11,10 +11,21 @@ var _lines: Array[Dictionary] = []
 var _index: int = 0
 var _dialogue_id: String = ""
 var _playing: bool = false
+var _body_font_override: Font = null
 
 
 func is_playing() -> bool:
 	return _playing
+
+
+func set_body_font_override(font: Font) -> void:
+	_body_font_override = font
+	_call_ui("set_body_font_override", [_body_font_override])
+
+
+func clear_body_font_override() -> void:
+	_body_font_override = null
+	_call_ui("set_body_font_override", [_body_font_override])
 
 
 func play(dialogue_id: String, lines: Array[Dictionary], skip_delay: bool = false) -> void:
@@ -70,6 +81,7 @@ func _ensure_ui() -> void:
 	_ui = dialogue_ui_scene.instantiate() as CanvasLayer
 	get_tree().root.add_child(_ui)
 	_call_ui("bind_system", [self])
+	_call_ui("set_body_font_override", [_body_font_override])
 	_ui.visible = false
 
 
