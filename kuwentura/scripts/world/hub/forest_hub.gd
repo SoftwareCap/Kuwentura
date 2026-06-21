@@ -165,6 +165,7 @@ var _map_open_tween: Tween
 var _map_marker_tweens: Array = []
 var _touch_controls_default_layer: int = 101
 var _map_focus_controls_active: bool = false
+var _climax_transition_started: bool = false
 
 
 func _ready() -> void:
@@ -207,6 +208,7 @@ func _ready() -> void:
 						_rpc_spawn_player_with_pos.rpc_id(other_peer, peer_id, false, peer_pos)
 
 	await get_tree().process_frame
+	call_deferred("_check_pending_climax_transition")
 
 
 func _exit_tree() -> void:
@@ -1664,13 +1666,25 @@ func _make_strikethrough(text: String) -> String:
 			result += character + "\u0336"
 	return result
 
-func _on_all_clues_collected() -> void:
-	if not multiplayer.is_server():
-		return
-	_lock_player_movement()
-	_notify_transition_to_bakunawa.rpc()
+func _check_pending_climax_transition() -> void:
+	if GameState.climax_triggered:
+		_start_bakunawa_transition()
 
-@rpc("authority", "reliable", "call_local")
-func _notify_transition_to_bakunawa() -> void:
+
+func _on_all_clues_collected() -> void:
+	_start_bakunawa_transition()
+
+
+func _start_bakunawa_transition() -> void:
+	if _climax_transition_started or not GameState.climax_triggered:
+		return
+	_climax_transition_started = true
+	_lock_player_movement()
+	call_deferred("_run_bakunawa_transition")
+
+
+func _run_bakunawa_transition() -> void:
 	await get_tree().create_timer(0.5).timeout
+	if not is_inside_tree():
+		return
 	get_tree().change_scene_to_file(BAKUNAWA_SCENE)

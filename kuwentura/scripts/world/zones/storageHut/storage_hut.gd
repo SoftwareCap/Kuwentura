@@ -2057,7 +2057,7 @@ func _return_to_forest() -> void:
 	get_tree().paused = false
 	MusicController.resume_music()
 	if is_inside_tree():
-		get_tree().change_scene_to_file(SCENE_FOREST_HUB)
+		GameState.change_to_post_zone_scene(get_tree())
 
 
 func _on_clue_collected(zone_id: String, _clue_data: Dictionary) -> void:

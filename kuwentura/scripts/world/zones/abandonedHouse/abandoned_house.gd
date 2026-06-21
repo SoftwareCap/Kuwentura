@@ -1589,7 +1589,7 @@ func _get_event_position(event: InputEvent) -> Vector2:
 
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file(FOREST_HUB_SCENE_PATH)
+	GameState.change_to_post_zone_scene(get_tree())
 
 
 func _on_pause_button_pressed() -> void:
@@ -3938,7 +3938,7 @@ func _process(delta: float) -> void:
 func _return_to_forest() -> void:
 	get_tree().paused = false
 	MusicController.resume_music()
-	get_tree().change_scene_to_file(SCENE_FOREST_HUB)
+	GameState.change_to_post_zone_scene(get_tree())
 	
 func _play_ending_cutscene() -> void:
 	if not is_instance_valid(ending_cutscene):
@@ -3965,7 +3965,7 @@ func _on_cutscene_finished() -> void:
 	get_tree().paused = false
 	await get_tree().process_frame
 	if is_inside_tree():
-		get_tree().change_scene_to_file(SCENE_FOREST_HUB)
+		GameState.change_to_post_zone_scene(get_tree())
 
 
 func _fade_out(duration: float = 0.6) -> void:
