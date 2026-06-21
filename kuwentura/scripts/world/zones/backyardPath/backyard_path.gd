@@ -7,6 +7,8 @@ const MAX_STRIKES := 3
 const _SERVER_PEER_ID := 1
 const SCENE_FOREST_HUB := "res://scenes/world/hub/ForestHub.tscn"
 const SCENE_MAIN_MENU := "res://scenes/mainMenu/MainMenu.tscn"
+const LEDGER_IMAGE_PATH := "res://assets/sprites/ledger/backyardpath_instructions.png"
+const OCRA_FONT: FontFile = preload("res://assets/fonts/ocraextended.ttf")
 
 const PROGRESS_DEFAULT_TEX: Texture2D = preload("res://assets/sprites/tracker/backyardPath/defaultBY.png")
 const PROGRESS_PUZZLE1_TEX: Texture2D = preload("res://assets/sprites/tracker/backyardPath/puzzle1BY.png")
@@ -87,6 +89,8 @@ const UI_INFO := Color(0.99, 0.91, 0.63, 1.0)
 @onready var ledger_panel: Panel = get_node_or_null("SidekickLayer/Ledger")
 @onready var ledger_title_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerTitle")
 @onready var ledger_body_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerBody")
+
+var _ledger_instruction_image: TextureRect = null
 @onready var fog_overlay: ColorRect = $FogOverlay
 @onready var inside_zone_control: CanvasLayer = get_node_or_null("InsideZoneControl")
 @onready var pause_canvas_layer: CanvasLayer = get_node_or_null("PauseCanvasLayer")
@@ -380,6 +384,7 @@ func _play_ghost_dialogue_typewriter(text: String) -> void:
 	ghost_dialogue_label.visible = true
 	ghost_dialogue_label.text = ""
 	ghost_dialogue_label.modulate.a = 0.0
+	ghost_dialogue_label.add_theme_font_override("font", OCRA_FONT)
 	ghost_dialogue_label.add_theme_font_size_override("font_size", 24)
 	ghost_dialogue_label.add_theme_color_override("font_color", UI_CREAM)
 	ghost_dialogue_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -655,7 +660,7 @@ func _style_notification_panel() -> void:
 		notification_label.offset_top = -20.0
 		notification_label.offset_right = 305.0
 		notification_label.offset_bottom = 20.0
-		notification_label.remove_theme_font_override("font")
+		notification_label.add_theme_font_override("font", OCRA_FONT)
 		notification_label.add_theme_font_size_override("font_size", 20)
 		notification_label.add_theme_color_override("font_color", UI_CREAM)
 		notification_label.add_theme_constant_override("outline_size", 2)
@@ -669,7 +674,7 @@ func _style_back_button() -> void:
 		return
 
 	back_button.text = "BACK TO FOREST"
-	back_button.remove_theme_font_override("font")
+	back_button.add_theme_font_override("font", OCRA_FONT)
 	back_button.add_theme_font_size_override("font_size", 24)
 	back_button.add_theme_color_override("font_color", UI_CREAM)
 	back_button.add_theme_color_override("font_hover_color", UI_CREAM)
@@ -686,7 +691,7 @@ func _style_button(button: Button, text: String, primary: bool = true, font_size
 
 	button.flat = false
 	button.text = text
-	button.remove_theme_font_override("font")
+	button.add_theme_font_override("font", OCRA_FONT)
 	button.add_theme_font_size_override("font_size", font_size)
 	button.add_theme_color_override("font_color", UI_CREAM)
 	button.add_theme_color_override("font_hover_color", UI_CREAM)
@@ -718,7 +723,7 @@ func _style_input_fields() -> void:
 	for field in [x_input, word_puzzle_answer_input, name_input]:
 		if not is_instance_valid(field):
 			continue
-		field.remove_theme_font_override("font")
+		field.add_theme_font_override("font", OCRA_FONT)
 		field.add_theme_color_override("font_color", UI_INK)
 		field.add_theme_color_override("font_placeholder_color", Color(UI_INK.r, UI_INK.g, UI_INK.b, 0.7))
 		field.add_theme_color_override("font_selected_color", UI_CREAM)
@@ -763,7 +768,7 @@ func _style_text_feedback() -> void:
 	for label in [feedback_label, lantern_reward_label, ghost_dialogue_label, reward_banner_label, tap_instruction_label, word_puzzle_instruction_label, word_puzzle_turn_label, word_puzzle_question_label]:
 		if not is_instance_valid(label):
 			continue
-		label.remove_theme_font_override("font")
+		label.add_theme_font_override("font", OCRA_FONT)
 		label.add_theme_color_override("font_color", UI_CREAM)
 		label.add_theme_constant_override("outline_size", 2)
 		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
@@ -776,6 +781,7 @@ func _style_text_feedback() -> void:
 		feedback_label.position = Vector2(455, 458)
 
 	if is_instance_valid(ghost_dialogue_label):
+		ghost_dialogue_label.add_theme_font_override("font", OCRA_FONT)
 		ghost_dialogue_label.add_theme_font_size_override("font_size", 24)
 		ghost_dialogue_label.add_theme_color_override("font_color", UI_CREAM)
 		ghost_dialogue_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.92))
@@ -1591,14 +1597,43 @@ func _populate_heights() -> void:
 
 
 func _populate_ledger_content() -> void:
-	var ledger_view: Dictionary = PuzzleManager.get_zone_ledger_display(ZONE_ID)
-	if ledger_view.is_empty():
-		return
-	if is_instance_valid(ledger_title_label):
-		ledger_title_label.text = str(ledger_view.get("title", ""))
-	if is_instance_valid(ledger_body_label):
-		ledger_body_label.text = str(ledger_view.get("body", ""))
+	for label in [ledger_title_label, ledger_body_label]:
+		if is_instance_valid(label):
+			label.visible = false
+	_show_ledger_instruction_image(LEDGER_IMAGE_PATH)
 
+
+func _show_ledger_instruction_image(path: String) -> void:
+	if not is_instance_valid(ledger_panel):
+		return
+	ledger_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	var holder: Control = get_node_or_null("SidekickLayer/Ledger/Control") as Control
+	if not is_instance_valid(holder):
+		holder = ledger_panel
+	if not is_instance_valid(_ledger_instruction_image):
+		_ledger_instruction_image = holder.get_node_or_null("LedgerInstructionImage") as TextureRect
+	if not is_instance_valid(_ledger_instruction_image):
+		_ledger_instruction_image = TextureRect.new()
+		_ledger_instruction_image.name = "LedgerInstructionImage"
+		_ledger_instruction_image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		holder.add_child(_ledger_instruction_image)
+	var texture: Texture2D = load(path) as Texture2D
+	if texture == null:
+		push_warning("Ledger instruction image missing: " + path)
+		return
+	var image_size := holder.size
+	if image_size == Vector2.ZERO:
+		image_size = ledger_panel.size
+	if image_size == Vector2.ZERO:
+		image_size = Vector2(900.0, 540.0)
+	_ledger_instruction_image.texture = texture
+	_ledger_instruction_image.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	_ledger_instruction_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_ledger_instruction_image.position = Vector2.ZERO
+	_ledger_instruction_image.size = image_size
+	_ledger_instruction_image.custom_minimum_size = image_size
+	_ledger_instruction_image.visible = true
+	_ledger_instruction_image.move_to_front()
 
 func _set_dialogue_input_lock(locked: bool) -> void:
 	_dialogue_input_locked = locked
@@ -1668,10 +1703,18 @@ func _get_backyard_intro_dialogue() -> Array[Dictionary]:
 	]
 
 
+func _play_backyard_dialogue(dialogue_id: String, lines: Array[Dictionary]) -> void:
+	if DialogueSystem.has_method("set_body_font_override"):
+		DialogueSystem.set_body_font_override(OCRA_FONT)
+	DialogueSystem.play(dialogue_id, lines)
+	await DialogueSystem.wait_finished(dialogue_id)
+	if DialogueSystem.has_method("clear_body_font_override"):
+		DialogueSystem.clear_body_font_override()
+
+
 func _run_intro_sequence() -> void:
 	_set_dialogue_input_lock(true)
-	DialogueSystem.play("backyard_path_intro", _get_backyard_intro_dialogue())
-	await DialogueSystem.wait_finished("backyard_path_intro")
+	await _play_backyard_dialogue("backyard_path_intro", _get_backyard_intro_dialogue())
 	_set_dialogue_input_lock(false)
 	_report_intro_ready()
 
@@ -2453,8 +2496,7 @@ func rpc_reveal_ghost() -> void:
 
 	await _play_ghost_dialogue_typewriter(GHOST_REVEAL_LINE)
 
-	DialogueSystem.play("backyard_after_ghost_reveal", _get_after_ghost_reveal_dialogue())
-	await DialogueSystem.wait_finished("backyard_after_ghost_reveal")
+	await _play_backyard_dialogue("backyard_after_ghost_reveal", _get_after_ghost_reveal_dialogue())
 
 	_set_dialogue_input_lock(false)
 
@@ -2910,8 +2952,7 @@ func rpc_name_decoded() -> void:
 		"It is " + str(memory_distance_dali) + " Dali away from me."
 	])
 
-	DialogueSystem.play("backyard_after_memory_clue", _get_after_memory_clue_dialogue())
-	await DialogueSystem.wait_finished("backyard_after_memory_clue")
+	await _play_backyard_dialogue("backyard_after_memory_clue", _get_after_memory_clue_dialogue())
 
 	hide_notification()
 	_show_dali_conversion_ledger()

@@ -18,6 +18,15 @@ func bind_system(system: DialogueSystem) -> void:
 	_system = system
 
 
+func set_body_font_override(font: Font) -> void:
+	if not is_instance_valid(text_label):
+		return
+	if font == null:
+		text_label.remove_theme_font_override("font")
+		return
+	text_label.add_theme_font_override("font", font)
+
+
 func set_line(speaker: String, line_text: String) -> void:
 	var is_sidekick := (speaker == "sidekick")
 	if is_instance_valid(detective_dialogue):

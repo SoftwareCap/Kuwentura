@@ -127,8 +127,6 @@ func _fade(target: Color, duration: float) -> void:
 
 
 func _get_opening_cutscene_scene() -> String:
-	if CutsceneHelper.is_mobile_platform():
-		return SCENE_MOBILE_OPENING_CUTSCENE
 	return SCENE_OPENING_CUTSCENE
 
 

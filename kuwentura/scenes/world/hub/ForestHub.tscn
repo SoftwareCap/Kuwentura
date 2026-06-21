@@ -55,19 +55,14 @@
 [ext_resource type="Texture2D" uid="uid://c188o656x7dju" path="res://assets/sprites/quest/yellow_tiara.png" id="53_nt1ne"]
 [ext_resource type="Texture2D" uid="uid://doqn3riuibwhs" path="res://assets/sprites/ledger/bookmarks/active_abandonedHouse.png" id="ah_bm_act"]
 [ext_resource type="Texture2D" uid="uid://lmxtatw3ij5k" path="res://assets/sprites/ledger/bookmarks/inactive_abandonedHouse.png" id="ah_bm_ina"]
-[ext_resource type="Texture2D" uid="uid://ds2g6tpbx3uf3" path="res://assets/sprites/ledger/abandonedhouse_instructions.png" id="ah_ins"]
 [ext_resource type="Texture2D" uid="uid://doa2lnt7p6frh" path="res://assets/sprites/ledger/bookmarks/active_backyardPath.png" id="bp_bm_act"]
 [ext_resource type="Texture2D" uid="uid://b0vkiv2ewp4fs" path="res://assets/sprites/ledger/bookmarks/inactive_backyardPath.png" id="bp_bm_ina"]
-[ext_resource type="Texture2D" uid="uid://b1tucxrdoq38v" path="res://assets/sprites/ledger/backyardpath_instructions.png" id="bp_ins"]
 [ext_resource type="Texture2D" uid="uid://babm4dtq3kk25" path="res://assets/sprites/ledger/bookmarks/active_oldWell.png" id="ow_bm_act"]
 [ext_resource type="Texture2D" uid="uid://cigwf8yxcjnes" path="res://assets/sprites/ledger/bookmarks/inactive_oldWell.png" id="ow_bm_ina"]
-[ext_resource type="Texture2D" uid="uid://bguqoumbmknw5" path="res://assets/sprites/ledger/oldwell_instructions.png" id="ow_ins"]
 [ext_resource type="Texture2D" uid="uid://rg3h8wpi7nbh" path="res://assets/sprites/ledger/bookmarks/active_pinasHouse.png" id="ph_bm_act"]
 [ext_resource type="Texture2D" uid="uid://bjxq2pmv4gnvn" path="res://assets/sprites/ledger/bookmarks/inactive_pinasHouse.png" id="ph_bm_ina"]
-[ext_resource type="Texture2D" uid="uid://3r3bvvojbklk" path="res://assets/sprites/ledger/pinashouse_instructions.png" id="ph_ins"]
 [ext_resource type="Texture2D" uid="uid://c7sak5ms3ly0f" path="res://assets/sprites/ledger/bookmarks/active_storageHut.png" id="sh_bm_act"]
 [ext_resource type="Texture2D" uid="uid://cvkpxjx5hxar6" path="res://assets/sprites/ledger/bookmarks/inactive_storageHut.png" id="sh_bm_ina"]
-[ext_resource type="Texture2D" uid="uid://njoeyyh3k21d" path="res://assets/sprites/ledger/storagehut_instructions.png" id="sh_ins"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6nmbo"]
 size = Vector2(1.0549998, 9.77)
@@ -1796,27 +1791,22 @@ texture_focused = ExtResource("ah_bm_act")
 [node name="PHInstruction" type="Sprite2D" parent="SidekickLayer/Ledger/ZoneInstructions"]
 position = Vector2(620, 335.0001)
 scale = Vector2(0.32592773, 0.32592773)
-texture = ExtResource("ph_ins")
 
 [node name="OWInstruction" type="Sprite2D" parent="SidekickLayer/Ledger/ZoneInstructions"]
 position = Vector2(620, 335.0001)
 scale = Vector2(0.32592773, 0.32592773)
-texture = ExtResource("ow_ins")
 
 [node name="BPInstruction" type="Sprite2D" parent="SidekickLayer/Ledger/ZoneInstructions"]
 position = Vector2(620, 335.0001)
 scale = Vector2(0.32592773, 0.32592773)
-texture = ExtResource("bp_ins")
 
 [node name="SHInstruction" type="Sprite2D" parent="SidekickLayer/Ledger/ZoneInstructions"]
 position = Vector2(620, 335.0001)
 scale = Vector2(0.32592773, 0.32592773)
-texture = ExtResource("sh_ins")
 
 [node name="AHInstruction" type="Sprite2D" parent="SidekickLayer/Ledger/ZoneInstructions"]
 position = Vector2(620, 335.0001)
 scale = Vector2(0.32592773, 0.32592773)
-texture = ExtResource("ah_ins")
 
 [node name="Briefcase" type="Panel" parent="SidekickLayer"]
 visible = false
