@@ -13,7 +13,7 @@ const SCENE_MAIN_MENU := "res://scenes/mainMenu/MainMenu.tscn"
 const SCENE_FOREST_HUB := "res://scenes/world/hub/ForestHub.tscn"
 const SCENE_OPENING_CUTSCENE := "res://scenes/cutscenes/opening/OpeningCutscene.tscn"
 const SCENE_MOBILE_OPENING_CUTSCENE := "res://scenes/cutscenes/opening/MobileOpeningCutscene.tscn"
-const DEV_SKIP_OPENING_CUTSCENE := true
+const DEV_SKIP_OPENING_CUTSCENE := false
 
 # UI colors
 const COLOR_NORMAL := Color(1, 1, 1, 1)
@@ -462,8 +462,6 @@ func _change_to_game() -> void:
 func _get_opening_cutscene_scene() -> String:
 	if DEV_SKIP_OPENING_CUTSCENE and OS.is_debug_build():
 		return SCENE_FOREST_HUB
-	if CutsceneHelper.is_mobile_platform():
-		return SCENE_MOBILE_OPENING_CUTSCENE
 	return SCENE_OPENING_CUTSCENE
 
 

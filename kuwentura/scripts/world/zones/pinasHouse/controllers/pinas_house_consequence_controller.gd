@@ -91,7 +91,7 @@ func kick_to_hub_local() -> void:
 	zone.get_tree().paused = false
 	await zone.get_tree().process_frame
 	if zone.is_inside_tree():
-		zone.get_tree().change_scene_to_file(SCENE_FOREST_HUB)
+		GameState.change_to_post_zone_scene(zone.get_tree())
 
 
 func apply_consequence_state(attack_idx: int, strikes_left: int, failed: bool) -> void:

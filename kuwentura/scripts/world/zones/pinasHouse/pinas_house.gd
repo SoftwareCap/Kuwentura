@@ -12,6 +12,7 @@ const PROGRESS_PUZZLE2_TEX: Texture2D = preload("res://assets/sprites/tracker/pi
 const PROGRESS_PUZZLE3_TEX: Texture2D = preload("res://assets/sprites/tracker/pinasHouse/puzzle3PH.png")
 
 const SCENE_FOREST_HUB := "res://scenes/world/hub/ForestHub.tscn"
+const LEDGER_IMAGE_PATH := "res://assets/sprites/ledger/pinashouse_instructions.png"
 
 const _SERVER_PEER_ID := 1
 const _TOOL_IDS := ["pan", "ladle", "pot"]
@@ -113,6 +114,7 @@ const UI_FOCUS_BROWN := Color(0.31, 0.16, 0.06, 0.70)
 @onready var ledger_left_body_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerLeftBody")
 @onready var ledger_right_header_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerRightHeader")
 @onready var ledger_right_body_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerRightBody")
+var _ledger_instruction_image: TextureRect = null
 
 @onready var cabinet_open_sprite: Sprite2D = $InteractiveLayer/Cabinet/OpenCabinet
 @onready var cabinet_collision: CollisionShape2D = $InteractiveLayer/Cabinet/Cabinet
@@ -1003,7 +1005,7 @@ func _return_to_forest() -> void:
 		pause_controller._resume_zone_systems()
 	await get_tree().process_frame
 	if is_inside_tree():
-		get_tree().change_scene_to_file(SCENE_FOREST_HUB)
+		GameState.change_to_post_zone_scene(get_tree())
 
 
 func _exit_tree() -> void:
@@ -1368,15 +1370,43 @@ func rpc_set_search_mode(enable: bool) -> void:
 
 
 func _populate_ledger_content() -> void:
-	var ledger_view: Dictionary = PuzzleManager.get_zone_ledger_display("pinas_house")
-	if ledger_view.is_empty():
-		return
-	if is_instance_valid(ledger_title_label): ledger_title_label.text = str(ledger_view.get("title", ""))
-	if is_instance_valid(ledger_left_header_label): ledger_left_header_label.text = str(ledger_view.get("left_header", ""))
-	if is_instance_valid(ledger_left_body_label): ledger_left_body_label.text = str(ledger_view.get("left_body", ""))
-	if is_instance_valid(ledger_right_header_label): ledger_right_header_label.text = str(ledger_view.get("right_header", ""))
-	if is_instance_valid(ledger_right_body_label): ledger_right_body_label.text = str(ledger_view.get("right_body", ""))
+	for label in [ledger_title_label, ledger_left_header_label, ledger_left_body_label, ledger_right_header_label, ledger_right_body_label]:
+		if is_instance_valid(label):
+			label.visible = false
+	_show_ledger_instruction_image(LEDGER_IMAGE_PATH)
 
+
+func _show_ledger_instruction_image(path: String) -> void:
+	if not is_instance_valid(ledger_panel):
+		return
+	ledger_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	var holder: Control = get_node_or_null("SidekickLayer/Ledger/Control") as Control
+	if not is_instance_valid(holder):
+		holder = ledger_panel
+	if not is_instance_valid(_ledger_instruction_image):
+		_ledger_instruction_image = holder.get_node_or_null("LedgerInstructionImage") as TextureRect
+	if not is_instance_valid(_ledger_instruction_image):
+		_ledger_instruction_image = TextureRect.new()
+		_ledger_instruction_image.name = "LedgerInstructionImage"
+		_ledger_instruction_image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		holder.add_child(_ledger_instruction_image)
+	var texture: Texture2D = load(path) as Texture2D
+	if texture == null:
+		push_warning("Ledger instruction image missing: " + path)
+		return
+	var image_size := holder.size
+	if image_size == Vector2.ZERO:
+		image_size = ledger_panel.size
+	if image_size == Vector2.ZERO:
+		image_size = Vector2(900.0, 540.0)
+	_ledger_instruction_image.texture = texture
+	_ledger_instruction_image.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	_ledger_instruction_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_ledger_instruction_image.position = Vector2.ZERO
+	_ledger_instruction_image.size = image_size
+	_ledger_instruction_image.custom_minimum_size = image_size
+	_ledger_instruction_image.visible = true
+	_ledger_instruction_image.move_to_front()
 
 func _refresh_inside_zone_buttons() -> void:
 	var is_sidekick: bool = GameState.local_role == GameState.Role.SIDEKICK
@@ -1816,7 +1846,7 @@ func _on_cutscene_finished() -> void:
 	_stop_strike_system()
 	await get_tree().process_frame
 	if is_inside_tree():
-		get_tree().change_scene_to_file(SCENE_FOREST_HUB)
+		GameState.change_to_post_zone_scene(get_tree())
 
 
 func _input(event: InputEvent) -> void:

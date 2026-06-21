@@ -266,6 +266,22 @@ func get_collected_count() -> int:
 	return count
 
 
+const SCENE_FOREST_HUB := "res://scenes/world/hub/ForestHub.tscn"
+const SCENE_BAKUNAWA := "res://scenes/world/climax/Bakunawa.tscn"
+
+
+func get_post_zone_scene() -> String:
+	if climax_triggered:
+		return SCENE_BAKUNAWA
+	return SCENE_FOREST_HUB
+
+
+func change_to_post_zone_scene(tree: SceneTree) -> void:
+	if tree == null:
+		return
+	tree.change_scene_to_file(get_post_zone_scene())
+
+
 func _reset_clues() -> void:
 	for zone_id in collected_clues:
 		collected_clues[zone_id].collected = false
