@@ -34,7 +34,8 @@ const UI_INPUT := Color(0.45, 0.60, 0.95, 1.0)
 
 const INTRO_LINES := [
 	{"speaker": "Siyokoy", "text": "So... you came peeking into my well?"},
-	{"speaker": "Siyokoy", "text": "Something waits inside the bucket below. A little clue, broken and sleeping in the dark."},
+	{"speaker": "Siyokoy", "text": "Something waits inside the bucket below."},
+	{"speaker": "Siyokoy", "text": "A little clue, broken and sleeping in the dark."},
 	{"speaker": "Siyokoy", "text": "But I do not hand treasures to careless eyes."},
 	{"speaker": "Siyokoy", "text": "If you want the bucket to rise, then play my game."},
 	{"speaker": "Siyokoy", "text": "Read my old number marks. Answer right, and the bucket climbs."},
@@ -64,20 +65,20 @@ enum Phase { IDLE, INTRO, PUZZLE_1, PUZZLE_2, PUZZLE_3, REWARD, FAILED, COMPLETE
 @onready var legacy_well_sprite: Sprite2D = get_node_or_null("BackgroundLayer/OldWellSprite") as Sprite2D
 @onready var bucket_sprite: Sprite2D = get_node_or_null("BackgroundLayer/BucketSprite") as Sprite2D
 @onready var siyokoy_sprite: Sprite2D = get_node_or_null("BackgroundLayer/SiyokoySprite") as Sprite2D
-@onready var intro_old_well: Node2D = get_node_or_null("BackgroundLayer/IntroOldWell") as Node2D
-@onready var intro_water_sprite: Sprite2D = get_node_or_null("BackgroundLayer/IntroOldWell/water") as Sprite2D
-@onready var intro_siyokoy_sprite: Sprite2D = get_node_or_null("BackgroundLayer/IntroOldWell/siyokoy") as Sprite2D
-@onready var siyokoys_game_background: Node2D = get_node_or_null("BackgroundLayer/SiyokoysGame") as Node2D
-@onready var game_siyokoy_well: Sprite2D = get_node_or_null("BackgroundLayer/SiyokoysGame/siyokoyOldWell") as Sprite2D
+@onready var intro_old_well: Node2D = get_node_or_null("IntroOldWell") as Node2D
+@onready var intro_water_sprite: Sprite2D = get_node_or_null("IntroOldWell/water") as Sprite2D
+@onready var intro_siyokoy_sprite: Sprite2D = get_node_or_null("IntroOldWell/siyokoy") as Sprite2D
+@onready var siyokoys_game_background: Node2D = get_node_or_null("SiyokoysGame") as Node2D
+@onready var game_siyokoy_well: Sprite2D = get_node_or_null("SiyokoysGame/siyokoyOldWell") as Sprite2D
 @onready var role_label: Label = get_node_or_null("HUD/RoleLabel") as Label
 @onready var status_label: Label = get_node_or_null("HUD/StatusPanel/StatusLabel") as Label
 @onready var progress_label: Label = get_node_or_null("HUD/StatusPanel/ProgressLabel") as Label
 @onready var lives_label: Label = get_node_or_null("HUD/StatusPanel/LivesLabel") as Label
 @onready var instruction_label: Label = get_node_or_null("HUD/InstructionPanel/InstructionLabel") as Label
-@onready var intro_layer: CanvasLayer = get_node_or_null("IntroLayer") as CanvasLayer
-@onready var speaker_label: Label = get_node_or_null("IntroLayer/DialoguePanel/SpeakerNameLabel") as Label
-@onready var dialogue_label: Label = get_node_or_null("IntroLayer/DialoguePanel/DialogueTextLabel") as Label
-@onready var continue_button: Button = get_node_or_null("IntroLayer/DialoguePanel/ContinueButton") as Button
+@onready var dialogue_layer: Node2D = get_node_or_null("DialogueLayer") as Node2D
+@onready var dialogue_label: Label = get_node_or_null("DialogueLayer/SiyokoyScriptLabel") as Label
+@onready var continue_button: Button = get_node_or_null("DialogueLayer/ContinueButton") as Button
+@onready var dialogue_prompt_label: Label = get_node_or_null("DialogueLayer/TapAnywhereLabel") as Label
 @onready var puzzle1_layer: CanvasLayer = get_node_or_null("Puzzle1Layer") as CanvasLayer
 @onready var detective_roman_view: Control = get_node_or_null("Puzzle1Layer/DetectiveRomanView") as Control
 @onready var roman_plaque: TextureRect = get_node_or_null("Puzzle1Layer/DetectiveRomanView/RomanPlaqueDisplay") as TextureRect
@@ -161,8 +162,8 @@ var _fail_started := false
 var _bucket_start := Vector2.ZERO
 var _font: Font
 var _heading_font: Font
-var _dialogue_frame: TextureRect = null
 var _hearts_container: HBoxContainer = null
+var _puzzle1_instruction_label: Label = null
 var _heart_icons: Array[TextureRect] = []
 var _heart_full_texture: Texture2D = null
 var _heart_empty_texture: Texture2D = null
@@ -249,30 +250,53 @@ func _setup_mobile_layout() -> void:
 
 
 func _ensure_turn_controls() -> void:
-	if is_instance_valid(_pass_button):
-		return
 	if not is_instance_valid(sidekick_answer_panel):
 		return
-	_pass_button = Button.new()
-	_pass_button.name = "PassTurnButton"
-	_pass_button.text = "Pass"
-	sidekick_answer_panel.add_child(_pass_button)
+	if not is_instance_valid(_puzzle1_instruction_label):
+		_puzzle1_instruction_label = Label.new()
+		_puzzle1_instruction_label.name = "Puzzle1InstructionLabel"
+		_puzzle1_instruction_label.text = "Turn the Roman numeral into a number."
+		_puzzle1_instruction_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		sidekick_answer_panel.add_child(_puzzle1_instruction_label)
+		if is_instance_valid(roman_guide_label):
+			sidekick_answer_panel.move_child(_puzzle1_instruction_label, roman_guide_label.get_index() + 1)
+	if not is_instance_valid(_pass_button):
+		_pass_button = Button.new()
+		_pass_button.name = "PassTurnButton"
+		_pass_button.text = "Pass"
+		sidekick_answer_panel.add_child(_pass_button)
 
 
 func _ensure_dialogue_frame() -> void:
-	var dialogue_panel: Control = get_node_or_null("IntroLayer/DialoguePanel") as Control
-	if not is_instance_valid(dialogue_panel) or is_instance_valid(_dialogue_frame):
-		return
-	var dialogue_texture: Texture2D = _load_texture(TEX_DIALOGUE_BOX)
-	if dialogue_texture == null:
-		return
-	_dialogue_frame = TextureRect.new()
-	_dialogue_frame.name = "DialogueFrame"
-	_dialogue_frame.texture = dialogue_texture
-	_dialogue_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_dialogue_frame.stretch_mode = TextureRect.STRETCH_SCALE
-	dialogue_panel.add_child(_dialogue_frame)
-	dialogue_panel.move_child(_dialogue_frame, 0)
+	if is_instance_valid(dialogue_layer):
+		dialogue_layer.visible = false
+	if is_instance_valid(dialogue_label):
+		dialogue_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		dialogue_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		dialogue_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		dialogue_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if not is_instance_valid(dialogue_prompt_label) and is_instance_valid(dialogue_layer):
+		dialogue_prompt_label = Label.new()
+		dialogue_prompt_label.name = "TapAnywhereLabel"
+		dialogue_prompt_label.text = "Tap anywhere to continue."
+		dialogue_prompt_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		dialogue_layer.add_child(dialogue_prompt_label)
+	if is_instance_valid(dialogue_prompt_label):
+		dialogue_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		dialogue_prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		dialogue_prompt_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		dialogue_prompt_label.text = "Tap anywhere to continue."
+	if is_instance_valid(continue_button):
+		continue_button.text = ""
+		continue_button.flat = true
+		continue_button.focus_mode = Control.FOCUS_NONE
+		continue_button.mouse_filter = Control.MOUSE_FILTER_STOP
+		continue_button.visible = false
+		continue_button.disabled = true
+		continue_button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+		continue_button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
+		continue_button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
+		continue_button.add_theme_stylebox_override("disabled", StyleBoxEmpty.new())
 
 
 func _ensure_heart_display() -> void:
@@ -299,28 +323,23 @@ func _layout_runtime() -> void:
 	var size: Vector2 = get_viewport_rect().size
 	if size == Vector2.ZERO:
 		size = Vector2(1240, 720)
-	var dialogue_width: float = minf(size.x * 0.76, 900.0)
-	var dialogue_height: float = 164.0
-	var dialogue_x: float = (size.x - dialogue_width) * 0.5
-	_place(get_node_or_null("IntroLayer/DialoguePanel") as Control, Vector2(dialogue_x, size.y - dialogue_height - 34.0), Vector2(dialogue_width, dialogue_height))
-	_place(_dialogue_frame, Vector2.ZERO, Vector2(dialogue_width, dialogue_height))
-	_place(speaker_label, Vector2(52, 22), Vector2(170, 30))
-	_place(dialogue_label, Vector2(74, 56), Vector2(dialogue_width - 148.0, 58))
-	_place(continue_button, Vector2(dialogue_width - 214.0, 108), Vector2(168, 44))
+	_place(continue_button, Vector2.ZERO, size)
+	_place(dialogue_prompt_label, Vector2((size.x - 520.0) * 0.5, 588.0), Vector2(520.0, 28.0))
 	if is_instance_valid(_hearts_container):
 		_hearts_container.position = Vector2(64, 48)
 		_hearts_container.size = Vector2(168, 46)
 
-	_place(detective_roman_view, Vector2(108, 138), Vector2(360, 136))
-	_place(roman_plaque, Vector2(0, 56), Vector2(360, 80))
-	_place(detective_hint_label, Vector2(0, 0), Vector2(360, 56))
-	_place(sidekick_answer_panel, Vector2(108, 282), Vector2(360, 214))
-	_place(roman_guide_label, Vector2(18, 12), Vector2(324, 36))
-	_place(sidekick_hint_label, Vector2(18, 50), Vector2(324, 34))
-	_place(number_input, Vector2(28, 94), Vector2(304, 48))
-	_place(submit_number_button, Vector2(28, 158), Vector2(142, 48))
-	_place(_pass_button, Vector2(190, 158), Vector2(142, 48))
-	_place(puzzle1_feedback, Vector2(108, 514), Vector2(360, 44))
+	_place(detective_roman_view, Vector2(118, 250), Vector2(320, 86))
+	_place(roman_plaque, Vector2.ZERO, Vector2.ZERO)
+	_place(detective_hint_label, Vector2(0, 0), Vector2(320, 86))
+	_place(sidekick_answer_panel, Vector2(98, 190), Vector2(360, 300))
+	_place(roman_guide_label, Vector2(0, 0), Vector2(360, 48))
+	_place(_puzzle1_instruction_label, Vector2(0, 42), Vector2(360, 34))
+	_place(sidekick_hint_label, Vector2(0, 142), Vector2(360, 28))
+	_place(number_input, Vector2(50, 184), Vector2(260, 42))
+	_place(submit_number_button, Vector2(70, 248), Vector2(104, 46))
+	_place(_pass_button, Vector2(186, 248), Vector2(104, 46))
+	_place(puzzle1_feedback, Vector2(98, 500), Vector2(360, 54))
 	_place(detective_chain_view, Vector2(size.x * 0.05, 220), Vector2(size.x * 0.44, 300))
 	_place(chain_instruction_label, Vector2(20, 10), Vector2(size.x * 0.44 - 40, 52))
 	for i in range(_chain_displays.size()):
@@ -350,7 +369,7 @@ func _layout_runtime() -> void:
 	_place(check_puzzle_button, Vector2(42, 394), Vector2(size.x * 0.43 - 84, 48))
 	_place(puzzle3_feedback, Vector2(size.x * 0.20, 624), Vector2(size.x * 0.60, 48))
 
-	for label in [speaker_label, dialogue_label, detective_hint_label, roman_guide_label, sidekick_hint_label, puzzle1_feedback, chain_instruction_label, order_instruction_label, puzzle2_feedback, reflection_title_label, reflection_hint_label, puzzle_title_label, puzzle3_feedback]:
+	for label in [dialogue_label, dialogue_prompt_label, detective_hint_label, roman_guide_label, _puzzle1_instruction_label, sidekick_hint_label, puzzle1_feedback, chain_instruction_label, order_instruction_label, puzzle2_feedback, reflection_title_label, reflection_hint_label, puzzle_title_label, puzzle3_feedback]:
 		if is_instance_valid(label):
 			label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -366,29 +385,31 @@ func _place(control: Control, pos: Vector2, rect_size: Vector2) -> void:
 
 
 func _apply_design_system() -> void:
-	for panel in [get_node_or_null("HUD/StatusPanel"), get_node_or_null("HUD/InstructionPanel"), get_node_or_null("IntroLayer/DialoguePanel"), sidekick_answer_panel, sidekick_order_panel, detective_reflection_panel, sidekick_puzzle_panel]:
+	for panel in [get_node_or_null("HUD/StatusPanel"), get_node_or_null("HUD/InstructionPanel"), sidekick_order_panel, detective_reflection_panel, sidekick_puzzle_panel]:
 		if panel is Panel:
 			_apply_panel_style(panel as Panel, UI_PANEL)
-	for button in [continue_button, submit_number_button, _pass_button, check_chain_button, check_puzzle_button, collect_button, back_button]:
+	for button in [submit_number_button, _pass_button, check_chain_button, check_puzzle_button, collect_button, back_button]:
 		if button is Button:
 			_apply_button_style(button as Button)
 	_apply_line_edit_style(number_input)
+	_clear_panel_style(sidekick_answer_panel)
 	_style_label(role_label, 16, UI_CREAM)
 	_style_label(status_label, 20, UI_GOLD)
 	_style_label(progress_label, 18, UI_CREAM)
 	_style_label(lives_label, 18, UI_CREAM)
 	_style_label(instruction_label, 19, UI_CREAM)
-	_style_label(speaker_label, 18, UI_GOLD)
-	_style_label(dialogue_label, 20, UI_CREAM)
-	_style_label(detective_hint_label, 54, UI_CREAM)
-	_style_label(roman_guide_label, 28, UI_CREAM)
-	_style_label(sidekick_hint_label, 20, UI_GREEN)
+	_style_label(dialogue_label, 30, UI_CREAM)
+	_style_label(dialogue_prompt_label, 13, Color(0.86, 0.90, 1.0, 0.88))
+	_style_label(detective_hint_label, 78, UI_CREAM)
+	_style_label(roman_guide_label, 42, UI_CREAM)
+	_style_label(_puzzle1_instruction_label, 15, UI_CREAM)
+	_style_label(sidekick_hint_label, 17, UI_GREEN)
 	_style_label(chain_instruction_label, 19, UI_CREAM)
 	_style_label(order_instruction_label, 18, UI_CREAM)
 	_style_label(reflection_title_label, 22, UI_GOLD)
 	_style_label(reflection_hint_label, 18, UI_CREAM)
 	_style_label(puzzle_title_label, 22, UI_GOLD)
-	for label in [speaker_label, detective_hint_label, roman_guide_label, reflection_title_label, puzzle_title_label]:
+	for label in [dialogue_label, detective_hint_label, roman_guide_label, reflection_title_label, puzzle_title_label]:
 		if is_instance_valid(label) and _heading_font:
 			label.add_theme_font_override("font", _heading_font)
 	for label in [puzzle1_feedback, puzzle2_feedback, puzzle3_feedback]:
@@ -460,6 +481,12 @@ func _apply_panel_style(panel: Panel, color: Color) -> void:
 	style.shadow_color = Color(0, 0, 0, 0.35)
 	style.shadow_size = 8
 	panel.add_theme_stylebox_override("panel", style)
+
+
+func _clear_panel_style(panel: Panel) -> void:
+	if not is_instance_valid(panel):
+		return
+	panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 
 
 func _apply_button_style(button: Button) -> void:
@@ -606,6 +633,7 @@ func _reset_state() -> void:
 	_clue_collected = GameState.has_clue(ZONE_ID) if GameState else false
 	_hide_phase_layers()
 	_hide_effects()
+	_set_background_state(true, false)
 	_update_role_text()
 	_update_hud()
 	_update_instruction("Inspect the well to begin.")
@@ -613,8 +641,8 @@ func _reset_state() -> void:
 	_populate_ledger()
 	_refresh_role_visibility()
 	if is_instance_valid(back_button):
-		back_button.visible = true
-		back_button.disabled = false
+		back_button.visible = false
+		back_button.disabled = true
 
 func _auto_start_intro() -> void:
 	if _phase != Phase.IDLE or _clue_collected:
@@ -648,11 +676,7 @@ func _server_start_intro() -> void:
 	_mistakes = 0
 	_bucket_progress = 0
 	_server_sync_state()
-	if _has_multiplayer():
-		rpc_play_opening_emerge.rpc()
-	else:
-		rpc_play_opening_emerge()
-	_server_feedback("Water bursts from the well as Siyokoy rises, laughing.", false)
+	_server_feedback("Siyokoy waits in the Old Well.", false)
 
 
 func advance_intro() -> void:
@@ -662,6 +686,8 @@ func advance_intro() -> void:
 		rpc_request_advance_intro.rpc_id(SERVER_PEER_ID)
 	else:
 		_server_advance_intro()
+
+
 
 
 @rpc("any_peer", "reliable")
@@ -691,20 +717,16 @@ func _server_start_puzzle_1() -> void:
 	_active_answer_role = GameState.Role.SIDEKICK
 	_last_pass_msec = 0
 	_roman_sequence = ROMAN_QUESTIONS.duplicate(true)
-	_roman_sequence.shuffle()
 	_roman_index = 0
 	_pick_next_roman()
 	_server_sync_state()
-	_server_feedback("Read the mark. Enter its true number.", false)
 
 
 func _pick_next_roman() -> void:
 	if _roman_sequence.is_empty():
 		_roman_sequence = ROMAN_QUESTIONS.duplicate(true)
-		_roman_sequence.shuffle()
 	if _roman_index >= _roman_sequence.size():
 		_roman_index = 0
-		_roman_sequence.shuffle()
 	_current_roman = (_roman_sequence[_roman_index] as Dictionary).duplicate(true)
 	_roman_index += 1
 
@@ -1165,7 +1187,7 @@ func rpc_play_correct_effect() -> void:
 @rpc("authority", "reliable", "call_local")
 func rpc_play_opening_emerge() -> void:
 	_set_background_state(true, false)
-	var dialogue_panel_node: CanvasItem = get_node_or_null("IntroLayer/DialoguePanel") as CanvasItem
+	var dialogue_panel_node: CanvasItem = get_node_or_null("DialogueLayer") as CanvasItem
 	if is_instance_valid(dialogue_panel_node):
 		dialogue_panel_node.visible = false
 	var tween: Tween = create_tween()
@@ -1218,12 +1240,12 @@ func _apply_phase_visibility() -> void:
 			_update_instruction("The well is still. Siyokoy waits below.")
 		Phase.INTRO:
 			_set_background_state(true, false)
-			_vis(intro_layer, true)
-			_update_instruction("Siyokoy rises from the Old Well.")
+			_vis(dialogue_layer, true)
+			_update_instruction("Tap anywhere to continue Siyokoy's dialogue.")
 		Phase.PUZZLE_1:
 			_set_background_state(false, true)
 			_vis(puzzle1_layer, true)
-			_update_instruction("Read the mark. Enter its true number.")
+			_update_instruction("")
 		Phase.PUZZLE_2:
 			_set_background_state(false, true)
 			_vis(puzzle2_layer, true)
@@ -1287,12 +1309,12 @@ func _refresh_current_ui() -> void:
 func _refresh_intro_ui() -> void:
 	var index: int = clampi(_intro_index, 0, INTRO_LINES.size() - 1)
 	var line: Dictionary = INTRO_LINES[index]
-	if is_instance_valid(speaker_label):
-		speaker_label.text = str(line.get("speaker", "Siyokoy"))
 	if is_instance_valid(dialogue_label):
 		dialogue_label.text = str(line.get("text", ""))
+	if is_instance_valid(dialogue_prompt_label):
+		dialogue_prompt_label.text = "Tap anywhere to continue."
 	if is_instance_valid(continue_button):
-		continue_button.text = "Begin" if index >= INTRO_LINES.size() - 1 else "Continue"
+		continue_button.visible = true
 		continue_button.disabled = false
 
 
@@ -1305,8 +1327,10 @@ func _refresh_puzzle1_ui() -> void:
 		roman_plaque.visible = false
 	if is_instance_valid(roman_guide_label):
 		roman_guide_label.text = "Siyokoy's Game"
+	if is_instance_valid(_puzzle1_instruction_label):
+		_puzzle1_instruction_label.text = "Turn the Roman numeral into a number."
 	if is_instance_valid(sidekick_hint_label):
-		sidekick_hint_label.text = _role_turn_text(_active_answer_role) + "'s Turn"
+		sidekick_hint_label.text = "Your Turn" if can_act else _role_turn_text(_active_answer_role) + "'s Turn"
 		sidekick_hint_label.add_theme_color_override("font_color", UI_GREEN if can_act else UI_GOLD)
 	if is_instance_valid(submit_number_button):
 		submit_number_button.text = "Check"
@@ -1418,7 +1442,7 @@ func _hide_reward_for_briefcase() -> void:
 
 
 func _hide_phase_layers() -> void:
-	for layer in [intro_layer, puzzle1_layer, puzzle2_layer, puzzle3_layer, reward_layer]:
+	for layer in [dialogue_layer, puzzle1_layer, puzzle2_layer, puzzle3_layer, reward_layer]:
 		_vis(layer, false)
 
 
@@ -1442,7 +1466,8 @@ func _update_hud() -> void:
 		progress_label.text = "Series: %d / %d" % [_bucket_progress, TOTAL_BUCKET_STEPS]
 	_update_life_hearts()
 	if is_instance_valid(lives_label):
-		if _heart_icons.is_empty() or _heart_full_texture == null or _heart_empty_texture == null:
+		var game_phase: bool = _phase in [Phase.PUZZLE_1, Phase.PUZZLE_2, Phase.PUZZLE_3]
+		if game_phase and (_heart_icons.is_empty() or _heart_full_texture == null or _heart_empty_texture == null):
 			lives_label.visible = true
 			lives_label.text = "Lives: %d / %d" % [clampi(MAX_MISTAKES - _mistakes, 0, MAX_MISTAKES), MAX_MISTAKES]
 		else:
@@ -1456,7 +1481,8 @@ func _update_instruction(text: String) -> void:
 
 func _update_life_hearts() -> void:
 	var remaining: int = clampi(MAX_MISTAKES - _mistakes, 0, MAX_MISTAKES)
-	var can_use_textures: bool = _heart_full_texture != null and _heart_empty_texture != null and not _heart_icons.is_empty()
+	var game_phase: bool = _phase in [Phase.PUZZLE_1, Phase.PUZZLE_2, Phase.PUZZLE_3]
+	var can_use_textures: bool = game_phase and _heart_full_texture != null and _heart_empty_texture != null and not _heart_icons.is_empty()
 	if is_instance_valid(_hearts_container):
 		_hearts_container.visible = can_use_textures
 	if not can_use_textures:
@@ -1475,16 +1501,14 @@ func _update_bucket_visual() -> void:
 
 
 func _set_background_state(show_intro: bool, show_game: bool) -> void:
-	var has_new_background: bool = is_instance_valid(intro_old_well) or is_instance_valid(siyokoys_game_background)
+	_vis(legacy_background, true)
 	_vis(intro_old_well, show_intro)
 	_vis(siyokoys_game_background, show_game)
-	if has_new_background:
-		_vis(legacy_background, false)
-		_vis(legacy_well_sprite, false)
-		_vis(siyokoy_sprite, false)
-		_vis(bucket_sprite, false)
-	else:
-		_vis(legacy_background, true)
+	_vis(legacy_well_sprite, false)
+	_vis(siyokoy_sprite, false)
+	_vis(bucket_sprite, false)
+	_vis(intro_water_sprite, false)
+	_vis(intro_siyokoy_sprite, false)
 	if is_instance_valid(game_siyokoy_well):
 		game_siyokoy_well.visible = show_game
 
@@ -1510,6 +1534,7 @@ func _local_feedback(message: String, is_error: bool) -> void:
 
 
 func _play_wrong_effect() -> void:
+	_play_heartbreak_effect()
 	if is_instance_valid(siyokoy_sprite):
 		var attack: Texture2D = _load_texture(TEX_SIYOKOY_ATTACK)
 		if attack:
@@ -1537,6 +1562,30 @@ func _play_wrong_effect() -> void:
 				siyokoy_sprite.texture = idle
 	)
 
+
+func _play_heartbreak_effect() -> void:
+	if _heart_icons.is_empty() or _heart_full_texture == null or _heart_empty_texture == null:
+		return
+	var lost_index: int = clampi(MAX_MISTAKES - _mistakes, 0, _heart_icons.size() - 1)
+	var heart: TextureRect = _heart_icons[lost_index]
+	if not is_instance_valid(heart):
+		return
+	heart.visible = true
+	heart.texture = _heart_full_texture
+	heart.modulate = Color.WHITE
+	heart.scale = Vector2.ONE
+	var tween: Tween = create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(heart, "scale", Vector2(1.28, 1.28), 0.10)
+	tween.tween_property(heart, "modulate", Color(1.0, 0.35, 0.35, 1.0), 0.10)
+	tween.tween_property(heart, "scale", Vector2(0.82, 0.82), 0.12).set_delay(0.10)
+	tween.tween_property(heart, "modulate:a", 0.45, 0.12).set_delay(0.10)
+	tween.finished.connect(func():
+		if is_instance_valid(heart):
+			heart.texture = _heart_empty_texture
+			heart.modulate = Color.WHITE
+			heart.scale = Vector2.ONE
+	)
 
 func _play_correct_effect() -> void:
 	if not is_instance_valid(correct_overlay):
