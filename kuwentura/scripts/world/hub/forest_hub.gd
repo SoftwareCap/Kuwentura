@@ -103,6 +103,15 @@ const BOOKMARK_INACTIVE_TEXTURES: Dictionary = {
 	"abandoned_house": preload("res://assets/sprites/ledger/bookmarks/inactive_abandonedHouse.png"),
 }
 
+# ── Instruction texture paths (for safe loading with mobile guardrails) ─────────
+const INSTRUCTION_TEXTURE_PATHS: Dictionary = {
+	"pinas_house":     "res://assets/sprites/ledger/pinashouse_instructions.png",
+	"old_well":        "res://assets/sprites/ledger/oldwell_instructions.png",
+	"backyard_path":   "res://assets/sprites/ledger/backyardpath_instructions.png",
+	"storage_hut":     "res://assets/sprites/ledger/storagehut_instructions.png",
+	"abandoned_house": "res://assets/sprites/ledger/abandonedhouse_instructions.png",
+}
+
 const LEDGER_CLOSED_SCALE: Vector2 = Vector2(0.1, 1.0)
 const BRIEFCASE_OPEN_SCALE: Vector2 = Vector2(1.0, 1.0)
 const BRIEFCASE_CLOSED_SCALE: Vector2 = Vector2(1.0, 0.1)
@@ -167,6 +176,59 @@ var _touch_controls_default_layer: int = 101
 var _map_focus_controls_active: bool = false
 var _climax_transition_started: bool = false
 
+# ── Texture cache for mobile memory safety ──────────────────────────────────────
+var _instruction_texture_cache: Dictionary = {}
+
+
+## Safely loads a texture with error checking (mobile guardrail)
+## Returns null if loading fails, preventing crashes on missing assets
+func _load_texture_safely(path: String) -> Texture2D:
+	if path.is_empty():
+		push_warning("[ForestHub] Empty texture path provided")
+		return null
+	
+	# Check cache first to avoid redundant loads
+	if _instruction_texture_cache.has(path):
+		return _instruction_texture_cache[path] as Texture2D
+	
+	# Use ResourceLoader for safe loading with error checking
+	if not ResourceLoader.exists(path):
+		push_error("[ForestHub] Texture not found: %s" % path)
+		return null
+	
+	var texture: Texture2D = ResourceLoader.load(path) as Texture2D
+	if not texture:
+		push_error("[ForestHub] Failed to load texture: %s" % path)
+		return null
+	
+	# Cache the texture for reuse
+	_instruction_texture_cache[path] = texture
+	return texture
+
+
+## Preloads all instruction textures at startup for performance (mobile guardrail)
+## This prevents stuttering when opening the ledger with high-resolution textures
+func _preload_instruction_textures() -> void:
+	for zone_name in INSTRUCTION_TEXTURE_PATHS.keys():
+		var path: String = INSTRUCTION_TEXTURE_PATHS[zone_name]
+		var texture: Texture2D = _load_texture_safely(path)
+		if texture:
+			print("[ForestHub] Preloaded instruction texture for %s" % zone_name)
+		else:
+			push_error("[ForestHub] Failed to preload instruction texture for %s" % zone_name)
+
+
+## Cleans up cached textures to prevent memory leaks (mobile guardrail)
+## Called in _exit_tree() to ensure proper memory cleanup
+func _cleanup_instruction_textures() -> void:
+	for path in _instruction_texture_cache.keys():
+		var texture: Resource = _instruction_texture_cache[path]
+		if texture:
+			# Clear the reference to allow Godot to free the resource
+			_instruction_texture_cache.erase(path)
+	_instruction_texture_cache.clear()
+	print("[ForestHub] Instruction texture cache cleared")
+
 
 func _ready() -> void:
 	_ensure_spawn_points()
@@ -178,6 +240,7 @@ func _ready() -> void:
 	_setup_ui_controls()
 	_setup_map_layer()
 	_setup_quest_objectives()
+	_preload_instruction_textures()  # Preload for performance
 	_setup_ledger_bookmarks()
 	_connect_portal_signals()
 	_setup_zone_completion_indicators()
@@ -214,6 +277,7 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	_disconnect_network_signals()
 	_clear_dialogue()
+	_cleanup_instruction_textures()  # Memory safety cleanup
 
 
 func _get_network_signal_pairs() -> Array:
@@ -798,6 +862,18 @@ func _setup_ledger_bookmarks() -> void:
 		"storage_hut":     _ins_storage,
 		"abandoned_house": _ins_abandoned,
 	}
+
+	# Assign instruction textures from cache (mobile guardrail)
+	for zone_name in _instruction_sprites.keys():
+		var sprite: Sprite2D = _instruction_sprites[zone_name]
+		if not is_instance_valid(sprite):
+			continue
+		var path: String = INSTRUCTION_TEXTURE_PATHS[zone_name]
+		var texture: Texture2D = _load_texture_safely(path)
+		if texture:
+			sprite.texture = texture
+		else:
+			push_error("[ForestHub] Failed to assign instruction texture for %s" % zone_name)
 
 	# Wire all bookmark buttons. All tabs are always pressable so the player
 	# can navigate to any page. Incomplete zones will show the empty-ledger

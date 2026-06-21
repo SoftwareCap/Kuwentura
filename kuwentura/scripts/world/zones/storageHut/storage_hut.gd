@@ -4,6 +4,7 @@ extends Node2D
 const ZONE_ID := "storage_hut"
 const SCENE_FOREST_HUB := "res://scenes/world/hub/ForestHub.tscn"
 const SCENE_MAIN_MENU := "res://scenes/mainMenu/MainMenu.tscn"
+const LEDGER_IMAGE_PATH := "res://assets/sprites/ledger/storagehut_instructions.png"
 const SERVER_PEER_ID := 1
 const TOTAL_RIDDLES := 5
 
@@ -213,6 +214,7 @@ const LOCK_HINT_TEXT := "The vessel hides the code in its own measure. Find its 
 @onready var ledger_right_body: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerRightBody") as Label
 @onready var briefcase_panel: Panel = get_node_or_null("SidekickLayer/Briefcase") as Panel
 @onready var briefcase_display: TextureRect = get_node_or_null("SidekickLayer/Briefcase/BriefcaseDisplay") as TextureRect
+var _ledger_instruction_image: TextureRect = null
 
 @onready var reward_layer: CanvasLayer = get_node_or_null("RewardLayer") as CanvasLayer
 @onready var reward_dark_overlay: ColorRect = get_node_or_null("RewardLayer/DarkOverlay") as ColorRect
@@ -1876,19 +1878,43 @@ func _hide_reward_visuals_for_briefcase() -> void:
 
 
 func _populate_ledger() -> void:
-	if is_instance_valid(ledger_title):
-		ledger_title.text = "Storage Hut Ledger"
-	if is_instance_valid(ledger_body):
-		ledger_body.text = ""
-	if is_instance_valid(ledger_left_header):
-		ledger_left_header.text = "Shape Guide"
-	if is_instance_valid(ledger_left_body):
-		ledger_left_body.text = "Triangle = 3 sides\nSquare = 4 sides\nPentagon = 5 sides\nHexagon = 6 sides"
-	if is_instance_valid(ledger_right_header):
-		ledger_right_header.text = "Volume Guide"
-	if is_instance_valid(ledger_right_body):
-		ledger_right_body.text = "Rectangular container:\nV = length x width x height\n\nCylinder:\nV = pi x radius x radius x height\nUse pi = 3"
+	for label in [ledger_title, ledger_body, ledger_left_header, ledger_left_body, ledger_right_header, ledger_right_body]:
+		if is_instance_valid(label):
+			label.visible = false
+	_show_ledger_instruction_image(LEDGER_IMAGE_PATH)
 
+
+func _show_ledger_instruction_image(path: String) -> void:
+	if not is_instance_valid(ledger_panel):
+		return
+	ledger_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	var holder: Control = get_node_or_null("SidekickLayer/Ledger/Control") as Control
+	if not is_instance_valid(holder):
+		holder = ledger_panel
+	if not is_instance_valid(_ledger_instruction_image):
+		_ledger_instruction_image = holder.get_node_or_null("LedgerInstructionImage") as TextureRect
+	if not is_instance_valid(_ledger_instruction_image):
+		_ledger_instruction_image = TextureRect.new()
+		_ledger_instruction_image.name = "LedgerInstructionImage"
+		_ledger_instruction_image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		holder.add_child(_ledger_instruction_image)
+	var texture: Texture2D = load(path) as Texture2D
+	if texture == null:
+		push_warning("Ledger instruction image missing: " + path)
+		return
+	var image_size := holder.size
+	if image_size == Vector2.ZERO:
+		image_size = ledger_panel.size
+	if image_size == Vector2.ZERO:
+		image_size = Vector2(900.0, 540.0)
+	_ledger_instruction_image.texture = texture
+	_ledger_instruction_image.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	_ledger_instruction_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_ledger_instruction_image.position = Vector2.ZERO
+	_ledger_instruction_image.size = image_size
+	_ledger_instruction_image.custom_minimum_size = image_size
+	_ledger_instruction_image.visible = true
+	_ledger_instruction_image.move_to_front()
 
 func _refresh_inside_zone_buttons() -> void:
 	var is_sidekick := GameState.local_role == GameState.Role.SIDEKICK

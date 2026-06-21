@@ -3,6 +3,7 @@ extends Node2D
 
 const FOREST_HUB_SCENE_PATH := "res://scenes/world/hub/ForestHub.tscn"
 const SCENE_FOREST_HUB := "res://scenes/world/hub/ForestHub.tscn"
+const LEDGER_IMAGE_PATH := "res://assets/sprites/ledger/abandonedhouse_instructions.png"
 
 const ZONE_ID := "abandoned_house"
 const SUB_PUZZLE_ID := "abandoned_house_books"
@@ -128,6 +129,7 @@ var _final_box_data: Dictionary = {}
 @onready var ledger_left_body_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerLeftBody")
 @onready var ledger_right_header_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerRightHeader")
 @onready var ledger_right_body_label: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerRightBody")
+var _ledger_instruction_image: TextureRect = null
 @onready var sidekick_briefcase_panel: Panel = get_node_or_null("SidekickLayer/Briefcase")
 @onready var inventory_board: Node2D = get_node_or_null("InventoryBoard") as Node2D
 @onready var inventory_board_sprite: Sprite2D = get_node_or_null("InventoryBoard/Board") as Sprite2D
@@ -1670,49 +1672,43 @@ func _set_pause_process_mode_recursive(node: Node) -> void:
 
 
 func _populate_ledger_content() -> void:
-	if not PuzzleManager or not PuzzleManager.has_method("get_zone_ledger_display"):
+	for label in [ledger_title_label, ledger_body_label, ledger_left_header_label, ledger_left_body_label, ledger_right_header_label, ledger_right_body_label]:
+		if is_instance_valid(label):
+			label.visible = false
+	_show_ledger_instruction_image(LEDGER_IMAGE_PATH)
+
+
+func _show_ledger_instruction_image(path: String) -> void:
+	if not is_instance_valid(ledger_panel):
 		return
-
-	var ledger_view: Dictionary = PuzzleManager.get_zone_ledger_display(ZONE_ID)
-	if ledger_view.is_empty():
+	ledger_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	var holder: Control = get_node_or_null("SidekickLayer/Ledger/Control") as Control
+	if not is_instance_valid(holder):
+		holder = ledger_panel
+	if not is_instance_valid(_ledger_instruction_image):
+		_ledger_instruction_image = holder.get_node_or_null("LedgerInstructionImage") as TextureRect
+	if not is_instance_valid(_ledger_instruction_image):
+		_ledger_instruction_image = TextureRect.new()
+		_ledger_instruction_image.name = "LedgerInstructionImage"
+		_ledger_instruction_image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		holder.add_child(_ledger_instruction_image)
+	var texture: Texture2D = load(path) as Texture2D
+	if texture == null:
+		push_warning("Ledger instruction image missing: " + path)
 		return
-
-	var raw_ledger: Dictionary = {}
-	if PuzzleManager.has_method("get_ledger_info"):
-		raw_ledger = PuzzleManager.get_ledger_info(ZONE_ID)
-
-	if is_instance_valid(ledger_title_label):
-		ledger_title_label.text = str(ledger_view.get("title", "Ledger"))
-		ledger_title_label.position = Vector2(160.0, 188.0)
-		ledger_title_label.size = Vector2(590.0, 44.0)
-		ledger_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	if is_instance_valid(ledger_body_label):
-		ledger_body_label.text = str(raw_ledger.get("formula", ledger_view.get("body", "")))
-		ledger_body_label.position = Vector2(154.0, 244.0)
-		ledger_body_label.size = Vector2(590.0, 42.0)
-		ledger_body_label.add_theme_font_size_override("font_size", 19)
-		ledger_body_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	if is_instance_valid(ledger_left_header_label):
-		var left_header := str(ledger_view.get("left_header", ""))
-		ledger_left_header_label.text = left_header if not left_header.is_empty() else "How to solve"
-		ledger_left_header_label.position = Vector2(154.0, 304.0)
-		ledger_left_header_label.size = Vector2(292.0, 38.0)
-	if is_instance_valid(ledger_left_body_label):
-		ledger_left_body_label.text = str(ledger_view.get("left_body", ""))
-		ledger_left_body_label.position = Vector2(154.0, 350.0)
-		ledger_left_body_label.size = Vector2(292.0, 118.0)
-		ledger_left_body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	if is_instance_valid(ledger_right_header_label):
-		var right_header := str(ledger_view.get("right_header", ""))
-		ledger_right_header_label.text = right_header if not right_header.is_empty() else "Example"
-		ledger_right_header_label.position = Vector2(478.0, 244.0)
-		ledger_right_header_label.size = Vector2(292.0, 38.0)
-	if is_instance_valid(ledger_right_body_label):
-		ledger_right_body_label.text = str(ledger_view.get("right_body", ""))
-		ledger_right_body_label.position = Vector2(478.0, 290.0)
-		ledger_right_body_label.size = Vector2(292.0, 178.0)
-		ledger_right_body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-
+	var image_size := holder.size
+	if image_size == Vector2.ZERO:
+		image_size = ledger_panel.size
+	if image_size == Vector2.ZERO:
+		image_size = Vector2(900.0, 540.0)
+	_ledger_instruction_image.texture = texture
+	_ledger_instruction_image.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	_ledger_instruction_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_ledger_instruction_image.position = Vector2.ZERO
+	_ledger_instruction_image.size = image_size
+	_ledger_instruction_image.custom_minimum_size = image_size
+	_ledger_instruction_image.visible = true
+	_ledger_instruction_image.move_to_front()
 
 func _on_ledger_pressed() -> void:
 	if _dialogue_input_locked or not _is_local_sidekick() or not is_instance_valid(ledger_panel):

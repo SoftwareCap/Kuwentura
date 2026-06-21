@@ -6,6 +6,7 @@ const SERVER_PEER_ID := 1
 const MAX_MISTAKES := 3
 const PUZZLE_1_TARGET := 10
 const TOTAL_BUCKET_STEPS := 10
+const LEDGER_IMAGE_PATH := "res://assets/sprites/ledger/oldwell_instructions.png"
 
 const TEX_SPLASH := "res://assets/sprites/zoneObjects/oldWell/splashWater.png"
 const TEX_SIYOKOY_IDLE := "res://assets/sprites/zoneObjects/oldWell/siyokoy1.png"
@@ -133,6 +134,7 @@ enum Phase { IDLE, INTRO, PUZZLE_1, PUZZLE_2, PUZZLE_3, REWARD, FAILED, COMPLETE
 @onready var ledger_right_body: Label = get_node_or_null("SidekickLayer/Ledger/Control/LedgerRightBody") as Label
 @onready var briefcase_panel: Panel = get_node_or_null("SidekickLayer/Briefcase") as Panel
 @onready var briefcase_display: TextureRect = get_node_or_null("SidekickLayer/Briefcase/BriefcaseDisplay") as TextureRect
+var _ledger_instruction_image: TextureRect = null
 @onready var pause_layer: CanvasLayer = get_node_or_null("PauseCanvasLayer") as CanvasLayer
 @onready var pause_panel: Panel = get_node_or_null("PauseCanvasLayer/InGamePausePanel") as Panel
 @onready var option_panel: Panel = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel") as Panel
@@ -564,19 +566,43 @@ func _button_style(color: Color) -> StyleBoxFlat:
 
 
 func _populate_ledger() -> void:
-	if is_instance_valid(ledger_title):
-		ledger_title.text = "Old Well Ledger"
-	if is_instance_valid(ledger_body):
-		ledger_body.text = ""
-	if is_instance_valid(ledger_left_header):
-		ledger_left_header.text = "Roman Guide"
-	if is_instance_valid(ledger_left_body):
-		ledger_left_body.text = "I = 1\nV = 5\nX = 10\nL = 50\nIV = 4\nIX = 9\nXIV = 14"
-	if is_instance_valid(ledger_right_header):
-		ledger_right_header.text = "Well Rules"
-	if is_instance_valid(ledger_right_body):
-		ledger_right_body.text = "Correct answers raise the bucket.\nWrong checks raise the water.\nThree mistakes sends both players back."
+	for label in [ledger_title, ledger_body, ledger_left_header, ledger_left_body, ledger_right_header, ledger_right_body]:
+		if is_instance_valid(label):
+			label.visible = false
+	_show_ledger_instruction_image(LEDGER_IMAGE_PATH)
 
+
+func _show_ledger_instruction_image(path: String) -> void:
+	if not is_instance_valid(ledger_panel):
+		return
+	ledger_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	var holder: Control = get_node_or_null("SidekickLayer/Ledger/Control") as Control
+	if not is_instance_valid(holder):
+		holder = ledger_panel
+	if not is_instance_valid(_ledger_instruction_image):
+		_ledger_instruction_image = holder.get_node_or_null("LedgerInstructionImage") as TextureRect
+	if not is_instance_valid(_ledger_instruction_image):
+		_ledger_instruction_image = TextureRect.new()
+		_ledger_instruction_image.name = "LedgerInstructionImage"
+		_ledger_instruction_image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		holder.add_child(_ledger_instruction_image)
+	var texture: Texture2D = load(path) as Texture2D
+	if texture == null:
+		push_warning("Ledger instruction image missing: " + path)
+		return
+	var image_size := holder.size
+	if image_size == Vector2.ZERO:
+		image_size = ledger_panel.size
+	if image_size == Vector2.ZERO:
+		image_size = Vector2(900.0, 540.0)
+	_ledger_instruction_image.texture = texture
+	_ledger_instruction_image.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	_ledger_instruction_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_ledger_instruction_image.position = Vector2.ZERO
+	_ledger_instruction_image.size = image_size
+	_ledger_instruction_image.custom_minimum_size = image_size
+	_ledger_instruction_image.visible = true
+	_ledger_instruction_image.move_to_front()
 
 func _close_sidekick_panels() -> void:
 	if is_instance_valid(ledger_panel):
