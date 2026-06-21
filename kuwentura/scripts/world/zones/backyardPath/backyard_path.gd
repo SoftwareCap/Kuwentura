@@ -3735,7 +3735,7 @@ func _on_back_pressed() -> void:
 func _return_to_forest() -> void:
 	get_tree().paused = false
 	MusicController.resume_music()
-	get_tree().change_scene_to_file(SCENE_FOREST_HUB)
+	GameState.change_to_post_zone_scene(get_tree())
 
 
 func _refresh_inside_zone_buttons() -> void:
@@ -4044,7 +4044,7 @@ func _on_cutscene_finished() -> void:
 	get_tree().paused = false
 	await get_tree().process_frame
 	if is_inside_tree():
-		get_tree().change_scene_to_file(SCENE_FOREST_HUB)
+		GameState.change_to_post_zone_scene(get_tree())
 
 
 func _fade_out(duration: float = 0.6) -> void:

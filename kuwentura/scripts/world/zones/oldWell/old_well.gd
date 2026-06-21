@@ -28,6 +28,9 @@ const UI_PANEL := Color(0.03, 0.05, 0.16, 0.92)
 const UI_PRIMARY := Color(0.45, 0.62, 1.0, 1.0)
 const UI_PRIMARY_HOVER := Color(0.58, 0.72, 1.0, 1.0)
 const UI_PRIMARY_PRESSED := Color(0.30, 0.48, 0.90, 1.0)
+const UI_BUTTON := Color(0.26, 0.40, 0.78, 1.0)
+const UI_BUTTON_HOVER := Color(0.34, 0.48, 0.86, 1.0)
+const UI_BUTTON_PRESSED := Color(0.18, 0.30, 0.66, 1.0)
 const UI_DISABLED := Color(0.15, 0.19, 0.30, 0.90)
 const UI_BORDER := Color(0.75, 0.86, 1.0, 1.0)
 const UI_INPUT := Color(0.45, 0.60, 0.95, 1.0)
@@ -230,9 +233,13 @@ func _setup_mobile_layout() -> void:
 		number_input.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
 		number_input.max_length = 3
 		number_input.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	for button in [continue_button, submit_number_button, check_chain_button, check_puzzle_button, collect_button, back_button]:
+	for button in [continue_button, check_chain_button, check_puzzle_button, collect_button, back_button]:
 		if is_instance_valid(button):
 			button.custom_minimum_size = Vector2(160, 48)
+			button.focus_mode = Control.FOCUS_NONE
+	for button in [submit_number_button, _pass_button]:
+		if is_instance_valid(button):
+			button.custom_minimum_size = Vector2(148, 48)
 			button.focus_mode = Control.FOCUS_NONE
 	for button in _chain_choice_buttons + _chain_slot_buttons + _eye_piece_buttons + _eye_slot_buttons:
 		if is_instance_valid(button):
@@ -305,13 +312,13 @@ func _ensure_heart_display() -> void:
 	_hearts_container = HBoxContainer.new()
 	_hearts_container.name = "OldWellHearts"
 	_hearts_container.position = Vector2(62, 46)
-	_hearts_container.size = Vector2(168, 46)
-	_hearts_container.add_theme_constant_override("separation", 8)
+	_hearts_container.size = Vector2(204, 54)
+	_hearts_container.add_theme_constant_override("separation", 10)
 	add_child(_hearts_container)
 	for i in range(MAX_MISTAKES):
 		var heart: TextureRect = TextureRect.new()
 		heart.name = "Heart%d" % (i + 1)
-		heart.custom_minimum_size = Vector2(42, 38)
+		heart.custom_minimum_size = Vector2(50, 44)
 		heart.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 		heart.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		heart.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -326,20 +333,34 @@ func _layout_runtime() -> void:
 	_place(continue_button, Vector2.ZERO, size)
 	_place(dialogue_prompt_label, Vector2((size.x - 520.0) * 0.5, 588.0), Vector2(520.0, 28.0))
 	if is_instance_valid(_hearts_container):
-		_hearts_container.position = Vector2(64, 48)
-		_hearts_container.size = Vector2(168, 46)
+		_hearts_container.position = Vector2(80, 44)
+		_hearts_container.size = Vector2(204, 54)
 
-	_place(detective_roman_view, Vector2(118, 250), Vector2(320, 86))
+	var puzzle_block_width: float = 420.0
+	var puzzle_block_x: float = maxf(148.0, size.x * 0.30 - puzzle_block_width * 0.5)
+	var puzzle_block_y: float = 168.0
+	var puzzle_button_width: float = 148.0
+	var puzzle_button_height: float = 48.0
+	var puzzle_button_y: float = 286.0
+	var puzzle_button_gap: float = 12.0
+	var puzzle_buttons_total: float = puzzle_button_width * 2.0 + puzzle_button_gap
+	var puzzle_button_x: float = (puzzle_block_width - puzzle_buttons_total) * 0.5
+	var puzzle_input_width: float = 280.0
+	var puzzle_input_x: float = (puzzle_block_width - puzzle_input_width) * 0.5
+	var puzzle_feedback_gap: float = 32.0
+	var puzzle_feedback_y: float = puzzle_block_y + puzzle_button_y + puzzle_button_height + puzzle_feedback_gap
+
+	_place(detective_roman_view, Vector2(puzzle_block_x, puzzle_block_y + 106), Vector2(puzzle_block_width, 84))
 	_place(roman_plaque, Vector2.ZERO, Vector2.ZERO)
-	_place(detective_hint_label, Vector2(0, 0), Vector2(320, 86))
-	_place(sidekick_answer_panel, Vector2(98, 190), Vector2(360, 300))
-	_place(roman_guide_label, Vector2(0, 0), Vector2(360, 48))
-	_place(_puzzle1_instruction_label, Vector2(0, 42), Vector2(360, 34))
-	_place(sidekick_hint_label, Vector2(0, 142), Vector2(360, 28))
-	_place(number_input, Vector2(50, 184), Vector2(260, 42))
-	_place(submit_number_button, Vector2(70, 248), Vector2(104, 46))
-	_place(_pass_button, Vector2(186, 248), Vector2(104, 46))
-	_place(puzzle1_feedback, Vector2(98, 500), Vector2(360, 54))
+	_place(detective_hint_label, Vector2(0, 0), Vector2(puzzle_block_width, 84))
+	_place(sidekick_answer_panel, Vector2(puzzle_block_x, puzzle_block_y), Vector2(puzzle_block_width, 350))
+	_place(roman_guide_label, Vector2(0, 0), Vector2(puzzle_block_width, 54))
+	_place(_puzzle1_instruction_label, Vector2(0, 58), Vector2(puzzle_block_width, 34))
+	_place(sidekick_hint_label, Vector2(0, 192), Vector2(puzzle_block_width, 34))
+	_place(number_input, Vector2(puzzle_input_x, 232), Vector2(puzzle_input_width, 46))
+	_place(submit_number_button, Vector2(puzzle_button_x, puzzle_button_y), Vector2(puzzle_button_width, puzzle_button_height))
+	_place(_pass_button, Vector2(puzzle_button_x + puzzle_button_width + puzzle_button_gap, puzzle_button_y), Vector2(puzzle_button_width, puzzle_button_height))
+	_place(puzzle1_feedback, Vector2(puzzle_block_x, puzzle_feedback_y), Vector2(puzzle_block_width, 28))
 	_place(detective_chain_view, Vector2(size.x * 0.05, 220), Vector2(size.x * 0.44, 300))
 	_place(chain_instruction_label, Vector2(20, 10), Vector2(size.x * 0.44 - 40, 52))
 	for i in range(_chain_displays.size()):
@@ -369,11 +390,25 @@ func _layout_runtime() -> void:
 	_place(check_puzzle_button, Vector2(42, 394), Vector2(size.x * 0.43 - 84, 48))
 	_place(puzzle3_feedback, Vector2(size.x * 0.20, 624), Vector2(size.x * 0.60, 48))
 
-	for label in [dialogue_label, dialogue_prompt_label, detective_hint_label, roman_guide_label, _puzzle1_instruction_label, sidekick_hint_label, puzzle1_feedback, chain_instruction_label, order_instruction_label, puzzle2_feedback, reflection_title_label, reflection_hint_label, puzzle_title_label, puzzle3_feedback]:
+	for label in [dialogue_label, dialogue_prompt_label, detective_hint_label, roman_guide_label, sidekick_hint_label, chain_instruction_label, order_instruction_label, puzzle2_feedback, reflection_title_label, reflection_hint_label, puzzle_title_label, puzzle3_feedback]:
 		if is_instance_valid(label):
 			label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 			label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if is_instance_valid(_puzzle1_instruction_label):
+		_puzzle1_instruction_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_puzzle1_instruction_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		_puzzle1_instruction_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		_puzzle1_instruction_label.max_lines_visible = 1
+		_puzzle1_instruction_label.clip_text = true
+		_puzzle1_instruction_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if is_instance_valid(puzzle1_feedback):
+		puzzle1_feedback.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		puzzle1_feedback.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		puzzle1_feedback.autowrap_mode = TextServer.AUTOWRAP_OFF
+		puzzle1_feedback.max_lines_visible = 1
+		puzzle1_feedback.clip_text = true
+		puzzle1_feedback.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 
 
 func _place(control: Control, pos: Vector2, rect_size: Vector2) -> void:
@@ -388,9 +423,12 @@ func _apply_design_system() -> void:
 	for panel in [get_node_or_null("HUD/StatusPanel"), get_node_or_null("HUD/InstructionPanel"), sidekick_order_panel, detective_reflection_panel, sidekick_puzzle_panel]:
 		if panel is Panel:
 			_apply_panel_style(panel as Panel, UI_PANEL)
-	for button in [submit_number_button, _pass_button, check_chain_button, check_puzzle_button, collect_button, back_button]:
+	for button in [check_chain_button, check_puzzle_button, collect_button, back_button]:
 		if button is Button:
 			_apply_button_style(button as Button)
+	for button in [submit_number_button, _pass_button]:
+		if button is Button:
+			_apply_button_style(button as Button, UI_BUTTON, UI_BUTTON_HOVER, UI_BUTTON_PRESSED)
 	_apply_line_edit_style(number_input)
 	_clear_panel_style(sidekick_answer_panel)
 	_style_label(role_label, 16, UI_CREAM)
@@ -400,10 +438,10 @@ func _apply_design_system() -> void:
 	_style_label(instruction_label, 19, UI_CREAM)
 	_style_label(dialogue_label, 30, UI_CREAM)
 	_style_label(dialogue_prompt_label, 13, Color(0.86, 0.90, 1.0, 0.88))
-	_style_label(detective_hint_label, 78, UI_CREAM)
-	_style_label(roman_guide_label, 42, UI_CREAM)
-	_style_label(_puzzle1_instruction_label, 15, UI_CREAM)
-	_style_label(sidekick_hint_label, 17, UI_GREEN)
+	_style_label(detective_hint_label, 88, UI_CREAM)
+	_style_label(roman_guide_label, 52, UI_CREAM)
+	_style_label(_puzzle1_instruction_label, 20, UI_CREAM)
+	_style_label(sidekick_hint_label, 22, UI_GREEN)
 	_style_label(chain_instruction_label, 19, UI_CREAM)
 	_style_label(order_instruction_label, 18, UI_CREAM)
 	_style_label(reflection_title_label, 22, UI_GOLD)
@@ -412,8 +450,22 @@ func _apply_design_system() -> void:
 	for label in [dialogue_label, detective_hint_label, roman_guide_label, reflection_title_label, puzzle_title_label]:
 		if is_instance_valid(label) and _heading_font:
 			label.add_theme_font_override("font", _heading_font)
-	for label in [puzzle1_feedback, puzzle2_feedback, puzzle3_feedback]:
+	_style_label(puzzle1_feedback, 16, UI_GOLD)
+	for label in [puzzle2_feedback, puzzle3_feedback]:
 		_style_label(label, 20, UI_GOLD)
+	_apply_single_line_label(_puzzle1_instruction_label)
+	_apply_single_line_label(puzzle1_feedback)
+
+
+func _apply_single_line_label(label: Label) -> void:
+	if not is_instance_valid(label):
+		return
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.max_lines_visible = 1
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 
 
 func _place_guardian_art() -> void:
@@ -451,7 +503,7 @@ func _apply_line_edit_style(input: LineEdit) -> void:
 		return
 	if _font:
 		input.add_theme_font_override("font", _font)
-	input.add_theme_font_size_override("font_size", 18)
+	input.add_theme_font_size_override("font_size", 22)
 	input.add_theme_color_override("font_color", UI_INK)
 	input.add_theme_color_override("font_placeholder_color", Color(0.78, 0.84, 1.0, 0.95))
 	input.add_theme_stylebox_override("normal", _input_style(UI_INPUT))
@@ -489,16 +541,16 @@ func _clear_panel_style(panel: Panel) -> void:
 	panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 
 
-func _apply_button_style(button: Button) -> void:
+func _apply_button_style(button: Button, normal_color: Color = UI_PRIMARY, hover_color: Color = UI_PRIMARY_HOVER, pressed_color: Color = UI_PRIMARY_PRESSED) -> void:
 	button.focus_mode = Control.FOCUS_NONE
 	if _font:
 		button.add_theme_font_override("font", _font)
-	button.add_theme_font_size_override("font_size", 20)
+	button.add_theme_font_size_override("font_size", 24)
 	button.add_theme_color_override("font_color", UI_CREAM)
 	button.add_theme_color_override("font_disabled_color", Color(0.70, 0.76, 0.92, 0.72))
-	button.add_theme_stylebox_override("normal", _button_style(UI_PRIMARY))
-	button.add_theme_stylebox_override("hover", _button_style(UI_PRIMARY_HOVER))
-	button.add_theme_stylebox_override("pressed", _button_style(UI_PRIMARY_PRESSED))
+	button.add_theme_stylebox_override("normal", _button_style(normal_color))
+	button.add_theme_stylebox_override("hover", _button_style(hover_color))
+	button.add_theme_stylebox_override("pressed", _button_style(pressed_color))
 	button.add_theme_stylebox_override("disabled", _button_style(UI_DISABLED))
 
 
@@ -1331,7 +1383,7 @@ func _refresh_puzzle1_ui() -> void:
 		_puzzle1_instruction_label.text = "Turn the Roman numeral into a number."
 	if is_instance_valid(sidekick_hint_label):
 		sidekick_hint_label.text = "Your Turn" if can_act else _role_turn_text(_active_answer_role) + "'s Turn"
-		sidekick_hint_label.add_theme_color_override("font_color", UI_GREEN if can_act else UI_GOLD)
+		sidekick_hint_label.add_theme_color_override("font_color", UI_GREEN)
 	if is_instance_valid(submit_number_button):
 		submit_number_button.text = "Check"
 		submit_number_button.disabled = not can_act
@@ -1675,7 +1727,7 @@ func _return_to_forest() -> void:
 	if MusicController and MusicController.has_method("resume_music"):
 		MusicController.resume_music()
 	if is_inside_tree():
-		get_tree().change_scene_to_file(SCENE_FOREST_HUB)
+		GameState.change_to_post_zone_scene(get_tree())
 
 
 func _on_clue_collected(zone_id: String, _data: Dictionary) -> void:
