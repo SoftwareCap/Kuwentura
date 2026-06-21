@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://bg4g0qn3wtlx5" path="res://assets/sprites/enemies/siyokoy_well.png" id="6_5mwpi"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="6_wqdfr"]
 [ext_resource type="Texture2D" uid="uid://bx6q2amuwpu5h" path="res://assets/sprites/clues/eyeClue.png" id="7_5e2xw"]
+[ext_resource type="Texture2D" uid="uid://lncrqsxxofpu" path="res://assets/sprites/zoneObjects/oldWell/siyokoyDialogue.png" id="7_62xvu"]
 [ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="8_62xvu"]
 [ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="9_5mwpi"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="10_8wp6h"]
@@ -24,8 +25,6 @@ size = Vector2(340.5, 254)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_fm76n"]
 texture = ExtResource("4_aqc6w")
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_riy6k"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4bwmt"]
 content_margin_top = 10.0
@@ -138,30 +137,60 @@ visible = false
 [node name="SiyokoySprite" type="Sprite2D" parent="BackgroundLayer"]
 visible = false
 
-[node name="IntroOldWell" type="Node2D" parent="BackgroundLayer"]
+[node name="IntroOldWell" type="Node2D" parent="."]
 visible = false
+position = Vector2(6.1035156e-05, 6.1035156e-05)
+scale = Vector2(0.99999994, 0.99999994)
 
-[node name="oldwell" type="Sprite2D" parent="BackgroundLayer/IntroOldWell"]
+[node name="oldwell" type="Sprite2D" parent="IntroOldWell"]
 position = Vector2(632.5, 339.99994)
 scale = Vector2(0.37158203, 0.35546875)
 texture = ExtResource("3_jlo7o")
 
-[node name="water" type="Sprite2D" parent="BackgroundLayer/IntroOldWell"]
+[node name="water" type="Sprite2D" parent="IntroOldWell"]
 position = Vector2(634.5, 160.99995)
 scale = Vector2(0.20350005, 0.186)
 texture = ExtResource("4_5e2xw")
 
-[node name="siyokoy" type="Sprite2D" parent="BackgroundLayer/IntroOldWell"]
+[node name="siyokoy" type="Sprite2D" parent="IntroOldWell"]
 position = Vector2(637, 225.99997)
 scale = Vector2(0.32950005, 0.3752)
 texture = ExtResource("5_62xvu")
 
-[node name="SiyokoysGame" type="Node2D" parent="BackgroundLayer"]
+[node name="SiyokoysGame" type="Node2D" parent="."]
+position = Vector2(6.1035156e-05, 6.1035156e-05)
+scale = Vector2(0.99999994, 0.99999994)
 
-[node name="siyokoyOldWell" type="Sprite2D" parent="BackgroundLayer/SiyokoysGame"]
+[node name="siyokoyOldWell" type="Sprite2D" parent="SiyokoysGame"]
 position = Vector2(805, 236.99995)
 scale = Vector2(0.2779999, 0.2898)
 texture = ExtResource("6_5mwpi")
+
+[node name="DialogueLayer" type="Node2D" parent="."]
+position = Vector2(1.0913936e-11, 1.0913936e-11)
+scale = Vector2(0.9999998, 0.9999998)
+
+[node name="SiyokoyDialogue" type="Sprite2D" parent="DialogueLayer"]
+position = Vector2(658.0001, 418.00006)
+scale = Vector2(0.80905783, 0.76435804)
+texture = ExtResource("7_62xvu")
+
+[node name="SiyokoyScriptLabel" type="Label" parent="DialogueLayer"]
+offset_left = 163.00003
+offset_top = 488.0001
+offset_right = 1199.0001
+offset_bottom = 551.0001
+theme_override_fonts/font = ExtResource("5_w8i7o")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ContinueButton" type="Button" parent="DialogueLayer"]
+offset_left = 1.525878e-05
+offset_top = 3.051757e-05
+offset_right = 8.000015
+offset_bottom = 8.0000305
 
 [node name="InteractionLayer" type="Node2D" parent="."]
 visible = false
@@ -171,27 +200,6 @@ visible = false
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionLayer/WellInteractionArea"]
 position = Vector2(657.75, 428)
 shape = SubResource("RectangleShape2D_wk2tw")
-
-[node name="IntroLayer" type="CanvasLayer" parent="."]
-
-[node name="DialoguePanel" type="Panel" parent="IntroLayer"]
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="SpeakerNameLabel" type="Label" parent="IntroLayer/DialoguePanel"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
-
-[node name="DialogueTextLabel" type="Label" parent="IntroLayer/DialoguePanel"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
-
-[node name="ContinueButton" type="Button" parent="IntroLayer/DialoguePanel"]
-layout_mode = 0
-offset_right = 8.0
-offset_bottom = 8.0
 
 [node name="Puzzle1Layer" type="CanvasLayer" parent="."]
 visible = false
@@ -544,20 +552,6 @@ theme_override_colors/font_color = Color(0.4, 0.16862746, 0.105882354, 1)
 theme_override_fonts/font = ExtResource("5_w8i7o")
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
-
-[node name="Briefcase" type="Panel" parent="SidekickLayer"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -247.0
-offset_top = -297.0
-offset_right = 247.0
-offset_bottom = 197.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_riy6k")
 
 [node name="RewardLayer" type="CanvasLayer" parent="."]
 visible = false
