@@ -1,9 +1,9 @@
 extends CanvasLayer
 
 const EDGE_MARGIN: float = 4.0
-const ARROW_SIZE: float = 28.0
-const ARROW_COLOR: Color = Color(1.0, 0.85, 0.2, 0.92)
-const ARROW_OUTLINE_COLOR: Color = Color(0.0, 0.0, 0.0, 0.55)
+const ARROW_SIZE: float = 40.0
+const ARROW_COLOR: Color = Color(1.0, 0.9, 0.2, 0.98)
+const ARROW_OUTLINE_COLOR: Color = Color(0.26, 0.16, 0.08, 0.88)
 const PADDING: float = 48.0
 
 var _draw_node: Node2D
@@ -114,9 +114,9 @@ func _on_draw() -> void:
 	var world_pos := _arrow_screen_pos
 
 	var outline_points := PackedVector2Array([
-		world_pos + tip * 1.08,
-		world_pos + base_left * 1.08,
-		world_pos + base_right * 1.08,
+		world_pos + tip * 1.16,
+		world_pos + base_left * 1.16,
+		world_pos + base_right * 1.16,
 	])
 	_draw_node.draw_colored_polygon(outline_points, ARROW_OUTLINE_COLOR)
 
@@ -126,3 +126,4 @@ func _on_draw() -> void:
 		world_pos + base_right,
 	])
 	_draw_node.draw_colored_polygon(fill_points, ARROW_COLOR)
+

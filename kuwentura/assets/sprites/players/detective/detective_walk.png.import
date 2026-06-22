@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://mttlik5nsegf"
-path.s3tc="res://.godot/imported/detective_walk.png-8723304f6eb1ad511db1d4d8c2a9442c.s3tc.ctex"
-path.etc2="res://.godot/imported/detective_walk.png-8723304f6eb1ad511db1d4d8c2a9442c.etc2.ctex"
+path.s3tc="res://.godot/imported/Detective_walk.png-f1e306d9f49b88daebfbac03a0f2917b.s3tc.ctex"
+path.etc2="res://.godot/imported/Detective_walk.png-f1e306d9f49b88daebfbac03a0f2917b.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/players/detective/detective_walk.png"
-dest_files=["res://.godot/imported/detective_walk.png-8723304f6eb1ad511db1d4d8c2a9442c.s3tc.ctex", "res://.godot/imported/detective_walk.png-8723304f6eb1ad511db1d4d8c2a9442c.etc2.ctex"]
+source_file="res://assets/sprites/players/Detective/Detective_walk.png"
+dest_files=["res://.godot/imported/Detective_walk.png-f1e306d9f49b88daebfbac03a0f2917b.s3tc.ctex", "res://.godot/imported/Detective_walk.png-f1e306d9f49b88daebfbac03a0f2917b.etc2.ctex"]
 
 [params]
 
