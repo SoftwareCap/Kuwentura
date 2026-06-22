@@ -67,6 +67,11 @@ func _ready() -> void:
 			_last_sent_position = global_position
 			_last_sent_animation = "idle"
 
+		if role == "Detective":
+			add_to_group("host_player")
+		else:
+			add_to_group("sidekick_player")
+
 	if is_instance_valid(location_diamond):
 		location_diamond.visible = false
 
