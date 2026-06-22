@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://i2gpufiq0ql0"]
+[gd_scene load_steps=21 format=3 uid="uid://i2gpufiq0ql0"]
 
 [ext_resource type="Script" uid="uid://ci46mv31xj0do" path="res://scripts/controls/touch_controls.gd" id="1_sv83y"]
 [ext_resource type="Texture2D" uid="uid://dp27skv21m3fj" path="res://assets/buttons/leftButton.png" id="2_hcjou"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://dhs2e7weqqu13" path="res://assets/buttons/players/mapbutton.png" id="6_vwhch"]
 [ext_resource type="Texture2D" uid="uid://b67wsufrc0323" path="res://assets/buttons/players/ledgerbutton.png" id="7_vwhch"]
 [ext_resource type="Texture2D" uid="uid://bx0l3llidiblf" path="res://assets/buttons/players/briefcasebutton.png" id="8_w2x6p"]
+[ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="9_w2x6p"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_left"]
 size = Vector2(250, 250)
@@ -29,6 +30,37 @@ size = Vector2(1000, 1000)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6oeic"]
 size = Vector2(1000, 1000)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vwhch"]
+bg_color = Color(0.360784, 0.215686, 0.180392, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.9843137, 0.9254902, 0.7882353, 1)
+shadow_size = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w2x6p"]
+bg_color = Color(0.65098, 0.439216, 0.266667, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_opfl2"]
+bg_color = Color(0.752941, 0.505882, 0.329412, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_orkyw"]
 
 [node name="TouchControls" type="CanvasLayer"]
 layer = 101
@@ -89,3 +121,31 @@ texture_normal = ExtResource("8_w2x6p")
 texture_pressed = ExtResource("8_w2x6p")
 shape = SubResource("RectangleShape2D_6oeic")
 passby_press = true
+
+[node name="FindPartner" type="Button" parent="."]
+z_index = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -195.0
+offset_top = -110.0
+offset_right = -20.0
+offset_bottom = -54.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("9_w2x6p")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_vwhch")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_w2x6p")
+theme_override_styles/hover = SubResource("StyleBoxFlat_opfl2")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_w2x6p")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_orkyw")
+action_mode = 0
+text = "Find Partner"
