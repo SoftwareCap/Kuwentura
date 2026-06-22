@@ -158,7 +158,6 @@ const ZONE_THOUGHTS: Dictionary = {
 }
 
 var _spawned_players: Dictionary = {}
-var _is_finding_partner: bool = false
 var _current_open_panel: String = ""
 var _is_animating: bool = false
 var _active_zone: String = ""
@@ -659,7 +658,6 @@ func _setup_ui_controls() -> void:
 		["Map",         true,        _on_map_button_pressed],
 		["Ledger",      is_sidekick, _on_ledger_button_pressed],
 		["Briefcase",   is_sidekick, _on_briefcase_button_pressed],
-		["FindPartner", true,        _on_find_partner_pressed],
 		["Jump",        false,       Callable()],
 	]
 
@@ -1330,64 +1328,7 @@ func _clear_dialogue() -> void:
 	if is_instance_valid(dialogue_panel):
 		dialogue_panel.visible = false
 
-# ─── FIND PARTNER ────────────────────────────────────────────────────────────
-
-func _on_find_partner_pressed() -> void:
-	if _is_finding_partner:
-		return
-	var my_id := multiplayer.get_unique_id()
-	var partner_id: int = -1
-	for peer_id in _spawned_players.keys():
-		if peer_id != my_id:
-			partner_id = peer_id
-			break
-	if partner_id == -1:
-		push_warning("[ForestHub] No partner found to locate.")
-		return
-	var partner_pos: Vector2
-	var state := NetworkManager.get_partner_state(partner_id)
-	if not state.is_empty() and state.has("position"):
-		partner_pos = state.get("position", Vector2.ZERO)
-	else:
-		var partner_node := get_node_or_null(str(partner_id)) as CharacterBody2D
-		if not is_instance_valid(partner_node):
-			push_warning("[ForestHub] Partner state and node both unavailable.")
-			return
-		partner_pos = partner_node.global_position
-	_slide_camera_to_partner(partner_pos)
-
-
-func _slide_camera_to_partner(target_pos: Vector2) -> void:
-	var my_id := multiplayer.get_unique_id()
-	var my_player := get_node_or_null(str(my_id)) as CharacterBody2D
-	if not is_instance_valid(my_player):
-		push_warning("[ForestHub] Local player node not found.")
-		return
-	var cam := my_player.get_node_or_null("Camera2D") as Camera2D
-	if not cam:
-		push_warning("[ForestHub] Camera2D not found on local player.")
-		return
-	_is_finding_partner = true
-	cam.set_as_top_level(true)
-	cam.global_position = my_player.global_position
-	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_SINE)
-	tween.set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(cam, "global_position", target_pos, FIND_PARTNER_DURATION)
-	tween.tween_interval(FIND_PARTNER_HOLD)
-	tween.tween_method(func(_t: float):
-		if is_instance_valid(cam) and is_instance_valid(my_player):
-			cam.global_position = cam.global_position.lerp(my_player.global_position, 0.15)
-	, 0.0, 1.0, FIND_PARTNER_DURATION)
-	tween.tween_callback(func():
-		if not is_instance_valid(cam) or not is_instance_valid(my_player):
-			_is_finding_partner = false
-			return
-		cam.set_as_top_level(false)
-		cam.position = Vector2.ZERO
-		_is_finding_partner = false)
-
-# ─── LOCATION DIAMOND ────────────────────────────────────────────────────────
+# LOCATION DIAMOND
 
 func _animate_location_diamond() -> void:
 	var diamond := get_node_or_null("LocationDiamond")
