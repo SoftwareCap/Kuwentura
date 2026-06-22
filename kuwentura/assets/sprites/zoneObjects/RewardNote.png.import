@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bx0hqyafkevfo"
-path.bptc="res://.godot/imported/RewardNote.png-876e40fccc80346fc76790947dc80118.bptc.ctex"
-path.astc="res://.godot/imported/RewardNote.png-876e40fccc80346fc76790947dc80118.astc.ctex"
+path.bptc="res://.godot/imported/rewardNote.png-b93733382f447228cd52c111ef512950.bptc.ctex"
+path.astc="res://.godot/imported/rewardNote.png-b93733382f447228cd52c111ef512950.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/RewardNote.png"
-dest_files=["res://.godot/imported/RewardNote.png-876e40fccc80346fc76790947dc80118.bptc.ctex", "res://.godot/imported/RewardNote.png-876e40fccc80346fc76790947dc80118.astc.ctex"]
+source_file="res://assets/sprites/zoneObjects/rewardNote.png"
+dest_files=["res://.godot/imported/rewardNote.png-b93733382f447228cd52c111ef512950.bptc.ctex", "res://.godot/imported/rewardNote.png-b93733382f447228cd52c111ef512950.astc.ctex"]
 
 [params]
 
