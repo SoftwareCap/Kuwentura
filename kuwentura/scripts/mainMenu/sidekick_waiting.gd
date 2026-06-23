@@ -11,6 +11,7 @@ const FADE_DURATION := 0.2
 const SETTINGS_FILE := "user://settings.json"
 const SCENE_MAIN_MENU := "res://scenes/mainMenu/MainMenu.tscn"
 const SCENE_FOREST_HUB := "res://scenes/world/hub/ForestHub.tscn"
+const SCENE_BAKUNAWA := "res://scenes/world/climax/Bakunawa.tscn"
 const SCENE_OPENING_CUTSCENE := "res://scenes/cutscenes/opening/OpeningCutscene.tscn"
 const SCENE_MOBILE_OPENING_CUTSCENE := "res://scenes/cutscenes/opening/MobileOpeningCutscene.tscn"
 const DEV_SKIP_OPENING_CUTSCENE := false
@@ -314,10 +315,10 @@ func _update_costume_display() -> void:
 		sidekick_costume_label.modulate = COLOR_NORMAL
 
 	if is_instance_valid(sidekick_select_btn):
-		sidekick_select_btn.text = "✓ Selected!" if is_confirmed else "Select Costume"
+		sidekick_select_btn.text = "âœ“ Selected!" if is_confirmed else "Select Costume"
 		sidekick_select_btn.disabled = is_confirmed
 
-	# Partner (detective) — read-only display
+	# Partner (detective) â€” read-only display
 	var partner_id := GameState.get_selected_costume("detective")
 	var partner_costume := GameState.get_costume_by_id("detective", partner_id)
 	var partner_confirmed := GameState.is_costume_confirmed("detective")
@@ -369,20 +370,40 @@ func _on_host_connected_state() -> void:
 
 
 # CONNECTION & GAME START
+func _get_scene_for_checkpoint(checkpoint: String) -> String:
+	match checkpoint:
+		GameState.START_CHECKPOINT_FOREST_HUB:
+			return SCENE_FOREST_HUB
+		GameState.START_CHECKPOINT_BAKUNAWA:
+			return SCENE_BAKUNAWA
+		_:
+			return _get_opening_cutscene_scene()
+
+
+func _get_rejoin_checkpoint(world_state: Dictionary = {}) -> String:
+	var start_checkpoint: String = str(world_state.get("start_checkpoint", ""))
+	if not start_checkpoint.is_empty():
+		return start_checkpoint
+	var current_zone: String = str(world_state.get("current_zone", GameState.current_zone))
+	if current_zone == GameState.START_CHECKPOINT_BAKUNAWA:
+		return GameState.START_CHECKPOINT_BAKUNAWA
+	return GameState.START_CHECKPOINT_FOREST_HUB
+
+
 func _call_join_if_playing() -> void:
 	"""Check if game is already in progress (rejoining scenario)."""
 	await get_tree().process_frame
 	if not is_inside_tree():
 		return
 	if NetworkManager.is_playing():
-		_change_to_game()
+		_change_to_game(_get_rejoin_checkpoint())
 		return
 
 	await get_tree().create_timer(0.5).timeout
 	if not is_inside_tree():
 		return
 	if NetworkManager.is_playing():
-		_change_to_game()
+		_change_to_game(_get_rejoin_checkpoint())
 		return
 
 	_host_connected = NetworkManager.has_active_connection()
@@ -423,20 +444,20 @@ func _on_partner_connected(_data: Dictionary) -> void:
 			sprite.play("idle")
 
 
-func _on_game_started(_checkpoint: String = "") -> void:
+func _on_game_started(checkpoint: String = "") -> void:
 	if not is_inside_tree():
 		return
 	status_label.text = "Starting game..."
-	await _transition_to_game()
+	await _transition_to_game(checkpoint)
 
 
-func _on_rejoin_game_requested(_world_state: Dictionary) -> void:
+func _on_rejoin_game_requested(world_state: Dictionary) -> void:
 	if not is_inside_tree():
 		return
-	await _transition_to_game()
+	await _transition_to_game(_get_rejoin_checkpoint(world_state))
 
 
-func _transition_to_game() -> void:
+func _transition_to_game(checkpoint: String = GameState.START_CHECKPOINT_OPENING) -> void:
 	"""Hide settings UI, fade out, and change to game scene."""
 	_is_leaving = true
 	if settings_control:
@@ -449,14 +470,14 @@ func _transition_to_game() -> void:
 	var tween := create_tween()
 	tween.tween_property(self, "modulate", Color.BLACK, FADE_DURATION)
 	await tween.finished
-	_change_to_game()
+	_change_to_game(checkpoint)
 
 
-func _change_to_game() -> void:
+func _change_to_game(checkpoint: String = GameState.START_CHECKPOINT_OPENING) -> void:
 	"""Safely change to game scene."""
 	if not is_instance_valid(self) or not is_inside_tree():
 		return
-	get_tree().change_scene_to_file(_get_opening_cutscene_scene())
+	get_tree().change_scene_to_file(_get_scene_for_checkpoint(checkpoint))
 
 
 func _get_opening_cutscene_scene() -> String:
@@ -467,9 +488,9 @@ func _get_opening_cutscene_scene() -> String:
 
 func _on_connection_failed(error: String) -> void:
 	var msg := "Cannot connect to game.\n\nPlease check:\n"
-	msg += "• Both devices on same Wi-Fi\n"
-	msg += "• Room code is correct\n"
-	msg += "• Detective is hosting\n"
+	msg += "â€¢ Both devices on same Wi-Fi\n"
+	msg += "â€¢ Room code is correct\n"
+	msg += "â€¢ Detective is hosting\n"
 	msg += "\nError: %s" % error
 	status_label.text = msg
 	status_label.modulate = COLOR_ERROR
