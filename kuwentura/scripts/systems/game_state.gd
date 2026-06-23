@@ -8,7 +8,7 @@ extends Node
 ## - Player roles and session data
 ## - Puzzle seeds and game reset handling
 ##
-## Save system: LocalSaveManager (primary) → FirebaseManager (cloud backup)
+## Save system: LocalSaveManager (primary) â†’ FirebaseManager (cloud backup)
 
 signal zone_visited(zone_id: String)
 
@@ -25,10 +25,16 @@ signal briefcase_updated
 
 enum Role { NONE, DETECTIVE, SIDEKICK }
 enum ZoneStatus { LOCKED, AVAILABLE, COMPLETED }
+enum DeveloperStartMode { NORMAL, SKIP_OPENING, START_BAKUNAWA }
+
+const START_CHECKPOINT_OPENING := "opening_cutscene"
+const START_CHECKPOINT_FOREST_HUB := "forest_hub"
+const START_CHECKPOINT_BAKUNAWA := "bakunawa"
 
 var local_role: Role = Role.NONE
 var is_host: bool = false
-var forest_tutorial_shown: bool = false  # ← persisted now
+var developer_start_mode: DeveloperStartMode = DeveloperStartMode.NORMAL
+var forest_tutorial_shown: bool = false  # â† persisted now
 
 var current_zone: String = "forest_hub"
 var zones_status: Dictionary = {
@@ -51,7 +57,7 @@ var collected_clues: Dictionary = {
 	"pinas_house": {
 		"collected": false,
 		"item": "Ladle",
-		"text": "We use our eyes to find things, but Pina never used hers…",
+		"text": "We use our eyes to find things, but Pina never used hersâ€¦",
 		"zone_name": "Pina's House",
 	},
 	"backyard_path": {
@@ -225,6 +231,68 @@ func assign_role(role: Role) -> void:
 	player_role_assigned.emit(role)
 
 
+func set_developer_start_mode(mode: DeveloperStartMode) -> void:
+	developer_start_mode = mode
+
+
+func get_developer_start_mode_label() -> String:
+	match developer_start_mode:
+		DeveloperStartMode.SKIP_OPENING:
+			return "Skip Opening Cutscene"
+		DeveloperStartMode.START_BAKUNAWA:
+			return "Start Bakunawa Challenge"
+		_:
+			return "Play Normal Game"
+
+
+func get_developer_start_checkpoint() -> String:
+	match developer_start_mode:
+		DeveloperStartMode.SKIP_OPENING:
+			return START_CHECKPOINT_FOREST_HUB
+		DeveloperStartMode.START_BAKUNAWA:
+			return START_CHECKPOINT_BAKUNAWA
+		_:
+			return START_CHECKPOINT_OPENING
+
+
+func prepare_selected_start_mode() -> void:
+	match developer_start_mode:
+		DeveloperStartMode.SKIP_OPENING:
+			current_zone = "forest_hub"
+			forest_intro_played = true
+			_save_progress("developer_skip_opening")
+		DeveloperStartMode.START_BAKUNAWA:
+			_prepare_bakunawa_debug_state()
+		_:
+			current_zone = "forest_hub"
+			forest_intro_played = false
+
+
+func _prepare_bakunawa_debug_state() -> void:
+	ledger_entries.clear()
+	for zone_id in PUZZLE_ZONE_ORDER:
+		if not collected_clues.has(zone_id):
+			continue
+		collected_clues[zone_id].collected = true
+		zones_status[zone_id] = ZoneStatus.COMPLETED
+		if visited_zones.has(zone_id):
+			visited_zones[zone_id] = true
+		solved_puzzles[zone_id] = true
+		var clue_data: Dictionary = collected_clues[zone_id]
+		ledger_entries.append({
+			"zone": zone_id,
+			"item": clue_data.get("item", ""),
+			"text": clue_data.get("text", ""),
+			"timestamp": int(Time.get_unix_time_from_system()),
+		})
+	climax_triggered = true
+	game_completed = false
+	current_zone = START_CHECKPOINT_BAKUNAWA
+	forest_intro_played = true
+	briefcase_updated.emit()
+	_save_progress("developer_start_bakunawa")
+
+
 func collect_clue(zone_id: String) -> bool:
 	if not collected_clues.has(zone_id):
 		return false
@@ -298,7 +366,7 @@ func reset_game_after_nightfall() -> void:
 	climax_triggered = false
 	solved_puzzles.clear()
 	forest_intro_played = false
-	# ← Do NOT reset forest_tutorial_shown here — tutorial only shows once ever
+	# â† Do NOT reset forest_tutorial_shown here â€” tutorial only shows once ever
 	game_reset.emit()
 	_save_progress("nightfall_reset")
 
@@ -415,7 +483,7 @@ func get_save_data() -> Dictionary:
 		"selected_costumes":         selected_costumes.duplicate(true),
 		"_costume_confirmed_status": _costume_confirmed_status.duplicate(true),
 		"zone_inventory":            zone_inventory.duplicate(true),
-		"forest_tutorial_shown":     forest_tutorial_shown,  # ← added
+		"forest_tutorial_shown":     forest_tutorial_shown,  # â† added
 	}
 
 
@@ -449,7 +517,7 @@ func load_save_data(data: Dictionary) -> void:
 	if data.has("zone_inventory"):
 		zone_inventory = data["zone_inventory"].duplicate(true)
 	if data.has("forest_tutorial_shown"):
-		forest_tutorial_shown = data["forest_tutorial_shown"]  # ← added
+		forest_tutorial_shown = data["forest_tutorial_shown"]  # â† added
 	if data.has("session_seed"):
 		_session_seed = int(data["session_seed"])
 
@@ -619,7 +687,7 @@ func reset_all_progress() -> void:
 	_initialize_puzzle_seeds()
 	reset_costume_selections()
 	forest_intro_played = false
-	forest_tutorial_shown = false  # ← reset only on full wipe, not nightfall
+	forest_tutorial_shown = false  # â† reset only on full wipe, not nightfall
 	if LocalSaveManager:
 		LocalSaveManager.delete_save()
 	game_reset.emit()

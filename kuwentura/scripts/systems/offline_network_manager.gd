@@ -18,7 +18,7 @@ const DISCOVERY_BROADCAST_INTERVAL: float = 0.5
 const DISCOVERY_PORT: int = 17778
 const DISCOVERY_TIMEOUT: float = 10.0
 
-# IP priority list for host selection — checked in order, first match wins
+# IP priority list for host selection â€” checked in order, first match wins
 const IP_PRIORITY: Array = [
 	"192.168.43.", "192.168.44.", # Android hotspot
 	"172.20.10.", # iOS hotspot
@@ -131,7 +131,7 @@ func _report_position_to_host_rpc(peer_id: int, position: Vector2) -> void:
 func _start_discovery_broadcast() -> void:
 	_broadcast_socket = PacketPeerUDP.new()
 	_broadcast_socket.set_broadcast_enabled(true)
-	# No bind — socket is send-only
+	# No bind â€” socket is send-only
 
 
 func _broadcast_presence() -> void:
@@ -273,13 +273,9 @@ func host_game() -> Dictionary:
 	_invite_code = _generate_invite_code()
 	_session_seed = randi()
 	_host_ip = _get_best_host_ip()
-	_world_progress = {
-		"collected_clues": {},
-		"zones_status": GameState.zones_status.duplicate(),
-		"current_zone": "forest_hub",
-		"session_seed": _session_seed,
-	}
 	GameState.set_session_seed(_session_seed)
+	sync_world_progress_from_gamestate()
+	_world_progress["start_checkpoint"] = GameState.START_CHECKPOINT_OPENING
 	_change_state(ConnectionState.HOSTING)
 
 	var host_info := {
@@ -342,14 +338,14 @@ func join_game_with_code(invite_code: String) -> Dictionary:
 	if host_info.is_empty():
 		return {
 			"success": false,
-			"error": "Could not find game with code: " + target_code + "\n\nConnection Options:\n1. Same Wi-Fi: Connect both devices to same network\n2. Hotspot Mode: Host enables mobile hotspot, Sidekick connects to it\n\nThen:\n• Host must be in lobby\n• Room code must match",
+			"error": "Could not find game with code: " + target_code + "\n\nConnection Options:\n1. Same Wi-Fi: Connect both devices to same network\n2. Hotspot Mode: Host enables mobile hotspot, Sidekick connects to it\n\nThen:\nâ€¢ Host must be in lobby\nâ€¢ Room code must match",
 		}
 	return await _connect_to_host(host_info.ip, target_code)
 
 
 
 
-func start_game() -> bool:
+func start_game(checkpoint: String = GameState.START_CHECKPOINT_OPENING) -> bool:
 	if not _is_host:
 		push_warning("[OfflineNetwork] Only host can start the game")
 		return false
@@ -357,11 +353,12 @@ func start_game() -> bool:
 		push_warning("[OfflineNetwork] No partner connected")
 		return false
 	sync_world_progress_from_gamestate()
+	_world_progress["start_checkpoint"] = checkpoint
 	_rpc_sync_world_state.rpc(_world_progress)
 	_change_state(ConnectionState.PLAYING)
 	_has_game_started = true
-	_game_started_rpc.rpc("forest_hub")
-	game_started.emit("forest_hub")
+	_game_started_rpc.rpc(checkpoint)
+	game_started.emit(checkpoint)
 	return true
 
 
@@ -378,14 +375,39 @@ func resume_game() -> bool:
 
 
 func sync_world_progress_from_gamestate() -> void:
+	var start_checkpoint: String = str(_world_progress.get("start_checkpoint", GameState.START_CHECKPOINT_OPENING))
 	_world_progress = {
 		"collected_clues": GameState.collected_clues.duplicate(true),
 		"zones_status": GameState.zones_status.duplicate(true),
+		"visited_zones": GameState.visited_zones.duplicate(true),
+		"ledger_entries": GameState.ledger_entries.duplicate(true),
+		"solved_puzzles": GameState.solved_puzzles.duplicate(true),
 		"current_zone": GameState.current_zone,
 		"session_seed": _session_seed,
 		"climax_triggered": GameState.climax_triggered,
 		"game_completed": GameState.game_completed,
+		"start_checkpoint": start_checkpoint,
 	}
+
+
+func _apply_world_state_to_gamestate(world_state: Dictionary) -> void:
+	if world_state.has("collected_clues"):
+		GameState.collected_clues = world_state.collected_clues.duplicate(true)
+	if world_state.has("zones_status"):
+		GameState.zones_status = world_state.zones_status.duplicate(true)
+	if world_state.has("visited_zones"):
+		GameState.visited_zones = world_state.visited_zones.duplicate(true)
+	if world_state.has("ledger_entries"):
+		GameState.ledger_entries = world_state.ledger_entries.duplicate(true)
+	if world_state.has("solved_puzzles"):
+		GameState.solved_puzzles = world_state.solved_puzzles.duplicate(true)
+	if world_state.has("current_zone"):
+		GameState.current_zone = world_state.current_zone
+	if world_state.has("climax_triggered"):
+		GameState.climax_triggered = world_state.climax_triggered
+	if world_state.has("game_completed"):
+		GameState.game_completed = world_state.game_completed
+	GameState.briefcase_updated.emit()
 
 
 func disconnect_network() -> void:
@@ -445,6 +467,7 @@ func _rpc_sync_world_state(world_state: Dictionary) -> void:
 	if synced_seed != 0 and synced_seed != _session_seed:
 		_session_seed = synced_seed
 		GameState.set_session_seed(_session_seed)
+	_apply_world_state_to_gamestate(world_state)
 
 
 @rpc("any_peer", "reliable")
@@ -487,12 +510,7 @@ func _rejoin_game_rpc(rejoin_data: Dictionary) -> void:
 	var world_state: Dictionary = rejoin_data.get("world_progress", {})
 	var player_positions: Dictionary = rejoin_data.get("player_positions", {})
 	_world_progress = world_state
-	if world_state.has("collected_clues"):
-		GameState.collected_clues = world_state.collected_clues.duplicate(true)
-	if world_state.has("zones_status"):
-		GameState.zones_status = world_state.zones_status.duplicate(true)
-	if world_state.has("current_zone"):
-		GameState.current_zone = world_state.current_zone
+	_apply_world_state_to_gamestate(world_state)
 	for peer_id_str in player_positions:
 		var pid := int(peer_id_str)
 		if pid == 1:
@@ -653,7 +671,7 @@ func _get_host_instructions() -> Array:
 
 
 func _get_connection_troubleshooting_tips() -> String:
-	return "\n\nTroubleshooting:\n• Verify the IP address is correct\n• Ensure both devices are on the same network\n• Try Hotspot Mode (host enables mobile hotspot)\n• Disable mobile data on client device\n• Check firewall settings (allow port 17777)"
+	return "\n\nTroubleshooting:\nâ€¢ Verify the IP address is correct\nâ€¢ Ensure both devices are on the same network\nâ€¢ Try Hotspot Mode (host enables mobile hotspot)\nâ€¢ Disable mobile data on client device\nâ€¢ Check firewall settings (allow port 17777)"
 
 
 func get_connection_instructions() -> Dictionary:

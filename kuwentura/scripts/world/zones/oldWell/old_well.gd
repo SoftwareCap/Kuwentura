@@ -18,6 +18,7 @@ const TEX_HEART_FULL := "res://assets/sprites/zoneObjects/oldWell/fullHeart.png"
 const TEX_HEART_EMPTY := "res://assets/sprites/zoneObjects/oldWell/zeroheart.png"
 const FONT_HEADING := "res://assets/fonts/Arabica.ttf"
 const FONT_BODY := "res://assets/fonts/ocraextended.ttf"
+const COMPLETION_SFX: AudioStream = preload("res://assets/audios/ZoneCompletionSFX.mp3")
 
 const UI_CREAM := Color(1.0, 1.0, 1.0, 1.0)
 const UI_INK := Color(0.01, 0.02, 0.07, 1.0)
@@ -167,6 +168,7 @@ var _fail_started := false
 var _bucket_start := Vector2.ZERO
 var _font: Font
 var _heading_font: Font
+var _sfx_player: AudioStreamPlayer
 var _hearts_container: HBoxContainer = null
 var _puzzle1_instruction_label: Label = null
 var _heart_icons: Array[TextureRect] = []
@@ -183,6 +185,10 @@ func _ready() -> void:
 	_rng.randomize()
 	_font = _load_font(FONT_BODY)
 	_heading_font = _load_font(FONT_HEADING)
+	_ensure_sfx_bus()
+	_sfx_player = AudioStreamPlayer.new()
+	_sfx_player.bus = "SFX"
+	add_child(_sfx_player)
 	_cache_arrays()
 	_apply_assets()
 	_setup_mobile_layout()
@@ -455,6 +461,11 @@ func _apply_design_system() -> void:
 	_style_label(puzzle1_feedback, 16, UI_GOLD)
 	for label in [puzzle2_feedback, puzzle3_feedback]:
 		_style_label(label, 20, UI_GOLD)
+	if is_instance_valid(reward_text):
+		if _heading_font:
+			reward_text.add_theme_font_override("font", _heading_font)
+		reward_text.add_theme_color_override("font_color", Color(0.0, 0.0, 0.0, 1.0))
+		reward_text.add_theme_constant_override("outline_size", 0)
 	_apply_single_line_label(_puzzle1_instruction_label)
 	_apply_single_line_label(puzzle1_feedback)
 
@@ -1222,6 +1233,7 @@ func _server_sync_state() -> void:
 
 @rpc("authority", "reliable", "call_local")
 func rpc_sync_state(phase: int, mistakes: int, bucket_progress: int, intro_index: int, puzzle1_correct: int, active_answer_role: int, current_roman: Dictionary, chain_rings: Array, chain_slots: Array, eye_order: Array, eye_slots: Array, reward_stage: int, waiting_reward_tap: bool, collect_started: bool) -> void:
+	var previous_phase: int = _phase
 	_phase = phase
 	_mistakes = mistakes
 	_bucket_progress = bucket_progress
@@ -1240,6 +1252,8 @@ func rpc_sync_state(phase: int, mistakes: int, bucket_progress: int, intro_index
 	_update_role_text()
 	_update_hud()
 	_refresh_current_ui()
+	if phase == Phase.REWARD and previous_phase != Phase.REWARD:
+		_play_zone_completion_sfx()
 
 
 func _server_feedback(message: String, is_error: bool) -> void:
@@ -1836,6 +1850,26 @@ func _to_int_array(values: Array) -> Array[int]:
 		result.append(int(value))
 	return result
 
+
+func _ensure_sfx_bus() -> void:
+	var idx := AudioServer.get_bus_index("SFX")
+	if idx == -1:
+		AudioServer.add_bus(AudioServer.bus_count)
+		var last := AudioServer.bus_count - 1
+		AudioServer.set_bus_name(last, "SFX")
+		AudioServer.set_bus_volume_db(last, 0.0)
+
+func _play_zone_completion_sfx() -> void:
+	if not is_instance_valid(_sfx_player) or COMPLETION_SFX == null:
+		return
+	MusicController.pause_music()
+	_sfx_player.stream = COMPLETION_SFX
+	_sfx_player.play()
+	if not _sfx_player.finished.is_connected(_on_sfx_finished_resume_music):
+		_sfx_player.finished.connect(_on_sfx_finished_resume_music, CONNECT_ONE_SHOT)
+
+func _on_sfx_finished_resume_music() -> void:
+	MusicController.resume_music()
 
 func _load_texture(path: String) -> Texture2D:
 	if path.is_empty() or not ResourceLoader.exists(path):
