@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b644j453adiph"
-path.bptc="res://.godot/imported/6.png-f6eaa3a9ca2460800d5fe83e7d50d6e7.bptc.ctex"
-path.astc="res://.godot/imported/6.png-f6eaa3a9ca2460800d5fe83e7d50d6e7.astc.ctex"
+path.bptc="res://.godot/imported/6.png-6884f0909d9b121360f59bc7cfdc8942.bptc.ctex"
+path.astc="res://.godot/imported/6.png-6884f0909d9b121360f59bc7cfdc8942.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightGoingOut/6.png"
-dest_files=["res://.godot/imported/6.png-f6eaa3a9ca2460800d5fe83e7d50d6e7.bptc.ctex", "res://.godot/imported/6.png-f6eaa3a9ca2460800d5fe83e7d50d6e7.astc.ctex"]
+source_file="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/6.png"
+dest_files=["res://.godot/imported/6.png-6884f0909d9b121360f59bc7cfdc8942.bptc.ctex", "res://.godot/imported/6.png-6884f0909d9b121360f59bc7cfdc8942.astc.ctex"]
 
 [params]
 

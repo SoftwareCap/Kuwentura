@@ -1,3 +1,10 @@
-[gd_scene format=3 uid="uid://k7nlakbeiv8k"]
+[gd_scene load_steps=2 format=3 uid="uid://k7nlakbeiv8k"]
+
+[ext_resource type="VideoStream" uid="uid://drhuaflyfe8fd" path="res://assets/sprites/deduction/altarDeduction.ogv" id="1_0x6e6"]
 
 [node name="AltarDeduction" type="Node2D"]
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+stream = ExtResource("1_0x6e6")
