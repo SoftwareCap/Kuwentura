@@ -246,6 +246,9 @@ func is_partner_connected() -> bool:
 func get_partner_state(peer_id: int) -> Dictionary:
 	return _partner_states.get(str(peer_id), {})
 
+func get_partner_peer_id() -> int:
+	return _partner_peer_id
+
 func clear_partner_state(peer_id: int) -> void:
 	_partner_states.erase(str(peer_id))
 
@@ -484,6 +487,8 @@ func _puzzle_result_rpc(_puzzle_id: String, _result: Dictionary) -> void:
 
 @rpc("any_peer", "unreliable_ordered")
 func sync_player_state(position: Vector2, velocity: Vector2, facing: String, animation_state: String) -> void:
+	var sender_id := multiplayer.get_remote_sender_id()
+	print("[NET] sync_player_state received, sender_id=", sender_id)
 	_partner_states[str(multiplayer.get_remote_sender_id())] = {
 		"position": position,
 		"velocity": velocity,
@@ -554,6 +559,7 @@ func _on_multiplayer_peer_disconnected(peer_id: int) -> void:
 
 func _on_connected_to_server() -> void:
 	_local_peer_id = multiplayer.get_unique_id()
+	_partner_peer_id = 1
 	_change_state(ConnectionState.CONNECTED)
 
 

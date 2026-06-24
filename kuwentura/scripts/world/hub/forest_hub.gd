@@ -230,6 +230,11 @@ func _cleanup_instruction_textures() -> void:
 
 
 func _ready() -> void:
+	GameState.clear_spawn_position(multiplayer.get_unique_id())
+	if multiplayer.is_server():
+		for peer_id in multiplayer.get_peers():
+			GameState.clear_spawn_position(peer_id)
+			
 	_ensure_spawn_points()
 	MusicController.play_track(MusicController.MusicTrack.FOREST_HUB)
 	_connect_signals()
@@ -441,16 +446,21 @@ func _instantiate_player(is_detective: bool) -> CharacterBody2D:
 	return player
 
 
-func _resolve_spawn_position(peer_id: int, is_detective: bool, forced_pos: Vector2 = Vector2.ZERO) -> Vector2:
+func _resolve_spawn_position(_peer_id: int, is_detective: bool, forced_pos: Vector2 = Vector2.ZERO) -> Vector2:
 	if forced_pos != Vector2.ZERO:
 		return forced_pos
-	var saved_pos := GameState.get_spawn_position(peer_id)
-	if saved_pos != Vector2.ZERO:
-		return saved_pos
-	var marker_name := "DetectiveSpawn" if is_detective else "SidekickSpawn"
+
+	var has_visited := GameState.visited_zones.values().any(func(v): return bool(v))
+	var marker_name: String
+	if is_detective:
+		marker_name = "DetectiveSpawnReturn" if has_visited else "DetectiveSpawn"
+	else:
+		marker_name = "SidekickSpawnReturn" if has_visited else "SidekickSpawn"
+
 	var marker := spawn_points.get_node_or_null(marker_name) as Marker2D
 	if marker:
 		return marker.global_position
+
 	var default_pos := Vector2(200 if is_detective else 600, ground_y)
 	push_warning("[ForestHub] Spawn marker not found for %s, using default: %s" % [
 		"Detective" if is_detective else "Sidekick", str(default_pos)
@@ -459,14 +469,18 @@ func _resolve_spawn_position(peer_id: int, is_detective: bool, forced_pos: Vecto
 
 
 func _finalize_spawn(player: CharacterBody2D, peer_id: int, spawn_pos: Vector2) -> void:
-	player.global_position = spawn_pos
 	if NetworkManager.has_method("clear_partner_state"):
 		NetworkManager.clear_partner_state(peer_id)
 	_stabilize_player_physics(player)
 	player.set_multiplayer_authority(peer_id)
 	_force_visibility_recursive(player)
 	_spawned_players[peer_id] = player
+	player.prepare_deferred_spawn()       # ← block physics until positioned
 	add_child(player, true)
+	await get_tree().process_frame
+	if not is_instance_valid(player):
+		return
+	player.initialize_spawn(spawn_pos)    # ← sets global_position + _intended_x_position + velocity together
 	_call_stabilize_after_frame(player)
 	if peer_id == multiplayer.get_unique_id():
 		await get_tree().process_frame
@@ -485,8 +499,6 @@ func _spawn_player_for_peer(peer_id: int) -> void:
 	var player := _instantiate_player(is_detective)
 	player.name = str(peer_id)
 	await _finalize_spawn(player, peer_id, spawn_pos)
-	if peer_id == multiplayer.get_unique_id():
-		GameState.clear_spawn_position(peer_id)
 
 
 func _on_player_connected(peer_id: int, _role: int = 0) -> void:
