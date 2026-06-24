@@ -1199,6 +1199,7 @@ texture_scale = 3.0
 
 [node name="TryAgain" type="CanvasLayer" parent="."]
 layer = 50
+visible = false
 
 [node name="Control" type="Control" parent="TryAgain"]
 layout_mode = 3
