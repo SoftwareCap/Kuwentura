@@ -2,23 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b1dy4fq6ytpn6"
-path.bptc="res://.godot/imported/inventoryBoard.png-b6729ab0d2c8e41cd01e4b52ef5d286b.bptc.ctex"
-path.astc="res://.godot/imported/inventoryBoard.png-b6729ab0d2c8e41cd01e4b52ef5d286b.astc.ctex"
+uid="uid://dxrptdr08anot"
+path="res://.godot/imported/bakunawaTryAgain.png-ab80ed3b414bf181d2850b9b575c2d1a.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/zoneObjects/pinasHouseObjects/inventoryBoard.png"
-dest_files=["res://.godot/imported/inventoryBoard.png-b6729ab0d2c8e41cd01e4b52ef5d286b.bptc.ctex", "res://.godot/imported/inventoryBoard.png-b6729ab0d2c8e41cd01e4b52ef5d286b.astc.ctex"]
+source_file="res://assets/sprites/bakunawa/bakunawaTryAgain.png"
+dest_files=["res://.godot/imported/bakunawaTryAgain.png-ab80ed3b414bf181d2850b9b575c2d1a.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bmhp4hxk4hrxe"
-path="res://.godot/imported/pinasHouseIndicator.png-49227b6868f3e9eedbfd93d9cc8e48d1.ctex"
+path="res://.godot/imported/pinasHouseIndicator.png-84e4dcb69a9b25bb68a8132745d42104.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/Detective/pinasHouseIndicator.png"
-dest_files=["res://.godot/imported/pinasHouseIndicator.png-49227b6868f3e9eedbfd93d9cc8e48d1.ctex"]
+source_file="res://assets/sprites/players/detective/pinasHouseIndicator.png"
+dest_files=["res://.godot/imported/pinasHouseIndicator.png-84e4dcb69a9b25bb68a8132745d42104.ctex"]
 
 [params]
 

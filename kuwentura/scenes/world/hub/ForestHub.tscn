@@ -1332,13 +1332,13 @@ position = Vector2(569, 0)
 position = Vector2(201, 477)
 
 [node name="SidekickSpawn" type="Marker2D" parent="SpawnPoints"]
-position = Vector2(0, 477)
+position = Vector2(50, 477)
 
 [node name="DetectiveSpawnReturn" type="Marker2D" parent="SpawnPoints"]
 position = Vector2(201, 650)
 
 [node name="SidekickSpawnReturn" type="Marker2D" parent="SpawnPoints"]
-position = Vector2(0, 650)
+position = Vector2(50, 650)
 
 [node name="FinishZoneIndicator" type="Node2D" parent="."]
 script = ExtResource("7_indicator")
