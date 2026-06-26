@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3 uid="uid://baveasecgw327"]
+
+[ext_resource type="Script" uid="uid://bn3epxd1igh1o" path="res://scripts/credits/credits.gd" id="1_677rg"]
+
+[node name="Credits" type="Node2D"]
+script = ExtResource("1_677rg")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="Control" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="CreditsList" type="VBoxContainer" parent="CanvasLayer/Control"]
+layout_mode = 0
+alignment = 1
