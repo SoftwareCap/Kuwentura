@@ -242,6 +242,9 @@ var _ledger_instruction_image: TextureRect = null
 @export var progress_default_tex: Texture2D
 @export var progress_solved_tex: Texture2D
 
+@onready var ending_cutscene: VideoStreamPlayer = $Cutscene/EndingCutscene
+var _ending_cutscene_resolved := false
+
 var _current_riddle_index: int = 0
 var _glow_progress: int = 0
 var _chest_revealed: bool = false
@@ -300,6 +303,14 @@ func _ready() -> void:
 	MusicController.play_track(MusicController.MusicTrack.BACKYARD_PATH)
 	_initialize_chest_lock_sync()
 	_sync_riddle_ui("The hut is dark. Solve the carved shapes together.", false)
+	
+	if is_instance_valid(ending_cutscene):
+		CutsceneHelper.prepare_mobile_video_player(ending_cutscene)
+		ending_cutscene.visible = false
+
+	var cutscene_dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	if is_instance_valid(cutscene_dark):
+		cutscene_dark.visible = false
 
 
 func _process(delta: float) -> void:
@@ -323,6 +334,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not chest_modal.get_global_rect().has_point(click_position):
 		chest_modal.visible = false
 
+func _input(event: InputEvent) -> void:
+	if is_instance_valid(ending_cutscene) and ending_cutscene.visible:
+		var skip := event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel")
+		skip = skip or (event is InputEventScreenTouch and event.pressed)
+		if skip:
+			_on_cutscene_finished()
 
 func setup_layout() -> void:
 	var screen_size := get_viewport_rect().size
@@ -1861,9 +1878,8 @@ func rpc_finalize_clue() -> void:
 	if is_instance_valid(reward_dark_overlay):
 		reward_dark_overlay.modulate.a = 0.0
 	await _fade_out(0.6)
-	await get_tree().create_timer(0.2).timeout
+	_play_ending_cutscene()
 	await _fade_in(0.6)
-	_return_to_forest()
 
 
 func _hide_reward_visuals_for_briefcase() -> void:
@@ -2262,3 +2278,44 @@ func _fade_in(duration: float = 0.6) -> void:
 	tween.tween_property(overlay, "color:a", 0.0, duration)
 	await tween.finished
 	overlay.queue_free()
+
+
+func _play_ending_cutscene() -> void:
+	if not is_instance_valid(ending_cutscene):
+		_return_to_forest()
+		return
+	var dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	var viewport_size := get_viewport().get_visible_rect().size
+	if is_instance_valid(dark):
+		dark.visible = true
+		dark.z_index = 1
+		dark.position = Vector2.ZERO
+		dark.size = viewport_size
+
+	var margin_x := viewport_size.x * 0.1
+	var margin_y := viewport_size.y * 0.1
+	ending_cutscene.z_index = 2
+	ending_cutscene.visible = true
+	ending_cutscene.position = Vector2(margin_x, margin_y)
+	ending_cutscene.size = Vector2(
+		viewport_size.x - margin_x * 2.0,
+		viewport_size.y - margin_y * 2.0
+	)
+	CutsceneHelper.play_with_fallback(self, ending_cutscene, _on_cutscene_finished)
+
+
+func _on_cutscene_finished() -> void:
+	if _ending_cutscene_resolved:
+		return
+	_ending_cutscene_resolved = true
+	if is_instance_valid(ending_cutscene):
+		ending_cutscene.visible = false
+		ending_cutscene.stop()
+	var dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	if is_instance_valid(dark):
+		dark.visible = false
+	await _fade_out(0.6)
+	get_tree().paused = false
+	await get_tree().process_frame
+	if is_inside_tree():
+		GameState.change_to_post_zone_scene(get_tree())

@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://storagehut"]
+[gd_scene load_steps=34 format=3 uid="uid://storagehut"]
 
 [ext_resource type="Script" uid="uid://rlqjp66bw7gk" path="res://scripts/world/zones/storageHut/storage_hut.gd" id="1_storagehut"]
 [ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="3_wl25h"]
@@ -11,24 +11,16 @@
 [ext_resource type="Texture2D" uid="uid://djlktpioqbhaa" path="res://assets/sprites/ledger/ledgerOpen.png" id="9_u1wdi"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="10_dlbia"]
 [ext_resource type="Texture2D" uid="uid://bepqi3l7fudbv" path="res://assets/sprites/clues/scrollClue.png" id="11_vi7lo"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="12_u5bgj"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="12_u5bgj"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="13_hjfqw"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="14_gi6hd"]
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="15_gfj04"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="16_i0npi"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="17_2bkes"]
 [ext_resource type="Texture2D" uid="uid://dvkupminll3bb" path="res://assets/sprites/tracker/backyardPath/defaultBY.png" id="18_hxsfn"]
-[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/tapeMeasure.png" id="19_tape"]
-[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/rectangularPrismPaper.png" id="20_rectpaper"]
-[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/cylinderPaper.png" id="21_cylpaper"]
-[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/widthRectangular.png" id="22_widthrect"]
-[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/heightRectangular.png" id="23_heightrect"]
-[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/lengthRectangular.png" id="24_lengthrect"]
-[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/radiusCylinder.png" id="25_radiuscyl"]
-[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/heightCylinder.png" id="26_heightcyl"]
-[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/crumplePaperRoll.png" id="27_crumple"]
-[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/cylinderContainer.png" id="28_cylcontainer"]
-[ext_resource type="Texture2D" path="res://assets/sprites/zoneObjects/storageHut/hexagonStorageHut.png" id="29_hexagon"]
+[ext_resource type="Texture2D" uid="uid://dd3ad0xf8fqqb" path="res://assets/sprites/zoneObjects/storageHut/tapeMeasure.png" id="19_tape"]
+[ext_resource type="VideoStream" uid="uid://cf73hbw71d7o0" path="res://assets/sprites/cutscene/zoneEnding/storageHut.ogv" id="21_ceovl"]
+[ext_resource type="Texture2D" uid="uid://6uxgm5ao33py" path="res://assets/sprites/zoneObjects/storageHut/crumplePaperRoll.png" id="27_crumple"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qwhi7"]
 size = Vector2(165.5, 81)
@@ -38,6 +30,18 @@ size = Vector2(170, 95)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_paper_tool"]
 size = Vector2(140, 115)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5jp5d"]
+bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.65178686, 0.44065732, 0.2680916, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_pe3ft"]
 texture = ExtResource("9_u1wdi")
@@ -87,18 +91,6 @@ shadow_size = 5
 shadow_offset = Vector2(0, 3.41)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ms7al"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5jp5d"]
-bg_color = Color(0.103743516, 0.10374353, 0.103743516, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.65178686, 0.44065732, 0.2680916, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_pfif1"]
 color = Color(1, 1, 1, 1)
@@ -360,7 +352,6 @@ offset_bottom = 8.0
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 23.0
-
 
 [node name="MeasurementUILayer" type="CanvasLayer" parent="."]
 visible = false
@@ -947,5 +938,28 @@ visible = false
 position = Vector2(253, 70)
 scale = Vector2(0.28802085, 0.3236111)
 texture = ExtResource("18_hxsfn")
+
+[node name="Cutscene" type="CanvasLayer" parent="."]
+
+[node name="DarkOverlay" type="ColorRect" parent="Cutscene"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.011764706, 0.011764706, 0.011764706, 1)
+
+[node name="EndingCutscene" type="VideoStreamPlayer" parent="Cutscene"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1240.0
+offset_bottom = -648.0
+grow_horizontal = 2
+grow_vertical = 2
+stream = ExtResource("21_ceovl")
+speed_scale = 0.4
+expand = true
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]

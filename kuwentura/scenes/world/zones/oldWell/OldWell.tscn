@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://b6jvccfrna5vu"]
+[gd_scene load_steps=30 format=3 uid="uid://b6jvccfrna5vu"]
 
 [ext_resource type="Script" uid="uid://h5y0185hh34e" path="res://scripts/world/zones/oldWell/old_well.gd" id="1_oldwell"]
 [ext_resource type="Texture2D" uid="uid://ccxagpkrv77uf" path="res://assets/sprites/zoneObjects/oldWell/oldWellBackground.png" id="2_mf72o"]
@@ -11,7 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="6_wqdfr"]
 [ext_resource type="Texture2D" uid="uid://bx6q2amuwpu5h" path="res://assets/sprites/clues/eyeClue.png" id="7_5e2xw"]
 [ext_resource type="Texture2D" uid="uid://lncrqsxxofpu" path="res://assets/sprites/zoneObjects/oldWell/siyokoyDialogue.png" id="7_62xvu"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="8_62xvu"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="8_62xvu"]
 [ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="9_5mwpi"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="10_8wp6h"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="11_mydnv"]
@@ -19,6 +19,7 @@
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="13_eyxif"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="14_2ecgv"]
 [ext_resource type="Texture2D" uid="uid://dvkupminll3bb" path="res://assets/sprites/tracker/backyardPath/defaultBY.png" id="15_k3kud"]
+[ext_resource type="VideoStream" uid="uid://ct7nfadklw5vg" path="res://assets/sprites/cutscene/zoneEnding/oldWell.ogv" id="20_5mwpi"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wk2tw"]
 size = Vector2(340.5, 254)
@@ -934,3 +935,26 @@ visible = false
 position = Vector2(253, 70)
 scale = Vector2(0.28802085, 0.3236111)
 texture = ExtResource("15_k3kud")
+
+[node name="Cutscene" type="CanvasLayer" parent="."]
+
+[node name="DarkOverlay" type="ColorRect" parent="Cutscene"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.011764706, 0.011764706, 0.011764706, 1)
+
+[node name="EndingCutscene" type="VideoStreamPlayer" parent="Cutscene"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1240.0
+offset_bottom = -648.0
+grow_horizontal = 2
+grow_vertical = 2
+stream = ExtResource("20_5mwpi")
+speed_scale = 0.4
+expand = true
