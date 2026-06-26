@@ -1,7 +1,7 @@
 [gd_scene load_steps=21 format=4 uid="uid://ca4nhoyen56hd"]
 
 [ext_resource type="VideoStream" uid="uid://dnb1fgxdwteh" path="res://assets/sprites/cutscene/bakunawa/Bakunawa cutscene.ogv" id="1_dm08g"]
-[ext_resource type="Script" uid="uid://vo73l5s21klo" path="res://scenes/world/climax/bakunawa.gd" id="1_elj54"]
+[ext_resource type="Script" uid="uid://vo73l5s21klo" path="res://scripts/world/climax/bakunawa.gd" id="1_elj54"]
 [ext_resource type="Texture2D" uid="uid://gwwexdyyqjrl" path="res://assets/sprites/consequences/nuno/nunoHead.png" id="2_7nyqu"]
 [ext_resource type="Texture2D" uid="uid://cen4v3th6fqvx" path="res://assets/sprites/consequences/nuno/nuno.png" id="3_elj54"]
 [ext_resource type="Texture2D" uid="uid://k60h4yhhde0x" path="res://assets/backgrounds/forest.png" id="3_qr4vx"]

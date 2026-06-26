@@ -1,0 +1,408 @@
+[gd_scene load_steps=45 format=3 uid="uid://hvm1ta7wpio4"]
+
+[ext_resource type="Script" uid="uid://ny0hvpeig3j2" path="res://scripts/cutscenes/ending_scene.gd" id="1_xkd32"]
+[ext_resource type="Texture2D" uid="uid://c3p5qn3e3uw1n" path="res://assets/sprites/cutscene/openingIntro/openingCutsceneBG.png" id="2_aobwj"]
+[ext_resource type="PackedScene" uid="uid://7lttltfl4u86" path="res://scenes/character/Grandma.tscn" id="3_xr0qt"]
+[ext_resource type="Texture2D" uid="uid://1c2h4nc7u3fw" path="res://assets/sprites/players/detective/detective_idle.png" id="4_2d77w"]
+[ext_resource type="Texture2D" uid="uid://bxbkwkkjox3dh" path="res://assets/sprites/players/sidekick/sidekick_idle.png" id="5_8vchc"]
+[ext_resource type="Texture2D" uid="uid://c4ayy3kyw3fy6" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/1.png" id="6_72c3b"]
+[ext_resource type="Texture2D" uid="uid://cybtap6cqkbm1" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/2.png" id="7_ttna0"]
+[ext_resource type="Texture2D" uid="uid://cq1vl0tw0x0xa" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/3.png" id="8_6o22u"]
+[ext_resource type="Texture2D" uid="uid://dtbpim8iflp6r" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/4.png" id="9_pkt04"]
+[ext_resource type="Texture2D" uid="uid://dngclr8dp8jw3" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/5.png" id="10_y3xks"]
+[ext_resource type="Texture2D" uid="uid://b644j453adiph" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/6.png" id="11_ivjc3"]
+[ext_resource type="Texture2D" uid="uid://sl0msc04hcau" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/7.png" id="12_ct2bm"]
+[ext_resource type="Texture2D" uid="uid://c3u38k1ecv17e" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/8.png" id="13_24bdy"]
+[ext_resource type="Texture2D" uid="uid://mq85uqgakdje" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/9.png" id="14_6xhq5"]
+[ext_resource type="Texture2D" uid="uid://dsd82w7fiyep8" path="res://assets/sprites/cutscene/openingIntro/sceneTwo/windSwirling_lightgoingout/10.png" id="15_vkyuq"]
+[ext_resource type="Texture2D" uid="uid://cuhne1u8q0p3s" path="res://assets/sprites/clues/pineappleClue.png" id="16_egbar"]
+[ext_resource type="Texture2D" uid="uid://u7ubhk5misyx" path="res://assets/sprites/cutscene/dialogueBox.png" id="17_3mrqa"]
+[ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="18_frm88"]
+[ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="19_vt354"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hc6bb"]
+atlas = ExtResource("4_2d77w")
+region = Rect2(0, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n24a0"]
+atlas = ExtResource("4_2d77w")
+region = Rect2(1144, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6qc16"]
+atlas = ExtResource("4_2d77w")
+region = Rect2(2288, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dgnjl"]
+atlas = ExtResource("4_2d77w")
+region = Rect2(3432, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jiev4"]
+atlas = ExtResource("4_2d77w")
+region = Rect2(4576, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2f0m6"]
+atlas = ExtResource("4_2d77w")
+region = Rect2(5720, 0, 1144, 1108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ojbcl"]
+atlas = ExtResource("4_2d77w")
+region = Rect2(6864, 0, 1144, 1108)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_682ht"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hc6bb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n24a0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6qc16")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dgnjl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jiev4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2f0m6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ojbcl")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1eune"]
+atlas = ExtResource("5_8vchc")
+region = Rect2(0, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7qhlb"]
+atlas = ExtResource("5_8vchc")
+region = Rect2(1000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ce8kv"]
+atlas = ExtResource("5_8vchc")
+region = Rect2(2000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_om4s5"]
+atlas = ExtResource("5_8vchc")
+region = Rect2(3000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w5r2o"]
+atlas = ExtResource("5_8vchc")
+region = Rect2(4000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jl1h0"]
+atlas = ExtResource("5_8vchc")
+region = Rect2(5000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x7cs1"]
+atlas = ExtResource("5_8vchc")
+region = Rect2(6000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uucyx"]
+atlas = ExtResource("5_8vchc")
+region = Rect2(7000, 0, 1000, 1000)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h1j2c"]
+atlas = ExtResource("5_8vchc")
+region = Rect2(8000, 0, 1000, 1000)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_4h3r2"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1eune")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7qhlb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ce8kv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_om4s5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w5r2o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jl1h0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x7cs1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uucyx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h1j2c")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_qogxf"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hc6bb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n24a0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6qc16")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dgnjl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jiev4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2f0m6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ojbcl")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_jl4n8"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1eune")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7qhlb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ce8kv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_om4s5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w5r2o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jl1h0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x7cs1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uucyx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h1j2c")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ph6vk"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_72c3b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_ttna0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_6o22u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_pkt04")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_y3xks")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_ivjc3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_ct2bm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_24bdy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_6xhq5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_vkyuq")
+}],
+"loop": false,
+"name": &"wind_swirling",
+"speed": 10.0
+}]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5rr1v"]
+bg_color = Color(0.360784, 0.215686, 0.180392, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p3vx2"]
+bg_color = Color(0.65098, 0.439216, 0.266667, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7xwsp"]
+bg_color = Color(0.752941, 0.505882, 0.329412, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_odvl6"]
+
+[node name="EndingScene" type="Node2D"]
+script = ExtResource("1_xkd32")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(618, 325)
+
+[node name="Scene1" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Background" type="Sprite2D" parent="Scene1"]
+z_index = -1
+position = Vector2(620.44446, 349.00003)
+scale = Vector2(0.646, 0.646)
+texture = ExtResource("2_aobwj")
+
+[node name="Grandma" parent="Scene1" instance=ExtResource("3_xr0qt")]
+position = Vector2(785, 301)
+scale = Vector2(0.5, 0.5)
+
+[node name="DetectiveIdle" type="AnimatedSprite2D" parent="Scene1"]
+position = Vector2(146.99998, 341.99997)
+scale = Vector2(0.4, 0.4)
+sprite_frames = SubResource("SpriteFrames_682ht")
+
+[node name="SidekickIdle" type="AnimatedSprite2D" parent="Scene1"]
+position = Vector2(291.99997, 270.99997)
+scale = Vector2(0.4, 0.4)
+sprite_frames = SubResource("SpriteFrames_4h3r2")
+
+[node name="Scene2" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DetectiveIdle" type="AnimatedSprite2D" parent="Scene2"]
+position = Vector2(146.99998, 341.99997)
+scale = Vector2(0.4, 0.4)
+sprite_frames = SubResource("SpriteFrames_qogxf")
+
+[node name="SidekickIdle" type="AnimatedSprite2D" parent="Scene2"]
+position = Vector2(291.99997, 270.99997)
+scale = Vector2(0.4, 0.4)
+sprite_frames = SubResource("SpriteFrames_jl4n8")
+
+[node name="WindAnimation" type="AnimatedSprite2D" parent="Scene2"]
+z_index = -1
+position = Vector2(620.444, 349)
+scale = Vector2(0.646, 0.646)
+sprite_frames = SubResource("SpriteFrames_ph6vk")
+animation = &"wind_swirling"
+speed_scale = 0.6
+
+[node name="Pineapple" type="Sprite2D" parent="Scene2"]
+position = Vector2(503.00003, 328)
+scale = Vector2(0.09033203, 0.09033203)
+texture = ExtResource("16_egbar")
+
+[node name="DialogueBox" type="Sprite2D" parent="."]
+position = Vector2(617.99994, 525)
+scale = Vector2(0.6574074, 0.6574074)
+texture = ExtResource("17_3mrqa")
+
+[node name="SkipButton" type="Button" parent="."]
+z_index = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 963.0
+offset_top = 565.0
+offset_right = 1187.0
+offset_bottom = 618.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_focus_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_pressed_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_hover_color = Color(0.9607843, 0.8235294, 0.6745098, 1)
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("18_frm88")
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_5rr1v")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_p3vx2")
+theme_override_styles/hover = SubResource("StyleBoxFlat_7xwsp")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_p3vx2")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_odvl6")
+action_mode = 0
+text = "Skip"
+autowrap_mode = 3
+
+[node name="DialogueLabel" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 158.0
+offset_top = 492.0
+offset_right = 1063.0
+offset_bottom = 596.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("19_vt354")
+theme_override_font_sizes/font_size = 31
+text = "Long ago, in a quiet village, there lived a girl named Pina..."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="NameLabel" type="Label" parent="."]
+offset_left = 101.0
+offset_top = 475.0
+offset_right = 301.0
+offset_bottom = 509.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("19_vt354")
+theme_override_font_sizes/font_size = 30
+text = "Grandmother:"

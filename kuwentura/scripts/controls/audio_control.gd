@@ -7,9 +7,12 @@ enum MusicTrack {
 	PINAS_HOUSE,
 	BACKYARD_PATH,
 	BAKUNAWA,
+	ALTAR_DEDUCTION,
+	END_CREDITS,
+	YOU_FAILED,
+	ZONE_COMPLETION,
 }
 
-# Maps each track to its resource path — single source of truth for all paths
 const TRACK_PATHS: Dictionary = {
 	MusicTrack.MAIN_MENU: "res://assets/audios/MainMenuBG.mp3",
 	MusicTrack.OPENING_CUTSCENE: "res://assets/audios/OpeningCutsceneBG.mp3",
@@ -17,22 +20,26 @@ const TRACK_PATHS: Dictionary = {
 	MusicTrack.PINAS_HOUSE: "res://assets/audios/PinasHouseBG.mp3",
 	MusicTrack.BACKYARD_PATH: "res://assets/audios/BackyardBG.mp3",
 	MusicTrack.BAKUNAWA: "res://assets/audios/BakunawaBG.mp3",
+	MusicTrack.ALTAR_DEDUCTION: "res://assets/audios/AltarDeductionBG.mp3",
+	MusicTrack.END_CREDITS: "res://assets/audios/EndCredits.mp3",
+	MusicTrack.YOU_FAILED: "res://assets/audios/YouFailedBG.mp3",
+	MusicTrack.ZONE_COMPLETION: "res://assets/audios/ZoneCompletionSFX.mp3",
 }
+
+const SETTINGS_FILE := "user://settings.json"
 
 @onready var _player: AudioStreamPlayer = $AudioStreamPlayer
 
 var _tracks: Dictionary = {}
-
 var _current_track: MusicTrack = MusicTrack.MAIN_MENU
 var _is_initialized: bool = false
-
-# Saved playback position for resuming forest music when returning from zones
 var _forest_hub_playback_position: float = 0.0
 
 
 func _ready() -> void:
-	_ensure_music_bus()
+	_ensure_buses()
 	_load_tracks()
+	_load_saved_volume()
 
 	if _player and not _player.playing:
 		play_track(MusicTrack.MAIN_MENU, 0.0)
@@ -40,10 +47,12 @@ func _ready() -> void:
 	_is_initialized = true
 
 
-func _ensure_music_bus() -> void:
-	"""Create a dedicated Music audio bus if it doesn't exist."""
-	var music_bus_index := AudioServer.get_bus_index("Music")
-	if music_bus_index == -1:
+# BUS SETUP
+
+func _ensure_buses() -> void:
+	"""Create dedicated Music and SFX audio buses if they don't exist."""
+	# Music bus
+	if AudioServer.get_bus_index("Music") == -1:
 		AudioServer.add_bus(AudioServer.bus_count)
 		AudioServer.set_bus_name(AudioServer.bus_count - 1, "Music")
 		AudioServer.set_bus_volume_db(AudioServer.bus_count - 1, 0.0)
@@ -51,6 +60,14 @@ func _ensure_music_bus() -> void:
 	if _player:
 		_player.bus = "Music"
 
+	# SFX bus
+	if AudioServer.get_bus_index("SFX") == -1:
+		AudioServer.add_bus(AudioServer.bus_count)
+		AudioServer.set_bus_name(AudioServer.bus_count - 1, "SFX")
+		AudioServer.set_bus_volume_db(AudioServer.bus_count - 1, 0.0)
+
+
+# TRACK LOADING 
 
 func _load_tracks() -> void:
 	"""Preload all music tracks defined in TRACK_PATHS."""
@@ -70,6 +87,8 @@ func _load_track(track: MusicTrack, path: String) -> void:
 
 	_tracks[track] = stream
 
+
+# PLAYBACK
 
 func play_track(track: MusicTrack, fade_duration: float = 0.5) -> void:
 	"""Play a music track with optional fade transition."""
@@ -113,14 +132,6 @@ func _switch_track(track: MusicTrack, fade_duration: float) -> void:
 		_fade_volume(0.0, fade_duration)
 
 
-func _fade_volume(target_db: float, duration: float, callback: Callable = Callable()) -> void:
-	"""Tween the player volume to target_db over duration, then invoke an optional callback."""
-	var tween := create_tween()
-	tween.tween_property(_player, "volume_db", target_db, duration)
-	if callback.is_valid():
-		tween.tween_callback(callback)
-
-
 func stop_music(fade_duration: float = 0.5) -> void:
 	"""Stop the current music with optional fade out."""
 	if not _player or not _player.playing:
@@ -146,6 +157,18 @@ func resume_music() -> void:
 	_player.stream_paused = false
 
 
+func is_playing() -> bool:
+	"""Check if music is currently playing."""
+	return _player.playing if _player else false
+
+
+func get_current_track() -> MusicTrack:
+	"""Get the currently playing track enum."""
+	return _current_track
+
+
+# VOLUME
+
 func set_volume(volume: float) -> void:
 	"""Set music volume (0.0 to 1.0)."""
 	var db := linear_to_db(clamp(volume, 0.0, 1.0))
@@ -158,11 +181,44 @@ func get_volume() -> float:
 	return db_to_linear(db)
 
 
-func is_playing() -> bool:
-	"""Check if music is currently playing."""
-	return _player.playing if _player else false
+func set_sfx_volume(volume: float) -> void:
+	"""Set SFX volume (0.0 to 1.0)."""
+	var db := linear_to_db(clamp(volume, 0.0, 1.0))
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), db)
 
 
-func get_current_track() -> MusicTrack:
-	"""Get the currently playing track enum."""
-	return _current_track
+func get_sfx_volume() -> float:
+	"""Get current SFX volume (0.0 to 1.0)."""
+	var db := AudioServer.get_bus_volume_db(AudioServer.get_bus_index("SFX"))
+	return db_to_linear(db)
+
+
+func _fade_volume(target_db: float, duration: float, callback: Callable = Callable()) -> void:
+	"""Tween the player volume to target_db over duration, then invoke an optional callback."""
+	var tween := create_tween()
+	tween.tween_property(_player, "volume_db", target_db, duration)
+	if callback.is_valid():
+		tween.tween_callback(callback)
+
+
+# PERSISTENCE
+
+func _load_saved_volume() -> void:
+	"""Load saved volume settings from file on startup."""
+	if not FileAccess.file_exists(SETTINGS_FILE):
+		return
+	var file := FileAccess.open(SETTINGS_FILE, FileAccess.READ)
+	if not file:
+		return
+	var json := JSON.new()
+	var error := json.parse(file.get_as_text())
+	file.close()
+	if error != OK:
+		push_warning("[AudioControl] Failed to parse settings file")
+		return
+	var data = json.get_data()
+	if data is Dictionary:
+		if data.has("volume"):
+			set_volume(float(data["volume"]))
+		if data.has("sfx_volume"):
+			set_sfx_volume(float(data["sfx_volume"]))
