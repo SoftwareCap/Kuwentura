@@ -141,6 +141,9 @@ var _ledger_instruction_image: TextureRect = null
 @onready var option_panel: Panel = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel") as Panel
 @onready var volume_slider: HSlider = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeSlider") as HSlider
 @onready var volume_value: Label = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeValue") as Label
+@onready var ending_cutscene: VideoStreamPlayer = $Cutscene/EndingCutscene
+
+var _ending_cutscene_resolved := false
 
 var _rng := RandomNumberGenerator.new()
 var _phase: int = Phase.IDLE
@@ -197,6 +200,14 @@ func _ready() -> void:
 	call_deferred("_auto_start_intro")
 	if GameState and not GameState.clue_collected.is_connected(_on_clue_collected):
 		GameState.clue_collected.connect(_on_clue_collected)
+
+	if is_instance_valid(ending_cutscene):
+		CutsceneHelper.prepare_mobile_video_player(ending_cutscene)
+		ending_cutscene.visible = false
+
+	var cutscene_dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	if is_instance_valid(cutscene_dark):
+		cutscene_dark.visible = false
 
 
 func _cache_arrays() -> void:
@@ -615,6 +626,7 @@ func _show_ledger_instruction_image(path: String) -> void:
 	_ledger_instruction_image.visible = true
 	_ledger_instruction_image.move_to_front()
 
+
 func _close_sidekick_panels() -> void:
 	if is_instance_valid(ledger_panel):
 		ledger_panel.visible = false
@@ -642,6 +654,7 @@ func _on_briefcase_pressed() -> void:
 		briefcase_display.visible = tex != null
 	if is_instance_valid(briefcase_panel):
 		briefcase_panel.visible = not briefcase_panel.visible
+
 
 func _connect_signals() -> void:
 	if is_instance_valid(back_button):
@@ -698,6 +711,7 @@ func _connect_signals() -> void:
 	if is_instance_valid(volume_slider):
 		volume_slider.value_changed.connect(_on_volume_changed)
 
+
 func _reset_state() -> void:
 	_phase = Phase.IDLE
 	_mistakes = 0
@@ -732,6 +746,7 @@ func _reset_state() -> void:
 	if is_instance_valid(back_button):
 		back_button.visible = false
 		back_button.disabled = true
+
 
 func _auto_start_intro() -> void:
 	if _phase != Phase.IDLE or _clue_collected:
@@ -775,8 +790,6 @@ func advance_intro() -> void:
 		rpc_request_advance_intro.rpc_id(SERVER_PEER_ID)
 	else:
 		_server_advance_intro()
-
-
 
 
 @rpc("any_peer", "reliable")
@@ -837,6 +850,7 @@ func submit_puzzle_1_answer() -> void:
 		rpc_request_puzzle_1_answer.rpc_id(SERVER_PEER_ID, answer)
 	else:
 		_server_handle_puzzle_1(answer)
+
 
 func pass_puzzle_1_question() -> void:
 	if _phase != Phase.PUZZLE_1:
@@ -911,6 +925,7 @@ func _server_handle_puzzle_1(answer: int) -> void:
 			_broadcast_correct_effect()
 	else:
 		_server_register_mistake("Siyokoy laughs. The water pulls closer.")
+
 
 func _toggle_answer_role() -> void:
 	_active_answer_role = GameState.Role.DETECTIVE if _active_answer_role == GameState.Role.SIDEKICK else GameState.Role.SIDEKICK
@@ -1119,6 +1134,7 @@ func _server_register_mistake(message: String) -> void:
 		_server_sync_state()
 		_broadcast_drowning_fail()
 
+
 func _broadcast_wrong_effect() -> void:
 	if _has_multiplayer():
 		rpc_play_wrong_effect.rpc()
@@ -1138,6 +1154,7 @@ func _broadcast_drowning_fail() -> void:
 		rpc_trigger_drowning_fail.rpc()
 	else:
 		rpc_trigger_drowning_fail()
+
 
 @rpc("authority", "reliable", "call_local")
 func rpc_trigger_drowning_fail() -> void:
@@ -1200,7 +1217,7 @@ func rpc_show_briefcase_reveal_then_finalize() -> void:
 		var reveal: Texture2D = GameState.get_briefcase_texture("old_well_reveal") if GameState else null
 		briefcase_reveal.texture = reveal
 		briefcase_reveal.visible = reveal != null
-	await get_tree().create_timer(1.3, true).timeout
+	await get_tree().create_timer(1.5).timeout
 	if not _has_multiplayer():
 		rpc_finalize_clue()
 	elif multiplayer.is_server():
@@ -1219,9 +1236,50 @@ func rpc_finalize_clue() -> void:
 	if is_instance_valid(briefcase_reveal):
 		briefcase_reveal.visible = false
 		briefcase_reveal.texture = null
-	_local_feedback("Eye Clue added to the briefcase.", false)
-	await get_tree().create_timer(0.9, true).timeout
-	_return_to_forest()
+	await _fade_out(0.6)
+	_play_ending_cutscene()
+	await _fade_in(0.6)
+
+
+func _play_ending_cutscene() -> void:
+	if not is_instance_valid(ending_cutscene):
+		_return_to_forest()
+		return
+	var dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	var viewport_size := get_viewport().get_visible_rect().size
+	if is_instance_valid(dark):
+		dark.visible = true
+		dark.z_index = 1
+		dark.position = Vector2.ZERO
+		dark.size = viewport_size
+
+	var margin_x := viewport_size.x * 0.1
+	var margin_y := viewport_size.y * 0.1
+	ending_cutscene.z_index = 2
+	ending_cutscene.visible = true
+	ending_cutscene.position = Vector2(margin_x, margin_y)
+	ending_cutscene.size = Vector2(
+		viewport_size.x - margin_x * 2.0,
+		viewport_size.y - margin_y * 2.0
+	)
+	CutsceneHelper.play_with_fallback(self, ending_cutscene, _on_cutscene_finished)
+
+
+func _on_cutscene_finished() -> void:
+	if _ending_cutscene_resolved:
+		return
+	_ending_cutscene_resolved = true
+	if is_instance_valid(ending_cutscene):
+		ending_cutscene.visible = false
+		ending_cutscene.stop()
+	var dark: Node = get_node_or_null("Cutscene/DarkOverlay")
+	if is_instance_valid(dark):
+		dark.visible = false
+	await _fade_out(0.6)
+	get_tree().paused = false
+	await get_tree().process_frame
+	if is_inside_tree():
+		GameState.change_to_post_zone_scene(get_tree())
 
 
 func _server_sync_state() -> void:
@@ -1276,6 +1334,8 @@ func rpc_play_wrong_effect() -> void:
 @rpc("authority", "reliable", "call_local")
 func rpc_play_correct_effect() -> void:
 	_play_correct_effect()
+
+
 @rpc("authority", "reliable", "call_local")
 func rpc_play_opening_emerge() -> void:
 	_set_background_state(true, false)
@@ -1679,6 +1739,7 @@ func _play_heartbreak_effect() -> void:
 			heart.scale = Vector2.ONE
 	)
 
+
 func _play_correct_effect() -> void:
 	if not is_instance_valid(correct_overlay):
 		return
@@ -1700,6 +1761,29 @@ func _play_drowning_fail() -> void:
 		tween.tween_property(drowning_overlay, "color:a", 0.82, 0.35)
 	tween.tween_interval(0.9)
 	await tween.finished
+
+
+func _fade_out(duration: float = 0.6) -> void:
+	var overlay := ColorRect.new()
+	overlay.name = "FadeOverlay"
+	overlay.color = Color(0, 0, 0, 0)
+	overlay.z_index = 4096
+	overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(overlay)
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(overlay, "color:a", 1.0, duration)
+	await tween.finished
+
+
+func _fade_in(duration: float = 0.6) -> void:
+	var overlay := get_node_or_null("FadeOverlay")
+	if not is_instance_valid(overlay):
+		return
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(overlay, "color:a", 0.0, duration)
+	await tween.finished
+	overlay.queue_free()
 
 
 func _on_pause_pressed() -> void:
@@ -1775,6 +1859,14 @@ func _on_clue_collected(zone_id: String, _data: Dictionary) -> void:
 		_clue_collected = true
 
 
+func _input(event: InputEvent) -> void:
+	if is_instance_valid(ending_cutscene) and ending_cutscene.visible:
+		var skip := event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel")
+		skip = skip or (event is InputEventScreenTouch and event.pressed)
+		if skip:
+			_on_cutscene_finished()
+
+
 func _is_click_event(event: InputEvent) -> bool:
 	if event is InputEventMouseButton:
 		var mouse: InputEventMouseButton = event as InputEventMouseButton
@@ -1795,6 +1887,7 @@ func _is_detective_view() -> bool:
 func _is_sidekick_view() -> bool:
 	return GameState.local_role == GameState.Role.SIDEKICK or not _has_multiplayer() or GameState.local_role == GameState.Role.NONE
 
+
 func _can_current_answerer_act() -> bool:
 	if _clue_collected or _phase in [Phase.FAILED, Phase.COMPLETE]:
 		return false
@@ -1811,15 +1904,6 @@ func _role_turn_text(role: int) -> String:
 			return "Sidekick"
 	return "Player"
 
-
-func _heart_text() -> String:
-	var hearts: Array[String] = []
-	var remaining: int = clampi(MAX_MISTAKES - _mistakes, 0, MAX_MISTAKES)
-	var full_heart: String = String.chr(0x2665)
-	var empty_heart: String = String.chr(0x2661)
-	for i in range(MAX_MISTAKES):
-		hearts.append(full_heart if i < remaining else empty_heart)
-	return "Lives: " + " ".join(hearts)
 
 func _can_sidekick_act() -> bool:
 	return _is_sidekick_view() and not _clue_collected and _phase not in [Phase.FAILED, Phase.COMPLETE]
@@ -1859,6 +1943,7 @@ func _ensure_sfx_bus() -> void:
 		AudioServer.set_bus_name(last, "SFX")
 		AudioServer.set_bus_volume_db(last, 0.0)
 
+
 func _play_zone_completion_sfx() -> void:
 	if not is_instance_valid(_sfx_player) or COMPLETION_SFX == null:
 		return
@@ -1868,8 +1953,10 @@ func _play_zone_completion_sfx() -> void:
 	if not _sfx_player.finished.is_connected(_on_sfx_finished_resume_music):
 		_sfx_player.finished.connect(_on_sfx_finished_resume_music, CONNECT_ONE_SHOT)
 
+
 func _on_sfx_finished_resume_music() -> void:
 	MusicController.resume_music()
+
 
 func _load_texture(path: String) -> Texture2D:
 	if path.is_empty() or not ResourceLoader.exists(path):
@@ -1883,13 +1970,13 @@ func _load_font(path: String) -> Font:
 	return load(path) as Font
 
 
-func _vis(node: Object, visible: bool) -> void:
+func _vis(node: Object, itis_visible: bool) -> void:
 	if not is_instance_valid(node):
 		return
 	if node is CanvasItem:
-		(node as CanvasItem).visible = visible
+		(node as CanvasItem).visible = itis_visible
 	elif node is CanvasLayer:
-		(node as CanvasLayer).visible = visible
+		(node as CanvasLayer).visible = itis_visible
 
 
 func _set_button_label(button: BaseButton, text: String) -> void:
