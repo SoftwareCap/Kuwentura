@@ -161,6 +161,7 @@ const ZONE_THOUGHTS: Dictionary = {
 }
 
 var _spawned_players: Dictionary = {}
+var _pending_spawn_positions: Dictionary = {}
 var _current_open_panel: String = ""
 var _is_animating: bool = false
 var _active_zone: String = ""
@@ -256,10 +257,8 @@ func _get_sprite_display_scale(sprite: Sprite2D) -> Vector2:
 
 
 func _ready() -> void:
-	GameState.clear_spawn_position(multiplayer.get_unique_id())
-	if multiplayer.is_server():
-		for peer_id in multiplayer.get_peers():
-			GameState.clear_spawn_position(peer_id)
+	_capture_pending_spawn_positions()
+	_clear_saved_spawn_positions()
 			
 	_ensure_spawn_points()
 	MusicController.play_track(MusicController.MusicTrack.FOREST_HUB)
@@ -291,11 +290,11 @@ func _ready() -> void:
 
 	if multiplayer.is_server():
 		await get_tree().process_frame
-		var host_pos := GameState.get_spawn_position(1)
+		var host_pos := _get_saved_or_pending_spawn_position(1)
 		for peer_id in multiplayer.get_peers():
 			if peer_id != multiplayer.get_unique_id():
 				_rpc_spawn_player_with_pos.rpc_id(peer_id, 1, true, host_pos)
-				var peer_pos := GameState.get_spawn_position(peer_id)
+				var peer_pos := _get_saved_or_pending_spawn_position(peer_id)
 				for other_peer in multiplayer.get_peers():
 					if other_peer != peer_id and other_peer != multiplayer.get_unique_id():
 						_rpc_spawn_player_with_pos.rpc_id(other_peer, peer_id, false, peer_pos)
@@ -360,6 +359,37 @@ func _ensure_spawn_points() -> void:
 		m.name = cfg[0]
 		m.position = cfg[1]
 		spawn_points.add_child(m)
+
+
+func _get_relevant_spawn_peer_ids() -> Array[int]:
+	var peer_ids: Array[int] = [1]
+	var local_peer_id := multiplayer.get_unique_id()
+	if local_peer_id > 0 and not peer_ids.has(local_peer_id):
+		peer_ids.append(local_peer_id)
+	for peer_id in multiplayer.get_peers():
+		if peer_id > 0 and not peer_ids.has(peer_id):
+			peer_ids.append(peer_id)
+	return peer_ids
+
+
+func _capture_pending_spawn_positions() -> void:
+	_pending_spawn_positions.clear()
+	for peer_id in _get_relevant_spawn_peer_ids():
+		if GameState.has_spawn_position(peer_id):
+			_pending_spawn_positions[peer_id] = GameState.get_spawn_position(peer_id)
+
+
+func _clear_saved_spawn_positions() -> void:
+	for peer_id in _get_relevant_spawn_peer_ids():
+		GameState.clear_spawn_position(peer_id)
+
+
+func _get_saved_or_pending_spawn_position(peer_id: int) -> Vector2:
+	if _pending_spawn_positions.has(peer_id):
+		return _pending_spawn_positions[peer_id] as Vector2
+	if GameState.has_spawn_position(peer_id):
+		return GameState.get_spawn_position(peer_id)
+	return Vector2.ZERO
 
 
 func _setup_room_code_label() -> void:
@@ -448,7 +478,7 @@ func _save_settings() -> void:
 
 
 func _on_spawn_player_requested(peer_id: int, is_detective: bool) -> void:
-	_rpc_spawn_player(peer_id, is_detective, GameState.get_spawn_position(peer_id))
+	_rpc_spawn_player(peer_id, is_detective, _get_saved_or_pending_spawn_position(peer_id))
 
 
 func _on_despawn_player_requested(peer_id: int) -> void:
@@ -475,6 +505,10 @@ func _instantiate_player(is_detective: bool) -> CharacterBody2D:
 func _resolve_spawn_position(_peer_id: int, is_detective: bool, forced_pos: Vector2 = Vector2.ZERO) -> Vector2:
 	if forced_pos != Vector2.ZERO:
 		return forced_pos
+
+	var saved_pos := _get_saved_or_pending_spawn_position(_peer_id)
+	if saved_pos != Vector2.ZERO:
+		return saved_pos
 
 	var has_visited := GameState.visited_zones.values().any(func(v): return bool(v))
 	var marker_name: String
@@ -542,11 +576,11 @@ func _on_player_connected(peer_id: int, _role: int = 0) -> void:
 	if not _spawned_players.has(peer_id):
 		_spawn_player_for_peer(peer_id)
 		_ensure_player_visible(peer_id)
-	var host_pos := GameState.get_spawn_position(1)
+	var host_pos := _get_saved_or_pending_spawn_position(1)
 	_rpc_spawn_player_with_pos.rpc_id(peer_id, 1, true, host_pos)
 	for other_peer in multiplayer.get_peers():
 		if other_peer != peer_id:
-			var new_pos := GameState.get_spawn_position(peer_id)
+			var new_pos := _get_saved_or_pending_spawn_position(peer_id)
 			_rpc_spawn_player_with_pos.rpc_id(other_peer, peer_id, false, new_pos)
 			_ensure_player_visible_on_peer.rpc_id(other_peer, peer_id)
 

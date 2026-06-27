@@ -562,20 +562,20 @@ func setup_layout() -> void:
 
 	_ensure_measurement_backdrop(screen_size)
 	if is_instance_valid(measurement_modal):
-		measurement_modal.size = Vector2(560.0, 450.0)
+		measurement_modal.size = Vector2(520.0, 500.0)
 		measurement_modal.position = Vector2((screen_size.x - measurement_modal.size.x) * 0.5, (screen_size.y - measurement_modal.size.y) * 0.5 + 18.0)
 		_apply_panel_style(measurement_modal, Color(0.12, 0.075, 0.04, 0.97))
 		measurement_modal.z_index = 5
 	if is_instance_valid(measurement_title_label):
-		_place_label(measurement_title_label, Vector2(30, 26), Vector2(460, 42), 26, UI_CREAM)
+		_place_label(measurement_title_label, Vector2(28, 24), Vector2(464, 40), 26, UI_CREAM)
 	if is_instance_valid(measurement_instruction_label):
-		_place_label(measurement_instruction_label, Vector2(42, 78), Vector2(436, 36), 14, UI_CREAM)
+		_place_label(measurement_instruction_label, Vector2(34, 62), Vector2(452, 36), 17, UI_CREAM)
 		measurement_instruction_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if is_instance_valid(measurement_image):
-		_layout_measurement_modal_image(measurement_image, TAPE_MEASURE_MODAL_TEX, 82.0, 314.0, 70.0)
+		_layout_measurement_modal_image(measurement_image, TAPE_MEASURE_MODAL_TEX, 70.0, 332.0, 58.0)
 	if is_instance_valid(measurement_answer_input):
-		measurement_answer_input.position = Vector2(126, 268)
-		measurement_answer_input.size = Vector2(268, 40)
+		measurement_answer_input.position = Vector2(140, 362)
+		measurement_answer_input.size = Vector2(240, 42)
 		measurement_answer_input.placeholder_text = ""
 		measurement_answer_input.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		measurement_answer_input.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
@@ -583,15 +583,15 @@ func setup_layout() -> void:
 		measurement_answer_input.add_theme_font_size_override("font_size", 22)
 		_apply_line_edit_style(measurement_answer_input)
 	if is_instance_valid(confirm_measurement_button):
-		confirm_measurement_button.position = Vector2(108, 334)
-		confirm_measurement_button.size = Vector2(140, 50)
+		confirm_measurement_button.position = Vector2(136, 420)
+		confirm_measurement_button.size = Vector2(124, 48)
 		confirm_measurement_button.text = "Record"
 		_apply_button_style(confirm_measurement_button)
 	_ensure_measurement_clear_button()
 	if is_instance_valid(_measurement_clear_button):
-		_measurement_clear_button.position = Vector2(270, 334)
-		_measurement_clear_button.size = Vector2(140, 50)
-		_measurement_clear_button.text = "Close"
+		_measurement_clear_button.position = Vector2(266, 420)
+		_measurement_clear_button.size = Vector2(124, 48)
+		_measurement_clear_button.text = "Clear"
 		_apply_button_style(_measurement_clear_button)
 	if is_instance_valid(close_measurement_button):
 		close_measurement_button.visible = false
@@ -769,6 +769,7 @@ func _setup_initial_state() -> void:
 	update_storage_hut_progress()
 
 	_update_darkness()
+
 
 
 func _connect_signals() -> void:
@@ -1440,13 +1441,22 @@ func _ensure_measurement_value_labels() -> void:
 		value_label.visible = false
 		measurement_modal.add_child(value_label)
 		_measurement_value_labels.append(value_label)
-	var values := ["4", "5", "3"]
+	var values := [
+		"%d CM" % int(_recorded_measurements.get("width", 4)),
+		"%d CM" % int(_recorded_measurements.get("length", 5)),
+		"%d CM" % int(_recorded_measurements.get("height", 3))
+	]
+	var record_layout := _get_measurement_record_group_layout()
+	var value_x: float = float(record_layout.get("value_x", 274.0))
+	var row_y: float = float(record_layout.get("row_y", 316.0))
+	var row_gap: float = float(record_layout.get("row_gap", 40.0))
+	var value_size := record_layout.get("value_size", Vector2(112.0, 34.0)) as Vector2
 	for i in range(_measurement_value_labels.size()):
 		var label := _measurement_value_labels[i]
 		if not is_instance_valid(label):
 			continue
 		label.text = values[i] if i < values.size() else ""
-		_place_label(label, Vector2(348, 322 + i * 56), Vector2(196, 38), 17, UI_INK)
+		_place_label(label, Vector2(value_x, row_y + i * row_gap), value_size, 20, UI_CREAM)
 		_apply_measurement_value_style(label)
 
 
@@ -1860,66 +1870,83 @@ func _update_measurement_modal_content(feedback_text: String = "", is_error: boo
 			measurement_instruction_label.visible = false
 		elif can_answer:
 			measurement_instruction_label.visible = true
-			measurement_instruction_label.text = "Read the tape and record the vessel's measurement."
-			_place_label(measurement_instruction_label, Vector2(58, 92), Vector2(524, 36), 15, UI_CREAM)
+			measurement_instruction_label.text = "Read and record the vessel's measurement."
+			_place_label(measurement_instruction_label, Vector2(34, 62), Vector2(452, 36), 17, UI_CREAM)
 		else:
 			measurement_instruction_label.visible = true
-			measurement_instruction_label.text = "%s must read this tape mark." % _role_display(answer_role)
-			_place_label(measurement_instruction_label, Vector2(58, 92), Vector2(524, 36), 15, UI_CREAM)
+			measurement_instruction_label.text = "%s is reading this tape mark now." % _role_display(answer_role)
+			_place_label(measurement_instruction_label, Vector2(34, 62), Vector2(452, 36), 17, UI_CREAM)
 	if is_instance_valid(measurement_image):
 		var measurement_texture: Texture2D = RECTANGULAR_CONTAINER_TEX
 		if not all_done:
 			measurement_texture = step.get("texture") as Texture2D
-		measurement_image.texture = measurement_texture
-		measurement_image.visible = measurement_image.texture != null
-		measurement_image.position = Vector2(330, 208) if all_done else Vector2(330, 245)
-		measurement_image.scale = Vector2(0.32, 0.32) if all_done else Vector2(0.42, 0.42)
+		if all_done:
+			_layout_measurement_modal_image(measurement_image, measurement_texture, 102.0, 300.0, 74.0)
+		else:
+			measurement_image.texture = measurement_texture
+			measurement_image.visible = measurement_image.texture != null
+			measurement_image.position = Vector2(260, 226)
+			measurement_image.scale = Vector2(0.38, 0.38)
 	if is_instance_valid(measurement_answer_input):
 		measurement_answer_input.visible = not all_done
 		measurement_answer_input.editable = can_answer
-		measurement_answer_input.placeholder_text = "Measurement"
+		measurement_answer_input.placeholder_text = "Measurement (cm)"
 		measurement_answer_input.text = ""
 	if is_instance_valid(confirm_measurement_button):
 		confirm_measurement_button.visible = not all_done
 		confirm_measurement_button.disabled = not can_answer
 		confirm_measurement_button.text = "Record"
-		confirm_measurement_button.position = Vector2(174, 438)
-		confirm_measurement_button.size = Vector2(132, 52)
+		confirm_measurement_button.position = Vector2(136, 420)
+		confirm_measurement_button.size = Vector2(124, 48)
 		_apply_button_style(confirm_measurement_button)
 	if is_instance_valid(_measurement_clear_button):
 		_measurement_clear_button.visible = not all_done
 		_measurement_clear_button.disabled = not can_answer
-		_measurement_clear_button.position = Vector2(334, 438)
-		_measurement_clear_button.size = Vector2(132, 52)
+		_measurement_clear_button.position = Vector2(266, 420)
+		_measurement_clear_button.size = Vector2(124, 48)
 		_measurement_clear_button.text = "Clear"
 		_apply_button_style(_measurement_clear_button)
+	if is_instance_valid(close_measurement_button):
+		close_measurement_button.visible = all_done
+		close_measurement_button.disabled = not all_done
+		if all_done:
+			close_measurement_button.text = "Close"
+			close_measurement_button.position = Vector2(96, 426)
+			close_measurement_button.size = Vector2(328, 48)
+			close_measurement_button.icon = null
+			close_measurement_button.expand_icon = false
+			close_measurement_button.flat = false
+			_apply_button_style(close_measurement_button)
 	if is_instance_valid(measurement_feedback_label):
 		if all_done:
+			var record_layout := _get_measurement_record_group_layout()
+			var label_pos := record_layout.get("label_pos", Vector2(132.0, 316.0)) as Vector2
+			var label_size := record_layout.get("label_size", Vector2(134.0, 108.0)) as Vector2
 			measurement_feedback_label.text = "Width =\n\nLength =\n\nHeight ="
 			measurement_feedback_label.add_theme_color_override("font_color", UI_CREAM)
-			_place_label(measurement_feedback_label, Vector2(154, 322), Vector2(172, 132), 18, UI_CREAM)
+			_place_label(measurement_feedback_label, label_pos, label_size, 20, UI_CREAM)
 			measurement_feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		elif feedback_text.is_empty() and not can_answer:
-			measurement_feedback_label.text = "Wait for your partner's measurement."
+			measurement_feedback_label.text = ""
 			measurement_feedback_label.add_theme_color_override("font_color", UI_INFO)
-			_place_label(measurement_feedback_label, Vector2(68, 496), Vector2(504, 28), 14, UI_INFO)
+			_place_label(measurement_feedback_label, Vector2(40, 470), Vector2(440, 22), 14, UI_INFO)
 			measurement_feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		else:
 			measurement_feedback_label.text = feedback_text
 			measurement_feedback_label.add_theme_color_override("font_color", UI_ERROR if is_error else UI_INFO)
-			_place_label(measurement_feedback_label, Vector2(68, 496), Vector2(504, 28), 14, UI_ERROR if is_error else UI_SUCCESS)
+			_place_label(measurement_feedback_label, Vector2(40, 470), Vector2(440, 22), 14, UI_ERROR if is_error else UI_SUCCESS)
 			measurement_feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	if is_instance_valid(measurement_summary_label):
 		measurement_summary_label.visible = true
 		if all_done:
-			measurement_summary_label.text = "The measurements are complete. Find the vessel's volume to break the seal."
-			_place_label(measurement_summary_label, Vector2(64, 488), Vector2(512, 30), 11, UI_INFO)
+			measurement_summary_label.text = "Use this to solve the passcode."
+			_place_label(measurement_summary_label, Vector2(72, 70), Vector2(376, 28), 16, UI_CREAM)
 			measurement_summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			measurement_summary_label.remove_theme_stylebox_override("normal")
 			_show_measurement_values()
 		else:
-			measurement_summary_label.text = str(step.get("label", "Measurement"))
-			_place_label(measurement_summary_label, Vector2(170, 328), Vector2(300, 36), 18, UI_INFO)
+			measurement_summary_label.text = "%s (cm)" % str(step.get("label", "Measurement"))
+			_place_label(measurement_summary_label, Vector2(130, 326), Vector2(260, 28), 19, UI_INFO)
 			measurement_summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			measurement_summary_label.remove_theme_stylebox_override("normal")
 			_hide_measurement_values()
@@ -1943,20 +1970,54 @@ func _layout_measurement_modal_image(sprite: Sprite2D, texture: Texture2D, top_y
 	sprite.position = Vector2(modal_size.x * 0.5, top_y + avail_h * 0.5)
 
 
+func _get_measurement_record_group_layout() -> Dictionary:
+	var modal_size := Vector2(520.0, 500.0)
+	if is_instance_valid(measurement_modal):
+		modal_size = measurement_modal.size
+	var label_width := 134.0
+	var value_width := 112.0
+	var column_gap := 10.0
+	var value_height := 34.0
+	var row_gap := 40.0
+	var group_height := 108.0
+	var padding := 20.0
+	var preferred_row_y := 288.0
+	var image_bottom := 222.0
+	if is_instance_valid(measurement_image) and measurement_image.texture != null:
+		var tex_size := measurement_image.texture.get_size()
+		image_bottom = measurement_image.position.y + tex_size.y * measurement_image.scale.y * 0.5
+	var close_button_top := 426.0
+	if is_instance_valid(close_measurement_button):
+		close_button_top = close_measurement_button.position.y
+	var min_row_y := image_bottom + padding
+	var max_row_y := close_button_top - group_height - padding
+	var row_y := minf(max_row_y, maxf(min_row_y, preferred_row_y))
+	var total_width := label_width + column_gap + value_width
+	var start_x := (modal_size.x - total_width) * 0.5
+	return {
+		"label_pos": Vector2(start_x, row_y),
+		"label_size": Vector2(label_width, group_height),
+		"value_x": start_x + label_width + column_gap,
+		"value_size": Vector2(value_width, value_height),
+		"row_y": row_y,
+		"row_gap": row_gap
+	}
+
+
 func _update_measurement_intro_content() -> void:
 	if is_instance_valid(measurement_title_label):
 		measurement_title_label.text = "Measuring Tape"
 	if is_instance_valid(measurement_instruction_label):
 		measurement_instruction_label.text = ""
 	if is_instance_valid(measurement_image):
-		_layout_measurement_modal_image(measurement_image, TAPE_MEASURE_MODAL_TEX, 72.0, 300.0, 74.0)
+		_layout_measurement_modal_image(measurement_image, TAPE_MEASURE_MODAL_TEX, 46.0, 340.0, 42.0)
 	if is_instance_valid(measurement_answer_input):
 		measurement_answer_input.visible = false
 	if is_instance_valid(confirm_measurement_button):
 		confirm_measurement_button.visible = true
 		confirm_measurement_button.disabled = false
 		confirm_measurement_button.text = "Use Now"
-		confirm_measurement_button.position = Vector2(116, 356)
+		confirm_measurement_button.position = Vector2(104, 344)
 		confirm_measurement_button.size = Vector2(136, 52)
 		_apply_button_style(confirm_measurement_button)
 		confirm_measurement_button.add_theme_font_size_override("font_size", 20)
@@ -1964,7 +2025,7 @@ func _update_measurement_intro_content() -> void:
 		close_measurement_button.visible = true
 		close_measurement_button.disabled = false
 		close_measurement_button.text = "Close"
-		close_measurement_button.position = Vector2(308, 356)
+		close_measurement_button.position = Vector2(280, 344)
 		close_measurement_button.size = Vector2(136, 52)
 		close_measurement_button.icon = null
 		close_measurement_button.expand_icon = false
@@ -2138,12 +2199,12 @@ func _has_all_measurements() -> bool:
 
 func _measurement_summary_text() -> String:
 	if _has_all_measurements():
-		return "Width  = 4\nLength = 5\nHeight = 3"
+		return "Width = 4 cm\nLength = 5 cm\nHeight = 3 cm"
 	var lines: Array[String] = []
 	for step in MEASUREMENT_STEPS:
 		var key := str(step.get("key", ""))
 		if _recorded_measurements.has(key):
-			lines.append("%s = %d" % [str(step.get("label", "Measurement")), int(_recorded_measurements[key])])
+			lines.append("%s = %d cm" % [str(step.get("label", "Measurement")), int(_recorded_measurements[key])])
 	if lines.is_empty():
 		return "No measurements recorded yet."
 	return "Recorded:\n%s" % "\n".join(lines)
@@ -2618,8 +2679,19 @@ func _on_clue_collected(zone_id: String, _clue_data: Dictionary) -> void:
 func _play_zone_completion_sfx() -> void:
 	if not is_instance_valid(_sfx_player) or not COMPLETION_SFX:
 		return
-	_sfx_player.stream = COMPLETION_SFX
+	MusicController.pause_music()
+	var sfx_stream := COMPLETION_SFX.duplicate()
+	if sfx_stream is AudioStreamMP3 or sfx_stream is AudioStreamOggVorbis:
+		sfx_stream.loop = false
+	_sfx_player.stop()
+	_sfx_player.stream = sfx_stream
 	_sfx_player.play()
+	if not _sfx_player.finished.is_connected(_on_sfx_finished_resume_music):
+		_sfx_player.finished.connect(_on_sfx_finished_resume_music, CONNECT_ONE_SHOT)
+
+
+func _on_sfx_finished_resume_music() -> void:
+	MusicController.resume_music()
 
 
 func _ensure_sfx_bus() -> void:
@@ -2732,12 +2804,11 @@ func _apply_hint_button_style(button: Button) -> void:
 
 
 func _apply_measurement_value_style(label: Label) -> void:
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.78, 0.54, 0.23, 0.96)
-	normal.border_color = Color(0.96, 0.72, 0.38, 1.0)
-	normal.set_border_width_all(2)
-	normal.set_corner_radius_all(20)
-	label.add_theme_stylebox_override("normal", normal)
+	label.remove_theme_stylebox_override("normal")
+	label.add_theme_font_override("font", OCRA_FONT)
+	label.add_theme_font_size_override("font_size", 20)
+	label.add_theme_color_override("font_color", UI_CREAM)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 
 
 func _apply_line_edit_style(line_edit: LineEdit) -> void:

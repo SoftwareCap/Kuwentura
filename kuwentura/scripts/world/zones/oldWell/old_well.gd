@@ -2124,7 +2124,11 @@ func _play_zone_completion_sfx() -> void:
 	if not is_instance_valid(_sfx_player) or COMPLETION_SFX == null:
 		return
 	MusicController.pause_music()
-	_sfx_player.stream = COMPLETION_SFX
+	var sfx_stream := COMPLETION_SFX.duplicate()
+	if sfx_stream is AudioStreamMP3 or sfx_stream is AudioStreamOggVorbis:
+		sfx_stream.loop = false
+	_sfx_player.stop()
+	_sfx_player.stream = sfx_stream
 	_sfx_player.play()
 	if not _sfx_player.finished.is_connected(_on_sfx_finished_resume_music):
 		_sfx_player.finished.connect(_on_sfx_finished_resume_music, CONNECT_ONE_SHOT)
