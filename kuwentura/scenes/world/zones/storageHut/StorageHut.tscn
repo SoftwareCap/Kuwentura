@@ -1,7 +1,7 @@
 [gd_scene load_steps=37 format=3 uid="uid://storagehut"]
 
 [ext_resource type="Script" uid="uid://rlqjp66bw7gk" path="res://scripts/world/zones/storageHut/storage_hut.gd" id="1_storagehut"]
-[ext_resource type="Script" path="res://scripts/controls/progress_tracker.gd" id="2_progress_tracker"]
+[ext_resource type="Script" uid="uid://ddrljblqheafw" path="res://scripts/controls/progress_tracker.gd" id="2_progress_tracker"]
 [ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="3_wl25h"]
 [ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="4_6n2rk"]
 [ext_resource type="Texture2D" uid="uid://cm4h0lilnf8lo" path="res://assets/sprites/places/storageHut.png" id="4_wl25h"]
@@ -178,22 +178,22 @@ offset_bottom = 8.0000305
 script = ExtResource("2_progress_tracker")
 
 [node name="ProgressTracker" type="Sprite2D" parent="ProgressTracker"]
-position = Vector2(193, 78.00001)
+position = Vector2(195.75, 67.00001)
 scale = Vector2(0.18039359, 0.14801587)
 texture = ExtResource("6_dlbia")
 
 [node name="Heart1" type="Sprite2D" parent="ProgressTracker"]
-position = Vector2(367, 76)
+position = Vector2(369.75, 65)
 scale = Vector2(0.030083332, 0.031333335)
 texture = ExtResource("7_vi7lo")
 
 [node name="Heart2" type="Sprite2D" parent="ProgressTracker"]
-position = Vector2(470.07843, 73.9375)
+position = Vector2(472.82843, 62.9375)
 scale = Vector2(0.03056206, 0.031916663)
 texture = ExtResource("7_vi7lo")
 
 [node name="Heart3" type="Sprite2D" parent="ProgressTracker"]
-position = Vector2(419, 75)
+position = Vector2(421.75, 64)
 scale = Vector2(0.030666674, 0.03133333)
 texture = ExtResource("7_vi7lo")
 

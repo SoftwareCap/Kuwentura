@@ -82,7 +82,8 @@ func _load_track(track: MusicTrack, path: String) -> void:
 		push_warning("[AudioControl] Failed to load: " + path)
 		return
 
-	if stream is AudioStreamMP3 or stream is AudioStreamOggVorbis:
+	var should_loop := track != MusicTrack.ZONE_COMPLETION
+	if should_loop and (stream is AudioStreamMP3 or stream is AudioStreamOggVorbis):
 		stream.loop = true
 
 	_tracks[track] = stream
@@ -222,3 +223,4 @@ func _load_saved_volume() -> void:
 			set_volume(float(data["volume"]))
 		if data.has("sfx_volume"):
 			set_sfx_volume(float(data["sfx_volume"]))
+
