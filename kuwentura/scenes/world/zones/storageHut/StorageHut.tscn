@@ -1,26 +1,29 @@
-[gd_scene load_steps=34 format=3 uid="uid://storagehut"]
+[gd_scene load_steps=37 format=3 uid="uid://storagehut"]
 
 [ext_resource type="Script" uid="uid://rlqjp66bw7gk" path="res://scripts/world/zones/storageHut/storage_hut.gd" id="1_storagehut"]
+[ext_resource type="Script" path="res://scripts/controls/progress_tracker.gd" id="2_progress_tracker"]
 [ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="3_wl25h"]
 [ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="4_6n2rk"]
 [ext_resource type="Texture2D" uid="uid://cm4h0lilnf8lo" path="res://assets/sprites/places/storageHut.png" id="4_wl25h"]
-[ext_resource type="Texture2D" uid="uid://dbl3xack1rg3r" path="res://assets/sprites/zoneObjects/storageHut/rectangularContainer.png" id="5_2w32v"]
+[ext_resource type="Texture2D" uid="uid://vr0pwwqs6vwf" path="res://assets/sprites/zoneObjects/storageHut/glowingContainer.png" id="5_2w32v"]
+[ext_resource type="Texture2D" uid="uid://t1jbo6al2pfg" path="res://assets/sprites/zoneObjects/storageHut/aswangDialogue.png" id="5_u1wdi"]
 [ext_resource type="Texture2D" uid="uid://hpqdw6fqijv0" path="res://assets/sprites/zoneObjects/storageHut/triangleStorageHut.png" id="6_7mtyr"]
+[ext_resource type="Texture2D" uid="uid://ds85h0n7krb2o" path="res://assets/sprites/tracker/progress_0.png" id="6_dlbia"]
+[ext_resource type="Texture2D" uid="uid://i1dbm5hvel3w" path="res://assets/sprites/zoneObjects/storageHut/brownFullHeart.png" id="7_vi7lo"]
 [ext_resource type="Texture2D" uid="uid://btgnsos2vm234" path="res://assets/sprites/zoneObjects/storageHut/squareStorageHut.png" id="7_w5q4s"]
 [ext_resource type="Texture2D" uid="uid://bdacql87buphd" path="res://assets/sprites/zoneObjects/storageHut/pentagonStorageHut.png" id="8_ceovl"]
 [ext_resource type="Texture2D" uid="uid://djlktpioqbhaa" path="res://assets/sprites/ledger/ledgerOpen.png" id="9_u1wdi"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="10_dlbia"]
 [ext_resource type="Texture2D" uid="uid://bepqi3l7fudbv" path="res://assets/sprites/clues/scrollClue.png" id="11_vi7lo"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="12_u5bgj"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="12_u5bgj"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="13_hjfqw"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="14_gi6hd"]
 [ext_resource type="Texture2D" uid="uid://b3afrv10yjhpf" path="res://assets/buttons/exitButton.png" id="15_gfj04"]
 [ext_resource type="Texture2D" uid="uid://d087jtl6ffvb3" path="res://assets/buttons/leftArrow.png" id="16_i0npi"]
 [ext_resource type="PackedScene" uid="uid://cpku7a4fredq7" path="res://scenes/controls/InsideZoneControls.tscn" id="17_2bkes"]
-[ext_resource type="Texture2D" uid="uid://dvkupminll3bb" path="res://assets/sprites/tracker/backyardPath/defaultBY.png" id="18_hxsfn"]
-[ext_resource type="Texture2D" uid="uid://dd3ad0xf8fqqb" path="res://assets/sprites/zoneObjects/storageHut/tapeMeasure.png" id="19_tape"]
+[ext_resource type="Texture2D" uid="uid://dwvvkbg0s0es8" path="res://assets/sprites/zoneObjects/storageHut/glowingTapeMeasure.png" id="19_tape"]
 [ext_resource type="VideoStream" uid="uid://cf73hbw71d7o0" path="res://assets/sprites/cutscene/zoneEnding/storageHut.ogv" id="21_ceovl"]
-[ext_resource type="Texture2D" uid="uid://6uxgm5ao33py" path="res://assets/sprites/zoneObjects/storageHut/crumplePaperRoll.png" id="27_crumple"]
+[ext_resource type="Texture2D" uid="uid://d4nmxbyrbo45i" path="res://assets/sprites/zoneObjects/storageHut/glowingCrumplePaperRoll.png" id="27_crumple"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qwhi7"]
 size = Vector2(165.5, 81)
@@ -134,7 +137,7 @@ offset_right = 300.0
 offset_bottom = 120.0
 theme_override_fonts/font = ExtResource("4_6n2rk")
 theme_override_font_sizes/font_size = 32
-text = "← Back to Forest"
+text = "â† Back to Forest"
 
 [node name="BackgroundLayer" type="Node2D" parent="."]
 position = Vector2(6.1035156e-05, 6.1035156e-05)
@@ -145,6 +148,55 @@ position = Vector2(656.49994, 325.49997)
 scale = Vector2(0.78409094, 0.6981934)
 texture = ExtResource("4_wl25h")
 
+[node name="DialogueLayer" type="Node2D" parent="."]
+position = Vector2(1.0913936e-11, 1.0913936e-11)
+scale = Vector2(0.9999998, 0.9999998)
+
+[node name="AswangDialogue" type="Sprite2D" parent="DialogueLayer"]
+position = Vector2(695.00006, 404.00006)
+scale = Vector2(1.082569, 1.010571)
+texture = ExtResource("5_u1wdi")
+
+[node name="AswangScriptLabel" type="Label" parent="DialogueLayer"]
+offset_left = 163.00003
+offset_top = 488.0001
+offset_right = 1199.0001
+offset_bottom = 551.0001
+theme_override_fonts/font = ExtResource("3_wl25h")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ContinueButton" type="Button" parent="DialogueLayer"]
+offset_left = 1.525878e-05
+offset_top = 3.051757e-05
+offset_right = 8.000015
+offset_bottom = 8.0000305
+
+[node name="ProgressTracker" type="Node2D" parent="."]
+script = ExtResource("2_progress_tracker")
+
+[node name="ProgressTracker" type="Sprite2D" parent="ProgressTracker"]
+position = Vector2(193, 78.00001)
+scale = Vector2(0.18039359, 0.14801587)
+texture = ExtResource("6_dlbia")
+
+[node name="Heart1" type="Sprite2D" parent="ProgressTracker"]
+position = Vector2(367, 76)
+scale = Vector2(0.030083332, 0.031333335)
+texture = ExtResource("7_vi7lo")
+
+[node name="Heart2" type="Sprite2D" parent="ProgressTracker"]
+position = Vector2(470.07843, 73.9375)
+scale = Vector2(0.03056206, 0.031916663)
+texture = ExtResource("7_vi7lo")
+
+[node name="Heart3" type="Sprite2D" parent="ProgressTracker"]
+position = Vector2(419, 75)
+scale = Vector2(0.030666674, 0.03133333)
+texture = ExtResource("7_vi7lo")
+
 [node name="RoomObjectLayer" type="Node2D" parent="."]
 
 [node name="ChestObject" type="Area2D" parent="RoomObjectLayer"]
@@ -152,7 +204,7 @@ texture = ExtResource("4_wl25h")
 [node name="ChestSprite" type="Sprite2D" parent="RoomObjectLayer/ChestObject"]
 self_modulate = Color(1, 1, 1, 0.5764706)
 position = Vector2(661, 416.99997)
-scale = Vector2(0.27600005, 0.18149999)
+scale = Vector2(0.23, 0.15)
 texture = ExtResource("5_2w32v")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RoomObjectLayer/ChestObject"]
@@ -166,7 +218,7 @@ monitoring = false
 monitorable = false
 
 [node name="MeasuringToolSprite" type="Sprite2D" parent="RoomObjectLayer/MeasuringToolObject"]
-scale = Vector2(0.13, 0.13)
+scale = Vector2(0.11, 0.11)
 texture = ExtResource("19_tape")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RoomObjectLayer/MeasuringToolObject"]
@@ -174,18 +226,19 @@ shape = SubResource("RectangleShape2D_tape_tool")
 
 [node name="ScratchPaperObject" type="Area2D" parent="RoomObjectLayer"]
 visible = false
-position = Vector2(1030, 525)
+position = Vector2(1060, 525)
 monitoring = false
 monitorable = false
 
 [node name="ScratchPaperSprite" type="Sprite2D" parent="RoomObjectLayer/ScratchPaperObject"]
-scale = Vector2(0.14, 0.14)
+scale = Vector2(0.11, 0.11)
 texture = ExtResource("27_crumple")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RoomObjectLayer/ScratchPaperObject"]
 shape = SubResource("RectangleShape2D_paper_tool")
 
 [node name="LightingLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Control" type="Control" parent="LightingLayer"]
 layout_mode = 3
@@ -447,6 +500,7 @@ autowrap_mode = 2
 [node name="SidekickLayer" type="CanvasLayer" parent="."]
 
 [node name="Ledger" type="Panel" parent="SidekickLayer"]
+visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -930,14 +984,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="InsideZoneControl" parent="." instance=ExtResource("17_2bkes")]
-
-[node name="ProgressTracker" type="Node2D" parent="."]
-visible = false
-
-[node name="Sprite2D" type="Sprite2D" parent="ProgressTracker"]
-position = Vector2(253, 70)
-scale = Vector2(0.28802085, 0.3236111)
-texture = ExtResource("18_hxsfn")
 
 [node name="Cutscene" type="CanvasLayer" parent="."]
 
