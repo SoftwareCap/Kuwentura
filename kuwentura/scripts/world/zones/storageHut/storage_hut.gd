@@ -26,6 +26,14 @@ const COMPLETION_SFX: AudioStream = preload("res://assets/audios/ZoneCompletionS
 const OCRA_FONT: FontFile = preload("res://assets/fonts/ocraextended.ttf")
 const ARABICA_FONT: FontFile = preload("res://assets/fonts/Arabica.ttf")
 
+const STORAGE_HUT_TASKS := [
+	"Solve Aswang's riddles.",
+	"Find the measuring tool.",
+	"Measure the vessel.",
+	"Find the volume formula.",
+	"Unlock the vessel using the volume.",
+]
+
 const UI_CREAM := Color(0.98, 0.95, 0.88, 1.0)
 const UI_INK := Color(0.22, 0.13, 0.07, 1.0)
 const UI_PANEL := Color(0.13, 0.08, 0.04, 0.92)
@@ -258,6 +266,7 @@ var _ledger_backdrop: ColorRect = null
 @onready var volume_value_label: Label = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeValue") as Label
 @onready var inside_zone_control: CanvasLayer = get_node_or_null("InsideZoneControl") as CanvasLayer
 @onready var progress_tracker: Node = get_node_or_null("ProgressTracker")
+@onready var tasks_ui: Node = get_node_or_null("TasksLayer")
 
 @export var progress_default_tex: Texture2D
 @export var progress_solved_tex: Texture2D
@@ -303,6 +312,8 @@ var _dialogue_prompt_label: Label = null
 var _intro_active: bool = false
 var _intro_index: int = 0
 
+var measuring_tool_found := false
+
 var shape_riddle_completed := false
 var vessel_measured := false
 var formula_found := false
@@ -335,7 +346,7 @@ func _ready() -> void:
 	_initialize_chest_lock_sync()
 	if _clue_collected:
 		_show_lighting_layer(true)
-		_sync_riddle_ui("The hut is dark. Solve the carved shapes together.", false)
+		_sync_riddle_ui("", false)
 	else:
 		call_deferred("_auto_start_intro")
 	
@@ -429,7 +440,13 @@ func setup_layout() -> void:
 		riddle_header_label.add_theme_constant_override("outline_size", 4)
 		riddle_header_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.92))
 	if is_instance_valid(turn_label):
-		turn_label.visible = false
+		_place_label(turn_label, Vector2((screen_size.x - 420.0) * 0.5, screen_size.y - 120.0), Vector2(420.0, 40.0), 22, UI_INFO)
+		turn_label.add_theme_font_override("font", OCRA_FONT)
+		turn_label.add_theme_font_size_override("font_size", 22)
+		turn_label.add_theme_constant_override("outline_size", 2)
+		turn_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+		turn_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		turn_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	if is_instance_valid(viewer_instruction_label):
 		_place_label(viewer_instruction_label, Vector2((screen_size.x - 620.0) * 0.5, screen_size.y * 0.20 + 66.0), Vector2(620.0, 34.0), 18, UI_CREAM)
 		viewer_instruction_label.add_theme_font_override("font", OCRA_FONT)
@@ -476,14 +493,14 @@ func setup_layout() -> void:
 		_answer_choice_row.position = Vector2(36.0, 62.0)
 		_answer_choice_row.size = Vector2(answer_panel.size.x - 72.0, 88.0)
 	if is_instance_valid(feedback_label):
-		feedback_label.position = Vector2((screen_size.x - feedback_width) * 0.5, clampf(screen_size.y * 0.83, 560.0, screen_size.y - 52.0))
-		feedback_label.size = Vector2(feedback_width, 34.0)
+		feedback_label.position = Vector2((screen_size.x - feedback_width) * 0.5, clampf((screen_size.y - 64.0) * 0.5, 280.0, screen_size.y - 248.0))
+		feedback_label.size = Vector2(feedback_width, 64.0)
 		feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		feedback_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		feedback_label.add_theme_font_override("font", OCRA_FONT)
-		feedback_label.add_theme_font_size_override("font_size", 18)
-		feedback_label.add_theme_constant_override("outline_size", 2)
-		feedback_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+		feedback_label.add_theme_font_size_override("font_size", 22)
+		feedback_label.add_theme_constant_override("outline_size", 3)
+		feedback_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.92))
 
 	if is_instance_valid(chest_modal):
 		chest_modal.size = Vector2(620.0, 330.0)
@@ -729,6 +746,7 @@ func _setup_initial_state() -> void:
 	_intro_active = false
 	_intro_index = 0
 	shape_riddle_completed = false
+	measuring_tool_found = false
 	vessel_measured = false
 	formula_found = false
 	vessel_unlocked = false
@@ -766,6 +784,9 @@ func _setup_initial_state() -> void:
 		back_button.visible = false
 	if is_instance_valid(progress_tracker) and progress_tracker.has_method("reset_tracker"):
 		progress_tracker.call("reset_tracker")
+	_setup_storage_hut_tasks()
+	_set_gameplay_hud_visible(true)
+	_set_gameplay_hud_interactable(true)
 	update_storage_hut_progress()
 
 	_update_darkness()
@@ -967,7 +988,7 @@ func rpc_finish_intro() -> void:
 	_intro_index = 0
 	_update_intro_visibility()
 	_show_lighting_layer(true)
-	_sync_riddle_ui("The hut is dark. Solve the carved shapes together.", false)
+	_sync_riddle_ui("", false)
 
 
 func _refresh_intro_ui() -> void:
@@ -1053,10 +1074,10 @@ func _sync_riddle_ui(message: String = "", is_error: bool = false) -> void:
 	if is_instance_valid(riddle_header_label):
 		riddle_header_label.text = "Aswang's Riddle"
 	if is_instance_valid(turn_label):
-		turn_label.visible = false
+		turn_label.text = _get_turn_indicator_text(answer_role, is_answerer)
+		turn_label.visible = true
 	if is_instance_valid(viewer_instruction_label):
 		viewer_instruction_label.text = "Count the sides and solve the operation."
-
 	if is_instance_valid(shape_viewer_panel):
 		shape_viewer_panel.visible = is_viewer
 	if is_instance_valid(answer_panel):
@@ -1815,6 +1836,7 @@ func _on_measuring_tool_input_event(_viewport: Node, event: InputEvent, _shape_i
 
 
 func _open_measurement_modal() -> void:
+	_register_measuring_tool_found()
 	_measurement_intro_active = not _has_all_measurements()
 	_update_measurement_modal_content()
 	if is_instance_valid(_measurement_backdrop):
@@ -2222,8 +2244,44 @@ func update_storage_hut_progress() -> void:
 		completed_tasks += 1
 	if is_instance_valid(progress_tracker) and progress_tracker.has_method("set_progress_by_completed_tasks"):
 		progress_tracker.call("set_progress_by_completed_tasks", completed_tasks, 4)
+	_refresh_storage_hut_tasks()
 	print("Storage Hut Progress: %d/4" % completed_tasks)
 
+
+
+func _setup_storage_hut_tasks() -> void:
+	if not is_instance_valid(tasks_ui):
+		return
+	if tasks_ui.has_method("set_title"):
+		tasks_ui.call("set_title", "Storage Hut Tasks")
+	if tasks_ui.has_method("set_tasks"):
+		tasks_ui.call("set_tasks", STORAGE_HUT_TASKS)
+	if tasks_ui.has_method("hide_tasks_panel"):
+		tasks_ui.call("hide_tasks_panel")
+	_refresh_storage_hut_tasks()
+
+
+func _refresh_storage_hut_tasks() -> void:
+	if not is_instance_valid(tasks_ui):
+		return
+	if not tasks_ui.has_method("complete_task"):
+		return
+	if tasks_ui.has_method("reset_tasks"):
+		tasks_ui.call("reset_tasks")
+	if _clue_collected:
+		for task_index in range(STORAGE_HUT_TASKS.size()):
+			tasks_ui.call("complete_task", task_index)
+		return
+	if shape_riddle_completed:
+		tasks_ui.call("complete_task", 0)
+	if measuring_tool_found or vessel_measured or formula_found or vessel_unlocked:
+		tasks_ui.call("complete_task", 1)
+	if vessel_measured or vessel_unlocked:
+		tasks_ui.call("complete_task", 2)
+	if formula_found or vessel_unlocked:
+		tasks_ui.call("complete_task", 3)
+	if vessel_unlocked:
+		tasks_ui.call("complete_task", 4)
 
 func _can_unlock_vessel() -> bool:
 	return vessel_measured and formula_found
@@ -2247,6 +2305,32 @@ func _register_formula_found() -> void:
 	else:
 		rpc_sync_formula_found()
 
+
+
+func _register_measuring_tool_found() -> void:
+	if measuring_tool_found:
+		return
+	if multiplayer.has_multiplayer_peer():
+		if multiplayer.is_server():
+			rpc_sync_measuring_tool_found.rpc()
+		else:
+			rpc_report_measuring_tool_found.rpc_id(SERVER_PEER_ID)
+	else:
+		rpc_sync_measuring_tool_found()
+
+
+@rpc("any_peer", "reliable")
+func rpc_report_measuring_tool_found() -> void:
+	if multiplayer.is_server() and not measuring_tool_found:
+		rpc_sync_measuring_tool_found.rpc()
+
+
+@rpc("authority", "reliable", "call_local")
+func rpc_sync_measuring_tool_found() -> void:
+	if measuring_tool_found:
+		return
+	measuring_tool_found = true
+	_refresh_storage_hut_tasks()
 
 func _apply_mistake_penalty() -> void:
 	# Call this helper from puzzle mistake branches so one validated mistake costs one life.
@@ -2285,6 +2369,8 @@ func _show_reward() -> void:
 	_waiting_reward_continue = true
 	_reward_stage = 1
 	_collect_sequence_started = false
+	_set_gameplay_hud_interactable(false)
+	_set_gameplay_hud_visible(false)
 
 	if is_instance_valid(reward_layer):
 		reward_layer.visible = true
@@ -2510,18 +2596,68 @@ func _refresh_inside_zone_buttons() -> void:
 			inside_zone_control.set_briefcase_enabled(is_sidekick)
 		if inside_zone_control.has_method("set_sidekick_ui_visible"):
 			inside_zone_control.set_sidekick_ui_visible(is_sidekick)
+	if is_instance_valid(tasks_ui) and tasks_ui.has_method("set_interactable"):
+		tasks_ui.call("set_interactable", true)
+	if is_instance_valid(tasks_ui) and tasks_ui.has_method("set_ui_visible"):
+		tasks_ui.call("set_ui_visible", true)
 	if not is_sidekick:
 		_set_ledger_open(false)
 		if is_instance_valid(briefcase_panel):
 			briefcase_panel.visible = false
 
 
+func _set_gameplay_hud_interactable(interactable: bool) -> void:
+	var is_sidekick := GameState.local_role == GameState.Role.SIDEKICK
+	if is_instance_valid(tasks_ui) and tasks_ui.has_method("set_interactable"):
+		tasks_ui.call("set_interactable", interactable)
+	if is_instance_valid(inside_zone_control):
+		if inside_zone_control.has_method("set_pause_enabled"):
+			inside_zone_control.set_pause_enabled(interactable)
+		if inside_zone_control.has_method("set_ledger_enabled"):
+			inside_zone_control.set_ledger_enabled(interactable and is_sidekick)
+		if inside_zone_control.has_method("set_briefcase_enabled"):
+			inside_zone_control.set_briefcase_enabled(interactable and is_sidekick)
+	if not interactable:
+		_set_ledger_open(false)
+		if is_instance_valid(briefcase_panel):
+			briefcase_panel.visible = false
+		if is_instance_valid(option_panel):
+			option_panel.visible = false
+		if is_instance_valid(pause_panel):
+			pause_panel.visible = false
+		if is_instance_valid(pause_canvas_layer):
+			pause_canvas_layer.visible = false
+
+
+func _set_gameplay_hud_visible(hud_visible: bool) -> void:
+	if is_instance_valid(tasks_ui) and tasks_ui.has_method("set_ui_visible"):
+		tasks_ui.call("set_ui_visible", hud_visible)
+	elif is_instance_valid(tasks_ui):
+		tasks_ui.visible = hud_visible
+	if is_instance_valid(progress_tracker):
+		var tracker_parent := progress_tracker.get_parent()
+		if tracker_parent is CanvasLayer:
+			(tracker_parent as CanvasLayer).visible = hud_visible
+		else:
+			progress_tracker.visible = hud_visible
+	if is_instance_valid(inside_zone_control):
+		inside_zone_control.visible = hud_visible
+	if not hud_visible:
+		_set_ledger_open(false)
+		if is_instance_valid(briefcase_panel):
+			briefcase_panel.visible = false
+		if is_instance_valid(option_panel):
+			option_panel.visible = false
+		if is_instance_valid(pause_panel):
+			pause_panel.visible = false
+		if is_instance_valid(pause_canvas_layer):
+			pause_canvas_layer.visible = false
 func _on_ledger_pressed() -> void:
+	if _reward_active or (is_instance_valid(ending_cutscene) and ending_cutscene.visible):
+		return
 	if GameState.local_role != GameState.Role.SIDEKICK:
 		return
 	_set_ledger_open(not (is_instance_valid(ledger_panel) and ledger_panel.visible))
-
-
 func _on_briefcase_pressed() -> void:
 	if GameState.local_role != GameState.Role.SIDEKICK:
 		return
@@ -2560,8 +2696,12 @@ func _update_glow_progress_label() -> void:
 func _set_feedback(text: String, is_error: bool) -> void:
 	if not is_instance_valid(feedback_label):
 		return
-	feedback_label.text = text
-	feedback_label.add_theme_color_override("font_color", UI_ERROR if is_error else UI_SUCCESS)
+	var trimmed_text := text.strip_edges()
+	var display_text := trimmed_text
+	if display_text.is_empty():
+		display_text = "Complete your tasks and recover the artifacts."
+	feedback_label.text = display_text
+	feedback_label.add_theme_color_override("font_color", UI_ERROR if is_error else (UI_INFO if trimmed_text.is_empty() else UI_SUCCESS))
 
 
 func _set_chest_feedback(text: String, is_error: bool) -> void:
@@ -2605,6 +2745,8 @@ func _show_aswang_warning() -> void:
 
 
 func _on_pause_pressed() -> void:
+	if _reward_active or (is_instance_valid(ending_cutscene) and ending_cutscene.visible):
+		return
 	if is_instance_valid(pause_canvas_layer):
 		pause_canvas_layer.visible = true
 	if is_instance_valid(pause_panel):
@@ -2674,6 +2816,7 @@ func _return_to_forest() -> void:
 func _on_clue_collected(zone_id: String, _clue_data: Dictionary) -> void:
 	if zone_id == ZONE_ID:
 		_clue_collected = true
+		_refresh_storage_hut_tasks()
 
 
 func _play_zone_completion_sfx() -> void:
@@ -2730,6 +2873,12 @@ func _role_display(role: String) -> String:
 		ROLE_SIDEKICK:
 			return "Sidekick"
 	return "Partner"
+
+
+func _get_turn_indicator_text(active_role: String, is_local_turn: bool) -> String:
+	if is_local_turn:
+		return "Your Turn"
+	return "%s's Turn" % _role_display(active_role)
 
 
 func _first_valid_node(paths: Array[String]) -> Node:
@@ -2860,6 +3009,8 @@ func _fade_in(duration: float = 0.6) -> void:
 
 
 func _play_ending_cutscene() -> void:
+	_set_gameplay_hud_interactable(false)
+	_set_gameplay_hud_visible(false)
 	if not is_instance_valid(ending_cutscene):
 		_return_to_forest()
 		return
