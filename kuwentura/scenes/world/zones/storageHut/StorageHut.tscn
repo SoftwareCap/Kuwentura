@@ -1,7 +1,8 @@
-[gd_scene load_steps=37 format=3 uid="uid://storagehut"]
+[gd_scene load_steps=39 format=3 uid="uid://storagehut"]
 
 [ext_resource type="Script" uid="uid://rlqjp66bw7gk" path="res://scripts/world/zones/storageHut/storage_hut.gd" id="1_storagehut"]
 [ext_resource type="Script" uid="uid://ddrljblqheafw" path="res://scripts/controls/progress_tracker.gd" id="2_progress_tracker"]
+[ext_resource type="Script" path="res://scripts/controls/task_ui.gd" id="3_task_ui"]
 [ext_resource type="FontFile" uid="uid://rniso7qjbwbg" path="res://assets/fonts/Arabica.ttf" id="3_wl25h"]
 [ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="4_6n2rk"]
 [ext_resource type="Texture2D" uid="uid://cm4h0lilnf8lo" path="res://assets/sprites/places/storageHut.png" id="4_wl25h"]
@@ -13,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://btgnsos2vm234" path="res://assets/sprites/zoneObjects/storageHut/squareStorageHut.png" id="7_w5q4s"]
 [ext_resource type="Texture2D" uid="uid://bdacql87buphd" path="res://assets/sprites/zoneObjects/storageHut/pentagonStorageHut.png" id="8_ceovl"]
 [ext_resource type="Texture2D" uid="uid://djlktpioqbhaa" path="res://assets/sprites/ledger/ledgerOpen.png" id="9_u1wdi"]
+[ext_resource type="Texture2D" uid="uid://bti38osse7c11" path="res://assets/sprites/zoneObjects/storageHut/brownTasks.png" id="9_u5bgj"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="10_dlbia"]
 [ext_resource type="Texture2D" uid="uid://bepqi3l7fudbv" path="res://assets/sprites/clues/scrollClue.png" id="11_vi7lo"]
 [ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="12_u5bgj"]
@@ -196,6 +198,14 @@ texture = ExtResource("7_vi7lo")
 position = Vector2(421.75, 64)
 scale = Vector2(0.030666674, 0.03133333)
 texture = ExtResource("7_vi7lo")
+
+[node name="TasksLayer" type="Node2D" parent="."]
+script = ExtResource("3_task_ui")
+
+[node name="TaskPanel" type="Sprite2D" parent="TasksLayer"]
+position = Vector2(117, 221)
+scale = Vector2(0.19466667, 0.238)
+texture = ExtResource("9_u5bgj")
 
 [node name="RoomObjectLayer" type="Node2D" parent="."]
 
@@ -1009,3 +1019,5 @@ speed_scale = 0.4
 expand = true
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
+
+
