@@ -5,7 +5,7 @@ extends Node
 ## Handles saving/loading game state to/from Firestore.
 ## Called by FirebaseManager - do not call directly from game logic.
 
-const PROJECT_ID = "kuwentura"
+const PROJECT_ID = FirebaseConfig.PROJECT_ID
 const BASE_URL = (
 	"https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents"
 )

@@ -22,7 +22,7 @@ const TRACK_PATHS: Dictionary = {
 	MusicTrack.BAKUNAWA: "res://assets/audios/BakunawaBG.mp3",
 	MusicTrack.ALTAR_DEDUCTION: "res://assets/audios/AltarDeductionBG.mp3",
 	MusicTrack.END_CREDITS: "res://assets/audios/EndCredits.mp3",
-	MusicTrack.YOU_FAILED: "res://assets/audios/YouFailedBG.mp3",
+	MusicTrack.YOU_FAILED: "res://assets/audios/YouFailedSFX.mp3",
 	MusicTrack.ZONE_COMPLETION: "res://assets/audios/ZoneCompletionSFX.mp3",
 }
 
@@ -223,4 +223,3 @@ func _load_saved_volume() -> void:
 			set_volume(float(data["volume"]))
 		if data.has("sfx_volume"):
 			set_sfx_volume(float(data["sfx_volume"]))
-

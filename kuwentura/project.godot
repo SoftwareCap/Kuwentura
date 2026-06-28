@@ -17,6 +17,7 @@ config/icon="res://assets/icons/kuwenturaIcon.png"
 
 [autoload]
 
+FirebaseConfig="*res://scripts/systems/firebase_config.gd"
 FirebaseAuth="*res://scripts/systems/firebase_auth.gd"
 FirebaseManager="*res://scripts/systems/firebase_manager.gd"
 FirebaseFirestore="*res://scripts/systems/firebase_firestore.gd"

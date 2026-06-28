@@ -41,7 +41,7 @@
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="35_dcipd"]
 [ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="36_u6sy3"]
 [ext_resource type="Texture2D" uid="uid://cs5ncbjbouyw2" path="res://assets/sprites/clues/ladleClue.png" id="37_dcipd"]
-[ext_resource type="Texture2D" uid="uid://cd26kltqmpwg5" path="res://assets/sprites/ledger/ledgerOpen.png" id="39_0s51p"]
+[ext_resource type="Texture2D" uid="uid://djlktpioqbhaa" path="res://assets/sprites/ledger/ledgerOpen.png" id="39_0s51p"]
 [ext_resource type="Texture2D" uid="uid://bvn74hwrf4gx2" path="res://assets/sprites/tracker/pinasHouse/defaultPH.png" id="39_ra7mo"]
 [ext_resource type="VideoStream" uid="uid://cf0vo7ifmgiha" path="res://assets/sprites/cutscene/zoneEnding/pinasHouse.ogv" id="40_fvin0"]
 
@@ -785,9 +785,9 @@ vertical_alignment = 1
 [node name="XInput" type="LineEdit" parent="RoleLayer/Control/SidekickOverlays/NoteBoardSidekick/SidekickNote"]
 layout_mode = 0
 offset_left = 402.0
-offset_top = 610.0
+offset_top = 560.0
 offset_right = 538.0
-offset_bottom = 683.0
+offset_bottom = 633.0
 theme_override_colors/font_color = Color(0.9650678, 0.9650869, 0.9614435, 1)
 theme_override_colors/font_selected_color = Color(0.04755766, 0.047557645, 0.047557645, 1)
 theme_override_colors/caret_color = Color(0.014275194, 0.014275219, 0.014275289, 1)
