@@ -3,4 +3,4 @@
 /android/
 
 # Firebase secrets - DO NOT COMMIT
-kuwentura/scripts/systems/firebase_config.gd
+scripts/systems/firebase_config.gd
