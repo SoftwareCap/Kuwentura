@@ -4,3 +4,4 @@
 
 # Firebase secrets - DO NOT COMMIT
 scripts/systems/firebase_config.gd
+scripts/systems/firebase_config.gd.uid
