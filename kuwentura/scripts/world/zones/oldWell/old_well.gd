@@ -6,7 +6,7 @@ const SERVER_PEER_ID := 1
 const MAX_MISTAKES := 3
 const PUZZLE_1_TARGET := 10
 const TOTAL_BUCKET_STEPS := 10
-const LEDGER_IMAGE_PATH := "res://assets/sprites/ledger/oldwell_instructions.png"
+const LEDGER_IMAGE_PATH := "res://assets/sprites/ledger/newOldWellLedger.png"
 
 const TEX_SPLASH := "res://assets/sprites/zoneObjects/oldWell/splashWater.png"
 const TEX_SIYOKOY_IDLE := "res://assets/sprites/zoneObjects/oldWell/siyokoy1.png"
@@ -48,9 +48,16 @@ const INTRO_LINES := [
 ]
 
 const ROMAN_QUESTIONS := [
-	{"roman": "IV", "answer": 4}, {"roman": "VI", "answer": 6}, {"roman": "IX", "answer": 9}, {"roman": "XII", "answer": 12},
-	{"roman": "XIV", "answer": 14}, {"roman": "XV", "answer": 15}, {"roman": "XVI", "answer": 16}, {"roman": "XVIII", "answer": 18},
-	{"roman": "XIX", "answer": 19}, {"roman": "XX", "answer": 20},
+	{"roman": "III", "answer": 3},
+	{"roman": "VI", "answer": 6},
+	{"roman": "XII", "answer": 12},
+	{"roman": "IV", "answer": 4},
+	{"roman": "XIV", "answer": 14},
+	{"roman": "XXVII", "answer": 27},
+	{"roman": "XL", "answer": 40},
+	{"roman": "LXVIII", "answer": 68},
+	{"roman": "XCIV", "answer": 94},
+	{"roman": "CDXLIV", "answer": 444},
 ]
 
 const CHAIN_RING_SET := [
@@ -62,6 +69,31 @@ const CHAIN_RING_SET := [
 
 const EYE_ORDER := [1, 2, 3, 4, 5, 6]
 
+const RAGE_BAIT_CORRECT_LINES: Array[String] = [
+	"Tch. Lucky guess.",
+	"Not bad… dry-land child.",
+	"Hmph. You got one.",
+	"You know Roman numerals? Annoying.",
+	"Fine. One point for you.",
+]
+const RAGE_BAIT_WRONG_LINES: Array[String] = [
+	"Wrong! Even moss knows better.",
+	"That answer sank fast.",
+	"No, no, no. Read it again.",
+	"Try again, little detective.",
+	"Oof. Straight to the bottom.",
+]
+const RAGE_BAIT_WIN_LINES: Array[String] = [
+	"Grr… impossible.",
+	"You actually solved them?",
+	"Fine! Take the clue.",
+	"The well opens… for now.",
+]
+const RAGE_BAIT_INK := Color(0.08, 0.16, 0.42, 1.0)
+const ACTION_COOLDOWN_MSEC := 900
+const RAGE_BAIT_VISIBLE_SECONDS := 2.6
+
+enum RageBaitKind { CORRECT, WRONG, WIN }
 enum Phase { IDLE, INTRO, PUZZLE_1, PUZZLE_2, PUZZLE_3, REWARD, FAILED, COMPLETE }
 
 @onready var back_button: Button = get_node_or_null("BackButton") as Button
@@ -75,6 +107,8 @@ enum Phase { IDLE, INTRO, PUZZLE_1, PUZZLE_2, PUZZLE_3, REWARD, FAILED, COMPLETE
 @onready var intro_siyokoy_sprite: Sprite2D = get_node_or_null("IntroOldWell/siyokoy") as Sprite2D
 @onready var siyokoys_game_background: Node2D = get_node_or_null("SiyokoysGame") as Node2D
 @onready var game_siyokoy_well: Sprite2D = get_node_or_null("SiyokoysGame/siyokoyOldWell") as Sprite2D
+@onready var rage_bait_bubble: Node2D = get_node_or_null("RageBaitBubble") as Node2D
+@onready var rage_bait_label: Label = get_node_or_null("RageBaitBubble/RageLabel") as Label
 @onready var role_label: Label = get_node_or_null("HUD/RoleLabel") as Label
 @onready var status_label: Label = get_node_or_null("HUD/StatusPanel/StatusLabel") as Label
 @onready var progress_label: Label = get_node_or_null("HUD/StatusPanel/ProgressLabel") as Label
@@ -162,6 +196,9 @@ var _eye_slots: Array[int] = [-1, -1, -1, -1, -1, -1]
 var _selected_eye_piece := -1
 var _active_answer_role: int = GameState.Role.SIDEKICK
 var _last_pass_msec: int = 0
+var _last_action_msec: int = 0
+var _last_server_answer_msec: int = 0
+var _rage_bait_tween: Tween = null
 var _pass_button: Button = null
 var _reward_stage := 0
 var _waiting_reward_tap := false
@@ -247,6 +284,7 @@ func _setup_mobile_layout() -> void:
 	_layout_runtime()
 	_apply_font_tree(self)
 	_apply_design_system()
+	_setup_rage_bait()
 	_place_guardian_art()
 	if is_instance_valid(number_input):
 		number_input.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
@@ -720,6 +758,8 @@ func _reset_state() -> void:
 	_puzzle1_correct = 0
 	_active_answer_role = GameState.Role.SIDEKICK
 	_last_pass_msec = 0
+	_last_action_msec = 0
+	_last_server_answer_msec = 0
 	_roman_sequence.clear()
 	_roman_index = 0
 	_current_roman = {}
@@ -742,6 +782,7 @@ func _reset_state() -> void:
 	_update_instruction("Inspect the well to begin.")
 	_close_sidekick_panels()
 	_populate_ledger()
+	_hide_rage_bait()
 	_refresh_role_visibility()
 	if is_instance_valid(back_button):
 		back_button.visible = false
@@ -847,6 +888,8 @@ func submit_puzzle_1_answer() -> void:
 		return
 	var answer: int = int(text)
 	if _has_multiplayer() and not multiplayer.is_server():
+		if not _try_consume_action_cooldown():
+			return
 		rpc_request_puzzle_1_answer.rpc_id(SERVER_PEER_ID, answer)
 	else:
 		_server_handle_puzzle_1(answer)
@@ -867,11 +910,13 @@ func pass_puzzle_1_question() -> void:
 @rpc("any_peer", "reliable")
 func rpc_request_pass_puzzle_1() -> void:
 	if multiplayer.is_server():
-		_server_pass_puzzle_1()
+		_server_pass_puzzle_1(multiplayer.get_remote_sender_id())
 
 
-func _server_pass_puzzle_1() -> void:
+func _server_pass_puzzle_1(sender_id: int = SERVER_PEER_ID) -> void:
 	if _phase != Phase.PUZZLE_1 or _fail_started:
+		return
+	if not _is_sender_active_answerer(sender_id):
 		return
 	var now_msec: int = Time.get_ticks_msec()
 	if now_msec - _last_pass_msec < 350:
@@ -887,6 +932,8 @@ func _on_number_submitted(_text: String) -> void:
 
 
 func _on_number_changed(text: String) -> void:
+	if not _can_current_answerer_act():
+		return
 	var digits: String = ""
 	for i in range(text.length()):
 		var c: String = text.substr(i, 1)
@@ -901,11 +948,15 @@ func _on_number_changed(text: String) -> void:
 @rpc("any_peer", "reliable")
 func rpc_request_puzzle_1_answer(answer: int) -> void:
 	if multiplayer.is_server():
-		_server_handle_puzzle_1(answer)
+		_server_handle_puzzle_1(answer, multiplayer.get_remote_sender_id())
 
 
-func _server_handle_puzzle_1(answer: int) -> void:
+func _server_handle_puzzle_1(answer: int, sender_id: int = SERVER_PEER_ID) -> void:
 	if _phase != Phase.PUZZLE_1 or _current_roman.is_empty() or _fail_started:
+		return
+	if not _is_sender_active_answerer(sender_id):
+		return
+	if not _try_consume_server_answer_cooldown():
 		return
 	if answer == int(_current_roman.get("answer", -1)):
 		_puzzle1_correct += 1
@@ -913,6 +964,7 @@ func _server_handle_puzzle_1(answer: int) -> void:
 		if _puzzle1_correct >= PUZZLE_1_TARGET:
 			_bucket_progress = TOTAL_BUCKET_STEPS
 			_server_sync_state()
+			_broadcast_rage_bait(RageBaitKind.WIN)
 			_server_feedback("The bucket breaks the surface. The clue is yours.", false)
 			_broadcast_correct_effect()
 			await get_tree().create_timer(0.7, true).timeout
@@ -921,9 +973,11 @@ func _server_handle_puzzle_1(answer: int) -> void:
 			_toggle_answer_role()
 			_pick_next_roman()
 			_server_sync_state()
+			_broadcast_rage_bait(RageBaitKind.CORRECT)
 			_server_feedback("Correct. The bucket climbs from the deep.", false)
 			_broadcast_correct_effect()
 	else:
+		_broadcast_rage_bait(RageBaitKind.WRONG)
 		_server_register_mistake("Siyokoy laughs. The water pulls closer.")
 
 
@@ -994,6 +1048,8 @@ func check_chain_order() -> void:
 		_local_feedback("Only the Sidekick checks the chain.", true)
 		return
 	if _has_multiplayer() and not multiplayer.is_server():
+		if not _try_consume_action_cooldown():
+			return
 		rpc_request_check_chain.rpc_id(SERVER_PEER_ID)
 	else:
 		_server_check_chain()
@@ -1011,15 +1067,19 @@ func _server_check_chain() -> void:
 	if _chain_slots.has(-1):
 		_server_feedback("Fill every chain slot before checking.", true)
 		return
+	if not _try_consume_server_answer_cooldown():
+		return
 	var previous: int = -999999
 	for ring_index in _chain_slots:
 		var value: int = int((_chain_rings[ring_index] as Dictionary).get("answer", 0))
 		if value < previous:
+			_broadcast_rage_bait(RageBaitKind.WRONG)
 			_server_register_mistake("The chain order is wrong. The water climbs.")
 			return
 		previous = value
 	_bucket_progress = max(_bucket_progress, PUZZLE_1_TARGET + 1)
 	_server_sync_state()
+	_broadcast_rage_bait(RageBaitKind.CORRECT)
 	_server_feedback("The chain loosens. The bucket reaches the top.", false)
 	_broadcast_correct_effect()
 	await get_tree().create_timer(0.6, true).timeout
@@ -1091,6 +1151,8 @@ func check_eye_puzzle() -> void:
 		_local_feedback("Only the Sidekick checks the image.", true)
 		return
 	if _has_multiplayer() and not multiplayer.is_server():
+		if not _try_consume_action_cooldown():
+			return
 		rpc_request_check_eye.rpc_id(SERVER_PEER_ID)
 	else:
 		_server_check_eye()
@@ -1108,12 +1170,16 @@ func _server_check_eye() -> void:
 	if _eye_slots.has(-1):
 		_server_feedback("Place all six pieces before checking.", true)
 		return
+	if not _try_consume_server_answer_cooldown():
+		return
 	for i in range(EYE_ORDER.size()):
 		if int(_eye_slots[i]) != int(EYE_ORDER[i]):
+			_broadcast_rage_bait(RageBaitKind.WRONG)
 			_server_register_mistake("The eye is still broken. Siyokoy laughs.")
 			return
 	_bucket_progress = TOTAL_BUCKET_STEPS
 	_server_sync_state()
+	_broadcast_rage_bait(RageBaitKind.CORRECT)
 	_server_feedback("The Eye Clue is restored.", false)
 	_broadcast_correct_effect()
 	await get_tree().create_timer(0.6, true).timeout
@@ -1417,6 +1483,8 @@ func _apply_phase_visibility() -> void:
 			_set_background_state(false, true)
 			_update_instruction("The Eye Clue is safe.")
 	_refresh_role_visibility()
+	if _phase not in [Phase.PUZZLE_1, Phase.PUZZLE_2, Phase.PUZZLE_3]:
+		_hide_rage_bait()
 
 
 func _refresh_role_visibility() -> void:
@@ -1486,15 +1554,16 @@ func _refresh_puzzle1_ui() -> void:
 		sidekick_hint_label.add_theme_color_override("font_color", UI_GREEN)
 	if is_instance_valid(submit_number_button):
 		submit_number_button.text = "Check"
-		submit_number_button.disabled = not can_act
+		_set_control_interactive(submit_number_button, can_act)
 	if is_instance_valid(_pass_button):
 		_pass_button.visible = true
 		_pass_button.text = "Pass"
-		_pass_button.disabled = not can_act
+		_set_control_interactive(_pass_button, can_act)
 	if is_instance_valid(number_input):
 		number_input.placeholder_text = "Enter Answer"
-		number_input.editable = can_act
-		number_input.clear()
+		_set_line_edit_interactive(number_input, can_act)
+		if can_act:
+			number_input.clear()
 
 
 func _refresh_chain_ui() -> void:
@@ -1683,6 +1752,88 @@ func _feedback_for_phase(phase: int, message: String, is_error: bool) -> void:
 
 func _local_feedback(message: String, is_error: bool) -> void:
 	_feedback_for_phase(_phase, message, is_error)
+
+
+func _try_consume_action_cooldown() -> bool:
+	var now_msec: int = Time.get_ticks_msec()
+	if now_msec - _last_action_msec < ACTION_COOLDOWN_MSEC:
+		return false
+	_last_action_msec = now_msec
+	return true
+
+
+func _try_consume_server_answer_cooldown() -> bool:
+	var now_msec: int = Time.get_ticks_msec()
+	if now_msec - _last_server_answer_msec < ACTION_COOLDOWN_MSEC:
+		return false
+	_last_server_answer_msec = now_msec
+	return true
+
+
+func _setup_rage_bait() -> void:
+	_hide_rage_bait()
+	if is_instance_valid(rage_bait_label):
+		if _font:
+			rage_bait_label.add_theme_font_override("font", _font)
+		rage_bait_label.add_theme_font_size_override("font_size", 18)
+		rage_bait_label.add_theme_color_override("font_color", RAGE_BAIT_INK)
+		rage_bait_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		rage_bait_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		rage_bait_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+
+func _hide_rage_bait() -> void:
+	if is_instance_valid(_rage_bait_tween):
+		_rage_bait_tween.kill()
+		_rage_bait_tween = null
+	if is_instance_valid(rage_bait_bubble):
+		rage_bait_bubble.visible = false
+		rage_bait_bubble.modulate = Color.WHITE
+		rage_bait_bubble.scale = Vector2.ONE
+
+
+func _pick_rage_bait_line(kind: int) -> String:
+	match kind:
+		RageBaitKind.WIN:
+			return RAGE_BAIT_WIN_LINES[_rng.randi_range(0, RAGE_BAIT_WIN_LINES.size() - 1)]
+		RageBaitKind.WRONG:
+			return RAGE_BAIT_WRONG_LINES[_rng.randi_range(0, RAGE_BAIT_WRONG_LINES.size() - 1)]
+		_:
+			return RAGE_BAIT_CORRECT_LINES[_rng.randi_range(0, RAGE_BAIT_CORRECT_LINES.size() - 1)]
+
+
+func _show_rage_bait(line: String) -> void:
+	if _phase not in [Phase.PUZZLE_1, Phase.PUZZLE_2, Phase.PUZZLE_3]:
+		return
+	if not is_instance_valid(rage_bait_bubble) or not is_instance_valid(rage_bait_label):
+		return
+	if is_instance_valid(_rage_bait_tween):
+		_rage_bait_tween.kill()
+	rage_bait_label.text = line
+	rage_bait_bubble.visible = true
+	rage_bait_bubble.modulate = Color(1, 1, 1, 0)
+	rage_bait_bubble.scale = Vector2(0.92, 0.92)
+	_rage_bait_tween = create_tween()
+	_rage_bait_tween.set_trans(Tween.TRANS_BACK)
+	_rage_bait_tween.set_ease(Tween.EASE_OUT)
+	_rage_bait_tween.tween_property(rage_bait_bubble, "modulate:a", 1.0, 0.16)
+	_rage_bait_tween.parallel().tween_property(rage_bait_bubble, "scale", Vector2.ONE, 0.16)
+	_rage_bait_tween.tween_interval(RAGE_BAIT_VISIBLE_SECONDS)
+	_rage_bait_tween.tween_property(rage_bait_bubble, "modulate:a", 0.0, 0.22)
+	_rage_bait_tween.tween_callback(_hide_rage_bait)
+
+
+func _broadcast_rage_bait(kind: int) -> void:
+	var line: String = _pick_rage_bait_line(kind)
+	if _has_multiplayer():
+		rpc_show_rage_bait.rpc(line)
+	else:
+		rpc_show_rage_bait(line)
+
+
+@rpc("authority", "reliable", "call_local")
+func rpc_show_rage_bait(line: String) -> void:
+	_show_rage_bait(line)
 
 
 func _play_wrong_effect() -> void:
@@ -1896,6 +2047,31 @@ func _can_current_answerer_act() -> bool:
 	return GameState.local_role == _active_answer_role
 
 
+func _is_sender_active_answerer(sender_id: int) -> bool:
+	if not _has_multiplayer() or GameState.local_role == GameState.Role.NONE:
+		return true
+	var sender_role: int = GameState.Role.DETECTIVE if sender_id == SERVER_PEER_ID else GameState.Role.SIDEKICK
+	return sender_role == _active_answer_role
+
+
+func _set_control_interactive(control: Control, interactive: bool) -> void:
+	if not is_instance_valid(control):
+		return
+	if control is BaseButton:
+		(control as BaseButton).disabled = not interactive
+	control.mouse_filter = Control.MOUSE_FILTER_STOP if interactive else Control.MOUSE_FILTER_IGNORE
+
+
+func _set_line_edit_interactive(input: LineEdit, interactive: bool) -> void:
+	if not is_instance_valid(input):
+		return
+	input.editable = interactive
+	input.focus_mode = Control.FOCUS_ALL if interactive else Control.FOCUS_NONE
+	input.mouse_filter = Control.MOUSE_FILTER_STOP if interactive else Control.MOUSE_FILTER_IGNORE
+	if not interactive and input.has_focus():
+		input.release_focus()
+
+
 func _role_turn_text(role: int) -> String:
 	match role:
 		GameState.Role.DETECTIVE:
@@ -1948,7 +2124,11 @@ func _play_zone_completion_sfx() -> void:
 	if not is_instance_valid(_sfx_player) or COMPLETION_SFX == null:
 		return
 	MusicController.pause_music()
-	_sfx_player.stream = COMPLETION_SFX
+	var sfx_stream := COMPLETION_SFX.duplicate()
+	if sfx_stream is AudioStreamMP3 or sfx_stream is AudioStreamOggVorbis:
+		sfx_stream.loop = false
+	_sfx_player.stop()
+	_sfx_player.stream = sfx_stream
 	_sfx_player.play()
 	if not _sfx_player.finished.is_connected(_on_sfx_finished_resume_music):
 		_sfx_player.finished.connect(_on_sfx_finished_resume_music, CONNECT_ONE_SHOT)

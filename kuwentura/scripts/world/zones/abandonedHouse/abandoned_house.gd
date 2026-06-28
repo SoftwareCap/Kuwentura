@@ -17,6 +17,7 @@ const MEMORY_FACE_IDS := ["face_1", "face_2", "face_3", "face_4", "face_5", "fac
 const MEMORY_REWARD_ITEMS := ["key_fragment_2", "light_bulb"]
 const DRAWER_REWARD_ITEMS := ["key_fragment_3"]
 const ZONE_COMPLETION_SFX: AudioStream = preload("res://assets/audios/ZoneCompletionSFX.mp3")
+const SERVER_PEER_ID := 1
 
 # Keeps the puzzle more responsive on different screen sizes.
 const BOOK_WIDTH_RATIOS := {
@@ -343,7 +344,16 @@ var _sfx_player: AudioStreamPlayer
 var _final_box_role_card: Panel
 var _final_box_role_title_label: Label
 var _final_box_role_hint_label: Label
+var _ending_cutscene_transition_active := false
+var _ending_cutscene_return_sent := false
+var _ending_cutscene_finished_peers: Dictionary = {}
 
+func _get_drawer_correct_code() -> Array[int]:
+	return [
+		DRAWER_CORRECT_CODE[0],
+		DRAWER_CORRECT_CODE[1],
+		DRAWER_CORRECT_CODE[2]
+	]
 
 func _make_flat_style(fill_color: Color, border_color: Color = Color.TRANSPARENT, radius: int = 10, border_width: int = 0) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
@@ -2041,9 +2051,23 @@ func _apply_memory_puzzle_solved() -> void:
 
 	memory_instruction_label.text = "All pairs matched. Puzzle solved!"
 	_close_memory_panel()
+	_grant_items_for_memory_completion()
+	_refresh_progress_tracker()
 	_update_quest_labels()
-	_show_memory_reward_panel()
+	_start_tiara_reward_sequence()
 	_show_notification("Card puzzle solved.")
+
+func _grant_items_for_memory_completion() -> void:
+	if GameState and GameState.has_method("grant_zone_items"):
+		GameState.grant_zone_items(ZONE_ID, MEMORY_REWARD_ITEMS)
+
+	_refresh_inventory_board()
+
+func _start_tiara_reward_sequence() -> void:
+	if _has_tiara_clue() or _tiara_reward_active:
+		return
+
+	rpc_show_tiara_reward()
 
 func _show_memory_reward_panel() -> void:
 	_show_reward_panel(
@@ -2443,7 +2467,7 @@ func _load_drawer_progress() -> void:
 		_drawer_unlocked = false
 
 	if _drawer_unlocked:
-		_drawer_digits = DRAWER_CORRECT_CODE.duplicate()
+		_drawer_digits = _get_drawer_correct_code()
 	else:
 		_drawer_digits = [0, 0, 0]
 
@@ -2674,11 +2698,7 @@ func _apply_drawer_unlocked() -> void:
 		return
 
 	_drawer_unlocked = true
-	_drawer_digits = [
-	DRAWER_CORRECT_CODE[0],
-	DRAWER_CORRECT_CODE[1],
-	DRAWER_CORRECT_CODE[2]
-	]
+	_drawer_digits = _get_drawer_correct_code()
 
 	if GameState and GameState.has_method("set_puzzle_solved"):
 		GameState.set_puzzle_solved(DRAWER_PUZZLE_ID, true)
@@ -3770,10 +3790,17 @@ func _on_tiara_collect_pressed() -> void:
 		cinematic_collect_button.visible = false
 		cinematic_collect_button.disabled = true
 
-	if multiplayer.has_multiplayer_peer():
-		rpc_finalize_tiara_clue.rpc()
+	if not multiplayer.has_multiplayer_peer():
+		rpc_show_tiara_briefcase_reveal_then_finalize()
+	elif multiplayer.is_server():
+		rpc_show_tiara_briefcase_reveal_then_finalize.rpc()
 	else:
-		rpc_finalize_tiara_clue()
+		rpc_request_collect_tiara.rpc_id(SERVER_PEER_ID)
+
+@rpc("any_peer", "reliable")
+func rpc_request_collect_tiara() -> void:
+	if multiplayer.is_server():
+		rpc_show_tiara_briefcase_reveal_then_finalize.rpc()
 		
 func _hide_tiara_reward_visuals_for_briefcase() -> void:
 	_tiara_sparkle_animating = false
@@ -3816,7 +3843,7 @@ func _show_tiara_briefcase_reveal_local() -> void:
 	cinematic_briefcase_reveal.visible = reveal_texture != null
 	cinematic_briefcase_reveal.modulate = Color(1, 1, 1, 1)
 	
-@rpc("any_peer", "reliable", "call_local")
+@rpc("authority", "reliable", "call_local")
 func rpc_show_tiara_briefcase_reveal_then_finalize() -> void:
 	_hide_tiara_reward_visuals_for_briefcase()
 	_show_tiara_briefcase_reveal_local()
@@ -3829,8 +3856,41 @@ func rpc_show_tiara_briefcase_reveal_then_finalize() -> void:
 	else:
 		rpc_finalize_tiara_clue()
 		
-@rpc("any_peer", "reliable", "call_local")
+func _complete_remaining_progress_after_memory() -> void:
+	if _final_box_opened:
+		return
+
+	if GameState and GameState.has_method("grant_zone_items"):
+		GameState.grant_zone_items(ZONE_ID, MEMORY_REWARD_ITEMS)
+		GameState.grant_zone_items(ZONE_ID, DRAWER_REWARD_ITEMS)
+		GameState.grant_zone_items(ZONE_ID, [CABINET_KEY_ITEM_ID])
+
+	if GameState and GameState.has_method("set_puzzle_solved"):
+		GameState.set_puzzle_solved(MIRROR_PUZZLE_ID, true)
+		GameState.set_puzzle_solved(DRAWER_PUZZLE_ID, true)
+		GameState.set_puzzle_solved(CABINET_PUZZLE_ID, true)
+		GameState.set_puzzle_solved(FINAL_BOX_PUZZLE_ID, true)
+
+	_mirror_lit = true
+	_drawer_unlocked = true
+	_drawer_digits = _get_drawer_correct_code()
+	_cabinet_opened = true
+	_final_box_opened = true
+
+	_refresh_room_lighting()
+	_refresh_drawer_digit_visuals()
+	_refresh_drawer_panel_state()
+	_refresh_drawer_lock_panel_state()
+	_refresh_cabinet_panel_state()
+	_refresh_final_box_panel_state()
+	_refresh_progress_tracker()
+	_refresh_inventory_board()
+	_update_quest_labels()
+
+@rpc("authority", "reliable", "call_local")
 func rpc_finalize_tiara_clue() -> void:
+	_complete_remaining_progress_after_memory()
+
 	# grant the tiara item and mark the whole abandoned house zone as solved
 	if GameState and GameState.has_method("grant_zone_items"):
 		GameState.grant_zone_items(ZONE_ID, TIARA_REWARD_ITEMS)
@@ -3920,9 +3980,7 @@ func rpc_finalize_tiara_clue() -> void:
 
 	_refresh_final_box_clue_state()
 
-	await _fade_out(0.6)
-	_play_ending_cutscene()
-	await _fade_in(0.6)
+	await _start_synced_zone_ending_sequence()
 	
 func _process(delta: float) -> void:
 	if _tiara_sparkle_animating and cinematic_sparkle and cinematic_sparkle.visible:
@@ -3935,10 +3993,23 @@ func _return_to_forest() -> void:
 	get_tree().paused = false
 	MusicController.resume_music()
 	GameState.change_to_post_zone_scene(get_tree())
+
+func _start_synced_zone_ending_sequence() -> void:
+	if _ending_cutscene_transition_active:
+		return
+
+	_ending_cutscene_transition_active = true
+	_ending_cutscene_return_sent = false
+	_ending_cutscene_finished_peers.clear()
+	_ending_cutscene_resolved = false
+
+	await _fade_out(0.6)
+	_play_ending_cutscene()
+	await _fade_in(0.6)
 	
 func _play_ending_cutscene() -> void:
 	if not is_instance_valid(ending_cutscene):
-		_return_to_forest()
+		call_deferred("_on_cutscene_finished")
 		return
 	var dark: Node = get_node_or_null("Cutscene/DarkOverlay")
 	if is_instance_valid(dark):
@@ -3960,8 +4031,64 @@ func _on_cutscene_finished() -> void:
 	await _fade_out(0.6)
 	get_tree().paused = false
 	await get_tree().process_frame
+
+	if not multiplayer.has_multiplayer_peer():
+		if is_inside_tree():
+			_return_to_forest()
+		return
+
+	if multiplayer.is_server():
+		_mark_ending_cutscene_peer_finished(multiplayer.get_unique_id())
+		_try_return_to_forest_after_synced_ending()
+	else:
+		rpc_notify_ending_cutscene_finished.rpc_id(SERVER_PEER_ID)
+
+func _mark_ending_cutscene_peer_finished(peer_id: int) -> void:
+	_ending_cutscene_finished_peers[str(peer_id)] = true
+
+func _have_all_ending_cutscene_peers_finished() -> bool:
+	if not multiplayer.has_multiplayer_peer():
+		return true
+
+	if not _ending_cutscene_finished_peers.get(str(multiplayer.get_unique_id()), false):
+		return false
+
+	for peer_id in multiplayer.get_peers():
+		if not _ending_cutscene_finished_peers.get(str(peer_id), false):
+			return false
+
+	return true
+
+func _try_return_to_forest_after_synced_ending() -> void:
+	if not multiplayer.has_multiplayer_peer() or not multiplayer.is_server():
+		return
+
+	if _ending_cutscene_return_sent or not _have_all_ending_cutscene_peers_finished():
+		return
+
+	_ending_cutscene_return_sent = true
+	rpc_return_to_forest_after_ending.rpc()
+
+@rpc("any_peer", "reliable")
+func rpc_notify_ending_cutscene_finished() -> void:
+	if not multiplayer.is_server():
+		return
+
+	var sender_id := multiplayer.get_remote_sender_id()
+	if sender_id <= 0:
+		return
+
+	_mark_ending_cutscene_peer_finished(sender_id)
+	_try_return_to_forest_after_synced_ending()
+
+@rpc("authority", "reliable", "call_local")
+func rpc_return_to_forest_after_ending() -> void:
+	_ending_cutscene_transition_active = false
+	_ending_cutscene_return_sent = false
+	_ending_cutscene_finished_peers.clear()
+
 	if is_inside_tree():
-		GameState.change_to_post_zone_scene(get_tree())
+		_return_to_forest()
 
 
 func _fade_out(duration: float = 0.6) -> void:

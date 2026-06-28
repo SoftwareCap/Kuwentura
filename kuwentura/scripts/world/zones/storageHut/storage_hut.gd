@@ -12,10 +12,11 @@ const TRIANGLE_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storag
 const SQUARE_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/squareStorageHut.png")
 const PENTAGON_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/pentagonStorageHut.png")
 const HEXAGON_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/hexagonStorageHut.png")
-const RECTANGULAR_CONTAINER_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/rectangularContainer.png")
+const RECTANGULAR_CONTAINER_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/glowingContainer.png")
 const CYLINDER_CONTAINER_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/cylinderContainer.png")
-const TAPE_MEASURE_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/tapeMeasure.png")
-const CRUMPLED_PAPER_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/crumplePaperRoll.png")
+const TAPE_MEASURE_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/glowingTapeMeasure.png")
+const TAPE_MEASURE_MODAL_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/tapeMeasure.png")
+const CRUMPLED_PAPER_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/glowingCrumplePaperRoll.png")
 const RECTANGULAR_PAPER_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/rectangularPrismPaper.png")
 const WIDTH_RECT_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/widthRectangular.png")
 const LENGTH_RECT_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/storageHut/lengthRectangular.png")
@@ -23,6 +24,15 @@ const HEIGHT_RECT_TEX: Texture2D = preload("res://assets/sprites/zoneObjects/sto
 const CLOSE_BUTTON_TEX: Texture2D = preload("res://assets/buttons/closeButton.png")
 const COMPLETION_SFX: AudioStream = preload("res://assets/audios/ZoneCompletionSFX.mp3")
 const OCRA_FONT: FontFile = preload("res://assets/fonts/ocraextended.ttf")
+const ARABICA_FONT: FontFile = preload("res://assets/fonts/Arabica.ttf")
+
+const STORAGE_HUT_TASKS := [
+	"Solve Aswang's riddles.",
+	"Find the measuring tool.",
+	"Measure the vessel.",
+	"Find the volume formula.",
+	"Unlock the vessel using the volume.",
+]
 
 const UI_CREAM := Color(0.98, 0.95, 0.88, 1.0)
 const UI_INK := Color(0.22, 0.13, 0.07, 1.0)
@@ -133,9 +143,26 @@ const MEASUREMENT_STEPS := [
 
 const LOCK_HINT_TEXT := "The vessel hides the code in its own measure. Find its volume and break the seal."
 
+const INTRO_LINES := [
+	"So... little feet have entered my hut.",
+	"Searching for the lost artifact?",
+	"Heh. Brave... or foolish?",
+	"I will let you deeper, if you dare.",
+	"Count the shapes. Solve my riddles.",
+	"Miss one, and the hut will remember.",
+	"But my game does not end there.",
+	"I hid the artifact beyond despair.",
+	"Win, and you may prepare.",
+	"Fail... and leave with my shadow to bear."
+]
 @onready var role_label: Label = get_node_or_null("RoleLabel") as Label
 @onready var back_button: Button = get_node_or_null("BackButton") as Button
 @onready var background_sprite: Sprite2D = _first_valid_node(["BackgroundLayer/StorageBackground", "BackgroundLayer/BackyardBackground"]) as Sprite2D
+@onready var dialogue_layer: Node2D = get_node_or_null("DialogueLayer") as Node2D
+@onready var aswang_dialogue_sprite: Sprite2D = get_node_or_null("DialogueLayer/AswangDialogue") as Sprite2D
+@onready var dialogue_label: Label = get_node_or_null("DialogueLayer/AswangScriptLabel") as Label
+@onready var continue_button: Button = get_node_or_null("DialogueLayer/ContinueButton") as Button
+@onready var lighting_layer: CanvasLayer = get_node_or_null("LightingLayer") as CanvasLayer
 @onready var chest_object: Area2D = get_node_or_null("RoomObjectLayer/ChestObject") as Area2D
 @onready var chest_sprite: Sprite2D = get_node_or_null("RoomObjectLayer/ChestObject/ChestSprite") as Sprite2D
 @onready var chest_collision: CollisionShape2D = get_node_or_null("RoomObjectLayer/ChestObject/CollisionShape2D") as CollisionShape2D
@@ -215,6 +242,7 @@ const LOCK_HINT_TEXT := "The vessel hides the code in its own measure. Find its 
 @onready var briefcase_panel: Panel = get_node_or_null("SidekickLayer/Briefcase") as Panel
 @onready var briefcase_display: TextureRect = get_node_or_null("SidekickLayer/Briefcase/BriefcaseDisplay") as TextureRect
 var _ledger_instruction_image: TextureRect = null
+var _ledger_backdrop: ColorRect = null
 
 @onready var reward_layer: CanvasLayer = get_node_or_null("RewardLayer") as CanvasLayer
 @onready var reward_dark_overlay: ColorRect = get_node_or_null("RewardLayer/DarkOverlay") as ColorRect
@@ -237,7 +265,8 @@ var _ledger_instruction_image: TextureRect = null
 @onready var volume_slider: HSlider = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeSlider") as HSlider
 @onready var volume_value_label: Label = get_node_or_null("PauseCanvasLayer/InGamePausePanel/OptionSubPanel/VolumeSliderControl/VolumeValue") as Label
 @onready var inside_zone_control: CanvasLayer = get_node_or_null("InsideZoneControl") as CanvasLayer
-@onready var progress_sprite: Sprite2D = get_node_or_null("ProgressTracker/Sprite2D") as Sprite2D
+@onready var progress_tracker: Node = get_node_or_null("ProgressTracker")
+@onready var tasks_ui: Node = get_node_or_null("TasksLayer")
 
 @export var progress_default_tex: Texture2D
 @export var progress_solved_tex: Texture2D
@@ -271,12 +300,24 @@ var _runtime_shape_rects: Array[TextureRect] = []
 var _runtime_operator_labels: Array[Label] = []
 var _runtime_equals_label: Label = null
 var _clear_answer_button: Button = null
+var _answer_choice_row: HBoxContainer = null
+var _answer_choice_buttons: Array[Button] = []
 var _passcode_digit_2: LineEdit = null
 var _measurement_backdrop: ColorRect = null
 var _measurement_clear_button: Button = null
 var _measurement_intro_active: bool = false
 var _chest_glow_rect: ColorRect = null
 var _measurement_value_labels: Array[Label] = []
+var _dialogue_prompt_label: Label = null
+var _intro_active: bool = false
+var _intro_index: int = 0
+
+var measuring_tool_found := false
+
+var shape_riddle_completed := false
+var vessel_measured := false
+var formula_found := false
+var vessel_unlocked := false
 
 
 func _ready() -> void:
@@ -288,6 +329,7 @@ func _ready() -> void:
 	if is_instance_valid(role_label):
 		role_label.text = "Role: " + GameState.get_role_display_text()
 
+	_ensure_progress_tracker_canvas_layer()
 	setup_layout()
 	_setup_initial_state()
 	_populate_ledger()
@@ -302,7 +344,11 @@ func _ready() -> void:
 
 	MusicController.play_track(MusicController.MusicTrack.BACKYARD_PATH)
 	_initialize_chest_lock_sync()
-	_sync_riddle_ui("The hut is dark. Solve the carved shapes together.", false)
+	if _clue_collected:
+		_show_lighting_layer(true)
+		_sync_riddle_ui("", false)
+	else:
+		call_deferred("_auto_start_intro")
 	
 	if is_instance_valid(ending_cutscene):
 		CutsceneHelper.prepare_mobile_video_player(ending_cutscene)
@@ -380,31 +426,39 @@ func setup_layout() -> void:
 		lantern_glow.visible = false
 
 	if is_instance_valid(glow_progress_panel):
-		glow_progress_panel.position = Vector2(24.0, 60.0)
-		glow_progress_panel.size = Vector2(238.0, 78.0)
-		_apply_panel_style(glow_progress_panel, UI_PANEL_SOFT)
-	if is_instance_valid(glow_title_label):
-		_place_label(glow_title_label, Vector2(12, 7), Vector2(214, 24), 13, UI_INFO)
-		glow_title_label.text = "Storage Hut"
-	if is_instance_valid(glow_counter_label):
-		_place_label(glow_counter_label, Vector2(12, 36), Vector2(214, 30), 14, UI_CREAM)
+		glow_progress_panel.visible = false
 
 	if is_instance_valid(riddle_panel):
-		riddle_panel.position = Vector2(riddle_x, 34.0)
-		riddle_panel.size = Vector2(riddle_width, 148.0)
-		_apply_panel_style(riddle_panel, UI_PANEL)
+		riddle_panel.position = Vector2.ZERO
+		riddle_panel.size = screen_size
+		riddle_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+		riddle_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if is_instance_valid(riddle_header_label):
-		_place_label(riddle_header_label, Vector2(18, 10), Vector2(riddle_width - 36.0, 34), 29, UI_CREAM)
+		_place_label(riddle_header_label, Vector2((screen_size.x - 760.0) * 0.5, screen_size.y * 0.20), Vector2(760.0, 70.0), 56, UI_CREAM)
+		riddle_header_label.add_theme_font_override("font", ARABICA_FONT)
+		riddle_header_label.add_theme_font_size_override("font_size", 56)
+		riddle_header_label.add_theme_constant_override("outline_size", 4)
+		riddle_header_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.92))
 	if is_instance_valid(turn_label):
-		_place_label(turn_label, Vector2(18, 50), Vector2(riddle_width - 36.0, 30), 22, UI_INFO)
+		_place_label(turn_label, Vector2((screen_size.x - 420.0) * 0.5, screen_size.y - 120.0), Vector2(420.0, 40.0), 22, UI_INFO)
+		turn_label.add_theme_font_override("font", OCRA_FONT)
+		turn_label.add_theme_font_size_override("font_size", 22)
+		turn_label.add_theme_constant_override("outline_size", 2)
+		turn_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+		turn_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		turn_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	if is_instance_valid(viewer_instruction_label):
-		_place_label(viewer_instruction_label, Vector2(18, 92), Vector2(riddle_width - 36.0, 42), 16, UI_CREAM)
+		_place_label(viewer_instruction_label, Vector2((screen_size.x - 620.0) * 0.5, screen_size.y * 0.20 + 66.0), Vector2(620.0, 34.0), 18, UI_CREAM)
+		viewer_instruction_label.add_theme_font_override("font", OCRA_FONT)
+		viewer_instruction_label.add_theme_font_size_override("font_size", 18)
 		viewer_instruction_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		viewer_instruction_label.add_theme_constant_override("outline_size", 2)
+		viewer_instruction_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 
 	if is_instance_valid(shape_viewer_panel):
-		shape_viewer_panel.position = Vector2((screen_size.x - shape_panel_width) * 0.5, shape_panel_y)
-		shape_viewer_panel.size = Vector2(shape_panel_width, shape_panel_height)
-		_apply_panel_style(shape_viewer_panel, Color(0.08, 0.05, 0.03, 0.88))
+		shape_viewer_panel.position = Vector2((screen_size.x - shape_panel_width) * 0.5, clampf(screen_size.y * 0.44, 250.0, screen_size.y - 310.0))
+		shape_viewer_panel.size = Vector2(shape_panel_width, clampf(screen_size.y * 0.16, 120.0, 150.0))
+		shape_viewer_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 		shape_viewer_panel.z_index = 20
 		_ensure_shape_expression_layer()
 		_hide_legacy_shape_nodes()
@@ -418,41 +472,35 @@ func setup_layout() -> void:
 	_layout_shape_expression()
 
 	if is_instance_valid(answer_panel):
-		answer_panel.position = Vector2(screen_size.x * 0.5 - 310.0, screen_size.y - 230.0)
-		answer_panel.size = Vector2(620.0, 190.0)
-		_apply_panel_style(answer_panel, UI_PANEL)
+		answer_panel.position = Vector2((screen_size.x - 560.0) * 0.5, clampf(screen_size.y * 0.61, 390.0, screen_size.y - 180.0))
+		answer_panel.size = Vector2(560.0, 170.0)
+		answer_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	if is_instance_valid(answer_instruction_label):
-		_place_label(answer_instruction_label, Vector2(18, 10), Vector2(584, 30), 18, UI_CREAM)
+		_place_label(answer_instruction_label, Vector2(20, 0), Vector2(520.0, 34.0), 20, UI_CREAM)
+		answer_instruction_label.add_theme_font_override("font", OCRA_FONT)
+		answer_instruction_label.add_theme_font_size_override("font_size", 20)
+		answer_instruction_label.add_theme_constant_override("outline_size", 2)
+		answer_instruction_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	if is_instance_valid(answer_input):
-		answer_input.position = Vector2(70, 50)
-		answer_input.size = Vector2(480, 58)
-		answer_input.placeholder_text = "Enter Answer"
-		answer_input.alignment = HORIZONTAL_ALIGNMENT_CENTER
-		answer_input.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
-		answer_input.max_length = 3
-		answer_input.add_theme_font_override("font", OCRA_FONT)
-		answer_input.add_theme_font_size_override("font_size", 24)
-		_apply_line_edit_style(answer_input)
+		answer_input.visible = false
 	_ensure_clear_answer_button()
 	if is_instance_valid(_clear_answer_button):
-		_clear_answer_button.position = Vector2(122, 124)
-		_clear_answer_button.size = Vector2(170, 52)
-		_apply_button_style(_clear_answer_button)
-		_clear_answer_button.add_theme_font_size_override("font_size", 20)
+		_clear_answer_button.visible = false
 	if is_instance_valid(submit_answer_button):
-		submit_answer_button.position = Vector2(328, 124)
-		submit_answer_button.size = Vector2(170, 52)
-		submit_answer_button.text = "Submit"
-		_apply_button_style(submit_answer_button)
-		submit_answer_button.add_theme_font_size_override("font_size", 20)
+		submit_answer_button.visible = false
+	_ensure_answer_choice_buttons()
+	if is_instance_valid(_answer_choice_row):
+		_answer_choice_row.position = Vector2(36.0, 62.0)
+		_answer_choice_row.size = Vector2(answer_panel.size.x - 72.0, 88.0)
 	if is_instance_valid(feedback_label):
-		feedback_label.position = Vector2((screen_size.x - feedback_width) * 0.5, shape_panel_y + shape_panel_height + 12.0)
-		feedback_label.size = Vector2(feedback_width, 38.0)
+		feedback_label.position = Vector2((screen_size.x - feedback_width) * 0.5, clampf((screen_size.y - 64.0) * 0.5, 280.0, screen_size.y - 248.0))
+		feedback_label.size = Vector2(feedback_width, 64.0)
 		feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		feedback_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		feedback_label.add_theme_font_override("font", OCRA_FONT)
 		feedback_label.add_theme_font_size_override("font_size", 22)
-		feedback_label.add_theme_constant_override("outline_size", 2)
-		feedback_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+		feedback_label.add_theme_constant_override("outline_size", 3)
+		feedback_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.92))
 
 	if is_instance_valid(chest_modal):
 		chest_modal.size = Vector2(620.0, 330.0)
@@ -513,7 +561,7 @@ func setup_layout() -> void:
 
 	if is_instance_valid(chest_sprite):
 		chest_sprite.position = Vector2(screen_size.x * 0.54, screen_size.y * 0.64)
-		chest_sprite.scale = Vector2(0.30, 0.22)
+		chest_sprite.scale = Vector2(0.24, 0.17)
 		chest_sprite.self_modulate = Color(1, 1, 1, 1)
 	if is_instance_valid(chest_collision) and is_instance_valid(chest_sprite):
 		chest_collision.position = chest_sprite.position
@@ -522,91 +570,160 @@ func setup_layout() -> void:
 		measuring_tool_object.position = Vector2(screen_size.x * 0.14, screen_size.y * 0.78)
 	if is_instance_valid(measuring_tool_sprite):
 		measuring_tool_sprite.texture = TAPE_MEASURE_TEX
-		measuring_tool_sprite.scale = Vector2(0.13, 0.13)
+		measuring_tool_sprite.scale = Vector2(0.11, 0.11)
 	if is_instance_valid(scratch_paper_object):
-		scratch_paper_object.position = Vector2(screen_size.x * 0.86, screen_size.y * 0.75)
+		scratch_paper_object.position = Vector2(screen_size.x * 0.89, screen_size.y * 0.75)
 	if is_instance_valid(scratch_paper_sprite):
 		scratch_paper_sprite.texture = CRUMPLED_PAPER_TEX
-		scratch_paper_sprite.scale = Vector2(0.13, 0.13)
+		scratch_paper_sprite.scale = Vector2(0.11, 0.11)
 
 	_ensure_measurement_backdrop(screen_size)
 	if is_instance_valid(measurement_modal):
-		measurement_modal.size = Vector2(640.0, 560.0)
-		measurement_modal.position = (screen_size - measurement_modal.size) * 0.5
+		measurement_modal.size = Vector2(520.0, 500.0)
+		measurement_modal.position = Vector2((screen_size.x - measurement_modal.size.x) * 0.5, (screen_size.y - measurement_modal.size.y) * 0.5 + 18.0)
 		_apply_panel_style(measurement_modal, Color(0.12, 0.075, 0.04, 0.97))
 		measurement_modal.z_index = 5
 	if is_instance_valid(measurement_title_label):
-		_place_label(measurement_title_label, Vector2(34, 36), Vector2(572, 48), 31, UI_CREAM)
+		_place_label(measurement_title_label, Vector2(28, 24), Vector2(464, 40), 26, UI_CREAM)
 	if is_instance_valid(measurement_instruction_label):
-		_place_label(measurement_instruction_label, Vector2(58, 96), Vector2(524, 42), 15, UI_CREAM)
+		_place_label(measurement_instruction_label, Vector2(34, 62), Vector2(452, 36), 17, UI_CREAM)
 		measurement_instruction_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if is_instance_valid(measurement_image):
-		measurement_image.position = Vector2(320, 238)
-		measurement_image.scale = Vector2(0.36, 0.36)
+		_layout_measurement_modal_image(measurement_image, TAPE_MEASURE_MODAL_TEX, 70.0, 332.0, 58.0)
 	if is_instance_valid(measurement_answer_input):
-		measurement_answer_input.position = Vector2(170, 372)
-		measurement_answer_input.size = Vector2(300, 42)
+		measurement_answer_input.position = Vector2(140, 362)
+		measurement_answer_input.size = Vector2(240, 42)
 		measurement_answer_input.placeholder_text = ""
 		measurement_answer_input.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		measurement_answer_input.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
 		measurement_answer_input.add_theme_font_override("font", OCRA_FONT)
-		measurement_answer_input.add_theme_font_size_override("font_size", 24)
+		measurement_answer_input.add_theme_font_size_override("font_size", 22)
 		_apply_line_edit_style(measurement_answer_input)
 	if is_instance_valid(confirm_measurement_button):
-		confirm_measurement_button.position = Vector2(174, 438)
-		confirm_measurement_button.size = Vector2(132, 52)
+		confirm_measurement_button.position = Vector2(136, 420)
+		confirm_measurement_button.size = Vector2(124, 48)
 		confirm_measurement_button.text = "Record"
 		_apply_button_style(confirm_measurement_button)
 	_ensure_measurement_clear_button()
 	if is_instance_valid(_measurement_clear_button):
-		_measurement_clear_button.position = Vector2(334, 438)
-		_measurement_clear_button.size = Vector2(132, 52)
+		_measurement_clear_button.position = Vector2(266, 420)
+		_measurement_clear_button.size = Vector2(124, 48)
 		_measurement_clear_button.text = "Clear"
 		_apply_button_style(_measurement_clear_button)
 	if is_instance_valid(close_measurement_button):
-		close_measurement_button.position = Vector2(574, 4)
-		close_measurement_button.size = Vector2(86, 86)
-		close_measurement_button.text = ""
-		close_measurement_button.icon = CLOSE_BUTTON_TEX
-		close_measurement_button.expand_icon = true
-		close_measurement_button.flat = true
+		close_measurement_button.visible = false
+		close_measurement_button.disabled = true
 	if is_instance_valid(measurement_feedback_label):
-		_place_label(measurement_feedback_label, Vector2(154, 332), Vector2(170, 130), 18, UI_CREAM)
+		_place_label(measurement_feedback_label, Vector2(76, 228), Vector2(154, 96), 16, UI_CREAM)
 		measurement_feedback_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if is_instance_valid(measurement_summary_label):
-		_place_label(measurement_summary_label, Vector2(340, 330), Vector2(210, 132), 18, UI_INK)
+		_place_label(measurement_summary_label, Vector2(252, 224), Vector2(190, 92), 15, UI_INK)
 		measurement_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_ensure_measurement_value_labels()
 
 	if is_instance_valid(scratch_paper_modal):
-		scratch_paper_modal.size = Vector2(720.0, 560.0)
-		scratch_paper_modal.position = (screen_size - scratch_paper_modal.size) * 0.5
+		scratch_paper_modal.size = Vector2(620.0, 470.0)
+		scratch_paper_modal.position = Vector2((screen_size.x - scratch_paper_modal.size.x) * 0.5, (screen_size.y - scratch_paper_modal.size.y) * 0.5 + 18.0)
 		_apply_panel_style(scratch_paper_modal, Color(0.12, 0.075, 0.04, 0.97))
 	if is_instance_valid(scratch_paper_title_label):
-		_place_label(scratch_paper_title_label, Vector2(24, 18), Vector2(672, 44), 30, UI_CREAM)
-		scratch_paper_title_label.text = "Crumpled Scratch Paper"
+		_place_label(scratch_paper_title_label, Vector2(24, 18), Vector2(512, 40), 26, UI_CREAM)
+		scratch_paper_title_label.text = "Rectangular Prism Formula"
 	if is_instance_valid(scratch_paper_image):
 		scratch_paper_image.texture = RECTANGULAR_PAPER_TEX
-		scratch_paper_image.position = Vector2(360, 250)
-		scratch_paper_image.scale = Vector2(0.48, 0.48)
+		scratch_paper_image.position = Vector2(310, 206)
+		scratch_paper_image.scale = Vector2(0.39, 0.39)
 	if is_instance_valid(rectangular_paper_button):
 		rectangular_paper_button.visible = false
 		rectangular_paper_button.disabled = true
 	if is_instance_valid(cylinder_paper_button):
-		cylinder_paper_button.position = Vector2(326, 408)
-		cylinder_paper_button.size = Vector2(160, 58)
-		cylinder_paper_button.text = "Cylinder"
 		cylinder_paper_button.visible = false
 		cylinder_paper_button.disabled = true
 		_apply_button_style(cylinder_paper_button)
 	if is_instance_valid(close_scratch_paper_button):
-		close_scratch_paper_button.position = Vector2(300, 414)
-		close_scratch_paper_button.size = Vector2(120, 56)
+		close_scratch_paper_button.position = Vector2(230, 404)
+		close_scratch_paper_button.size = Vector2(160, 52)
 		close_scratch_paper_button.text = "Close"
 		_apply_button_style(close_scratch_paper_button)
 	if is_instance_valid(scratch_paper_feedback_label):
-		_place_label(scratch_paper_feedback_label, Vector2(64, 488), Vector2(592, 44), 18, UI_INFO)
+		_place_label(scratch_paper_feedback_label, Vector2(72, 342), Vector2(476, 56), 16, UI_INFO)
 		scratch_paper_feedback_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+	_ensure_dialogue_canvas_layer()
+	_setup_dialogue_layer(screen_size)
+
+
+func _ensure_dialogue_canvas_layer() -> void:
+	if not is_instance_valid(dialogue_layer):
+		return
+	var parent := dialogue_layer.get_parent()
+	if parent is CanvasLayer and parent.name == "DialogueCanvasLayer":
+		return
+	var canvas := CanvasLayer.new()
+	canvas.name = "DialogueCanvasLayer"
+	canvas.layer = 90
+	add_child(canvas)
+	var layer_position := dialogue_layer.position
+	parent.remove_child(dialogue_layer)
+	canvas.add_child(dialogue_layer)
+	dialogue_layer.position = layer_position
+
+
+func _setup_dialogue_layer(screen_size: Vector2) -> void:
+	if is_instance_valid(dialogue_layer):
+		dialogue_layer.visible = false
+	if is_instance_valid(aswang_dialogue_sprite):
+		aswang_dialogue_sprite.position = Vector2(screen_size.x * 0.54, screen_size.y * 0.56)
+	var dialogue_text_y: float = screen_size.y * 0.68
+	var dialogue_text_width: float = min(1036.0, screen_size.x - 240.0)
+	if is_instance_valid(dialogue_label):
+		dialogue_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		dialogue_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		dialogue_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		dialogue_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_place_label(dialogue_label, Vector2((screen_size.x - dialogue_text_width) * 0.5, dialogue_text_y), Vector2(dialogue_text_width, 80.0), 30, UI_INK)
+		dialogue_label.add_theme_font_override("font", ARABICA_FONT)
+	if not is_instance_valid(_dialogue_prompt_label) and is_instance_valid(dialogue_layer):
+		_dialogue_prompt_label = Label.new()
+		_dialogue_prompt_label.name = "TapAnywhereLabel"
+		_dialogue_prompt_label.text = "Tap anywhere to continue."
+		_dialogue_prompt_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		dialogue_layer.add_child(_dialogue_prompt_label)
+	if is_instance_valid(_dialogue_prompt_label):
+		_place_label(_dialogue_prompt_label, Vector2((screen_size.x - 520.0) * 0.5, dialogue_text_y + 112.0), Vector2(520.0, 36.0), 17, Color(0.86, 0.90, 1.0, 0.88))
+		_dialogue_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_dialogue_prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		_dialogue_prompt_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		_dialogue_prompt_label.text = "Tap anywhere to continue."
+	if is_instance_valid(continue_button):
+		continue_button.text = ""
+		continue_button.flat = true
+		continue_button.focus_mode = Control.FOCUS_NONE
+		continue_button.mouse_filter = Control.MOUSE_FILTER_STOP
+		continue_button.visible = false
+		continue_button.disabled = true
+		continue_button.position = Vector2.ZERO
+		continue_button.size = screen_size
+		continue_button.custom_minimum_size = screen_size
+		continue_button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+		continue_button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
+		continue_button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
+		continue_button.add_theme_stylebox_override("disabled", StyleBoxEmpty.new())
+
+
+func _ensure_progress_tracker_canvas_layer() -> void:
+	if not is_instance_valid(progress_tracker):
+		return
+	var parent := progress_tracker.get_parent()
+	if parent is CanvasLayer and parent.name == "ProgressTrackerCanvasLayer":
+		(parent as CanvasLayer).layer = 90
+		return
+	var canvas := get_node_or_null("ProgressTrackerCanvasLayer") as CanvasLayer
+	if not is_instance_valid(canvas):
+		canvas = CanvasLayer.new()
+		canvas.name = "ProgressTrackerCanvasLayer"
+		canvas.layer = 90
+		add_child(canvas)
+	progress_tracker.reparent(canvas)
 
 
 func _setup_initial_state() -> void:
@@ -626,6 +743,13 @@ func _setup_initial_state() -> void:
 	_scratch_paper_seen = false
 	_zone_failed = false
 	_clue_collected = GameState.has_clue(ZONE_ID)
+	_intro_active = false
+	_intro_index = 0
+	shape_riddle_completed = false
+	measuring_tool_found = false
+	vessel_measured = false
+	formula_found = false
+	vessel_unlocked = false
 
 	_set_final_objects_visible(false)
 	if is_instance_valid(chest_modal):
@@ -649,7 +773,7 @@ func _setup_initial_state() -> void:
 	if is_instance_valid(briefcase_panel):
 		briefcase_panel.visible = false
 	if is_instance_valid(glow_progress_panel):
-		glow_progress_panel.visible = true
+		glow_progress_panel.visible = false
 	if is_instance_valid(notification_panel):
 		notification_panel.visible = false
 	if is_instance_valid(pause_panel):
@@ -658,13 +782,20 @@ func _setup_initial_state() -> void:
 		option_panel.visible = false
 	if is_instance_valid(back_button):
 		back_button.visible = false
-	if is_instance_valid(progress_sprite):
-		progress_sprite.texture = progress_default_tex if progress_default_tex else progress_sprite.texture
+	if is_instance_valid(progress_tracker) and progress_tracker.has_method("reset_tracker"):
+		progress_tracker.call("reset_tracker")
+	_setup_storage_hut_tasks()
+	_set_gameplay_hud_visible(true)
+	_set_gameplay_hud_interactable(true)
+	update_storage_hut_progress()
 
 	_update_darkness()
 
 
+
 func _connect_signals() -> void:
+	if is_instance_valid(continue_button) and not continue_button.pressed.is_connected(advance_intro):
+		continue_button.pressed.connect(advance_intro)
 	if is_instance_valid(back_button) and not back_button.pressed.is_connected(_on_back_pressed):
 		back_button.pressed.connect(_on_back_pressed)
 	if is_instance_valid(submit_answer_button) and not submit_answer_button.pressed.is_connected(_on_submit_answer_pressed):
@@ -766,7 +897,159 @@ func _apply_chest_lock(lock_index: int) -> void:
 	_update_chest_modal_content()
 
 
+func _auto_start_intro() -> void:
+	if _clue_collected or _intro_active:
+		return
+	start_intro()
+
+
+func start_intro() -> void:
+	if _clue_collected or _intro_active:
+		return
+	if _has_multiplayer() and not multiplayer.is_server():
+		rpc_request_start_intro.rpc_id(SERVER_PEER_ID)
+	else:
+		_server_start_intro()
+
+
+@rpc("any_peer", "reliable")
+func rpc_request_start_intro() -> void:
+	if multiplayer.is_server():
+		_server_start_intro()
+
+
+func _server_start_intro() -> void:
+	_intro_active = true
+	_intro_index = 0
+	if _has_multiplayer():
+		rpc_start_intro.rpc()
+	else:
+		rpc_start_intro()
+
+
+@rpc("authority", "reliable", "call_local")
+func rpc_start_intro() -> void:
+	_intro_active = true
+	_intro_index = 0
+	_update_intro_visibility()
+	_refresh_intro_ui()
+
+
+func advance_intro() -> void:
+	if not _intro_active:
+		return
+	if _has_multiplayer() and not multiplayer.is_server():
+		rpc_request_advance_intro.rpc_id(SERVER_PEER_ID)
+	else:
+		_server_advance_intro()
+
+
+@rpc("any_peer", "reliable")
+func rpc_request_advance_intro() -> void:
+	if multiplayer.is_server():
+		_server_advance_intro()
+
+
+func _server_advance_intro() -> void:
+	if not _intro_active:
+		return
+	_intro_index += 1
+	if _intro_index >= INTRO_LINES.size():
+		_server_finish_intro()
+	else:
+		_broadcast_intro_line()
+
+
+func _server_finish_intro() -> void:
+	_intro_active = false
+	_intro_index = 0
+	if _has_multiplayer():
+		rpc_finish_intro.rpc()
+	else:
+		rpc_finish_intro()
+
+
+func _broadcast_intro_line() -> void:
+	if _has_multiplayer():
+		rpc_sync_intro_line.rpc(_intro_index)
+	else:
+		rpc_sync_intro_line(_intro_index)
+
+
+@rpc("authority", "reliable", "call_local")
+func rpc_sync_intro_line(index: int) -> void:
+	_intro_index = clampi(index, 0, INTRO_LINES.size() - 1)
+	_refresh_intro_ui()
+
+
+@rpc("authority", "reliable", "call_local")
+func rpc_finish_intro() -> void:
+	_intro_active = false
+	_intro_index = 0
+	_update_intro_visibility()
+	_show_lighting_layer(true)
+	_sync_riddle_ui("", false)
+
+
+func _refresh_intro_ui() -> void:
+	var index: int = clampi(_intro_index, 0, INTRO_LINES.size() - 1)
+	var line_text: String = str(INTRO_LINES[index])
+	if is_instance_valid(dialogue_label):
+		dialogue_label.text = line_text
+	if is_instance_valid(_dialogue_prompt_label):
+		_dialogue_prompt_label.text = "Tap anywhere to continue."
+	if is_instance_valid(continue_button):
+		continue_button.visible = true
+		continue_button.disabled = false
+
+
+func _update_intro_visibility() -> void:
+	if is_instance_valid(dialogue_layer):
+		dialogue_layer.visible = _intro_active
+	if is_instance_valid(continue_button):
+		continue_button.visible = _intro_active
+		continue_button.disabled = not _intro_active
+	if is_instance_valid(progress_tracker):
+		progress_tracker.visible = not _intro_active
+	if is_instance_valid(inside_zone_control):
+		inside_zone_control.visible = not _intro_active
+	if _intro_active:
+		if is_instance_valid(riddle_layer):
+			riddle_layer.visible = false
+		if is_instance_valid(glow_progress_panel):
+			glow_progress_panel.visible = false
+		if is_instance_valid(ledger_panel):
+			ledger_panel.visible = false
+		if is_instance_valid(briefcase_panel):
+			briefcase_panel.visible = false
+		if is_instance_valid(pause_canvas_layer):
+			pause_canvas_layer.visible = false
+		_show_lighting_layer(false)
+		if is_instance_valid(dark_overlay):
+			dark_overlay.visible = false
+		if is_instance_valid(lantern_glow):
+			lantern_glow.visible = false
+	else:
+		if is_instance_valid(dialogue_layer):
+			dialogue_layer.visible = false
+		if is_instance_valid(continue_button):
+			continue_button.visible = false
+			continue_button.disabled = true
+		_refresh_inside_zone_buttons()
+
+
+func _show_lighting_layer(visible_state: bool) -> void:
+	if is_instance_valid(lighting_layer):
+		lighting_layer.visible = visible_state
+
+
+func _has_multiplayer() -> bool:
+	return multiplayer.has_multiplayer_peer()
+
+
 func _sync_riddle_ui(message: String = "", is_error: bool = false) -> void:
+	if _intro_active:
+		return
 	if not _chest_revealed:
 		_set_chest_visible(false)
 	_update_glow_progress_label()
@@ -775,6 +1058,10 @@ func _sync_riddle_ui(message: String = "", is_error: bool = false) -> void:
 	if _current_riddle_index >= TOTAL_RIDDLES:
 		_reveal_chest(message)
 		return
+
+	_show_lighting_layer(true)
+	if is_instance_valid(glow_progress_panel):
+		glow_progress_panel.visible = false
 
 	var riddle: Dictionary = RIDDLES[_current_riddle_index]
 	var viewer_role := str(riddle.get("viewer", ROLE_DETECTIVE))
@@ -785,33 +1072,30 @@ func _sync_riddle_ui(message: String = "", is_error: bool = false) -> void:
 	if is_instance_valid(riddle_layer):
 		riddle_layer.visible = true
 	if is_instance_valid(riddle_header_label):
-		riddle_header_label.text = "Shape Riddle %d / %d" % [_current_riddle_index + 1, TOTAL_RIDDLES]
+		riddle_header_label.text = "Aswang's Riddle"
 	if is_instance_valid(turn_label):
-		turn_label.text = "Viewer: %s   Answer: %s" % [_role_display(viewer_role), _role_display(answer_role)]
+		turn_label.text = _get_turn_indicator_text(answer_role, is_answerer)
+		turn_label.visible = true
 	if is_instance_valid(viewer_instruction_label):
-		if is_viewer and is_answerer:
-			viewer_instruction_label.text = "Count each shape's sides, follow the operator, then enter the result."
-		elif is_viewer:
-			viewer_instruction_label.text = "Count the sides of each shape and tell your partner the full equation."
-		elif is_answerer:
-			viewer_instruction_label.text = "Use your partner's shape counts, solve the equation, then enter the number."
-		else:
-			viewer_instruction_label.text = "Watch your partner's turn."
-
+		viewer_instruction_label.text = "Count the sides and solve the operation."
 	if is_instance_valid(shape_viewer_panel):
 		shape_viewer_panel.visible = is_viewer
 	if is_instance_valid(answer_panel):
 		answer_panel.visible = is_answerer
 	if is_instance_valid(answer_input):
-		answer_input.editable = is_answerer
+		answer_input.visible = false
+		answer_input.editable = false
 		answer_input.text = ""
 	if is_instance_valid(_clear_answer_button):
-		_clear_answer_button.visible = is_answerer
-		_clear_answer_button.disabled = not is_answerer
+		_clear_answer_button.visible = false
+		_clear_answer_button.disabled = true
 	if is_instance_valid(submit_answer_button):
-		submit_answer_button.disabled = not is_answerer
+		submit_answer_button.visible = false
+		submit_answer_button.disabled = true
 	if is_instance_valid(answer_instruction_label):
-		answer_instruction_label.text = "Enter the side-count result."
+		answer_instruction_label.visible = is_answerer
+		answer_instruction_label.text = "Choose the answer below."
+	_refresh_riddle_answer_choices(int(riddle.get("answer", 0)), is_answerer)
 
 	_set_shape_expression(riddle)
 	_set_feedback(message, is_error)
@@ -842,8 +1126,8 @@ func _set_shape_expression(riddle: Dictionary) -> void:
 		label.visible = i < ops.size()
 
 	if is_instance_valid(_runtime_equals_label):
-		_runtime_equals_label.text = "= ?"
-		_runtime_equals_label.visible = true
+		_runtime_equals_label.text = ""
+		_runtime_equals_label.visible = false
 
 	_layout_shape_expression()
 
@@ -861,14 +1145,13 @@ func _layout_shape_expression() -> void:
 		if is_instance_valid(slot) and slot.visible:
 			visible_count += 1
 	var panel_width := layer_size.x
-	var target_sprite_size: float = min(118.0, layer_size.y - 28.0)
-	var x_positions := [panel_width * 0.24, panel_width * 0.50, 0.0]
-	var op_positions := [panel_width * 0.37, 0.0]
-	var equals_x := panel_width * 0.70
+	var target_sprite_size: float = min(126.0, layer_size.y - 12.0)
+	var x_positions := [panel_width * 0.32, panel_width * 0.68, 0.0]
+	var op_positions := [panel_width * 0.50, 0.0]
 	if visible_count >= 3:
-		x_positions = [panel_width * 0.16, panel_width * 0.38, panel_width * 0.60]
-		op_positions = [panel_width * 0.27, panel_width * 0.49]
-		equals_x = panel_width * 0.78
+		target_sprite_size = min(112.0, layer_size.y - 10.0)
+		x_positions = [panel_width * 0.20, panel_width * 0.50, panel_width * 0.80]
+		op_positions = [panel_width * 0.35, panel_width * 0.65]
 	for i in range(_runtime_shape_rects.size()):
 		var slot := _runtime_shape_rects[i]
 		if is_instance_valid(slot):
@@ -880,8 +1163,6 @@ func _layout_shape_expression() -> void:
 		var label := _runtime_operator_labels[i]
 		if is_instance_valid(label):
 			_place_expression_label(label, Vector2(op_positions[i] - 34.0, center_y - 28.0), Vector2(68, 56))
-	if is_instance_valid(_runtime_equals_label):
-		_place_expression_label(_runtime_equals_label, Vector2(equals_x - 44.0, center_y - 28.0), Vector2(96, 56))
 
 
 func _ensure_shape_expression_layer() -> void:
@@ -1007,6 +1288,116 @@ func _ensure_clear_answer_button() -> void:
 		_clear_answer_button.pressed.connect(_on_clear_answer_pressed)
 
 
+func _ensure_answer_choice_buttons() -> void:
+	if not is_instance_valid(answer_panel):
+		return
+	if not is_instance_valid(_answer_choice_row):
+		_answer_choice_row = answer_panel.get_node_or_null("AnswerChoiceRow") as HBoxContainer
+	if not is_instance_valid(_answer_choice_row):
+		_answer_choice_row = HBoxContainer.new()
+		_answer_choice_row.name = "AnswerChoiceRow"
+		_answer_choice_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		_answer_choice_row.mouse_filter = Control.MOUSE_FILTER_STOP
+		_answer_choice_row.add_theme_constant_override("separation", 28)
+		answer_panel.add_child(_answer_choice_row)
+	while _answer_choice_buttons.size() < 3:
+		var choice_button := Button.new()
+		choice_button.name = "AnswerChoice%d" % (_answer_choice_buttons.size() + 1)
+		choice_button.custom_minimum_size = Vector2(84.0, 84.0)
+		choice_button.focus_mode = Control.FOCUS_NONE
+		choice_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		choice_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		choice_button.pressed.connect(_on_answer_choice_pressed.bind(choice_button))
+		_answer_choice_row.add_child(choice_button)
+		_answer_choice_buttons.append(choice_button)
+	for choice_button in _answer_choice_buttons:
+		_apply_answer_choice_style(choice_button)
+
+
+func _apply_answer_choice_style(button: Button) -> void:
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.94, 0.79, 0.49, 0.98)
+	normal.border_color = Color(1.0, 0.90, 0.60, 1.0)
+	normal.set_border_width_all(3)
+	normal.set_corner_radius_all(42)
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = Color(1.0, 0.84, 0.56, 1.0)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(0.88, 0.71, 0.40, 1.0)
+	var disabled := normal.duplicate() as StyleBoxFlat
+	disabled.bg_color = Color(0.62, 0.52, 0.38, 0.92)
+	disabled.border_color = Color(0.76, 0.66, 0.50, 0.9)
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", pressed)
+	button.add_theme_stylebox_override("disabled", disabled)
+	button.add_theme_font_override("font", OCRA_FONT)
+	button.add_theme_font_size_override("font_size", 24)
+	button.add_theme_color_override("font_color", UI_INK)
+	button.add_theme_color_override("font_pressed_color", UI_INK)
+	button.add_theme_color_override("font_hover_color", UI_INK)
+	button.add_theme_color_override("font_disabled_color", Color(0.27, 0.17, 0.09, 0.8))
+
+
+func _build_riddle_answer_choices(correct: int) -> Array[int]:
+	var choices: Array[int] = [correct]
+	var candidate_offsets: Array[int] = [-2, -1, 1, 2, 3, -3, 4]
+	for offset: int in candidate_offsets:
+		var candidate: int = correct + offset
+		if candidate < 0 or choices.has(candidate):
+			continue
+		choices.append(candidate)
+		if choices.size() >= 3:
+			break
+	while choices.size() < 3:
+		var fallback: int = correct + choices.size() + 1
+		if not choices.has(fallback):
+			choices.append(fallback)
+	choices.sort()
+	return choices
+
+
+func _refresh_riddle_answer_choices(correct: int, is_answerer: bool) -> void:
+	_ensure_answer_choice_buttons()
+	var choices := _build_riddle_answer_choices(correct)
+	for i in range(_answer_choice_buttons.size()):
+		var choice_button := _answer_choice_buttons[i]
+		if not is_instance_valid(choice_button):
+			continue
+		if i < choices.size():
+			var answer_value := choices[i]
+			choice_button.visible = true
+			choice_button.disabled = not is_answerer
+			choice_button.text = str(answer_value)
+			choice_button.set_meta("answer_value", answer_value)
+		else:
+			choice_button.visible = false
+
+
+func _on_answer_choice_pressed(choice_button: Button) -> void:
+	if not is_instance_valid(choice_button):
+		return
+	_submit_riddle_answer_value(int(choice_button.get_meta("answer_value", 0)))
+
+
+func _submit_riddle_answer_value(answer: int) -> void:
+	if _is_submitting_riddle or _zone_failed or _reward_active:
+		return
+	if _current_riddle_index >= TOTAL_RIDDLES:
+		return
+	var answer_role := str(RIDDLES[_current_riddle_index].get("answerer", ROLE_SIDEKICK))
+	if not (_is_local_role(answer_role) or _is_single_player_test()):
+		show_notification("It is your partner's turn to answer.", 1.6)
+		return
+	_is_submitting_riddle = true
+	if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
+		_validate_riddle_answer(answer)
+	else:
+		rpc_submit_riddle_answer.rpc_id(SERVER_PEER_ID, answer, _current_riddle_index)
+	await get_tree().create_timer(0.18).timeout
+	_is_submitting_riddle = false
+
+
 func _ensure_measurement_backdrop(screen_size: Vector2) -> void:
 	if not is_instance_valid(measurement_ui_layer):
 		return
@@ -1071,13 +1462,22 @@ func _ensure_measurement_value_labels() -> void:
 		value_label.visible = false
 		measurement_modal.add_child(value_label)
 		_measurement_value_labels.append(value_label)
-	var values := ["4", "5", "3"]
+	var values := [
+		"%d CM" % int(_recorded_measurements.get("width", 4)),
+		"%d CM" % int(_recorded_measurements.get("length", 5)),
+		"%d CM" % int(_recorded_measurements.get("height", 3))
+	]
+	var record_layout := _get_measurement_record_group_layout()
+	var value_x: float = float(record_layout.get("value_x", 274.0))
+	var row_y: float = float(record_layout.get("row_y", 316.0))
+	var row_gap: float = float(record_layout.get("row_gap", 40.0))
+	var value_size := record_layout.get("value_size", Vector2(112.0, 34.0)) as Vector2
 	for i in range(_measurement_value_labels.size()):
 		var label := _measurement_value_labels[i]
 		if not is_instance_valid(label):
 			continue
 		label.text = values[i] if i < values.size() else ""
-		_place_label(label, Vector2(348, 322 + i * 56), Vector2(196, 38), 17, UI_INK)
+		_place_label(label, Vector2(value_x, row_y + i * row_gap), value_size, 20, UI_CREAM)
 		_apply_measurement_value_style(label)
 
 
@@ -1118,29 +1518,13 @@ func _on_clear_answer_pressed() -> void:
 
 
 func _on_submit_answer_pressed() -> void:
-	if _is_submitting_riddle or _zone_failed or _reward_active:
-		return
-	if _current_riddle_index >= TOTAL_RIDDLES:
-		return
-	var answer_role := str(RIDDLES[_current_riddle_index].get("answerer", ROLE_SIDEKICK))
-	if not (_is_local_role(answer_role) or _is_single_player_test()):
-		show_notification("It is your partner's turn to answer.", 1.6)
-		return
 	if not is_instance_valid(answer_input):
 		return
-
 	var answer_text := answer_input.text.strip_edges()
 	if answer_text.is_empty() or not answer_text.is_valid_int():
-		_set_feedback("Enter a whole number.", true)
+		_set_feedback("Choose one of the answers below.", true)
 		return
-
-	_is_submitting_riddle = true
-	if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
-		_validate_riddle_answer(int(answer_text))
-	else:
-		rpc_submit_riddle_answer.rpc_id(SERVER_PEER_ID, int(answer_text), _current_riddle_index)
-	await get_tree().create_timer(0.18).timeout
-	_is_submitting_riddle = false
+	_submit_riddle_answer_value(int(answer_text))
 
 
 @rpc("any_peer", "reliable")
@@ -1169,6 +1553,7 @@ func _validate_riddle_answer(answer: int) -> void:
 		else:
 			rpc_sync_riddle_state(_current_riddle_index, _glow_progress, _current_riddle_index >= TOTAL_RIDDLES, message, false)
 	else:
+		_apply_mistake_penalty()
 		if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 			rpc_sync_riddle_state.rpc(_current_riddle_index, _glow_progress, _chest_revealed, "The lantern flickers. Try again.", true)
 		else:
@@ -1190,6 +1575,9 @@ func _reveal_chest(message: String = "The hut is fully revealed.") -> void:
 	_chest_revealed = true
 	_final_phase_unlocked = true
 	_glow_progress = TOTAL_RIDDLES
+	if not shape_riddle_completed:
+		shape_riddle_completed = true
+		update_storage_hut_progress()
 	_update_darkness()
 	_update_glow_progress_label()
 	if is_instance_valid(glow_progress_panel):
@@ -1198,8 +1586,6 @@ func _reveal_chest(message: String = "The hut is fully revealed.") -> void:
 	if is_instance_valid(riddle_layer):
 		riddle_layer.visible = false
 	_set_final_objects_visible(true)
-	if is_instance_valid(progress_sprite):
-		progress_sprite.texture = progress_solved_tex if progress_solved_tex else progress_sprite.texture
 	show_notification("The room is revealed. Search the hut for a way to open the vessel.", 2.4)
 
 
@@ -1239,6 +1625,9 @@ func _on_chest_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) 
 	if not _final_phase_unlocked or _reward_active or _zone_failed:
 		return
 	if not _is_click_event(event):
+		return
+	if not _can_unlock_vessel():
+		_handle_locked_vessel_attempt()
 		return
 	_open_chest_modal()
 
@@ -1353,12 +1742,12 @@ func rpc_submit_chest_passcode(passcode: int) -> void:
 
 
 func _validate_chest_passcode(passcode: int) -> void:
-	if not _has_all_measurements():
-		_set_chest_feedback("The seal stays cold. Something is still missing.", true)
+	if not _can_unlock_vessel():
+		_handle_locked_vessel_attempt()
 		if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 			var sender_id := multiplayer.get_remote_sender_id()
 			if sender_id > 0:
-				rpc_sync_chest_feedback.rpc_id(sender_id, "The seal stays cold. Something is still missing.", true)
+				rpc_sync_chest_feedback.rpc_id(sender_id, "Cannot unlock vessel yet. Measure the vessel and find the formula first.", true)
 		return
 	var lock: Dictionary = CHEST_LOCKS[_chest_lock_index]
 	var correct := int(lock.get("answer", 60))
@@ -1368,16 +1757,21 @@ func _validate_chest_passcode(passcode: int) -> void:
 		else:
 			rpc_chest_unlocked()
 	else:
+		_set_chest_feedback("Wrong passcode. Try again.", true)
 		if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
-			rpc_eject_from_hut.rpc()
-		else:
-			rpc_eject_from_hut()
+			var sender_id := multiplayer.get_remote_sender_id()
+			if sender_id > 0:
+				rpc_sync_chest_feedback.rpc_id(sender_id, "Wrong passcode. Try again.", true)
+		_apply_mistake_penalty()
 
 
 @rpc("authority", "reliable", "call_local")
 func rpc_chest_unlocked() -> void:
 	if _reward_active:
 		return
+	if not vessel_unlocked:
+		vessel_unlocked = true
+		update_storage_hut_progress()
 	if is_instance_valid(chest_modal):
 		chest_modal.visible = false
 	if is_instance_valid(measurement_modal):
@@ -1388,6 +1782,16 @@ func rpc_chest_unlocked() -> void:
 		scratch_paper_modal.visible = false
 	_play_zone_completion_sfx()
 	_show_reward()
+
+
+func handle_zone_failed() -> void:
+	if _zone_failed:
+		return
+	print("No lives remaining. Kicking player out of zone.")
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		rpc_eject_from_hut.rpc()
+	else:
+		rpc_eject_from_hut()
 
 
 @rpc("authority", "reliable", "call_local")
@@ -1432,6 +1836,7 @@ func _on_measuring_tool_input_event(_viewport: Node, event: InputEvent, _shape_i
 
 
 func _open_measurement_modal() -> void:
+	_register_measuring_tool_found()
 	_measurement_intro_active = not _has_all_measurements()
 	_update_measurement_modal_content()
 	if is_instance_valid(_measurement_backdrop):
@@ -1487,69 +1892,138 @@ func _update_measurement_modal_content(feedback_text: String = "", is_error: boo
 			measurement_instruction_label.visible = false
 		elif can_answer:
 			measurement_instruction_label.visible = true
-			measurement_instruction_label.text = "Read the tape and record the vessel's measurement."
-			_place_label(measurement_instruction_label, Vector2(58, 92), Vector2(524, 36), 15, UI_CREAM)
+			measurement_instruction_label.text = "Read and record the vessel's measurement."
+			_place_label(measurement_instruction_label, Vector2(34, 62), Vector2(452, 36), 17, UI_CREAM)
 		else:
 			measurement_instruction_label.visible = true
-			measurement_instruction_label.text = "%s must read this tape mark." % _role_display(answer_role)
-			_place_label(measurement_instruction_label, Vector2(58, 92), Vector2(524, 36), 15, UI_CREAM)
+			measurement_instruction_label.text = "%s is reading this tape mark now." % _role_display(answer_role)
+			_place_label(measurement_instruction_label, Vector2(34, 62), Vector2(452, 36), 17, UI_CREAM)
 	if is_instance_valid(measurement_image):
 		var measurement_texture: Texture2D = RECTANGULAR_CONTAINER_TEX
 		if not all_done:
 			measurement_texture = step.get("texture") as Texture2D
-		measurement_image.texture = measurement_texture
-		measurement_image.visible = measurement_image.texture != null
-		measurement_image.position = Vector2(330, 208) if all_done else Vector2(330, 245)
-		measurement_image.scale = Vector2(0.32, 0.32) if all_done else Vector2(0.42, 0.42)
+		if all_done:
+			_layout_measurement_modal_image(measurement_image, measurement_texture, 102.0, 300.0, 74.0)
+		else:
+			measurement_image.texture = measurement_texture
+			measurement_image.visible = measurement_image.texture != null
+			measurement_image.position = Vector2(260, 226)
+			measurement_image.scale = Vector2(0.38, 0.38)
 	if is_instance_valid(measurement_answer_input):
 		measurement_answer_input.visible = not all_done
 		measurement_answer_input.editable = can_answer
-		measurement_answer_input.placeholder_text = "Measurement"
+		measurement_answer_input.placeholder_text = "Measurement (cm)"
 		measurement_answer_input.text = ""
 	if is_instance_valid(confirm_measurement_button):
 		confirm_measurement_button.visible = not all_done
 		confirm_measurement_button.disabled = not can_answer
 		confirm_measurement_button.text = "Record"
-		confirm_measurement_button.position = Vector2(174, 438)
-		confirm_measurement_button.size = Vector2(132, 52)
+		confirm_measurement_button.position = Vector2(136, 420)
+		confirm_measurement_button.size = Vector2(124, 48)
 		_apply_button_style(confirm_measurement_button)
 	if is_instance_valid(_measurement_clear_button):
 		_measurement_clear_button.visible = not all_done
 		_measurement_clear_button.disabled = not can_answer
-		_measurement_clear_button.position = Vector2(334, 438)
-		_measurement_clear_button.size = Vector2(132, 52)
+		_measurement_clear_button.position = Vector2(266, 420)
+		_measurement_clear_button.size = Vector2(124, 48)
 		_measurement_clear_button.text = "Clear"
 		_apply_button_style(_measurement_clear_button)
+	if is_instance_valid(close_measurement_button):
+		close_measurement_button.visible = all_done
+		close_measurement_button.disabled = not all_done
+		if all_done:
+			close_measurement_button.text = "Close"
+			close_measurement_button.position = Vector2(96, 426)
+			close_measurement_button.size = Vector2(328, 48)
+			close_measurement_button.icon = null
+			close_measurement_button.expand_icon = false
+			close_measurement_button.flat = false
+			_apply_button_style(close_measurement_button)
 	if is_instance_valid(measurement_feedback_label):
 		if all_done:
+			var record_layout := _get_measurement_record_group_layout()
+			var label_pos := record_layout.get("label_pos", Vector2(132.0, 316.0)) as Vector2
+			var label_size := record_layout.get("label_size", Vector2(134.0, 108.0)) as Vector2
 			measurement_feedback_label.text = "Width =\n\nLength =\n\nHeight ="
 			measurement_feedback_label.add_theme_color_override("font_color", UI_CREAM)
-			_place_label(measurement_feedback_label, Vector2(154, 322), Vector2(172, 132), 18, UI_CREAM)
+			_place_label(measurement_feedback_label, label_pos, label_size, 20, UI_CREAM)
 			measurement_feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		elif feedback_text.is_empty() and not can_answer:
-			measurement_feedback_label.text = "Wait for your partner's measurement."
+			measurement_feedback_label.text = ""
 			measurement_feedback_label.add_theme_color_override("font_color", UI_INFO)
-			_place_label(measurement_feedback_label, Vector2(68, 496), Vector2(504, 28), 14, UI_INFO)
+			_place_label(measurement_feedback_label, Vector2(40, 470), Vector2(440, 22), 14, UI_INFO)
 			measurement_feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		else:
 			measurement_feedback_label.text = feedback_text
 			measurement_feedback_label.add_theme_color_override("font_color", UI_ERROR if is_error else UI_INFO)
-			_place_label(measurement_feedback_label, Vector2(68, 496), Vector2(504, 28), 14, UI_ERROR if is_error else UI_SUCCESS)
+			_place_label(measurement_feedback_label, Vector2(40, 470), Vector2(440, 22), 14, UI_ERROR if is_error else UI_SUCCESS)
 			measurement_feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	if is_instance_valid(measurement_summary_label):
 		measurement_summary_label.visible = true
 		if all_done:
-			measurement_summary_label.text = "The measurements are complete. Find the vessel's volume to break the seal."
-			_place_label(measurement_summary_label, Vector2(64, 488), Vector2(512, 30), 11, UI_INFO)
+			measurement_summary_label.text = "Use this to solve the passcode."
+			_place_label(measurement_summary_label, Vector2(72, 70), Vector2(376, 28), 16, UI_CREAM)
 			measurement_summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			measurement_summary_label.remove_theme_stylebox_override("normal")
 			_show_measurement_values()
 		else:
-			measurement_summary_label.text = str(step.get("label", "Measurement"))
-			_place_label(measurement_summary_label, Vector2(170, 328), Vector2(300, 36), 18, UI_INFO)
+			measurement_summary_label.text = "%s (cm)" % str(step.get("label", "Measurement"))
+			_place_label(measurement_summary_label, Vector2(130, 326), Vector2(260, 28), 19, UI_INFO)
 			measurement_summary_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			measurement_summary_label.remove_theme_stylebox_override("normal")
 			_hide_measurement_values()
+
+
+func _layout_measurement_modal_image(sprite: Sprite2D, texture: Texture2D, top_y: float, bottom_y: float, horizontal_padding: float = 72.0) -> void:
+	if not is_instance_valid(sprite) or texture == null:
+		return
+	sprite.texture = texture
+	sprite.visible = true
+	var modal_size := Vector2(640.0, 560.0)
+	if is_instance_valid(measurement_modal):
+		modal_size = measurement_modal.size
+	var tex_size := texture.get_size()
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return
+	var avail_w := modal_size.x - horizontal_padding * 2.0
+	var avail_h := bottom_y - top_y
+	var fit_scale := minf(avail_w / tex_size.x, avail_h / tex_size.y) * 0.9
+	sprite.scale = Vector2(fit_scale, fit_scale)
+	sprite.position = Vector2(modal_size.x * 0.5, top_y + avail_h * 0.5)
+
+
+func _get_measurement_record_group_layout() -> Dictionary:
+	var modal_size := Vector2(520.0, 500.0)
+	if is_instance_valid(measurement_modal):
+		modal_size = measurement_modal.size
+	var label_width := 134.0
+	var value_width := 112.0
+	var column_gap := 10.0
+	var value_height := 34.0
+	var row_gap := 40.0
+	var group_height := 108.0
+	var padding := 20.0
+	var preferred_row_y := 288.0
+	var image_bottom := 222.0
+	if is_instance_valid(measurement_image) and measurement_image.texture != null:
+		var tex_size := measurement_image.texture.get_size()
+		image_bottom = measurement_image.position.y + tex_size.y * measurement_image.scale.y * 0.5
+	var close_button_top := 426.0
+	if is_instance_valid(close_measurement_button):
+		close_button_top = close_measurement_button.position.y
+	var min_row_y := image_bottom + padding
+	var max_row_y := close_button_top - group_height - padding
+	var row_y := minf(max_row_y, maxf(min_row_y, preferred_row_y))
+	var total_width := label_width + column_gap + value_width
+	var start_x := (modal_size.x - total_width) * 0.5
+	return {
+		"label_pos": Vector2(start_x, row_y),
+		"label_size": Vector2(label_width, group_height),
+		"value_x": start_x + label_width + column_gap,
+		"value_size": Vector2(value_width, value_height),
+		"row_y": row_y,
+		"row_gap": row_gap
+	}
 
 
 func _update_measurement_intro_content() -> void:
@@ -1558,20 +2032,27 @@ func _update_measurement_intro_content() -> void:
 	if is_instance_valid(measurement_instruction_label):
 		measurement_instruction_label.text = ""
 	if is_instance_valid(measurement_image):
-		measurement_image.texture = TAPE_MEASURE_TEX
-		measurement_image.visible = true
-		measurement_image.position = Vector2(320, 242)
-		measurement_image.scale = Vector2(0.56, 0.56)
+		_layout_measurement_modal_image(measurement_image, TAPE_MEASURE_MODAL_TEX, 46.0, 340.0, 42.0)
 	if is_instance_valid(measurement_answer_input):
 		measurement_answer_input.visible = false
 	if is_instance_valid(confirm_measurement_button):
 		confirm_measurement_button.visible = true
 		confirm_measurement_button.disabled = false
 		confirm_measurement_button.text = "Use Now"
-		confirm_measurement_button.position = Vector2(220, 420)
-		confirm_measurement_button.size = Vector2(200, 64)
+		confirm_measurement_button.position = Vector2(104, 344)
+		confirm_measurement_button.size = Vector2(136, 52)
 		_apply_button_style(confirm_measurement_button)
-		confirm_measurement_button.add_theme_font_size_override("font_size", 24)
+		confirm_measurement_button.add_theme_font_size_override("font_size", 20)
+	if is_instance_valid(close_measurement_button):
+		close_measurement_button.visible = true
+		close_measurement_button.disabled = false
+		close_measurement_button.text = "Close"
+		close_measurement_button.position = Vector2(280, 344)
+		close_measurement_button.size = Vector2(136, 52)
+		close_measurement_button.icon = null
+		close_measurement_button.expand_icon = false
+		close_measurement_button.flat = false
+		_apply_button_style(close_measurement_button)
 	if is_instance_valid(_measurement_clear_button):
 		_measurement_clear_button.visible = false
 	if is_instance_valid(measurement_feedback_label):
@@ -1652,6 +2133,7 @@ func _validate_measurement_answer(answer: int) -> void:
 			message = "Measurements recorded:\nWidth = 4\nLength = 5\nHeight = 3"
 		_sync_measurement_state(message, false)
 	else:
+		_apply_mistake_penalty()
 		_sync_measurement_state("The tape mark does not match. Try again.", true)
 
 
@@ -1666,6 +2148,10 @@ func _sync_measurement_state(message: String, is_error: bool) -> void:
 func rpc_sync_measurement_state(measurement_index: int, recorded_measurements: Dictionary, message: String, is_error: bool) -> void:
 	_current_measurement_index = clampi(measurement_index, 0, MEASUREMENT_STEPS.size())
 	_recorded_measurements = recorded_measurements.duplicate(true)
+	if _has_all_measurements() and not vessel_measured:
+		vessel_measured = true
+		print("Vessel measured.")
+		update_storage_hut_progress()
 	if is_instance_valid(measurement_modal) and measurement_modal.visible:
 		_update_measurement_modal_content(message, is_error)
 	if is_instance_valid(chest_modal) and chest_modal.visible:
@@ -1698,6 +2184,7 @@ func _on_scratch_paper_input_event(_viewport: Node, event: InputEvent, _shape_id
 
 func _open_scratch_paper_modal() -> void:
 	_scratch_paper_seen = true
+	_register_formula_found()
 	_on_rectangular_paper_pressed()
 	if is_instance_valid(scratch_paper_modal):
 		scratch_paper_modal.visible = true
@@ -1705,12 +2192,12 @@ func _open_scratch_paper_modal() -> void:
 
 func _on_rectangular_paper_pressed() -> void:
 	if is_instance_valid(scratch_paper_title_label):
-		scratch_paper_title_label.text = "Crumpled Scratch Paper"
+		scratch_paper_title_label.text = "Rectangular Prism Formula"
 	if is_instance_valid(scratch_paper_image):
 		scratch_paper_image.texture = RECTANGULAR_PAPER_TEX
 		scratch_paper_image.visible = true
 	if is_instance_valid(scratch_paper_feedback_label):
-		scratch_paper_feedback_label.text = "The crumpled paper shows how to find a container's capacity."
+		scratch_paper_feedback_label.text = "Use this formula to solve for the passcode."
 		scratch_paper_feedback_label.add_theme_color_override("font_color", UI_INFO)
 
 
@@ -1734,15 +2221,147 @@ func _has_all_measurements() -> bool:
 
 func _measurement_summary_text() -> String:
 	if _has_all_measurements():
-		return "Width  = 4\nLength = 5\nHeight = 3"
+		return "Width = 4 cm\nLength = 5 cm\nHeight = 3 cm"
 	var lines: Array[String] = []
 	for step in MEASUREMENT_STEPS:
 		var key := str(step.get("key", ""))
 		if _recorded_measurements.has(key):
-			lines.append("%s = %d" % [str(step.get("label", "Measurement")), int(_recorded_measurements[key])])
+			lines.append("%s = %d cm" % [str(step.get("label", "Measurement")), int(_recorded_measurements[key])])
 	if lines.is_empty():
 		return "No measurements recorded yet."
 	return "Recorded:\n%s" % "\n".join(lines)
+
+
+func update_storage_hut_progress() -> void:
+	var completed_tasks := 0
+	if shape_riddle_completed:
+		completed_tasks += 1
+	if vessel_measured:
+		completed_tasks += 1
+	if formula_found:
+		completed_tasks += 1
+	if vessel_unlocked:
+		completed_tasks += 1
+	if is_instance_valid(progress_tracker) and progress_tracker.has_method("set_progress_by_completed_tasks"):
+		progress_tracker.call("set_progress_by_completed_tasks", completed_tasks, 4)
+	_refresh_storage_hut_tasks()
+	print("Storage Hut Progress: %d/4" % completed_tasks)
+
+
+
+func _setup_storage_hut_tasks() -> void:
+	if not is_instance_valid(tasks_ui):
+		return
+	if tasks_ui.has_method("set_title"):
+		tasks_ui.call("set_title", "Storage Hut Tasks")
+	if tasks_ui.has_method("set_tasks"):
+		tasks_ui.call("set_tasks", STORAGE_HUT_TASKS)
+	if tasks_ui.has_method("hide_tasks_panel"):
+		tasks_ui.call("hide_tasks_panel")
+	_refresh_storage_hut_tasks()
+
+
+func _refresh_storage_hut_tasks() -> void:
+	if not is_instance_valid(tasks_ui):
+		return
+	if not tasks_ui.has_method("complete_task"):
+		return
+	if tasks_ui.has_method("reset_tasks"):
+		tasks_ui.call("reset_tasks")
+	if _clue_collected:
+		for task_index in range(STORAGE_HUT_TASKS.size()):
+			tasks_ui.call("complete_task", task_index)
+		return
+	if shape_riddle_completed:
+		tasks_ui.call("complete_task", 0)
+	if measuring_tool_found or vessel_measured or formula_found or vessel_unlocked:
+		tasks_ui.call("complete_task", 1)
+	if vessel_measured or vessel_unlocked:
+		tasks_ui.call("complete_task", 2)
+	if formula_found or vessel_unlocked:
+		tasks_ui.call("complete_task", 3)
+	if vessel_unlocked:
+		tasks_ui.call("complete_task", 4)
+
+func _can_unlock_vessel() -> bool:
+	return vessel_measured and formula_found
+
+
+func _handle_locked_vessel_attempt() -> void:
+	var message := "Cannot unlock vessel yet. Measure the vessel and find the formula first."
+	print(message)
+	show_notification(message, 2.0)
+	_set_chest_feedback(message, true)
+
+
+func _register_formula_found() -> void:
+	if formula_found:
+		return
+	if multiplayer.has_multiplayer_peer():
+		if multiplayer.is_server():
+			rpc_sync_formula_found.rpc()
+		else:
+			rpc_report_formula_found.rpc_id(SERVER_PEER_ID)
+	else:
+		rpc_sync_formula_found()
+
+
+
+func _register_measuring_tool_found() -> void:
+	if measuring_tool_found:
+		return
+	if multiplayer.has_multiplayer_peer():
+		if multiplayer.is_server():
+			rpc_sync_measuring_tool_found.rpc()
+		else:
+			rpc_report_measuring_tool_found.rpc_id(SERVER_PEER_ID)
+	else:
+		rpc_sync_measuring_tool_found()
+
+
+@rpc("any_peer", "reliable")
+func rpc_report_measuring_tool_found() -> void:
+	if multiplayer.is_server() and not measuring_tool_found:
+		rpc_sync_measuring_tool_found.rpc()
+
+
+@rpc("authority", "reliable", "call_local")
+func rpc_sync_measuring_tool_found() -> void:
+	if measuring_tool_found:
+		return
+	measuring_tool_found = true
+	_refresh_storage_hut_tasks()
+
+func _apply_mistake_penalty() -> void:
+	# Call this helper from puzzle mistake branches so one validated mistake costs one life.
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		rpc_apply_life_loss.rpc()
+	else:
+		rpc_apply_life_loss()
+
+
+@rpc("any_peer", "reliable")
+func rpc_report_formula_found() -> void:
+	if multiplayer.is_server() and not formula_found:
+		rpc_sync_formula_found.rpc()
+
+
+@rpc("authority", "reliable", "call_local")
+func rpc_sync_formula_found() -> void:
+	if formula_found:
+		return
+	formula_found = true
+	print("Formula found.")
+	update_storage_hut_progress()
+
+
+@rpc("authority", "reliable", "call_local")
+func rpc_apply_life_loss() -> void:
+	if not is_instance_valid(progress_tracker) or not progress_tracker.has_method("lose_life"):
+		return
+	var remaining_lives := int(progress_tracker.call("lose_life"))
+	if remaining_lives <= 0 and (not multiplayer.has_multiplayer_peer() or multiplayer.is_server()):
+		handle_zone_failed()
 
 
 func _show_reward() -> void:
@@ -1750,6 +2369,8 @@ func _show_reward() -> void:
 	_waiting_reward_continue = true
 	_reward_stage = 1
 	_collect_sequence_started = false
+	_set_gameplay_hud_interactable(false)
+	_set_gameplay_hud_visible(false)
 
 	if is_instance_valid(reward_layer):
 		reward_layer.visible = true
@@ -1900,6 +2521,37 @@ func _populate_ledger() -> void:
 	_show_ledger_instruction_image(LEDGER_IMAGE_PATH)
 
 
+func _ensure_ledger_backdrop() -> void:
+	if not is_instance_valid(sidekick_layer):
+		return
+	if not is_instance_valid(_ledger_backdrop):
+		_ledger_backdrop = sidekick_layer.get_node_or_null("LedgerBackdrop") as ColorRect
+	if not is_instance_valid(_ledger_backdrop):
+		_ledger_backdrop = ColorRect.new()
+		_ledger_backdrop.name = "LedgerBackdrop"
+		_ledger_backdrop.color = Color(0.0, 0.0, 0.0, 0.01)
+		_ledger_backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
+		sidekick_layer.add_child(_ledger_backdrop)
+		if is_instance_valid(ledger_panel):
+			sidekick_layer.move_child(_ledger_backdrop, max(0, ledger_panel.get_index() - 1))
+	var viewport_size := get_viewport_rect().size
+	if viewport_size == Vector2.ZERO:
+		viewport_size = Vector2(1280.0, 720.0)
+	_ledger_backdrop.position = Vector2.ZERO
+	_ledger_backdrop.size = viewport_size
+	_ledger_backdrop.visible = false
+
+
+func _set_ledger_open(is_open: bool) -> void:
+	_ensure_ledger_backdrop()
+	if is_instance_valid(_ledger_backdrop):
+		_ledger_backdrop.visible = is_open
+	if is_instance_valid(ledger_panel):
+		ledger_panel.visible = is_open
+	if not is_open and is_instance_valid(briefcase_panel):
+		briefcase_panel.visible = false
+
+
 func _show_ledger_instruction_image(path: String) -> void:
 	if not is_instance_valid(ledger_panel):
 		return
@@ -1934,6 +2586,7 @@ func _show_ledger_instruction_image(path: String) -> void:
 
 func _refresh_inside_zone_buttons() -> void:
 	var is_sidekick := GameState.local_role == GameState.Role.SIDEKICK
+	_ensure_ledger_backdrop()
 	if is_instance_valid(inside_zone_control):
 		if inside_zone_control.has_method("set_pause_enabled"):
 			inside_zone_control.set_pause_enabled(true)
@@ -1943,20 +2596,68 @@ func _refresh_inside_zone_buttons() -> void:
 			inside_zone_control.set_briefcase_enabled(is_sidekick)
 		if inside_zone_control.has_method("set_sidekick_ui_visible"):
 			inside_zone_control.set_sidekick_ui_visible(is_sidekick)
+	if is_instance_valid(tasks_ui) and tasks_ui.has_method("set_interactable"):
+		tasks_ui.call("set_interactable", true)
+	if is_instance_valid(tasks_ui) and tasks_ui.has_method("set_ui_visible"):
+		tasks_ui.call("set_ui_visible", true)
 	if not is_sidekick:
-		if is_instance_valid(ledger_panel):
-			ledger_panel.visible = false
+		_set_ledger_open(false)
 		if is_instance_valid(briefcase_panel):
 			briefcase_panel.visible = false
 
 
+func _set_gameplay_hud_interactable(interactable: bool) -> void:
+	var is_sidekick := GameState.local_role == GameState.Role.SIDEKICK
+	if is_instance_valid(tasks_ui) and tasks_ui.has_method("set_interactable"):
+		tasks_ui.call("set_interactable", interactable)
+	if is_instance_valid(inside_zone_control):
+		if inside_zone_control.has_method("set_pause_enabled"):
+			inside_zone_control.set_pause_enabled(interactable)
+		if inside_zone_control.has_method("set_ledger_enabled"):
+			inside_zone_control.set_ledger_enabled(interactable and is_sidekick)
+		if inside_zone_control.has_method("set_briefcase_enabled"):
+			inside_zone_control.set_briefcase_enabled(interactable and is_sidekick)
+	if not interactable:
+		_set_ledger_open(false)
+		if is_instance_valid(briefcase_panel):
+			briefcase_panel.visible = false
+		if is_instance_valid(option_panel):
+			option_panel.visible = false
+		if is_instance_valid(pause_panel):
+			pause_panel.visible = false
+		if is_instance_valid(pause_canvas_layer):
+			pause_canvas_layer.visible = false
+
+
+func _set_gameplay_hud_visible(hud_visible: bool) -> void:
+	if is_instance_valid(tasks_ui) and tasks_ui.has_method("set_ui_visible"):
+		tasks_ui.call("set_ui_visible", hud_visible)
+	elif is_instance_valid(tasks_ui):
+		tasks_ui.visible = hud_visible
+	if is_instance_valid(progress_tracker):
+		var tracker_parent := progress_tracker.get_parent()
+		if tracker_parent is CanvasLayer:
+			(tracker_parent as CanvasLayer).visible = hud_visible
+		else:
+			progress_tracker.visible = hud_visible
+	if is_instance_valid(inside_zone_control):
+		inside_zone_control.visible = hud_visible
+	if not hud_visible:
+		_set_ledger_open(false)
+		if is_instance_valid(briefcase_panel):
+			briefcase_panel.visible = false
+		if is_instance_valid(option_panel):
+			option_panel.visible = false
+		if is_instance_valid(pause_panel):
+			pause_panel.visible = false
+		if is_instance_valid(pause_canvas_layer):
+			pause_canvas_layer.visible = false
 func _on_ledger_pressed() -> void:
+	if _reward_active or (is_instance_valid(ending_cutscene) and ending_cutscene.visible):
+		return
 	if GameState.local_role != GameState.Role.SIDEKICK:
 		return
-	if is_instance_valid(ledger_panel):
-		ledger_panel.visible = not ledger_panel.visible
-
-
+	_set_ledger_open(not (is_instance_valid(ledger_panel) and ledger_panel.visible))
 func _on_briefcase_pressed() -> void:
 	if GameState.local_role != GameState.Role.SIDEKICK:
 		return
@@ -1984,15 +2685,23 @@ func _update_darkness() -> void:
 
 
 func _update_glow_progress_label() -> void:
+	if is_instance_valid(glow_progress_panel):
+		glow_progress_panel.visible = false
 	if is_instance_valid(glow_counter_label):
-		glow_counter_label.text = "Hut Glow: %d / %d" % [_glow_progress, TOTAL_RIDDLES]
+		glow_counter_label.text = ""
+	if is_instance_valid(glow_title_label):
+		glow_title_label.text = ""
 
 
 func _set_feedback(text: String, is_error: bool) -> void:
 	if not is_instance_valid(feedback_label):
 		return
-	feedback_label.text = text
-	feedback_label.add_theme_color_override("font_color", UI_ERROR if is_error else UI_SUCCESS)
+	var trimmed_text := text.strip_edges()
+	var display_text := trimmed_text
+	if display_text.is_empty():
+		display_text = "Complete your tasks and recover the artifacts."
+	feedback_label.text = display_text
+	feedback_label.add_theme_color_override("font_color", UI_ERROR if is_error else (UI_INFO if trimmed_text.is_empty() else UI_SUCCESS))
 
 
 func _set_chest_feedback(text: String, is_error: bool) -> void:
@@ -2036,6 +2745,8 @@ func _show_aswang_warning() -> void:
 
 
 func _on_pause_pressed() -> void:
+	if _reward_active or (is_instance_valid(ending_cutscene) and ending_cutscene.visible):
+		return
 	if is_instance_valid(pause_canvas_layer):
 		pause_canvas_layer.visible = true
 	if is_instance_valid(pause_panel):
@@ -2105,13 +2816,25 @@ func _return_to_forest() -> void:
 func _on_clue_collected(zone_id: String, _clue_data: Dictionary) -> void:
 	if zone_id == ZONE_ID:
 		_clue_collected = true
+		_refresh_storage_hut_tasks()
 
 
 func _play_zone_completion_sfx() -> void:
 	if not is_instance_valid(_sfx_player) or not COMPLETION_SFX:
 		return
-	_sfx_player.stream = COMPLETION_SFX
+	MusicController.pause_music()
+	var sfx_stream := COMPLETION_SFX.duplicate()
+	if sfx_stream is AudioStreamMP3 or sfx_stream is AudioStreamOggVorbis:
+		sfx_stream.loop = false
+	_sfx_player.stop()
+	_sfx_player.stream = sfx_stream
 	_sfx_player.play()
+	if not _sfx_player.finished.is_connected(_on_sfx_finished_resume_music):
+		_sfx_player.finished.connect(_on_sfx_finished_resume_music, CONNECT_ONE_SHOT)
+
+
+func _on_sfx_finished_resume_music() -> void:
+	MusicController.resume_music()
 
 
 func _ensure_sfx_bus() -> void:
@@ -2150,6 +2873,12 @@ func _role_display(role: String) -> String:
 		ROLE_SIDEKICK:
 			return "Sidekick"
 	return "Partner"
+
+
+func _get_turn_indicator_text(active_role: String, is_local_turn: bool) -> String:
+	if is_local_turn:
+		return "Your Turn"
+	return "%s's Turn" % _role_display(active_role)
 
 
 func _first_valid_node(paths: Array[String]) -> Node:
@@ -2224,12 +2953,11 @@ func _apply_hint_button_style(button: Button) -> void:
 
 
 func _apply_measurement_value_style(label: Label) -> void:
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.78, 0.54, 0.23, 0.96)
-	normal.border_color = Color(0.96, 0.72, 0.38, 1.0)
-	normal.set_border_width_all(2)
-	normal.set_corner_radius_all(20)
-	label.add_theme_stylebox_override("normal", normal)
+	label.remove_theme_stylebox_override("normal")
+	label.add_theme_font_override("font", OCRA_FONT)
+	label.add_theme_font_size_override("font_size", 20)
+	label.add_theme_color_override("font_color", UI_CREAM)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 
 
 func _apply_line_edit_style(line_edit: LineEdit) -> void:
@@ -2281,6 +3009,8 @@ func _fade_in(duration: float = 0.6) -> void:
 
 
 func _play_ending_cutscene() -> void:
+	_set_gameplay_hud_interactable(false)
+	_set_gameplay_hud_visible(false)
 	if not is_instance_valid(ending_cutscene):
 		_return_to_forest()
 		return

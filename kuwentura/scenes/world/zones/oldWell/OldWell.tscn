@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://b6jvccfrna5vu"]
+[gd_scene load_steps=31 format=3 uid="uid://b6jvccfrna5vu"]
 
 [ext_resource type="Script" uid="uid://h5y0185hh34e" path="res://scripts/world/zones/oldWell/old_well.gd" id="1_oldwell"]
 [ext_resource type="Texture2D" uid="uid://ccxagpkrv77uf" path="res://assets/sprites/zoneObjects/oldWell/oldWellBackground.png" id="2_mf72o"]
@@ -10,8 +10,9 @@
 [ext_resource type="Texture2D" uid="uid://bg4g0qn3wtlx5" path="res://assets/sprites/enemies/siyokoy_well.png" id="6_5mwpi"]
 [ext_resource type="Texture2D" uid="uid://gmnsrknd8c7m" path="res://assets/sprites/zoneObjects/sparkleEffect.png" id="6_wqdfr"]
 [ext_resource type="Texture2D" uid="uid://bx6q2amuwpu5h" path="res://assets/sprites/clues/eyeClue.png" id="7_5e2xw"]
+[ext_resource type="Texture2D" uid="uid://c1c602fms720a" path="res://assets/sprites/zoneObjects/oldWell/rageBait.png" id="7_8wp6h"]
 [ext_resource type="Texture2D" uid="uid://lncrqsxxofpu" path="res://assets/sprites/zoneObjects/oldWell/siyokoyDialogue.png" id="7_62xvu"]
-[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/rewardNote.png" id="8_62xvu"]
+[ext_resource type="Texture2D" uid="uid://bx0hqyafkevfo" path="res://assets/sprites/zoneObjects/RewardNote.png" id="8_62xvu"]
 [ext_resource type="FontFile" uid="uid://cvl576oaugd8r" path="res://assets/fonts/ocraextended.ttf" id="9_5mwpi"]
 [ext_resource type="Texture2D" uid="uid://bqc8gialftro1" path="res://assets/buttons/playButton.png" id="10_8wp6h"]
 [ext_resource type="Texture2D" uid="uid://d326w16083ulk" path="res://assets/buttons/settingsButton.png" id="11_mydnv"]
@@ -166,6 +167,25 @@ scale = Vector2(0.99999994, 0.99999994)
 position = Vector2(805, 236.99995)
 scale = Vector2(0.2779999, 0.2898)
 texture = ExtResource("6_5mwpi")
+
+[node name="RageBaitBubble" type="Node2D" parent="."]
+visible = false
+
+[node name="RageBubble" type="Sprite2D" parent="RageBaitBubble"]
+position = Vector2(1017.875, 168.5)
+scale = Vector2(0.2775, 0.25457874)
+texture = ExtResource("7_8wp6h")
+
+[node name="RageLabel" type="Label" parent="RageBaitBubble"]
+offset_left = 914.0
+offset_top = 139.0
+offset_right = 1153.0
+offset_bottom = 181.0
+theme_override_fonts/font = ExtResource("9_5mwpi")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="DialogueLayer" type="Node2D" parent="."]
 position = Vector2(1.0913936e-11, 1.0913936e-11)

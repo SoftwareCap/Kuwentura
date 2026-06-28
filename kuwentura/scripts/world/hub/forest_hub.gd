@@ -78,6 +78,9 @@ extends Node2D
 const PANEL_ANIMATION_DURATION: float = 0.4
 const DIALOGUE_SPEED: float = 0.04
 const LEDGER_PAGE_TURN_DURATION: float = 0.16
+const INSTRUCTION_DISPLAY_SCALE: Vector2 = Vector2(0.32592773, 0.32592773)
+const INSTRUCTION_REFERENCE_TEXTURE_SIZE: float = 2048.0
+const LEDGER_PAGE_SLIDE_OFFSET: float = 300.0
 const DOOR_ANIMATION_DURATION: float = 0.5
 const FIND_PARTNER_DURATION: float = 1.2
 const FIND_PARTNER_HOLD: float = 2.0
@@ -106,7 +109,7 @@ const BOOKMARK_INACTIVE_TEXTURES: Dictionary = {
 # ── Instruction texture paths (for safe loading with mobile guardrails) ─────────
 const INSTRUCTION_TEXTURE_PATHS: Dictionary = {
 	"pinas_house":     "res://assets/sprites/ledger/pinashouse_instructions.png",
-	"old_well":        "res://assets/sprites/ledger/oldwell_instructions.png",
+	"old_well":        "res://assets/sprites/ledger/newOldWellLedger.png",
 	"backyard_path":   "res://assets/sprites/ledger/backyardpath_instructions.png",
 	"storage_hut":     "res://assets/sprites/ledger/storagehut_instructions.png",
 	"abandoned_house": "res://assets/sprites/ledger/abandonedhouse_instructions.png",
@@ -158,12 +161,15 @@ const ZONE_THOUGHTS: Dictionary = {
 }
 
 var _spawned_players: Dictionary = {}
+var _pending_spawn_positions: Dictionary = {}
 var _current_open_panel: String = ""
 var _is_animating: bool = false
 var _active_zone: String = ""
 var _bookmark_buttons: Dictionary = {}
 var _instruction_sprites: Dictionary = {}
+var _instruction_display_scales: Dictionary = {}
 var _ledger_page_animating: bool = false
+var _empty_ledger_home_position: Vector2 = Vector2.ZERO
 var _quest_objective_labels: Dictionary = {}
 var _quest_objective_texts: Dictionary = {}
 var _map_zone_markers: Dictionary = {}
@@ -229,11 +235,30 @@ func _cleanup_instruction_textures() -> void:
 	print("[ForestHub] Instruction texture cache cleared")
 
 
+func _compute_instruction_display_scale(texture: Texture2D) -> Vector2:
+	if not texture:
+		return INSTRUCTION_DISPLAY_SCALE
+	var tex_size := texture.get_size()
+	var max_dim := maxf(tex_size.x, tex_size.y)
+	if max_dim <= 0.0:
+		return INSTRUCTION_DISPLAY_SCALE
+	var size_ratio := INSTRUCTION_REFERENCE_TEXTURE_SIZE / max_dim
+	return INSTRUCTION_DISPLAY_SCALE * size_ratio
+
+
+func _get_instruction_display_scale(zone_name: String) -> Vector2:
+	return _instruction_display_scales.get(zone_name, INSTRUCTION_DISPLAY_SCALE) as Vector2
+
+
+func _get_sprite_display_scale(sprite: Sprite2D) -> Vector2:
+	if is_instance_valid(sprite) and sprite.has_meta("ledger_display_scale"):
+		return sprite.get_meta("ledger_display_scale") as Vector2
+	return INSTRUCTION_DISPLAY_SCALE
+
+
 func _ready() -> void:
-	GameState.clear_spawn_position(multiplayer.get_unique_id())
-	if multiplayer.is_server():
-		for peer_id in multiplayer.get_peers():
-			GameState.clear_spawn_position(peer_id)
+	_capture_pending_spawn_positions()
+	_clear_saved_spawn_positions()
 			
 	_ensure_spawn_points()
 	MusicController.play_track(MusicController.MusicTrack.FOREST_HUB)
@@ -265,11 +290,11 @@ func _ready() -> void:
 
 	if multiplayer.is_server():
 		await get_tree().process_frame
-		var host_pos := GameState.get_spawn_position(1)
+		var host_pos := _get_saved_or_pending_spawn_position(1)
 		for peer_id in multiplayer.get_peers():
 			if peer_id != multiplayer.get_unique_id():
 				_rpc_spawn_player_with_pos.rpc_id(peer_id, 1, true, host_pos)
-				var peer_pos := GameState.get_spawn_position(peer_id)
+				var peer_pos := _get_saved_or_pending_spawn_position(peer_id)
 				for other_peer in multiplayer.get_peers():
 					if other_peer != peer_id and other_peer != multiplayer.get_unique_id():
 						_rpc_spawn_player_with_pos.rpc_id(other_peer, peer_id, false, peer_pos)
@@ -334,6 +359,37 @@ func _ensure_spawn_points() -> void:
 		m.name = cfg[0]
 		m.position = cfg[1]
 		spawn_points.add_child(m)
+
+
+func _get_relevant_spawn_peer_ids() -> Array[int]:
+	var peer_ids: Array[int] = [1]
+	var local_peer_id := multiplayer.get_unique_id()
+	if local_peer_id > 0 and not peer_ids.has(local_peer_id):
+		peer_ids.append(local_peer_id)
+	for peer_id in multiplayer.get_peers():
+		if peer_id > 0 and not peer_ids.has(peer_id):
+			peer_ids.append(peer_id)
+	return peer_ids
+
+
+func _capture_pending_spawn_positions() -> void:
+	_pending_spawn_positions.clear()
+	for peer_id in _get_relevant_spawn_peer_ids():
+		if GameState.has_spawn_position(peer_id):
+			_pending_spawn_positions[peer_id] = GameState.get_spawn_position(peer_id)
+
+
+func _clear_saved_spawn_positions() -> void:
+	for peer_id in _get_relevant_spawn_peer_ids():
+		GameState.clear_spawn_position(peer_id)
+
+
+func _get_saved_or_pending_spawn_position(peer_id: int) -> Vector2:
+	if _pending_spawn_positions.has(peer_id):
+		return _pending_spawn_positions[peer_id] as Vector2
+	if GameState.has_spawn_position(peer_id):
+		return GameState.get_spawn_position(peer_id)
+	return Vector2.ZERO
 
 
 func _setup_room_code_label() -> void:
@@ -422,7 +478,7 @@ func _save_settings() -> void:
 
 
 func _on_spawn_player_requested(peer_id: int, is_detective: bool) -> void:
-	_rpc_spawn_player(peer_id, is_detective, GameState.get_spawn_position(peer_id))
+	_rpc_spawn_player(peer_id, is_detective, _get_saved_or_pending_spawn_position(peer_id))
 
 
 func _on_despawn_player_requested(peer_id: int) -> void:
@@ -449,6 +505,10 @@ func _instantiate_player(is_detective: bool) -> CharacterBody2D:
 func _resolve_spawn_position(_peer_id: int, is_detective: bool, forced_pos: Vector2 = Vector2.ZERO) -> Vector2:
 	if forced_pos != Vector2.ZERO:
 		return forced_pos
+
+	var saved_pos := _get_saved_or_pending_spawn_position(_peer_id)
+	if saved_pos != Vector2.ZERO:
+		return saved_pos
 
 	var has_visited := GameState.visited_zones.values().any(func(v): return bool(v))
 	var marker_name: String
@@ -516,11 +576,11 @@ func _on_player_connected(peer_id: int, _role: int = 0) -> void:
 	if not _spawned_players.has(peer_id):
 		_spawn_player_for_peer(peer_id)
 		_ensure_player_visible(peer_id)
-	var host_pos := GameState.get_spawn_position(1)
+	var host_pos := _get_saved_or_pending_spawn_position(1)
 	_rpc_spawn_player_with_pos.rpc_id(peer_id, 1, true, host_pos)
 	for other_peer in multiplayer.get_peers():
 		if other_peer != peer_id:
-			var new_pos := GameState.get_spawn_position(peer_id)
+			var new_pos := _get_saved_or_pending_spawn_position(peer_id)
 			_rpc_spawn_player_with_pos.rpc_id(other_peer, peer_id, false, new_pos)
 			_ensure_player_visible_on_peer.rpc_id(other_peer, peer_id)
 
@@ -794,6 +854,7 @@ func _close_map(animate: bool = true) -> void:
 func _open_ledger() -> void:
 	if not ledger_panel:
 		return
+	_ledger_page_animating = false
 	_refresh_ledger_display()
 	_is_animating = true
 	ledger_panel.visible = true
@@ -882,6 +943,9 @@ func _setup_ledger_bookmarks() -> void:
 		var texture: Texture2D = _load_texture_safely(path)
 		if texture:
 			sprite.texture = texture
+			var display_scale := _compute_instruction_display_scale(texture)
+			_instruction_display_scales[zone_name] = display_scale
+			sprite.set_meta("ledger_display_scale", display_scale)
 		else:
 			push_error("[ForestHub] Failed to assign instruction texture for %s" % zone_name)
 
@@ -901,9 +965,15 @@ func _setup_ledger_bookmarks() -> void:
 
 	# Seed the empty-ledger label text.
 	if is_instance_valid(_empty_ledger):
+		_empty_ledger_home_position = _empty_ledger.position
 		var lbl := _empty_ledger.get_node_or_null("Label") as Label
 		if is_instance_valid(lbl):
 			lbl.text = "Complete a zone to view their instructions."
+
+	for zone_name in _instruction_sprites.keys():
+		var sprite: Sprite2D = _instruction_sprites.get(zone_name)
+		if is_instance_valid(sprite):
+			sprite.visible = false
 
 	_refresh_ledger_display()
 
@@ -950,6 +1020,7 @@ func _on_bookmark_pressed(zone_name: String) -> void:
 	var old_zone := _active_zone
 	_active_zone = zone_name
 	_update_bookmark_textures()
+	_hide_all_ledger_pages()
 	_animate_page_turn(old_zone, zone_name)
 
 
@@ -966,6 +1037,25 @@ func _on_bookmark_pressed(zone_name: String) -> void:
 ##
 ## Both Sprite2D (scale-x squeeze) and Control (position slide + alpha) nodes
 ## are handled so the empty-ledger panel animates identically to an instruction page.
+func _reset_ledger_page_visual(page: CanvasItem) -> void:
+	if not is_instance_valid(page):
+		return
+	page.modulate = Color.WHITE
+	if page is Sprite2D:
+		(page as Sprite2D).scale = _get_sprite_display_scale(page as Sprite2D)
+	elif page is Control:
+		(page as Control).position = _empty_ledger_home_position
+
+
+func _hide_all_ledger_pages() -> void:
+	for zone_name in _instruction_sprites.keys():
+		var sprite: Sprite2D = _instruction_sprites.get(zone_name)
+		if is_instance_valid(sprite):
+			sprite.visible = false
+	if is_instance_valid(_empty_ledger):
+		_empty_ledger.visible = false
+
+
 func _animate_page_turn(old_zone: String, new_zone: String) -> void:
 	_ledger_page_animating = true
 
@@ -986,19 +1076,31 @@ func _animate_page_turn(old_zone: String, new_zone: String) -> void:
 	else:
 		incoming = _empty_ledger as CanvasItem
 
+	if is_instance_valid(outgoing):
+		outgoing.visible = true
+	if is_instance_valid(incoming):
+		incoming.visible = true
+
 	# ── Determine turn direction ──────────────────────────────────────────────
 	var old_idx: int = ZONE_ORDER.find(old_zone)   # -1 when old_zone is ""
 	var new_idx: int = ZONE_ORDER.find(new_zone)
 	# Higher index = forward (page slides in from right).
 	var forward: bool = new_idx > old_idx
-	var slide_offset: float = 300.0   # px — tune to match your ledger width
+	var slide_offset: float = LEDGER_PAGE_SLIDE_OFFSET
+	var incoming_display_scale := INSTRUCTION_DISPLAY_SCALE
+	if new_completed:
+		incoming_display_scale = _get_instruction_display_scale(new_zone)
+	var collapsed_instruction_scale := Vector2(
+		incoming_display_scale.x * 0.05,
+		incoming_display_scale.y
+	)
 
 	# ── Prepare incoming node (invisible, displaced to entry side) ────────────
 	if is_instance_valid(incoming):
-		incoming.visible = true
+		_reset_ledger_page_visual(incoming)
 		incoming.modulate.a = 0.0
 		if incoming is Sprite2D:
-			(incoming as Sprite2D).scale = Vector2(0.05, 1.0)
+			(incoming as Sprite2D).scale = collapsed_instruction_scale
 		elif incoming is Control:
 			(incoming as Control).position.x += (slide_offset if forward else -slide_offset)
 
@@ -1008,7 +1110,7 @@ func _animate_page_turn(old_zone: String, new_zone: String) -> void:
 	tween.set_ease(Tween.EASE_IN_OUT)
 
 	# Phase 1 — collapse / fade out the outgoing node.
-	if is_instance_valid(outgoing) and outgoing.visible:
+	if is_instance_valid(outgoing) and outgoing != incoming and outgoing.visible:
 		if outgoing is Sprite2D:
 			tween.tween_property(outgoing, "scale:x", 0.0, LEDGER_PAGE_TURN_DURATION)
 		elif outgoing is Control:
@@ -1020,15 +1122,10 @@ func _animate_page_turn(old_zone: String, new_zone: String) -> void:
 
 	# Phase 2 — hide outgoing, restore its state for next time.
 	tween.tween_callback(func():
-		if is_instance_valid(outgoing):
+		if is_instance_valid(outgoing) and outgoing != incoming:
 			outgoing.visible = false
-			if outgoing is Sprite2D:
-				(outgoing as Sprite2D).scale = Vector2.ONE
-			elif outgoing is Control:
-				(outgoing as Control).modulate.a = 1.0
+			_reset_ledger_page_visual(outgoing)
 
-		# When outgoing and incoming are the same node (_empty_ledger shown on
-		# both sides), keep it visible so the incoming phase can run.
 		if is_instance_valid(incoming):
 			incoming.visible = true
 	)
@@ -1036,7 +1133,7 @@ func _animate_page_turn(old_zone: String, new_zone: String) -> void:
 	# Phase 3 — expand / slide in the incoming node.
 	if is_instance_valid(incoming):
 		if incoming is Sprite2D:
-			tween.tween_property(incoming, "scale:x", 1.0, LEDGER_PAGE_TURN_DURATION)
+			tween.tween_property(incoming, "scale", incoming_display_scale, LEDGER_PAGE_TURN_DURATION)
 			tween.parallel().tween_property(incoming, "modulate:a", 1.0, LEDGER_PAGE_TURN_DURATION)
 		elif incoming is Control:
 			var target_x: float = (incoming as Control).position.x - (slide_offset if forward else -slide_offset)
@@ -1045,7 +1142,10 @@ func _animate_page_turn(old_zone: String, new_zone: String) -> void:
 	else:
 		tween.tween_interval(LEDGER_PAGE_TURN_DURATION)
 
-	tween.tween_callback(func(): _ledger_page_animating = false)
+	tween.tween_callback(func():
+		_ledger_page_animating = false
+		_update_instruction_visibility()
+	)
 
 
 ## Active tab uses the active texture; all others use the inactive texture.
@@ -1066,11 +1166,19 @@ func _update_bookmark_textures() -> void:
 ## or _empty_ledger when no zone is active / the active zone is incomplete.
 ## All other instruction sprites are hidden.
 func _update_instruction_visibility() -> void:
+	if _ledger_page_animating:
+		return
+
 	for zone_name in _instruction_sprites.keys():
 		var sprite: Sprite2D = _instruction_sprites.get(zone_name)
 		if not is_instance_valid(sprite):
 			continue
-		sprite.visible = (zone_name == _active_zone) and _is_ledger_zone_completed(zone_name)
+		var should_show: bool = (
+			zone_name == _active_zone
+			and _is_ledger_zone_completed(zone_name)
+		)
+		_reset_ledger_page_visual(sprite)
+		sprite.visible = should_show
 
 	if is_instance_valid(_empty_ledger):
 		# Show empty-ledger when:
@@ -1080,6 +1188,7 @@ func _update_instruction_visibility() -> void:
 			_active_zone.is_empty()
 			or not _is_ledger_zone_completed(_active_zone)
 		)
+		_reset_ledger_page_visual(_empty_ledger)
 		_empty_ledger.visible = show_empty
 
 # ─── BRIEFCASE ───────────────────────────────────────────────────────────────
