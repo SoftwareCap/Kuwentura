@@ -16,7 +16,7 @@ const SCENE_OPENING_CUTSCENE := "res://scenes/cutscenes/opening/OpeningCutscene.
 const SCENE_MOBILE_OPENING_CUTSCENE := "res://scenes/cutscenes/opening/MobileOpeningCutscene.tscn"
 const DEV_SKIP_OPENING_CUTSCENE := false
 
-# UI colors — named so intent is visible at every call site
+# UI colors - named so intent is visible at every call site
 const COLOR_NORMAL := Color(1, 1, 1, 1)
 const COLOR_CONFIRMED := Color(1, 0.95, 0.8, 1)
 const COLOR_UNCONFIRMED := Color(0.8, 0.8, 0.8, 1)
@@ -27,10 +27,6 @@ const COLOR_ERROR := Color(1, 0, 0, 1)
 
 # NODE REFERENCES
 @onready var start_button: Button = %StartButton
-@onready var developer_start_mode_buttons: HBoxContainer = get_node_or_null("DeveloperStartModeButtons")
-@onready var play_normal_game_button: Button = get_node_or_null("DeveloperStartModeButtons/PlayNormalGameButton")
-@onready var skip_opening_button: Button = get_node_or_null("DeveloperStartModeButtons/SkipOpeningButton")
-@onready var start_bakunawa_button: Button = get_node_or_null("DeveloperStartModeButtons/StartBakunawaButton")
 @onready var back_button: TextureButton = %BackButton
 @onready var room_code_label: Label = $RoomCode
 @onready var status_label: Label = $StatusLabel
@@ -75,7 +71,7 @@ var _detective_costumes: Array = []
 var _sidekick_costumes: Array = []
 var _is_leaving: bool = false
 
-# Resolved per-role node sets — used by _set_role_controls_visible and _update_costume_display
+# Resolved per-role node sets - used by _set_role_controls_visible and _update_costume_display
 # Populated in _ready() once @onready vars are available.
 var _role_nodes: Dictionary = {}
 
@@ -115,11 +111,11 @@ func _ready() -> void:
 	_setup_audio()
 	_setup_avatars()
 	_setup_costume_data()
+	GameState.set_developer_start_mode(GameState.DeveloperStartMode.NORMAL)
 	_setup_ui_visibility()
 	_connect_signals()
 	_setup_button_animations()
 	_setup_settings()
-	_apply_selected_start_mode_ui()
 
 	_update_costume_display("detective")
 	_update_costume_display("sidekick")
@@ -179,12 +175,10 @@ func _setup_base_lobby_ui() -> void:
 	if NetworkManager.get_my_role() == "detective":
 		start_button.visible = false
 		start_button.disabled = true
-		if is_instance_valid(developer_start_mode_buttons):
-			developer_start_mode_buttons.visible = true
 
 		var invite_code := NetworkManager.get_invite_code()
 		room_code_label.text = "Code: %s" % invite_code if not invite_code.is_empty() else "Code: ???"
-		status_label.text = "Waiting for Sidekick...\nMode: %s" % GameState.get_developer_start_mode_label()
+		status_label.text = "Waiting for Sidekick..."
 		status_label.modulate = COLOR_NORMAL
 
 		var sk_nodes: Dictionary = _role_nodes["sidekick"]
@@ -194,8 +188,6 @@ func _setup_base_lobby_ui() -> void:
 			sk_nodes.name_label.visible = false
 	else:
 		start_button.visible = false
-		if is_instance_valid(developer_start_mode_buttons):
-			developer_start_mode_buttons.visible = false
 		room_code_label.visible = false
 		status_label.text = "Connected! Waiting for Detective to start..."
 
@@ -219,9 +211,6 @@ func _connect_signals() -> void:
 
 	if settings_control and not settings_control.settings_pressed.is_connected(_on_settings_pressed):
 		settings_control.settings_pressed.connect(_on_settings_pressed)
-	_connect_developer_start_button(play_normal_game_button, _on_play_normal_game_pressed)
-	_connect_developer_start_button(skip_opening_button, _on_skip_opening_pressed)
-	_connect_developer_start_button(start_bakunawa_button, _on_start_bakunawa_pressed)
 
 
 func _disconnect_signals() -> void:
@@ -243,9 +232,6 @@ func _disconnect_signals() -> void:
 
 	if settings_control and settings_control.settings_pressed.is_connected(_on_settings_pressed):
 		settings_control.settings_pressed.disconnect(_on_settings_pressed)
-	_disconnect_developer_start_button(play_normal_game_button, _on_play_normal_game_pressed)
-	_disconnect_developer_start_button(skip_opening_button, _on_skip_opening_pressed)
-	_disconnect_developer_start_button(start_bakunawa_button, _on_start_bakunawa_pressed)
 
 	for btn in _nav_buttons:
 		if is_instance_valid(btn):
@@ -392,7 +378,7 @@ func _update_costume_display(role: String) -> void:
 		label.text = costume.get("name", "Classic Outfit")
 		label.modulate = COLOR_NORMAL
 		if is_instance_valid(select_btn):
-			select_btn.text = "✓ Selected!" if is_confirmed else "Select Costume"
+			select_btn.text = "Selected!" if is_confirmed else "Select Costume"
 			select_btn.disabled = is_confirmed
 	else:
 		if is_confirmed:
@@ -440,63 +426,6 @@ func _on_room_code_generated(code: String) -> void:
 		room_code_label.modulate = COLOR_WARNING
 
 
-func _apply_selected_start_mode_ui() -> void:
-	if not is_instance_valid(start_button):
-		return
-	start_button.text = "Start Game"
-	match GameState.developer_start_mode:
-		GameState.DeveloperStartMode.SKIP_OPENING:
-			_set_developer_start_button_active(play_normal_game_button, false)
-			_set_developer_start_button_active(skip_opening_button, true)
-			_set_developer_start_button_active(start_bakunawa_button, false)
-		GameState.DeveloperStartMode.START_BAKUNAWA:
-			_set_developer_start_button_active(play_normal_game_button, false)
-			_set_developer_start_button_active(skip_opening_button, false)
-			_set_developer_start_button_active(start_bakunawa_button, true)
-		_:
-			_set_developer_start_button_active(play_normal_game_button, true)
-			_set_developer_start_button_active(skip_opening_button, false)
-			_set_developer_start_button_active(start_bakunawa_button, false)
-
-
-func _connect_developer_start_button(button: Button, callback: Callable) -> void:
-	if is_instance_valid(button) and not button.pressed.is_connected(callback):
-		button.pressed.connect(callback)
-
-
-func _disconnect_developer_start_button(button: Button, callback: Callable) -> void:
-	if is_instance_valid(button) and button.pressed.is_connected(callback):
-		button.pressed.disconnect(callback)
-
-
-func _set_developer_start_button_active(button: Button, active: bool) -> void:
-	if not is_instance_valid(button):
-		return
-	button.disabled = active
-	button.modulate = Color(1.0, 0.96, 0.78, 1.0) if active else COLOR_NORMAL
-
-
-func _set_developer_start_mode(mode: int) -> void:
-	GameState.set_developer_start_mode(mode)
-	_apply_selected_start_mode_ui()
-	if is_instance_valid(status_label):
-		if sidekick_connected:
-			status_label.text = "Sidekick connected!\nMode: %s" % GameState.get_developer_start_mode_label()
-		else:
-			status_label.text = "Waiting for Sidekick...\nMode: %s" % GameState.get_developer_start_mode_label()
-
-
-func _on_play_normal_game_pressed() -> void:
-	_set_developer_start_mode(GameState.DeveloperStartMode.NORMAL)
-
-
-func _on_skip_opening_pressed() -> void:
-	_set_developer_start_mode(GameState.DeveloperStartMode.SKIP_OPENING)
-
-
-func _on_start_bakunawa_pressed() -> void:
-	_set_developer_start_mode(GameState.DeveloperStartMode.START_BAKUNAWA)
-
 func _get_scene_for_checkpoint(checkpoint: String) -> String:
 	match checkpoint:
 		GameState.START_CHECKPOINT_FOREST_HUB:
@@ -519,7 +448,7 @@ func _on_partner_connected(data: Dictionary) -> void:
 		var sk: Dictionary = _role_nodes["sidekick"]
 
 		if is_instance_valid(status_label):
-			status_label.text = "Sidekick connected!\nMode: %s" % GameState.get_developer_start_mode_label()
+			status_label.text = "Sidekick connected!"
 			status_label.modulate = COLOR_WARNING
 
 		if is_instance_valid(start_button):
@@ -588,9 +517,10 @@ func _on_start_pressed() -> void:
 	if is_instance_valid(start_button):
 		start_button.disabled = true
 	if is_instance_valid(status_label):
-		status_label.text = "Starting %s..." % GameState.get_developer_start_mode_label()
+		status_label.text = "Starting game..."
 
-	var checkpoint := GameState.get_developer_start_checkpoint()
+	GameState.set_developer_start_mode(GameState.DeveloperStartMode.NORMAL)
+	var checkpoint := GameState.START_CHECKPOINT_OPENING
 	GameState.prepare_selected_start_mode()
 	var success := NetworkManager.start_game(checkpoint)
 	if not success:
@@ -617,7 +547,7 @@ func _on_back_pressed() -> void:
 		get_tree().change_scene_to_file(SCENE_MAIN_MENU)
 
 
-# ── INSTANT transition: no fade, change scene immediately ──────────────────
+# Instant transition: no fade, change scene immediately
 func _on_game_started(checkpoint: String = "") -> void:
 	_is_leaving = true
 
