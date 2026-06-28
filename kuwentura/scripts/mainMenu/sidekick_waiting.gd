@@ -315,10 +315,10 @@ func _update_costume_display() -> void:
 		sidekick_costume_label.modulate = COLOR_NORMAL
 
 	if is_instance_valid(sidekick_select_btn):
-		sidekick_select_btn.text = "âœ“ Selected!" if is_confirmed else "Select Costume"
+		sidekick_select_btn.text = "Selected!" if is_confirmed else "Select Costume"
 		sidekick_select_btn.disabled = is_confirmed
 
-	# Partner (detective) â€” read-only display
+	# Partner (detective) - read-only display
 	var partner_id := GameState.get_selected_costume("detective")
 	var partner_costume := GameState.get_costume_by_id("detective", partner_id)
 	var partner_confirmed := GameState.is_costume_confirmed("detective")
@@ -391,18 +391,18 @@ func _get_rejoin_checkpoint(world_state: Dictionary = {}) -> String:
 
 
 func _call_join_if_playing() -> void:
-	"""Check if game is already in progress (rejoining scenario)."""
+	"""Only auto-join if this scene was opened for an actual in-progress rejoin."""
 	await get_tree().process_frame
 	if not is_inside_tree():
 		return
-	if NetworkManager.is_playing():
+	if NetworkManager.is_playing() and NetworkManager.is_rejoining():
 		_change_to_game(_get_rejoin_checkpoint())
 		return
 
 	await get_tree().create_timer(0.5).timeout
 	if not is_inside_tree():
 		return
-	if NetworkManager.is_playing():
+	if NetworkManager.is_playing() and NetworkManager.is_rejoining():
 		_change_to_game(_get_rejoin_checkpoint())
 		return
 
@@ -488,9 +488,9 @@ func _get_opening_cutscene_scene() -> String:
 
 func _on_connection_failed(error: String) -> void:
 	var msg := "Cannot connect to game.\n\nPlease check:\n"
-	msg += "â€¢ Both devices on same Wi-Fi\n"
-	msg += "â€¢ Room code is correct\n"
-	msg += "â€¢ Detective is hosting\n"
+	msg += "- Both devices on same Wi-Fi\n"
+	msg += "- Room code is correct\n"
+	msg += "- Detective is hosting\n"
 	msg += "\nError: %s" % error
 	status_label.text = msg
 	status_label.modulate = COLOR_ERROR
